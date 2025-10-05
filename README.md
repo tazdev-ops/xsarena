@@ -21,6 +21,8 @@ LMASudio is a comprehensive tool for AI-assisted writing, coding, and content cr
 - **Job Queue**: Run multiple long jobs sequentially with crash recovery
 - **Watch Mode**: Automatically process new/updated files in a directory
 - **Persistent State**: Session settings and history persistence
+- **Multi-Instance Support**: Run multiple parallel instances on different ports
+- **Configurable Ports**: Each instance can run on a different port with per-tab configuration
 
 ## Installation
 
@@ -130,6 +132,38 @@ LMASudio supports two backends:
 
 1. **Bridge Backend** (default): Communicates with a local server that handles API requests securely
 2. **OpenRouter Backend**: Direct API calls to OpenRouter services with model cost estimation
+
+## Multi-Instance Support
+
+LMASudio supports running multiple parallel instances for different tasks:
+
+### Starting Multiple Instances
+
+```bash
+# Instance 1
+lmastudio service start-bridge --port 8080
+
+# Instance 2
+lmastudio service start-bridge --port 8081
+
+# Instance 3
+lmastudio service start-bridge --port 8082
+```
+
+### Browser Tab Configuration
+
+Configure each browser tab to connect to the appropriate instance:
+
+- **URL Parameter**: Add `#bridge=8081` to the URL in each tab
+- **DevTools Helper**: Run `lmaSetBridgePort(8081)` in the console of each tab
+
+### Userscript Configuration
+
+The userscript automatically reads the port from:
+1. URL query parameter: `?bridge=8081`
+2. URL hash: `#bridge=8081`
+3. localStorage: `lma_bridge_port`
+4. Fallback: 8080
 
 ## Examples
 

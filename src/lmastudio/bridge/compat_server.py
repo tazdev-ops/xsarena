@@ -155,9 +155,16 @@ async def list_models(authorization: str = Depends(verify_api_key)):
     
     return ListModelsResponse(data=models)
 
-def run_compat_server(host: str = "localhost", port: int = 8000):
-    """Run the compatibility server."""
-    uvicorn.run(app, host=host, port=port)
+def main():
+    """Run the compatibility server with configurable port."""
+    import argparse, os
+    parser = argparse.ArgumentParser(description="LMASudio OpenAI-Compatible API Server")
+    parser.add_argument("--port", "-p", type=int, default=int(os.getenv("LMA_COMPAT_PORT", "8000")), help="Local API server port (default from LMA_COMPAT_PORT or 8000)")
+    parser.add_argument("--host", default=os.getenv("LMA_HOST", "127.0.0.1"), help="Local API server host (default 127.0.0.1)")
+    args = parser.parse_args()
+    
+    import uvicorn
+    uvicorn.run(app, host=args.host, port=args.port)
 
 if __name__ == "__main__":
-    run_compat_server()
+    main()

@@ -18,6 +18,7 @@ from .cmds_coder import app as coder_app
 from .cmds_backend import app as backend_app
 from .cmds_debug import app as debug_app
 from .cmds_modes import app as modes_app
+from .service import app as service_app
 
 app = typer.Typer()
 
@@ -32,6 +33,7 @@ app.add_typer(coder_app, name="coder", help="Coding commands")
 app.add_typer(backend_app, name="backend", help="Backend configuration commands")
 app.add_typer(debug_app, name="debug", help="Debugging commands")
 app.add_typer(modes_app, name="mode", help="Mode toggles and settings")
+app.add_typer(service_app, name="service", help="Service management (start servers)")
 
 @app.callback()
 def main(

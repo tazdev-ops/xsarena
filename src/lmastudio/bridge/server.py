@@ -1,6 +1,8 @@
 """CSP-safe bridge server for LMASudio."""
 import asyncio
 import json
+import os
+import argparse
 from typing import Dict, Any
 import aiohttp
 from aiohttp import web
@@ -88,7 +90,13 @@ async def health_check(request):
     return web.json_response({"status": "healthy"})
 
 def main():
-    """Run the bridge server."""
+    """Run the bridge server with configurable port."""
+    import argparse, os
+    parser = argparse.ArgumentParser(description="LMASudio Bridge Server")
+    parser.add_argument("--port", "-p", type=int, default=int(os.getenv("LMA_PORT", "8080")), help="Local bridge port (default from LMA_PORT or 8080)")
+    parser.add_argument("--host", default=os.getenv("LMA_HOST", "127.0.0.1"), help="Local bridge host (default 127.0.0.1)")
+    args = parser.parse_args()
+
     app = web.Application()
     app.add_routes(routes)
     
@@ -121,7 +129,31 @@ def main():
     app.middlewares.append(cors_middleware)
     
     logging.basicConfig(level=logging.INFO)
-    web.run_app(app, host='localhost', port=8080)
+    
+    # Set up the app runner
+    runner = web.AppRunner(app)
+
+    async def _run():
+        await runner.setup()
+        site = web.TCPSite(runner, args.host, args.port)
+        await site.start()
+        logging.info("Bridge server listening on:")
+        print(f"  GET  http://{args.host}:{args.port}/health")
+        print(f"  POST http://{args.host}:{args.port}/v1/chat/completions")
+        print(f"  POST http://{args.host}:{args.port}/push_response")
+        print(f"  Bridge server ready on http://{args.host}:{args.port}")
+
+    try:
+        asyncio.run(_run())
+    except (KeyboardInterrupt, SystemExit):
+        print("Shutting down bridge server...")
+    finally:
+        try:
+            loop = asyncio.new_event_loop()
+            loop.run_until_complete(runner.cleanup())
+            loop.close()
+        except Exception:
+            pass
 
 if __name__ == "__main__":
     main()
