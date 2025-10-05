@@ -118,3 +118,109 @@ class Engine:
         # For now, this is a simplified implementation
         # In a full implementation, this would handle JSON tool calls
         return await self.send_and_collect(user_prompt)
+    
+    async def strip_next_marker(self, text: str):
+        """Strip NEXT marker from text and return the body and hint separately."""
+        import re
+        hint = None
+        last = None
+        for m in re.finditer(r'^\s*NEXT:\s*(.+)\s*\$', text, re.MULTILINE):
+            last = m
+        if last:
+            hint = last.group(1).strip()
+            text = text[:last.start()] + text[last.end():]
+        return text.rstrip(), hint
+    
+    async def build_anchor_continue_prompt(self, anchor: str) -> str:
+        """Build an anchor continuation prompt."""
+        # A compact, subject-free continuation instruction
+        return (
+            "Continue exactly from after the following anchor. Do not repeat the anchor. "
+            "Do not reintroduce the subject or previous headings; do not summarize; pick up mid-paragraph if needed.\n"
+            "ANCHOR:\n<<<ANCHOR\n" + anchor + "\nANCHOR>>>\n"
+            "Continue."
+        )
+    
+    async def autopilot_run(self, initial_prompt: str = "BEGIN", max_chunks: Optional[int] = None):
+        """Run an autopilot loop with output pushing functionality."""
+        from .chunking import jaccard_ngrams, anchor_from_text, continuation_anchor
+        
+        first = True
+        chunk_count = 0
+        
+        while max_chunks is None or chunk_count < max_chunks:
+            # Decide next prompt
+            if first:
+                user_text = initial_prompt if initial_prompt != "BEGIN" else "BEGIN"
+                first = False
+            else:
+                if self.state.continuation_mode == "anchor":
+                    anch = continuation_anchor(self.state.history, self.state.anchor_length)
+                    if anch:
+                        user_text = await self.build_anchor_continue_prompt(anch)
+                        # Add coverage hammer for self-study runs
+                        if self.state.session_mode == "zero2hero" and self.state.coverage_hammer_on:
+                            user_text += "\nDo not conclude or summarize; coverage is not complete. Continue teaching the field and its subfields to the target depth."
+                    else:
+                        user_text = "continue."
+                else:
+                    user_text = "continue."
+
+            # First segment
+            reply = await self.send_and_collect(user_text)
+            body, hint = await self.strip_next_marker(reply)   # strip NEXT from main body; capture hint
+
+            # Auto-extend within the same subtopic to hit OUTPUT_MIN_CHARS
+            accumulated = body
+            local_hint = hint
+            micro = 0
+            while (self.state.output_push_on and 
+                   len(accumulated) < self.state.output_min_chars and 
+                   micro < self.state.output_push_max_passes):
+                   
+                # Build a local anchor from the accumulated text
+                local_anch = anchor_from_text(accumulated, self.state.anchor_length)
+                ext_prompt = (
+                    await self.build_anchor_continue_prompt(local_anch)
+                    + "\nFill to the per-response output limit within this same subtopic. "
+                      "Do not reintroduce or restart; continue exactly. "
+                      "Do not write a NEXT line yet; do not conclude."
+                )
+                
+                ext_reply = await self.send_and_collect(ext_prompt)
+                ext_body, ext_hint = await self.strip_next_marker(ext_reply)  # strip any premature NEXT
+                if not ext_body.strip():
+                    break
+                    
+                # Optional repetition guard: stop if highly repetitive vs last portion
+                if self.state.repetition_warn:
+                    prev_tail = anchor_from_text(accumulated, min(800, self.state.anchor_length*4))
+                    rep = jaccard_ngrams(prev_tail, ext_body[:max(400, self.state.anchor_length)], n=self.state.repetition_ngram)
+                    if rep > self.state.repetition_threshold:
+                        print(f"High repetition during extension (Jaccard~{rep:.2f}). Stopping extend.")
+                        break
+                        
+                accumulated += ("\n\n" if not accumulated.endswith("\n") else "") + ext_body
+                if ext_hint:    # keep only the last NEXT if the final step later adds it
+                    local_hint = ext_hint
+                micro += 1
+
+            # Now use the accumulated text as the final body for this iteration
+            final_body = accumulated
+            final_hint = local_hint
+
+            # Optional repetition detection (vs previous chunk)
+            if self.state.repetition_warn:
+                prev_tail = continuation_anchor(self.state.history, min(800, self.state.anchor_length*4))
+                rep = jaccard_ngrams(prev_tail, final_body[:max(400, self.state.anchor_length)], n=self.state.repetition_ngram)
+                if rep > self.state.repetition_threshold:
+                    print(f"High repetition detected (Jaccard~{rep:.2f}).")
+
+            chunk_count += 1
+
+            # Stop on explicit END
+            if final_hint and final_hint.upper() in {"END", "DONE", "STOP", "FINISHED"}:
+                print(f"NEXT: [{final_hint}] — stopping.")
+                break
+
+        print(f"Autopilot finished after {chunk_count} chunk(s).")

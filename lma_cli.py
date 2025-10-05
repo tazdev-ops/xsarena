@@ -104,6 +104,12 @@ AUTO_PAUSE = False                 # pause autopilot after finishing a chunk
 SESSION_MODE = None               # e.g., "zero2hero", None otherwise
 COVERAGE_HAMMER_ON = True         # when True, add a minimal anti-wrap-up line to continue prompts
 
+# --- Output budget / push-to-max controls ---
+OUTPUT_BUDGET_SNIPPET_ON = True   # append system prompt addendum on book modes
+OUTPUT_PUSH_ON = True             # auto-extend within the same subtopic to hit a min length
+OUTPUT_MIN_CHARS = 4500           # target minimal chunk size before moving on (tune as needed)
+OUTPUT_PUSH_MAX_PASSES = 3        # at most N extra "continue within current subtopic" micro-steps
+
 # --- Cloudflare controls ---
 CF_BLOCKED = False       # true while CF challenge is active
 CF_NOTIFIED = False      # ensure we print the notice only once per CF event
@@ -194,6 +200,15 @@ def continuation_anchor(tail_chars: int) -> str:
     # trim to sentence boundary if possible
     p = max(s.rfind("."), s.rfind("!"), s.rfind("?"))
     if p != -1 and p >= len(s) - 120:  # try to end on sentence end near the tail
+        s = s[:p+1]
+    return s.strip()
+
+def anchor_from_text(txt: str, tail_chars: int) -> str:
+    if not txt:
+        return ""
+    s = txt[-tail_chars:]
+    p = max(s.rfind("."), s.rfind("!"), s.rfind("?"))
+    if p != -1 and p >= len(s) - 120:
         s = s[:p+1]
     return s.strip()
 
@@ -436,29 +451,17 @@ async def autorun_loop():
     global AUTO_ON, AUTO_COUNT, LAST_NEXT_HINT, SYSTEM_PROMPT, NEXT_OVERRIDE, AUTO_PAUSE
     global HISTORY, AUTO_OUT, AUTO_MAX, AUTO_DELAY, CONT_MODE, CONT_ANCHOR_CHARS
     global REPEAT_WARN, REPEAT_THRESH, REPEAT_NGRAM, SESSION_MODE, COVERAGE_HAMMER_ON
+    global OUTPUT_PUSH_ON, OUTPUT_MIN_CHARS, OUTPUT_PUSH_MAX_PASSES
 
     first = True
     while AUTO_ON and (AUTO_MAX is None or AUTO_COUNT < AUTO_MAX):
-        # Calm wait if Cloudflare is active
-        if CF_BLOCKED:
-            # show one-time status line
-            if not CF_NOTIFIED:
-                print(f"\n{C.WARN}Cloudflare active. Waiting…{C.R}")
-            # ensure autopilot is paused
-            AUTO_PAUSE = True
-            # passive wait until user clears CF and resumes
-            while AUTO_ON and CF_BLOCKED:
-                await asyncio.sleep(0.25)
-            # continue the loop (user will /cf.resume and /book.resume)
-            continue
-
         # Pause support
         while AUTO_ON and AUTO_PAUSE:
             await asyncio.sleep(0.2)
         if not AUTO_ON:
             break
 
-        # Decide next prompt (no subject; no raw NEXT hint)
+        # Decide next prompt
         if first:
             user_text = "BEGIN"
             first = False
@@ -470,7 +473,6 @@ async def autorun_loop():
                 anch = continuation_anchor(CONT_ANCHOR_CHARS)
                 if anch:
                     user_text = build_anchor_continue_prompt(anch)
-                    # Minimal "hammer" for self-study runs: do not conclude; keep covering field/subfields
                     if SESSION_MODE == "zero2hero" and COVERAGE_HAMMER_ON:
                         user_text += "\nDo not conclude or summarize; coverage is not complete. Continue teaching the field and its subfields to the target depth."
                 else:
@@ -481,29 +483,56 @@ async def autorun_loop():
         print()
         print(f"{C.USER}{C.B}You{C.R}: {user_text}\n")
 
-        # Send and collect
+        # First segment
         reply = await send_and_collect(build_payload(user_text))
-
-        # Strip NEXT: [...] and capture hint (we store it, but we won't inject it on next turn)
-        body, hint = strip_next_marker(reply)
+        body, hint = strip_next_marker(reply)   # strip NEXT from main body; capture hint
         LAST_NEXT_HINT = hint
 
-        # Append to history (critical)
+        # Auto-extend within the same subtopic to hit OUTPUT_MIN_CHARS
+        accumulated = body
+        local_hint = hint
+        micro = 0
+        while OUTPUT_PUSH_ON and len(accumulated) < OUTPUT_MIN_CHARS and micro < OUTPUT_PUSH_MAX_PASSES and AUTO_ON:
+            # Build a local anchor from the accumulated text (not from full HISTORY)
+            local_anch = anchor_from_text(accumulated, CONT_ANCHOR_CHARS)
+            ext_prompt = (
+                build_anchor_continue_prompt(local_anch)
+                + "\nFill to the per-response output limit within this same subtopic. "
+                  "Do not reintroduce or restart; continue exactly. "
+                  "Do not write a NEXT line yet; do not conclude."
+            )
+            print()
+            print(f"{C.USER}{C.B}You{C.R}: [extend] {ext_prompt}\n")
+            ext_reply = await send_and_collect(build_payload(ext_prompt))
+            ext_body, ext_hint = strip_next_marker(ext_reply)  # strip any premature NEXT
+            if not ext_body.strip():
+                break
+            # Optional repetition guard: stop if highly repetitive vs last portion
+            if REPEAT_WARN:
+                prev_tail = anchor_from_text(accumulated, min(800, CONT_ANCHOR_CHARS*4))
+                rep = jaccard_ngrams(prev_tail, ext_body[:max(400, CONT_ANCHOR_CHARS)], n=REPEAT_NGRAM)
+                if rep > REPEAT_THRESH:
+                    warn(f"High repetition during extension (Jaccard~{rep:.2f}). Stopping extend; you may /next steer.")
+                    break
+            accumulated += ("\n\n" if not accumulated.endswith("\n") else "") + ext_body
+            if ext_hint:    # keep only the last NEXT if the final step later adds it
+                local_hint = ext_hint
+            micro += 1
+
+        # Now use the accumulated text as the final body for this iteration
+        final_body = accumulated
+        final_hint = local_hint
+
+        # Persist to history and file
         HISTORY.append({"role": "user", "content": user_text})
-        HISTORY.append({"role": "assistant", "content": body})
-
-        # Save to file
+        HISTORY.append({"role": "assistant", "content": final_body})
         if AUTO_OUT:
-            write_to_file(AUTO_OUT, body)
+            write_to_file(AUTO_OUT, final_body)
 
-        # If CF blocked got set mid-step by send_and_collect, pause here
-        if CF_BLOCKED:
-            AUTO_PAUSE = True
-
-        # Repetition detection vs previous tail
+        # Optional repetition detection (vs previous chunk)
         if REPEAT_WARN:
-            prev_tail = continuation_anchor(min(800, CONT_ANCHOR_CHARS * 4))  # longer tail for check
-            rep = jaccard_ngrams(prev_tail, body[:max(400, CONT_ANCHOR_CHARS)], n=REPEAT_NGRAM)
+            prev_tail = continuation_anchor(min(800, CONT_ANCHOR_CHARS*4))
+            rep = jaccard_ngrams(prev_tail, final_body[:max(400, CONT_ANCHOR_CHARS)], n=REPEAT_NGRAM)
             if rep > REPEAT_THRESH:
                 warn(f"High repetition detected (Jaccard~{rep:.2f}). Auto-pausing. Use /next to steer or /book.resume.")
                 AUTO_PAUSE = True
@@ -511,10 +540,13 @@ async def autorun_loop():
         AUTO_COUNT += 1
 
         # Stop on explicit END
-        if hint and hint.upper() in {"END", "DONE", "STOP", "FINISHED"}:
-            ok(f"NEXT: [{hint}] — stopping.")
+        if final_hint and final_hint.upper() in {"END", "DONE", "STOP", "FINISHED"}:
+            ok(f"NEXT: [{final_hint}] — stopping.")
             AUTO_ON = False
             break
+
+        # Carry hint forward (we do not inject hint text into the next prompt, we rely on anchors)
+        LAST_NEXT_HINT = final_hint
 
         await asyncio.sleep(AUTO_DELAY)
 
@@ -661,6 +693,10 @@ async def rewrite_start(synth_path: str, out_path: str, system_template: str | N
     base_system = SYSTEM_PROMPT
     if system_template:
         base_system = system_template
+        # Apply output budget addendum if this is a book lossless rewrite template
+        if "book.lossless.rewrite" in str(locals().get('system_template', '')) or len(synth) > 5000:  # heuristic for lossless rewriting
+            if OUTPUT_BUDGET_SNIPPET_ON:
+                base_system = base_system.strip() + "\n\n" + OUTPUT_BUDGET_ADDENDUM
     set_system(base_system + "\n\nSOURCE SYNTHESIS (for this session only):\n<<<SYNTHESIS\n" + synth + "\nSYNTHESIS>>>\n")
     global AUTO_OUT, AUTO_ON, AUTO_TASK, AUTO_COUNT, LAST_NEXT_HINT
     AUTO_OUT = out_path; AUTO_ON=True; AUTO_COUNT=0; LAST_NEXT_HINT=None
@@ -842,6 +878,11 @@ RULES
 
 OUTPUT
 - Return only the content in this style, no meta commentary."""
+# OUTPUT BUDGET ADDENDUM
+OUTPUT_BUDGET_ADDENDUM = """OUTPUT BUDGET
+- Use the full available output window in each response. Do not hold back or end early.
+- If you approach the limit mid-subtopic, stop cleanly (no wrap-up). You will resume exactly where you left off on the next input.
+- Do not jump ahead or skip subtopics to stay concise. Continue teaching until the whole field and subfields reach the target depth."""
 
 # NEW TEMPLATES FOR BILINGUAL AND POLICY FEATURES
 BOOK_BILINGUAL_TEMPLATE = """SUBJECT: {subject} | TARGET LANGUAGE: {lang}
@@ -1014,7 +1055,10 @@ async def book_zero2hero(subject: str, plan_first: bool, outdir: str|None, max_c
     out_path = next_available_path(os.path.join(outdir or BOOKS_DIR, f"{slug}.md"))
     outline_path = os.path.join(outdir or BOOKS_DIR, f"{slug}.outline.md")
     SAVE_SYSTEM_STACK.append(SYSTEM_PROMPT)
-    set_system(repo_render("book.zero2hero", subject=subject))
+    sys_text = repo_render("book.zero2hero", subject=subject)
+    if OUTPUT_BUDGET_SNIPPET_ON:
+        sys_text = sys_text.strip() + "\n\n" + OUTPUT_BUDGET_ADDENDUM
+    set_system(sys_text)
     SESSION_MODE = "zero2hero"
     if window is not None:
         set_window(window)
@@ -1034,7 +1078,10 @@ async def book_reference(subject: str, plan_first: bool, outdir: str|None, max_c
     out_path = next_available_path(os.path.join(outdir or BOOKS_DIR, f"{slug}.reference.md"))
     outline_path = os.path.join(outdir or BOOKS_DIR, f"{slug}.reference.outline.md")
     SAVE_SYSTEM_STACK.append(SYSTEM_PROMPT)
-    set_system(repo_render("book.reference", subject=subject))
+    sys_text = repo_render("book.reference", subject=subject)
+    if OUTPUT_BUDGET_SNIPPET_ON:
+        sys_text = sys_text.strip() + "\n\n" + OUTPUT_BUDGET_ADDENDUM
+    set_system(sys_text)
     if window is not None: set_window(window)
     if plan_first:
         plan = "Sketch the top-level sections and subsections for the reference handbook. End with NEXT: [Start Section 1]."
@@ -1053,7 +1100,10 @@ async def book_pop(subject: str, plan_first: bool, outdir: str|None, max_chunks:
     out_path = next_available_path(os.path.join(outdir or BOOKS_DIR, f"{slug}.pop.md"))
     outline_path = os.path.join(outdir or BOOKS_DIR, f"{slug}.pop.outline.md")
     SAVE_SYSTEM_STACK.append(SYSTEM_PROMPT)
-    set_system(repo_render("book.pop", subject=subject))
+    sys_text = repo_render("book.pop", subject=subject)
+    if OUTPUT_BUDGET_SNIPPET_ON:
+        sys_text = sys_text.strip() + "\n\n" + OUTPUT_BUDGET_ADDENDUM
+    set_system(sys_text)
     if window is not None: set_window(window)
     if plan_first:
         plan = "Draft a compelling, accurate chapter plan for the pop-science book. One line per chapter goal. End with NEXT: [Begin Chapter 1]."
@@ -1071,7 +1121,10 @@ async def exam_cram(subject: str, outdir: str|None, max_chunks: int|None, window
     slug = slugify(subject)
     out_path = next_available_path(os.path.join(outdir or BOOKS_DIR, f"{slug}.cram.md"))
     SAVE_SYSTEM_STACK.append(SYSTEM_PROMPT)
-    set_system(repo_render("exam.cram", subject=subject))
+    sys_text = repo_render("exam.cram", subject=subject)
+    if OUTPUT_BUDGET_SNIPPET_ON:
+        sys_text = sys_text.strip() + "\n\n" + OUTPUT_BUDGET_ADDENDUM
+    set_system(sys_text)
     if window is not None: set_window(window)
     global AUTO_OUT, AUTO_ON, AUTO_TASK, AUTO_COUNT, LAST_NEXT_HINT, AUTO_MAX
     AUTO_OUT = out_path; AUTO_ON=True; AUTO_COUNT=0; LAST_NEXT_HINT=None
@@ -1086,7 +1139,10 @@ async def book_nobs(subject: str, plan_first: bool, outdir: str|None, max_chunks
     out_path = next_available_path(os.path.join(outdir or BOOKS_DIR, f"{slug}.nobs.md"))
     outline_path = os.path.join(outdir or BOOKS_DIR, f"{slug}.nobs.outline.md")
     SAVE_SYSTEM_STACK.append(SYSTEM_PROMPT)
-    set_system(repo_render("book.nobs", subject=subject))
+    sys_text = repo_render("book.nobs", subject=subject)
+    if OUTPUT_BUDGET_SNIPPET_ON:
+        sys_text = sys_text.strip() + "\n\n" + OUTPUT_BUDGET_ADDENDUM
+    set_system(sys_text)
     if window is not None: set_window(window)
     if plan_first:
         plan = "Draft a compact outline of the essentials. Only sections that change decisions or understanding. End with NEXT: [Begin]."
@@ -1106,7 +1162,10 @@ async def book_bilingual(subject: str, lang: str, plan_first: bool, outdir: str|
     out_path = next_available_path(os.path.join(outdir or BOOKS_DIR, f"{slug}.bilingual.md"))
     outline_path = os.path.join(outdir or BOOKS_DIR, f"{slug}.bilingual.outline.md")
     SAVE_SYSTEM_STACK.append(SYSTEM_PROMPT)
-    set_system(repo_render("book.bilingual", subject=subject, lang=lang))
+    sys_text = repo_render("book.bilingual", subject=subject, lang=lang)
+    if OUTPUT_BUDGET_SNIPPET_ON:
+        sys_text = sys_text.strip() + "\n\n" + OUTPUT_BUDGET_ADDENDUM
+    set_system(sys_text)
     if window is not None:
         set_window(window)
     if plan_first:
@@ -1250,7 +1309,10 @@ async def rewrite_lossless(synth_path: str, out_path: str | None = None):
     base = slugify(os.path.splitext(os.path.basename(synth_path))[0])
     if out_path is None:
         out_path = next_available_path(os.path.join(BOOKS_DIR, f"{base}.lossless.md"))
-    await rewrite_start(synth_path, out_path, system_template=PROMPT_REPO["book.lossless.rewrite"]["system"])
+    sys_template = PROMPT_REPO["book.lossless.rewrite"]["system"]
+    if OUTPUT_BUDGET_SNIPPET_ON:
+        sys_template = sys_template.strip() + "\n\n" + OUTPUT_BUDGET_ADDENDUM
+    await rewrite_start(synth_path, out_path, system_template=sys_template)
 
 async def lossless_run(path: str, outdir: str|None = None, chunk_kb: int = 45, synth_chars: int = 12000):
     outdir = outdir or BOOKS_DIR; ensure_dir(outdir)
@@ -1290,6 +1352,11 @@ def help_text():
     print("Autopilot control:")
     print("  /book.pause | /book.resume | /next <text>   (one-shot override for the next prompt)")
     print("  /book.hammer on|off               Toggle strict no-wrap continuation hint for self-study")
+    print("Output budget:")
+    print("  /out.budget on|off                 Append OUTPUT BUDGET addendum to book prompts (default on)")
+    print("  /out.push on|off                   Auto-extend within a subtopic to hit min length (default on)")
+    print("  /out.minchars <N>                  Set minimal chars per chunk before moving on (default 4500)")
+    print("  /out.passes <N>                    Max extension steps per chunk (default 3)")
     print("  /cf.status                        Show Cloudflare status")
     print("  /cf.resume                        Clear CF pause after you solved the challenge")
     print("  /cf.reset                         Force-clear CF flags (debug)")
@@ -1557,6 +1624,46 @@ async def repl():
                     ok(f"Self-study continuation hammer: {COVERAGE_HAMMER_ON}")
                 else:
                     err("Usage: /book.hammer on|off")
+
+            elif cmd == "/out.budget":
+                if len(parts) >= 2 and parts[1].strip().lower() in ("on","off"):
+                    OUTPUT_BUDGET_SNIPPET_ON = (parts[1].strip().lower() == "on")
+                    ok(f"OUTPUT_BUDGET addendum: {OUTPUT_BUDGET_SNIPPET_ON}")
+                else:
+                    err("Usage: /out.budget on|off")
+
+            elif cmd == "/out.push":
+                if len(parts) >= 2 and parts[1].strip().lower() in ("on","off"):
+                    OUTPUT_PUSH_ON = (parts[1].strip().lower() == "on")
+                    ok(f"Output push: {OUTPUT_PUSH_ON}")
+                else:
+                    err("Usage: /out.push on|off")
+
+            elif cmd == "/out.minchars":
+                if len(parts) >= 2:
+                    try:
+                        v = int(parts[1]); 
+                        if v < 1000:
+                            warn("Value too small; suggest >= 2500.")
+                        OUTPUT_MIN_CHARS = max(1000, v)
+                        ok(f"OUTPUT_MIN_CHARS={OUTPUT_MIN_CHARS}")
+                    except:
+                        err("Provide an integer.")
+                else:
+                    err("Usage: /out.minchars <N>")
+
+            elif cmd == "/out.passes":
+                if len(parts) >= 2:
+                    try:
+                        v = int(parts[1]); 
+                        if v < 0 or v > 10:
+                            warn("Unusual value; using within [0..10].")
+                        OUTPUT_PUSH_MAX_PASSES = max(0, min(10, v))
+                        ok(f"OUTPUT_PUSH_MAX_PASSES={OUTPUT_PUSH_MAX_PASSES}")
+                    except:
+                        err("Provide an integer.")
+                else:
+                    err("Usage: /out.passes <N>")
 
             # Cloudflare commands
             elif cmd == "/cf.status":

@@ -11,36 +11,74 @@ class BookMode:
     
     async def zero2hero(self, topic: str, outline: Optional[str] = None) -> str:
         """Create a comprehensive book from zero to hero level."""
+        from ..core.templates import SYSTEM_PROMPTS, OUTPUT_BUDGET_ADDENDUM
+        
         if outline:
             prompt = f"Using this outline, write a comprehensive book about {topic}:\n\n{outline}"
         else:
             prompt = f"Write a comprehensive, detailed book about {topic}. Start with basic concepts and progressively build to advanced topics."
         
-        system_prompt = SYSTEM_PROMPTS["book"]
+        system_prompt = SYSTEM_PROMPTS["book.zero2hero"].format(subject=topic)
+        
+        # Add output budget addendum if enabled
+        if self.engine.state.output_budget_snippet_on:
+            system_prompt = system_prompt.strip() + "\n\n" + OUTPUT_BUDGET_ADDENDUM
+        
+        # Set session mode for the anti-wrap logic
+        self.engine.state.session_mode = "zero2hero"
+        
         return await self.engine.send_and_collect(prompt, system_prompt)
     
     async def reference(self, topic: str) -> str:
         """Create a reference-style book with detailed information."""
+        from ..core.templates import SYSTEM_PROMPTS, OUTPUT_BUDGET_ADDENDUM
+        
         prompt = f"Write a comprehensive reference book about {topic}. Include detailed explanations, examples, and cross-references."
         system_prompt = SYSTEM_PROMPTS["book"]
+        
+        # Add output budget addendum if enabled
+        if self.engine.state.output_budget_snippet_on:
+            system_prompt = system_prompt.strip() + "\n\n" + OUTPUT_BUDGET_ADDENDUM
+        
         return await self.engine.send_and_collect(prompt, system_prompt)
     
     async def pop(self, topic: str) -> str:
         """Create a popular science/book style content."""
+        from ..core.templates import SYSTEM_PROMPTS, OUTPUT_BUDGET_ADDENDUM
+        
         prompt = f"Write an engaging, accessible book about {topic} in a popular science style. Make it understandable to general audiences."
         system_prompt = SYSTEM_PROMPTS["book"]
+        
+        # Add output budget addendum if enabled
+        if self.engine.state.output_budget_snippet_on:
+            system_prompt = system_prompt.strip() + "\n\n" + OUTPUT_BUDGET_ADDENDUM
+        
         return await self.engine.send_and_collect(prompt, system_prompt)
     
     async def nobs(self, topic: str) -> str:
         """Create a no-bullshit manual about the topic."""
+        from ..core.templates import SYSTEM_PROMPTS, OUTPUT_BUDGET_ADDENDUM
+        
         prompt = f"Write a concise, no-nonsense manual about {topic}. Focus on practical information, skip fluff, be direct."
         system_prompt = SYSTEM_PROMPTS["book"]
+        
+        # Add output budget addendum if enabled
+        if self.engine.state.output_budget_snippet_on:
+            system_prompt = system_prompt.strip() + "\n\n" + OUTPUT_BUDGET_ADDENDUM
+        
         return await self.engine.send_and_collect(prompt, system_prompt)
     
     async def exam(self, topic: str) -> str:
         """Create an exam preparation book."""
+        from ..core.templates import SYSTEM_PROMPTS, OUTPUT_BUDGET_ADDENDUM
+        
         prompt = f"Write a comprehensive exam preparation book about {topic}. Include key concepts, practice questions, and explanations."
         system_prompt = SYSTEM_PROMPTS["book"]
+        
+        # Add output budget addendum if enabled
+        if self.engine.state.output_budget_snippet_on:
+            system_prompt = system_prompt.strip() + "\n\n" + OUTPUT_BUDGET_ADDENDUM
+        
         return await self.engine.send_and_collect(prompt, system_prompt)
     
     async def bilingual(self, text: str, source_lang: str, target_lang: str) -> str:
