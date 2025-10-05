@@ -1,80 +1,101 @@
-# LMArena CLI with Book Autopilot
+# LMASudio
 
-This CLI tool allows you to create books using the LMArena AI with automated chunk-by-chunk generation using the "continue." command.
+AI-powered writing and coding studio
+
+## Overview
+
+LMASudio is a comprehensive tool for AI-assisted writing, coding, and content creation. It provides multiple modes for different types of work, from book authoring to code generation, all unified under a consistent engine.
 
 ## Features
 
-- **Book Autopilot Mode**: Automated book generation with auto-continue functionality
-- **CSP-Safe Polling Bridge**: Works with browser extensions without WebSocket
-- **File Output**: Writes content directly to files
-- **Chunk Detection**: Recognizes "NEXT:" markers and stops at "NEXT: [END]"
+- **Book Authoring Modes**: Create comprehensive books with zero2hero, reference, popular science, and no-bullshit manual styles
+- **Lossless Processing**: Improve text while preserving all original meaning
+- **Bilingual Processing**: Translate and align content between languages
+- **Policy Analysis**: Generate and analyze policy documents
+- **Study Tools**: Create flashcards, quizzes, and study guides
+- **Chad Mode**: Evidence-based Q&A with blunt but safe responses
+- **Coding Mode**: Full file system access for code generation and modification
+- **Multiple Backends**: Support for local bridge and OpenRouter APIs
 
-## Requirements
+## Installation
 
-- Python 3.7+
-- aiohttp (`pip install aiohttp`)
+```bash
+pip install lmastudio
+```
 
-## Setup
+## Quick Start
 
-1. Install dependencies:
-   ```bash
-   ./install_deps.sh
-   ```
+```bash
+# Start the bridge server (if using local backend)
+python -m src.lmastudio.bridge.server
 
-2. Make sure you have the CSP-safe polling userscript installed in your browser and are on https://lmarena.ai
+# Use the CLI to generate a book outline
+lmastudio book outline "Machine Learning Fundamentals"
 
-## Usage
+# Write a no-bullshit manual
+lmastudio book nobs "Python for Beginners"
+```
 
-1. Start the CLI:
-   ```bash
-   python lma_cli.py
-   ```
+## Architecture
 
-2. In the CLI, capture your session IDs:
-   ```
-   /capture
-   ```
-   
-3. Click "Retry" in LMArena to capture your IDs (they will be displayed in the CLI)
+The project follows a modular architecture:
 
-4. Load your directive file:
-   ```
-   /systemfile directives/psychology_manual.txt
-   ```
+```
+src/
+├── lmastudio/
+│   ├── core/           # Core functionality
+│   │   ├── config.py   # Configuration management
+│   │   ├── state.py    # Session state management
+│   │   ├── chunking.py # Text chunking and anchor management
+│   │   ├── templates.py # Prompt templates
+│   │   ├── backends.py # Backend implementations
+│   │   ├── engine.py   # Core engine
+│   │   ├── jobs.py     # Job queue and management
+│   │   └── tools.py    # File system and command tools
+│   ├── modes/          # Different operational modes
+│   │   ├── book.py
+│   │   ├── lossless.py
+│   │   ├── bilingual.py
+│   │   ├── policy.py
+│   │   ├── study.py
+│   │   ├── chad.py
+│   │   └── coder.py
+│   ├── cli/            # Command line interface
+│   │   ├── main.py
+│   │   ├── cmds_*.py   # Command modules
+│   └── bridge/         # CSP-safe bridge server
+│       └── server.py
+```
 
-5. Start the book autopilot:
-   ```
-   /book.start output/my_book.md
-   ```
+## Modes
 
-The system will automatically send "BEGIN", then continue with "continue." after each chunk until it receives "NEXT: [END]".
+### Book Authoring
+- `zero2hero`: Comprehensive book from basic to advanced concepts
+- `reference`: Detailed reference material
+- `pop`: Popular science style
+- `nobs`: No-nonsense manual
+- `outline`: Generate detailed outlines
 
-## Commands
+### Lossless Processing
+- `ingest`: Synthesize information
+- `rewrite`: Preserve all meaning while improving text
+- `run`: Comprehensive processing run
 
-- `/help` - Show all commands
-- `/status` - Show current status and settings
-- `/capture` - Capture session IDs from browser
-- `/setids <sess> <msg>` - Set IDs manually
-- `/systemfile <path>` - Load system directive from file
-- `/book.start <outfile>` - Start autopilot mode
-- `/book.stop` - Stop autopilot mode
-- `/book.status` - Show autopilot status
-- `/book.max <N>` - Limit number of chunks
-- `/window <N>` - Set history window size
-- `/mono` - Toggle monochrome output
-- `/clear` - Clear chat history
-- `/exit` - Quit the CLI
+### Coding
+- Full file system access with safety sandbox
+- Code generation, review, and debugging
 
-## Directives
+## Backends
 
-The `directives/` folder contains sample directive files for different types of content. You can create your own directive files with specific instructions for the AI.
+LMASudio supports two backends:
 
-## Output
+1. **Bridge Backend** (default): Communicates with a local server that handles API requests securely
+2. **OpenRouter Backend**: Direct API calls to OpenRouter services
 
-Generated content is saved to the specified output file with clean formatting (NEXT: markers are stripped from the saved text).
+## Contributing
 
-## Notes
+See `CONTRIBUTING.md` for details on how to contribute to this project.
 
-- The tool maintains a rolling history of the last 40 exchanges by default
-- If Cloudflare challenges appear, complete them in the browser and the process will continue
-- The autopilot will stop automatically when the AI responds with "NEXT: [END]"
+## License
+
+MIT
