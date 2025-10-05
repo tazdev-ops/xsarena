@@ -17,6 +17,7 @@ from .cmds_chad import app as chad_app
 from .cmds_coder import app as coder_app
 from .cmds_backend import app as backend_app
 from .cmds_debug import app as debug_app
+from .cmds_modes import app as modes_app
 
 app = typer.Typer()
 
@@ -30,6 +31,7 @@ app.add_typer(chad_app, name="chad", help="Evidence-based Q&A commands")
 app.add_typer(coder_app, name="coder", help="Coding commands")
 app.add_typer(backend_app, name="backend", help="Backend configuration commands")
 app.add_typer(debug_app, name="debug", help="Debugging commands")
+app.add_typer(modes_app, name="mode", help="Mode toggles and settings")
 
 @app.callback()
 def main(

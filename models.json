@@ -1,0 +1,53 @@
+{
+  "models": [
+    {
+      "id": "default",
+      "name": "Default Model",
+      "type": "text",
+      "default_for_mode": {
+        "book": "gpt-4",
+        "lossless": "gpt-4",
+        "bilingual": "gpt-4",
+        "policy": "claude-3",
+        "chad": "gpt-4",
+        "coder": "gpt-4"
+      }
+    },
+    {
+      "id": "gpt-4",
+      "name": "OpenAI GPT-4",
+      "type": "text",
+      "capabilities": ["text-generation", "reasoning"]
+    },
+    {
+      "id": "gpt-4-turbo",
+      "name": "OpenAI GPT-4 Turbo",
+      "type": "text",
+      "capabilities": ["text-generation", "reasoning", "fast"]
+    },
+    {
+      "id": "claude-3-opus",
+      "name": "Anthropic Claude 3 Opus",
+      "type": "text",
+      "capabilities": ["text-generation", "reasoning", "long-context"]
+    },
+    {
+      "id": "claude-3-sonnet",
+      "name": "Anthropic Claude 3 Sonnet",
+      "type": "text",
+      "capabilities": ["text-generation", "reasoning"]
+    },
+    {
+      "id": "gemini-pro",
+      "name": "Google Gemini Pro",
+      "type": "text",
+      "capabilities": ["text-generation", "multimodal"]
+    },
+    {
+      "id": "mixtral-8x7b",
+      "name": "Mixtral 8x7B",
+      "type": "text",
+      "capabilities": ["text-generation", "code", "multilingual"]
+    }
+  ]
+}
