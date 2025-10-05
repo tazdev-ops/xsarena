@@ -1,4 +1,5 @@
 """Book mode CLI commands for LMASudio."""
+import asyncio
 import typer
 from typing import Optional
 from ..core.config import Config

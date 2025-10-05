@@ -2048,11 +2048,30 @@ def main():
     runner = web.AppRunner(app)
     async def _run():
         await runner.setup()
-        site = web.TCPSite(runner, "127.0.0.1", 5102); await site.start()
-        info("Listening on:")
-        print("  GET  http://127.0.0.1:5102/bridge/poll")
-        print("  POST http://127.0.0.1:5102/bridge/push")
-        print("  POST http://127.0.0.1:5102/internal/id_capture/update")
+        # Try to find an available port, starting with 5102
+        port = 5102
+        max_attempts = 20  # Try up to 20 ports
+        for attempt in range(max_attempts):
+            try:
+                site = web.TCPSite(runner, "127.0.0.1", port)
+                await site.start()
+                break  # Success, exit the loop
+            except OSError as e:
+                if e.errno == 98:  # Address already in use
+                    port += 1
+                    continue
+                else:
+                    raise  # Some other error occurred
+            except Exception:
+                raise  # Some other exception occurred
+        else:
+            # If we exhausted attempts, raise an error
+            raise RuntimeError(f"Could not find an available port after {max_attempts} attempts")
+        
+        info(f"Listening on:")
+        print(f"  GET  http://127.0.0.1:{port}/bridge/poll")
+        print(f"  POST http://127.0.0.1:{port}/bridge/push")
+        print(f"  POST http://127.0.0.1:{port}/internal/id_capture/update")
         await repl()
 
     try: asyncio.run(_run())
