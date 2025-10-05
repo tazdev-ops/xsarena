@@ -17,15 +17,23 @@ class SessionState:
     """Current session state."""
     history: List[Message] = field(default_factory=list)
     anchors: List[str] = field(default_factory=list)
-    continuation_mode: str = "anchor"
+    continuation_mode: str = "anchor"  # anchor or normal
     anchor_length: int = 300
     repetition_threshold: float = 0.8
+    repetition_ngram: int = 4
+    repetition_warn: bool = True
     backend: str = "bridge"
     model: str = "default"
     window_size: int = 100
     current_job_id: Optional[str] = None
     job_queue: List[Dict] = field(default_factory=list)
     settings: Dict = field(default_factory=dict)
+    session_mode: Optional[str] = None  # e.g., "zero2hero", None otherwise
+    coverage_hammer_on: bool = True  # when True, add a minimal anti-wrap-up line to continue prompts
+    output_budget_snippet_on: bool = True  # append system prompt addendum on book modes
+    output_push_on: bool = True  # auto-extend within the same subtopic to hit a min length
+    output_min_chars: int = 4500  # target minimal chunk size before moving on (tune as needed)
+    output_push_max_passes: int = 3  # at most N extra "continue within current subtopic" micro-steps
     
     def add_message(self, role: str, content: str):
         """Add a message to the history."""

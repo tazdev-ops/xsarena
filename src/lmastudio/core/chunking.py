@@ -107,3 +107,44 @@ def anti_repeat_filter(text: str, history: List[str]) -> str:
             unique_paragraphs.append(para.strip())
     
     return '\n\n'.join(unique_paragraphs)
+
+def anchor_from_text(txt: str, tail_chars: int) -> str:
+    """Create an anchor from arbitrary text."""
+    if not txt:
+        return ""
+    s = txt[-tail_chars:]
+    p = max(s.rfind("."), s.rfind("!"), s.rfind("?"))
+    if p != -1 and p >= len(s) - 120:
+        s = s[:p+1]
+    return s.strip()
+
+def jaccard_ngrams(a: str, b: str, n: int = 4) -> float:
+    """Calculate Jaccard similarity between two strings using n-grams."""
+    def ngrams(x):
+        x = ' '.join(x.split())  # normalize whitespace 
+        return set([x[i:i+n] for i in range(0, max(0, len(x)-n+1))])
+    
+    A, B = ngrams(a), ngrams(b)
+    if not A or not B:
+        return 0.0
+    return len(A & B) / len(A | B)
+
+def continuation_anchor(history: List['Message'], anchor_length: int = 300) -> str:
+    """Get the continuation anchor from the last assistant message."""
+    if not history:
+        return ""
+    
+    # Find the last assistant message
+    for msg in reversed(history):
+        if msg.role == "assistant":
+            prev = msg.content or ""
+            if not prev:
+                return ""
+            s = prev[-anchor_length:]
+            # trim to sentence boundary if possible
+            p = max(s.rfind("."), s.rfind("!"), s.rfind("?"))
+            if p != -1 and p >= len(s) - 120:  # try to end on sentence end near the tail
+                s = s[:p+1]
+            return s.strip()
+    
+    return ""
