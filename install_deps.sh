@@ -13,7 +13,7 @@ if [ $? -eq 0 ]; then
     echo "3. In the CLI:"
     echo "   - /capture"
     echo "   - Click Retry on any message in LMArena (CLI should show IDs updated)"
-    echo "   - /systemfile directives/psychology_manual.txt  # or your directive file"
+    echo "   - /systemfile directives/general_book.txt  # or your directive file (replace [FIELD/TOPIC] with your subject)"
     echo "   - /book.start output/manual.psychology.md"
     echo ""
     echo "The autopilot will send BEGIN, write chunk 1 to the file, then auto-send 'continue.' and keep writing until NEXT: [END]"
