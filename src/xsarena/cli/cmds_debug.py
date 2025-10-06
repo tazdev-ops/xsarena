@@ -1,4 +1,4 @@
-"""Debugging CLI commands for LMASudio."""
+"""Debugging CLI commands for XSArena."""
 
 import typer
 
@@ -64,7 +64,7 @@ def show_config():
 @app.command("save-state")
 def save_state(
     filepath: str = typer.Argument(
-        "./.lmastudio/session_state.json", help="Path to save state file"
+        "./.xsarena/session_state.json", help="Path to save state file"
     )
 ):
     """Save current state to a file."""
@@ -76,7 +76,7 @@ def save_state(
 @app.command("load-state")
 def load_state(
     filepath: str = typer.Argument(
-        "./.lmastudio/session_state.json", help="Path to load state file"
+        "./.xsarena/session_state.json", help="Path to load state file"
     )
 ):
     """Load state from a file."""

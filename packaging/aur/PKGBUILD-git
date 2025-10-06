@@ -1,7 +1,7 @@
 pkgname=xsarena-git
 pkgver=0.r0.g0000000
 pkgrel=1
-pkgdesc="LMASudio/xsarena (git): AI writing & study studio CLI"
+pkgdesc="XSArena (git): AI writing & study studio CLI"
 arch=('any')
 url="https://github.com/tazdev-ops/xsarena"
 license=('MIT')
@@ -13,7 +13,7 @@ depends=(
   'python-dotenv'
 )
 optdepends=(
-  'python-textual: TUI (lma_tui.py)'
+  'python-textual: TUI (xsarena_tui.py)'
   'python-watchdog: watch mode for file pipelines'
 )
 makedepends=(
@@ -48,7 +48,7 @@ package() {
 
   install -Dm755 /dev/stdin "${pkgdir}/usr/bin/xsarena" << 'EOF'
 #!/usr/bin/env bash
-exec lmastudio "$@"
+exec xsarena "$@"
 EOF
 
   install -Dm644 README.md "${pkgdir}/usr/share/doc/${pkgname}/README.md"

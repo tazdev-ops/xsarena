@@ -47,6 +47,8 @@ if [ "$DRY_RUN" = true ]; then
       -not -path "./examples/*" \
       -not -path "./docs/*" \
       -not -path "./tests/*" \
+      -not -path "./.xsarena/*" \
+      -not -path "./.lmastudio/*" \
       -not -path "./snapshot_chunks/*" \
       | sed 's/^\.\///' | sort
     echo
@@ -76,6 +78,8 @@ if [ "$DRY_RUN" = true ]; then
       -not -path "./examples/*" \
       -not -path "./docs/*" \
       -not -path "./tests/*" \
+      -not -path "./.xsarena/*" \
+      -not -path "./.lmastudio/*" \
       -not -path "./snapshot_chunks/*" \
       | sed 's/^\.\///' | sort
     echo
@@ -119,7 +123,9 @@ else
       -not -path "./examples/*" \
       -not -path "./docs/*" \
       -not -path "./tests/*" \
-        -not -path "./snapshot_chunks/*" \
+      -not -path "./.xsarena/*" \
+      -not -path "./.lmastudio/*" \
+      -not -path "./snapshot_chunks/*" \
         | sed 's/^\.\///' | sort
     } > temp_tree_output.txt
 
@@ -159,6 +165,8 @@ else
       -not -path "./examples/*" \
       -not -path "./docs/*" \
       -not -path "./tests/*" \
+      -not -path "./.xsarena/*" \
+      -not -path "./.lmastudio/*" \
       -not -path "./snapshot_chunks/*" \
       | sed 's/^\.\///' | sort > relevant_files.txt
 

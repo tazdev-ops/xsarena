@@ -1,4 +1,4 @@
-"""Job queue and management for LMASudio."""
+"""Job queue and management for XSArena."""
 
 import asyncio
 import json
@@ -32,7 +32,7 @@ class Job:
 class JobQueue:
     """Manages a queue of long-running jobs."""
 
-    def __init__(self, state_file: str = ".lmastudio/job_state.json"):
+    def __init__(self, state_file: str = ".xsarena/job_state.json"):
         self.jobs: List[Job] = []
         self.state_file = state_file
         self._load_state()

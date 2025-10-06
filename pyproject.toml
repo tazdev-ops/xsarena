@@ -3,14 +3,14 @@ requires = ["setuptools>=45", "wheel", "setuptools_scm[toml]>=6.2"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "lmastudio"
+name = "xsarena"
 version = "0.1.0"
 description = "AI-powered writing and coding studio"
 readme = "README.md"
 requires-python = ">=3.8"
 license = {text = "MIT"}
 authors = [
-    {name = "LMASudio Team"}
+    {name = "XSArena Team"}
 ]
 dependencies = [
     "typer>=0.9.0",
@@ -35,12 +35,16 @@ watch = [
 ]
 
 [project.scripts]
-lmastudio = "src.lmastudio.cli.main:run"
-lmastudio-bridge = "src.lmastudio.bridge.server:main"
+xsarena = "xsarena.cli.core:main"
+xsarena-tui = "xsarena_tui:main"
+xsarena-bridge = "src.xsarena.bridge.server:main"
+# compatibility for one release cycle:
+lmastudio = "xsarena.cli.core:main"
+lmastudio-bridge = "src.xsarena.bridge.server:main"
 
 [project.urls]
-Homepage = "https://github.com/your-username/lmastudio"
-Repository = "https://github.com/your-username/lmastudio"
+Homepage = "https://github.com/your-username/xsarena"
+Repository = "https://github.com/your-username/xsarena"
 
 [tool.setuptools.packages.find]
 where = ["src"]

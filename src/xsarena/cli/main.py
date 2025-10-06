@@ -1,4 +1,4 @@
-"""Main CLI entry point for LMASudio."""
+"""Main CLI entry point for XSArena."""
 
 import typer
 
@@ -33,7 +33,7 @@ def main(
     window: int = typer.Option(100, help="Window size for history"),
 ):
     """
-    LMASudio - AI-powered writing and coding studio
+    XSArena - AI-powered writing and coding studio
     """
     # Store configuration in a global context or pass to commands
     pass

@@ -33,7 +33,6 @@ makepkg -si
 
 # Verify installation
 xsarena --help
-lmastudio --help
 ```
 
 ## AUR Upload Process

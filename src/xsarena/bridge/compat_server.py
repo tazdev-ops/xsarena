@@ -1,4 +1,4 @@
-"""OpenAI-compatible HTTP API server for LMASudio."""
+"""OpenAI-compatible HTTP API server for XSArena."""
 
 import os
 from typing import Dict, List, Optional
@@ -13,7 +13,7 @@ from ..core.engine import Engine
 from ..core.jsonio import load_json_auto
 from ..core.state import SessionState
 
-app = FastAPI(title="LMASudio API", version="0.1.0")
+app = FastAPI(title="XSArena API", version="0.1.0")
 
 # Global engine instance
 engine: Optional[Engine] = None
@@ -58,7 +58,7 @@ class ModelInfo(BaseModel):
     id: str
     object: str = "model"
     created: int
-    owned_by: str = "lmastudio"
+    owned_by: str = "xsarena"
 
 
 class ListModelsResponse(BaseModel):
@@ -68,7 +68,7 @@ class ListModelsResponse(BaseModel):
 
 def verify_api_key(authorization: str = Header(None)):
     """Verify API key if required."""
-    api_key = os.getenv("LMASTUDIO_API_KEY")
+    api_key = os.getenv("XSARENA_API_KEY")
     if api_key and authorization != f"Bearer {api_key}":
         raise HTTPException(status_code=401, detail="Invalid API key")
 
@@ -170,19 +170,19 @@ def main():
     import os
 
     parser = argparse.ArgumentParser(
-        description="LMASudio OpenAI-Compatible API Server"
+        description="XSArena OpenAI-Compatible API Server"
     )
     parser.add_argument(
         "--port",
         "-p",
         type=int,
-        default=int(os.getenv("LMA_COMPAT_PORT", "8000")),
-        help="Local API server port (default from LMA_COMPAT_PORT or 8000)",
+        default=int(os.getenv("XSA_COMPAT_PORT", os.getenv("LMA_COMPAT_PORT", "8000"))),
+        help="Local API server port (default from XSA_COMPAT_PORT, LMA_COMPAT_PORT, or 8000)",
     )
     parser.add_argument(
         "--host",
-        default=os.getenv("LMA_HOST", "127.0.0.1"),
-        help="Local API server host (default 127.0.0.1)",
+        default=os.getenv("XSA_HOST", os.getenv("LMA_HOST", "127.0.0.1")),
+        help="Local API server host (default from XSA_HOST, LMA_HOST, or 127.0.0.1)",
     )
     args = parser.parse_args()
 

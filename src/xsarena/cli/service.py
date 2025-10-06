@@ -1,4 +1,4 @@
-"""Service management CLI for LMASudio."""
+"""Service management CLI for XSArena."""
 
 import os
 import subprocess
@@ -16,13 +16,13 @@ def start_bridge(
 ):
     """Start the bridge server on a specific port."""
     env = os.environ.copy()
-    env["LMA_PORT"] = str(port)
-    env["LMA_HOST"] = host
+    env["XSA_PORT"] = str(port)
+    env["XSA_HOST"] = host
 
     cmd = [
         sys.executable,
         "-m",
-        "src.lmastudio.bridge.server",
+        "src.xsarena.bridge.server",
         "--port",
         str(port),
         "--host",
@@ -49,13 +49,13 @@ def start_compat_api(
 ):
     """Start the OpenAI-compatible API server on a specific port."""
     env = os.environ.copy()
-    env["LMA_COMPAT_PORT"] = str(port)
-    env["LMA_HOST"] = host
+    env["XSA_COMPAT_PORT"] = str(port)
+    env["XSA_HOST"] = host
 
     cmd = [
         sys.executable,
         "-m",
-        "src.lmastudio.bridge.compat_server",
+        "src.xsarena.bridge.compat_server",
         "--port",
         str(port),
         "--host",
@@ -78,9 +78,9 @@ def multi_instance_help():
 Multi-instance Usage Guide:
 
 1. Start multiple bridge servers on different ports:
-   lmastudio service start-bridge --port 8080  # Instance 1
-   lmastudio service start-bridge --port 8081  # Instance 2
-   lmastudio service start-bridge --port 8082  # Instance 3
+   xsarena service start-bridge --port 8080  # Instance 1
+   xsarena service start-bridge --port 8081  # Instance 2
+   xsarena service start-bridge --port 8082  # Instance 3
 
 2. In your browser tabs, configure the userscript to use specific ports:
    - Tab A: Add #bridge=8080 to the URL
@@ -93,8 +93,8 @@ Multi-instance Usage Guide:
 4. Each instance maintains its own session state independently.
 
 5. You can also start the compatibility API servers on different ports:
-   lmastudio service start-compat-api --port 8000
-   lmastudio service start-compat-api --port 8001
+   xsarena service start-compat-api --port 8000
+   xsarena service start-compat-api --port 8001
 """
     typer.echo(help_text)
 

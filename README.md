@@ -1,7 +1,7 @@
-LMASudio (xsarena) — AI Writing, Study, and CLI Studio
+XSArena — AI Writing, Study, and CLI Studio
 
 Overview
-LMASudio is a power user's studio for generating long‑form books, study materials, and analysis with strong control over continuation, density, and style. It speaks to two backends:
+XSArena is a power user's studio for generating long‑form books, study materials, and analysis with strong control over continuation, density, and style. It speaks to two backends:
 - Bridge backend (default): works with the LMArena browser userscript (polling).
 - OpenRouter backend: direct API streaming.
 
@@ -22,8 +22,8 @@ Install
 
 Quick start (Bridge backend)
 1) Start the CLI:
-   python lma_cli.py
-2) In your browser, open https://lmarena.ai with the included userscript (see src/lmastudio/bridge/userscript_example.js)
+   python xsarena_cli.py
+2) In your browser, open https://lmarena.ai with the included userscript (see src/xsarena/bridge/userscript_example.js)
 3) In the CLI:
    /capture
    Click Retry on any message in the browser (captures session/message IDs)
@@ -111,7 +111,7 @@ Snapshots
 
 Modes and TUI
 - /mono — toggle monochrome
-- lma_tui.py — launches a Textual UI that wraps the CLI with buttons (capture/status/book controls)
+- xsarena_tui.py — launches a Textual UI that wraps the CLI with buttons (capture/status/book controls)
 
 Recommended workflows
 
@@ -186,7 +186,7 @@ Cloudflare (Bridge backend)
 Troubleshooting
 - Unknown command: /book.hammer or /out.minchars
   - If you haven't applied the patch, these may only exist in fallback REPL.
-  - Fix: use this patched version or run LMA_USE_PTK=0 python lma_cli.py
+  - Fix: use this patched version or run XSA_USE_PTK=0 python xsarena_cli.py
 - Model won't do narrative: ensure /style.narrative on and consider /out.budget off and minChars ~3000
 - Too terse: /out.budget on, /out.minchars 4500–5200, /out.passes 2–3
 - Too verbose: /out.budget off, /out.minchars 2500–3200, /out.passes 0–1
@@ -195,15 +195,15 @@ Troubleshooting
   "Output must be 100% English. If inputs contain other languages, translate to English before use."
 
 Developer guide (architecture)
-- src/lmastudio/core: engine, backends, templates, chunking, state, pipeline tools
-- src/lmastudio/cli: command modules, main entrypoint, service management
-- src/lmastudio/modes: book/lossless/bilingual/policy/study/chad wrappers
-- Bridge servers: src/lmastudio/bridge/server.py (simple), compat_server.py (OpenAI‑style)
-- TUI: lma_tui.py (Textual)
+- src/xsarena/core: engine, backends, templates, chunking, state, pipeline tools
+- src/xsarena/cli: command modules, main entrypoint, service management
+- src/xsarena/modes: book/lossless/bilingual/policy/study/chad wrappers
+- Bridge servers: src/xsarena/bridge/server.py (simple), compat_server.py (OpenAI‑style)
+- TUI: xsarena_tui.py (Textual)
 
 Extending styles
-- Add new overlays to lma_templates.py (like NARRATIVE_OVERLAY)
-- Expose toggles in lma_cli.py similar to /style.narrative
+- Add new overlays to xsarena_templates.py (like NARRATIVE_OVERLAY)
+- Expose toggles in xsarena_cli.py similar to /style.narrative
 - For run.recipe, pass style_file to apply overlays automatically
 
 Testing
