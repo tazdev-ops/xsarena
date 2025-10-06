@@ -1,0 +1,22 @@
+Exam: Iranian Master’s Entrance — Clinical Psychology
+Language: English only. Do not output Persian. If inputs include Persian, translate them first.
+
+Goal
+- Produce a zero‑to‑hero learning manual (foundations → exam depth), an exam‑cram booklet, and study aids.
+- Prioritize reasoning, DSM‑5‑TR criteria, therapy mechanisms, and assessment interpretation. No page numbers—use book + chapter/section only.
+
+Topic weights (importance)
+- Clinical Psychology: 3
+- Psychopathology & Exceptional Children: 2
+- Developmental Psychology: 2
+- Statistics & Research Methods: 1
+- Physiological Psychology, Motivation & Emotion: 1
+
+Constraints
+- MCQs dominant; ~120 minutes total
+- Target ≥ 80% accuracy on high‑weight topics
+- English terminology throughout
+
+Style
+- Clear, academic, high‑yield; bullets where helpful; short examples; mini‑drills at the end of sections
+- No early wrap‑up; continue exactly where you left off between chunks

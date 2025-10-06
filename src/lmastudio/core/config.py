@@ -1,13 +1,17 @@
 """Configuration management for LMASudio."""
-from pydantic import BaseModel
-from typing import Optional
+
 import os
+from typing import Optional
+
 from dotenv import load_dotenv
+from pydantic import BaseModel
 
 load_dotenv()
 
+
 class Config(BaseModel):
     """Application configuration."""
+
     backend: str = "bridge"  # bridge or openrouter
     model: str = "default"
     window_size: int = 100
@@ -19,6 +23,6 @@ class Config(BaseModel):
     base_url: str = "http://localhost:8080/v1"  # Default for bridge
     timeout: int = 300
     redaction_enabled: bool = False
-    
+
     class Config:
         env_file = ".env"

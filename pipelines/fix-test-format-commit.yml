@@ -1,0 +1,7 @@
+steps:
+  - uses: ruff-fix
+  - uses: pytest
+  - uses: black-format
+  - uses: git-commit
+    with:
+      message: "style: ruff --fix + black; tests green"

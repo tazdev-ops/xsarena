@@ -1,50 +1,75 @@
 """Service management CLI for LMASudio."""
-import typer
+
+import os
 import subprocess
 import sys
-import os
+
+import typer
 
 app = typer.Typer()
+
 
 @app.command("start-bridge")
 def start_bridge(
     port: int = typer.Option(8080, "--port", "-p", help="Port for the bridge server"),
-    host: str = typer.Option("127.0.0.1", "--host", help="Host for the bridge server")
+    host: str = typer.Option("127.0.0.1", "--host", help="Host for the bridge server"),
 ):
     """Start the bridge server on a specific port."""
     env = os.environ.copy()
     env["LMA_PORT"] = str(port)
     env["LMA_HOST"] = host
-    
-    cmd = [sys.executable, "-m", "src.lmastudio.bridge.server", "--port", str(port), "--host", host]
-    
+
+    cmd = [
+        sys.executable,
+        "-m",
+        "src.lmastudio.bridge.server",
+        "--port",
+        str(port),
+        "--host",
+        host,
+    ]
+
     typer.echo(f"Starting bridge server on {host}:{port}")
     typer.echo(f"Command: {' '.join(cmd)}")
-    
+
     try:
         subprocess.run(cmd, env=env)
     except KeyboardInterrupt:
         typer.echo("\nBridge server stopped")
 
+
 @app.command("start-compat-api")
 def start_compat_api(
-    port: int = typer.Option(8000, "--port", "-p", help="Port for the compatibility API server"),
-    host: str = typer.Option("127.0.0.1", "--host", help="Host for the compatibility API server")
+    port: int = typer.Option(
+        8000, "--port", "-p", help="Port for the compatibility API server"
+    ),
+    host: str = typer.Option(
+        "127.0.0.1", "--host", help="Host for the compatibility API server"
+    ),
 ):
     """Start the OpenAI-compatible API server on a specific port."""
     env = os.environ.copy()
     env["LMA_COMPAT_PORT"] = str(port)
     env["LMA_HOST"] = host
-    
-    cmd = [sys.executable, "-m", "src.lmastudio.bridge.compat_server", "--port", str(port), "--host", host]
-    
+
+    cmd = [
+        sys.executable,
+        "-m",
+        "src.lmastudio.bridge.compat_server",
+        "--port",
+        str(port),
+        "--host",
+        host,
+    ]
+
     typer.echo(f"Starting compatibility API server on {host}:{port}")
     typer.echo(f"Command: {' '.join(cmd)}")
-    
+
     try:
         subprocess.run(cmd, env=env)
     except KeyboardInterrupt:
         typer.echo("\nCompatibility API server stopped")
+
 
 @app.command("multi-instance-help")
 def multi_instance_help():
@@ -72,6 +97,7 @@ Multi-instance Usage Guide:
    lmastudio service start-compat-api --port 8001
 """
     typer.echo(help_text)
+
 
 if __name__ == "__main__":
     app()

@@ -60,3 +60,12 @@ ENV/
 *.out
 *.pdf
 *.epub
+
+# Generated/bulky artifacts
+snapshot.txt
+snapshot_chunks/
+available_models.json
+file_bed_server/uploads/
+.lmastudio/logs/
+.lmastudio/checkpoints/
+temp_*

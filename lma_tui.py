@@ -3,23 +3,26 @@
 # that provide either TextLog (newer) or Log (older). Adds Bilingual button and fixes thread log issue.
 
 import os
-import sys
 import subprocess
+import sys
 import threading
 
 from textual.app import App, ComposeResult
-from textual.widgets import Header, Footer, Button, Static, Input, Checkbox
-from textual.containers import Horizontal, Grid
+from textual.containers import Grid, Horizontal
+from textual.widgets import Button, Checkbox, Footer, Header, Input, Static
 
 # Fallback import for the log widget (TextLog in newer Textual, Log in older)
 try:
     from textual.widgets import TextLog as LogWidget
+
     LOG_IS_TEXTLOG = True
 except ImportError:
     from textual.widgets import Log as LogWidget  # type: ignore
+
     LOG_IS_TEXTLOG = False
 
 CLI_CMD = [sys.executable, "lma_cli.py"]  # Adjust path if needed
+
 
 class StudioApp(App):
     CSS = """
@@ -96,7 +99,10 @@ class StudioApp(App):
                 yield Button("Translate", id="btn_translate")
             with Horizontal():
                 yield Static("Next override:")
-                yield Input(placeholder='e.g., "Continue to master’s level; do not end."', id="in_next")
+                yield Input(
+                    placeholder='e.g., "Continue to master’s level; do not end."',
+                    id="in_next",
+                )
                 yield Button("Send Next", id="btn_next")
         yield LogWidget(id="logs")
         yield Static("Ready", id="status")
@@ -183,11 +189,14 @@ class StudioApp(App):
         elif bid == "btn_status":
             self.send_cmd("/status")
         elif bid == "btn_pause":
-            self.send_cmd("/book.pause"); self._set_status("Autopilot paused.")
+            self.send_cmd("/book.pause")
+            self._set_status("Autopilot paused.")
         elif bid == "btn_resume":
-            self.send_cmd("/book.resume"); self._set_status("Autopilot resumed.")
+            self.send_cmd("/book.resume")
+            self._set_status("Autopilot resumed.")
         elif bid == "btn_stop":
-            self.send_cmd("/book.stop"); self._set_status("Autopilot stopped.")
+            self.send_cmd("/book.stop")
+            self._set_status("Autopilot stopped.")
 
         elif bid in ("btn_z2h", "btn_ref", "btn_pop", "btn_cram"):
             subject = self.query_one("#in_subject", Input).value.strip()
@@ -199,10 +208,14 @@ class StudioApp(App):
                 self._set_status("Subject required.")
                 return
             flags = []
-            if plan: flags.append("--plan")
-            if maxv: flags.append(f"--max={maxv}")
-            if wind: flags.append(f"--window={wind}")
-            if outd: flags.append(f"--outdir={outd}")
+            if plan:
+                flags.append("--plan")
+            if maxv:
+                flags.append(f"--max={maxv}")
+            if wind:
+                flags.append(f"--window={wind}")
+            if outd:
+                flags.append(f"--outdir={outd}")
             if bid == "btn_z2h":
                 self.send_cmd(f"/book.zero2hero {subject} " + " ".join(flags))
             elif bid == "btn_ref":
@@ -224,10 +237,14 @@ class StudioApp(App):
                 self._set_status("Subject and language required.")
                 return
             flags = [f"--lang={lang}"]
-            if plan: flags.append("--plan")
-            if maxv: flags.append(f"--max={maxv}")
-            if wind: flags.append(f"--window={wind}")
-            if outd: flags.append(f"--outdir={outd}")
+            if plan:
+                flags.append("--plan")
+            if maxv:
+                flags.append(f"--max={maxv}")
+            if wind:
+                flags.append(f"--window={wind}")
+            if outd:
+                flags.append(f"--outdir={outd}")
             self.send_cmd(f"/book.bilingual {subject} " + " ".join(flags))
             self._set_status("Bilingual book started…")
 
@@ -253,7 +270,7 @@ class StudioApp(App):
             if not txt:
                 self._set_status("Enter a next override text.")
                 return
-            self.send_cmd(f'/next {txt}')
+            self.send_cmd(f"/next {txt}")
             self._set_status("Next override sent.")
 
     def on_unmount(self):
@@ -264,9 +281,12 @@ class StudioApp(App):
         except Exception:
             pass
 
+
 if __name__ == "__main__":
     # Ensure we run from the directory containing lma_cli.py
     if not os.path.exists("lma_cli.py"):
-        print("lma_tui.py: Could not find lma_cli.py in current directory. Run from the project root.")
+        print(
+            "lma_tui.py: Could not find lma_cli.py in current directory. Run from the project root."
+        )
     app = StudioApp()
     app.run()

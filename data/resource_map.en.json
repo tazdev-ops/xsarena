@@ -1,0 +1,34 @@
+{
+  "resource_map": [
+    {"subtopic": "DSM-5-TR diagnostic criteria", "recommended": [
+      {"book": "DSM-5-TR (APA)", "chapter_or_section": "Disorders by category"},
+      {"book": "Kaplan & Sadock's Synopsis of Psychiatry", "chapter_or_section": "Mood/Anxiety/Psychotic/Personality"},
+      {"book": "Abnormal Psychology (Barlow & Durand)", "chapter_or_section": "Core disorders"}
+    ]},
+    {"subtopic": "Psychotherapy schools & techniques", "recommended": [
+      {"book": "Systems of Psychotherapy (Prochaska & Norcross)", "chapter_or_section": "Psychodynamic/CBT/Humanistic/Existential/Third-wave"},
+      {"book": "Theory and Practice of Counseling and Psychotherapy (Corey)", "chapter_or_section": "Approaches overview"},
+      {"book": "Introduction to Clinical Psychology (Hunsley & Lee) or Pomerantz", "chapter_or_section": "Clinical practice foundations"}
+    ]},
+    {"subtopic": "Psychological assessment (WAIS, MMPI, Rorschach)", "recommended": [
+      {"book": "Handbook of Psychological Assessment (Groth-Marnat)", "chapter_or_section": "WAIS/MMPI/projectives"},
+      {"book": "Psychological Testing (Anastasi & Urbina)", "chapter_or_section": "Test theory and applications"},
+      {"book": "Psychological Testing and Assessment (Cohen, Swerlik)", "chapter_or_section": "Core instruments"}
+    ]},
+    {"subtopic": "Cognitive & psychosocial development", "recommended": [
+      {"book": "Development Through the Lifespan (Laura Berk)", "chapter_or_section": "Cognition/Attachment/Emotion"},
+      {"book": "Theories of Development (William Crain)", "chapter_or_section": "Piaget/Vygotsky/Erikson"},
+      {"book": "Life-Span Development (Santrock)", "chapter_or_section": "Key stages"}
+    ]},
+    {"subtopic": "Research design; validity/reliability; basic stats", "recommended": [
+      {"book": "Shadish, Cook, & Campbell", "chapter_or_section": "Experimental/Quasi-experimental design"},
+      {"book": "Discovering Statistics (Field)", "chapter_or_section": "t/ANOVA/Chi-square/assumptions"},
+      {"book": "Allen & Yen (or Kline: Psychometrics)", "chapter_or_section": "Reliability/Validity"}
+    ]},
+    {"subtopic": "Physiological, motivation & emotion", "recommended": [
+      {"book": "Physiology of Behavior (Carlson)", "chapter_or_section": "Neuroanatomy/Limbic/Neurotransmitters"},
+      {"book": "Biological Psychology (Kalat)", "chapter_or_section": "Systems & behavior"},
+      {"book": "Motivation and Emotion (Reeve)", "chapter_or_section": "Classic theories of emotion/motivation"}
+    ]}
+  ]
+}
