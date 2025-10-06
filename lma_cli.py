@@ -37,6 +37,7 @@ from lma_stream import (
 from lma_templates import (
     BOOK_PLAN_PROMPT,
     CHAD_TEMPLATE,
+    NARRATIVE_OVERLAY,
     NO_BS_ADDENDUM,
     OUTPUT_BUDGET_ADDENDUM,
     PROMPT_REPO,
@@ -362,6 +363,7 @@ SESSION_MODE = None  # e.g., "zero2hero", None otherwise
 COVERAGE_HAMMER_ON = (
     True  # when True, add a minimal anti-wrap-up line to continue prompts
 )
+NARRATIVE_ACTIVE = False  # narrative/pedagogy overlay ON/OFF
 
 # --- Output budget / push-to-max controls ---
 OUTPUT_BUDGET_SNIPPET_ON = True  # append system prompt addendum on book modes
@@ -2033,6 +2035,9 @@ def help_text():
     print(
         "  /style.nobs on|off                  Harden language (plain, no fluff) for current session"
     )
+    print(
+        "  /style.narrative on|off            Narrative + pedagogy overlay (teach-before-use, vignettes, quick checks)"
+    )
     print("  /model <uuid|none> | /window <N> | /history.tail | /mono | /clear")
     print(
         "  /image on|off                     Toggle markdown images from a2 image streams (default on)"
@@ -2593,6 +2598,76 @@ async def _handle_command(line):
             else:
                 err("Usage: /style.nobs on|off")
             return
+
+        elif cmd == "/style.narrative":
+            if len(parts) >= 2 and parts[1].strip().lower() in ("on", "off"):
+                val = parts[1].strip().lower()
+                global NARRATIVE_ACTIVE
+                if val == "on" and not NARRATIVE_ACTIVE:
+                    SAVE_SYSTEM_STACK.append(SYSTEM_PROMPT)
+                    set_system(
+                        (SYSTEM_PROMPT.strip() + "\n\n" + NARRATIVE_OVERLAY).strip()
+                    )
+                    NARRATIVE_ACTIVE = True
+                    ok("Narrative + pedagogy overlay ON (session).")
+                elif val == "off" and NARRATIVE_ACTIVE:
+                    if SAVE_SYSTEM_STACK:
+                        set_system(SAVE_SYSTEM_STACK.pop())
+                    NARRATIVE_ACTIVE = False
+                    ok("Narrative + pedagogy overlay OFF.")
+                else:
+                    warn("Already in desired state.")
+            else:
+                err("Usage: /style.narrative on|off")
+            return
+
+        # Density and continuation knobs (exposed in PTK path as well)
+        elif cmd == "/book.hammer":
+            if len(parts) >= 2 and parts[1].strip().lower() in ("on", "off"):
+                COVERAGE_HAMMER_ON = parts[1].strip().lower() == "on"
+                ok(f"Self-study continuation hammer: {COVERAGE_HAMMER_ON}")
+            else:
+                err("Usage: /book.hammer on|off")
+
+        elif cmd == "/out.budget":
+            if len(parts) >= 2 and parts[1].strip().lower() in ("on", "off"):
+                OUTPUT_BUDGET_SNIPPET_ON = parts[1].strip().lower() == "on"
+                ok(f"OUTPUT_BUDGET addendum: {OUTPUT_BUDGET_SNIPPET_ON}")
+            else:
+                err("Usage: /out.budget on|off")
+
+        elif cmd == "/out.push":
+            if len(parts) >= 2 and parts[1].strip().lower() in ("on", "off"):
+                OUTPUT_PUSH_ON = parts[1].strip().lower() == "on"
+                ok(f"Output push: {OUTPUT_PUSH_ON}")
+            else:
+                err("Usage: /out.push on|off")
+
+        elif cmd == "/out.minchars":
+            if len(parts) >= 2:
+                try:
+                    v = int(parts[1])
+                    if v < 1000:
+                        warn("Value too small; suggest >= 2500.")
+                    OUTPUT_MIN_CHARS = max(1000, v)
+                    ok(f"OUTPUT_MIN_CHARS={OUTPUT_MIN_CHARS}")
+                except:
+                    err("Provide an integer.")
+            else:
+                err("Usage: /out.minchars <N>")
+
+        elif cmd == "/out.passes":
+            if len(parts) >= 2:
+                try:
+                    v = int(parts[1])
+                    if v < 0 or v > 10:
+                        warn("Unusual value; using within [0..10].")
+                    OUTPUT_PUSH_MAX_PASSES = max(0, min(10, v))
+                    ok(f"OUTPUT_PUSH_MAX_PASSES={OUTPUT_PUSH_MAX_PASSES}")
+                except:
+                    err("Provide an integer.")
+            else:
+                err("Usage: /out.passes <N>")
 
         elif cmd == "/next":
             if len(parts) >= 2:
@@ -3920,6 +3995,75 @@ async def repl():
                         warn("Already in desired state.")
                 else:
                     err("Usage: /style.nobs on|off")
+
+            elif cmd == "/style.narrative":
+                if len(parts) >= 2 and parts[1].strip().lower() in ("on", "off"):
+                    val = parts[1].strip().lower()
+                    global NARRATIVE_ACTIVE
+                    if val == "on" and not NARRATIVE_ACTIVE:
+                        SAVE_SYSTEM_STACK.append(SYSTEM_PROMPT)
+                        set_system(
+                            (SYSTEM_PROMPT.strip() + "\n\n" + NARRATIVE_OVERLAY).strip()
+                        )
+                        NARRATIVE_ACTIVE = True
+                        ok("Narrative + pedagogy overlay ON (session).")
+                    elif val == "off" and NARRATIVE_ACTIVE:
+                        if SAVE_SYSTEM_STACK:
+                            set_system(SAVE_SYSTEM_STACK.pop())
+                        NARRATIVE_ACTIVE = False
+                        ok("Narrative + pedagogy overlay OFF.")
+                    else:
+                        warn("Already in desired state.")
+                else:
+                    err("Usage: /style.narrative on|off")
+
+            # Density and continuation knobs (exposed in PTK path as well)
+            elif cmd == "/book.hammer":
+                if len(parts) >= 2 and parts[1].strip().lower() in ("on", "off"):
+                    COVERAGE_HAMMER_ON = parts[1].strip().lower() == "on"
+                    ok(f"Self-study continuation hammer: {COVERAGE_HAMMER_ON}")
+                else:
+                    err("Usage: /book.hammer on|off")
+
+            elif cmd == "/out.budget":
+                if len(parts) >= 2 and parts[1].strip().lower() in ("on", "off"):
+                    OUTPUT_BUDGET_SNIPPET_ON = parts[1].strip().lower() == "on"
+                    ok(f"OUTPUT_BUDGET addendum: {OUTPUT_BUDGET_SNIPPET_ON}")
+                else:
+                    err("Usage: /out.budget on|off")
+
+            elif cmd == "/out.push":
+                if len(parts) >= 2 and parts[1].strip().lower() in ("on", "off"):
+                    OUTPUT_PUSH_ON = parts[1].strip().lower() == "on"
+                    ok(f"Output push: {OUTPUT_PUSH_ON}")
+                else:
+                    err("Usage: /out.push on|off")
+
+            elif cmd == "/out.minchars":
+                if len(parts) >= 2:
+                    try:
+                        v = int(parts[1])
+                        if v < 1000:
+                            warn("Value too small; suggest >= 2500.")
+                        OUTPUT_MIN_CHARS = max(1000, v)
+                        ok(f"OUTPUT_MIN_CHARS={OUTPUT_MIN_CHARS}")
+                    except:
+                        err("Provide an integer.")
+                else:
+                    err("Usage: /out.minchars <N>")
+
+            elif cmd == "/out.passes":
+                if len(parts) >= 2:
+                    try:
+                        v = int(parts[1])
+                        if v < 0 or v > 10:
+                            warn("Unusual value; using within [0..10].")
+                        OUTPUT_PUSH_MAX_PASSES = max(0, min(10, v))
+                        ok(f"OUTPUT_PUSH_MAX_PASSES={OUTPUT_PUSH_MAX_PASSES}")
+                    except:
+                        err("Provide an integer.")
+                else:
+                    err("Usage: /out.passes <N>")
 
             # Rewrite/Lossless
             elif cmd == "/rewrite.start":

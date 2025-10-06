@@ -1,0 +1,56 @@
+pkgname=xsarena-git
+pkgver=0.r0.g0000000
+pkgrel=1
+pkgdesc="LMASudio/xsarena (git): AI writing & study studio CLI"
+arch=('any')
+url="https://github.com/tazdev-ops/xsarena"
+license=('MIT')
+depends=(
+  'python'
+  'python-aiohttp'
+  'python-typer'
+  'python-pydantic'
+  'python-dotenv'
+)
+optdepends=(
+  'python-textual: TUI (lma_tui.py)'
+  'python-watchdog: watch mode for file pipelines'
+)
+makedepends=(
+  'git'
+  'python-build'
+  'python-installer'
+  'python-wheel'
+)
+provides=('xsarena')
+conflicts=('xsarena')
+source=("git+https://github.com/tazdev-ops/xsarena.git")
+sha256sums=('SKIP')
+
+pkgver() {
+  cd "${srcdir}/xsarena"
+  # Prefer tags if present; otherwise use commit count
+  if git describe --tags --long >/dev/null 2>&1; then
+    git describe --tags --long | sed 's/^v//; s/-/./g'
+  else
+    printf "0.r%s.g%s" "$(git rev-list --count HEAD)" "$(git rev-parse --short HEAD)"
+  fi
+}
+
+build() {
+  cd "${srcdir}/xsarena"
+  python -m build --wheel --no-isolation
+}
+
+package() {
+  cd "${srcdir}/xsarena"
+  python -m installer --destdir="${pkgdir}" dist/*.whl
+
+  install -Dm755 /dev/stdin "${pkgdir}/usr/bin/xsarena" << 'EOF'
+#!/usr/bin/env bash
+exec lmastudio "$@"
+EOF
+
+  install -Dm644 README.md "${pkgdir}/usr/share/doc/${pkgname}/README.md"
+  install -Dm644 LICENSE "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE"
+}
