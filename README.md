@@ -1,184 +1,219 @@
-# LMASudio
+LMASudio (xsarena) — AI Writing, Study, and CLI Studio
 
-AI-powered writing and coding studio
+Overview
+LMASudio is a power user's studio for generating long‑form books, study materials, and analysis with strong control over continuation, density, and style. It speaks to two backends:
+- Bridge backend (default): works with the LMArena browser userscript (polling).
+- OpenRouter backend: direct API streaming.
 
-## Overview
+Major capabilities
+- Book writing modes: zero‑to‑hero, reference, pop‑science, no‑BS, bilingual
+- Lossless pipeline: ingest → synthesis → lossless rewrite
+- Study tools: exam‑cram, flashcards, glossary, index
+- Style tools: capture + apply, narrative/pedagogy overlays
+- Autopilot: anchored continuation, output budget, repetition guard
+- Prompt Booster: improve prompts with a single command
+- Snapshot tooling: export your entire project for remote help
 
-LMASudio is a comprehensive tool for AI-assisted writing, coding, and content creation. It provides multiple modes for different types of work, from book authoring to code generation, all unified under a consistent engine. The tool maintains compatibility with OpenAI-style APIs while adding powerful authoring capabilities.
+Install
+- Python 3.9+
+- pip install -e ".[dev]" (from repo root)
+- Optional: install aiohttp if not present: pip install aiohttp
+- For TUI: pip install "textual>=0.40.0"
 
-## Features
+Quick start (Bridge backend)
+1) Start the CLI:
+   python lma_cli.py
+2) In your browser, open https://lmarena.ai with the included userscript (see src/lmastudio/bridge/userscript_example.js)
+3) In the CLI:
+   /capture
+   Click Retry on any message in the browser (captures session/message IDs)
 
-- **Book Authoring Modes**: Create comprehensive books with zero2hero, reference, popular science, and no-bullshit manual styles
-- **Lossless Processing**: Improve text while preserving all original meaning
-- **Bilingual Processing**: Translate and align content between languages with alignment checking
-- **Policy Analysis**: Generate and analyze policy documents with compliance scoring
-- **Study Tools**: Create flashcards, quizzes, and study guides with spaced repetition
-- **Chad Mode**: Evidence-based Q&A with blunt but safe responses and batch processing
-- **Coding Mode**: Full file system access for code generation and modification
-- **Multiple Backends**: Support for local bridge and OpenRouter APIs with cost estimation
-- **OpenAI-Compatible API**: /v1 endpoints for SDK compatibility
-- **Mode Toggles**: Direct/battle modes, tavern mode, bypass mode
-- **Job Queue**: Run multiple long jobs sequentially with crash recovery
-- **Watch Mode**: Automatically process new/updated files in a directory
-- **Persistent State**: Session settings and history persistence
-- **Multi-Instance Support**: Run multiple parallel instances on different ports
-- **Configurable Ports**: Each instance can run on a different port with per-tab configuration
+Quick start (OpenRouter backend)
+- Export OPENROUTER_API_KEY (or OPENAI_API_KEY)
+- In CLI:
+  /backend openrouter
+  /or.model openrouter/auto
+- Then use normal commands
 
-## Installation
+Key concepts
+- Autopilot: a loop that sends "BEGIN" then continues from an anchor chunk by chunk, writing to a file.
+- Anchored continuation: the model sees the tail of last output to continue seamlessly.
+- Output budget: a system addendum that pushes the model to use its full token window (produces dense chunks).
+- Output push: optional in‑chunk micro‑continues to reach a minimal length.
+- Repetition guard: jaccard n‑gram checking to avoid loops.
 
-```bash
-pip install lmastudio
+Primary commands
+Core
+- /help — list commands
+- /status — show state
+- /capture — capture IDs from the browser (then click Retry)
+- /setids <sess> <msg> — set IDs manually
+- /exit — quit
+
+Backends
+- /backend bridge|openrouter — switch
+- /or.model <model> — set OpenRouter model
+- /or.ref <url> | /or.title <text> — optional headers
+- /or.status — show OpenRouter status
+
+Book modes
+- /book.zero2hero <subject> [--plan] [--max=N] [--window=N] [--outdir=DIR]
+- /book.reference <subject> …
+- /book.pop <subject> …
+- /book.nobs <subject> …
+- /book.bilingual <subject> --lang=LANG [--plan] …
+- /exam.cram <subject> [--max=N] …
+
+Autopilot control
+- /book.pause | /book.resume | /book.stop
+- /next "<hint>" — one‑shot steer
+- /book.hammer on|off — anti‑wrap "coverage hammer" (prevents early wrap‑up)
+
+Density, continuation, repetition
+- /out.budget on|off — push for max per‑chunk content
+- /out.push on|off — allow micro‑continues inside a chunk
+- /out.minchars <N> — min characters per chunk (default 4500)
+- /out.passes <N> — max micro‑continues (default 3)
+- /cont.mode normal|anchor — continuation strategy
+- /cont.anchor <N> — tail chars used as anchor
+- /repeat.warn on|off — repetition warning
+- /repeat.thresh <0..1> — repetition sensitivity
+
+Styles
+- /style.nobs on|off — cut fluff; plain language
+- /style.narrative on|off — narrative + pedagogy overlay (teach‑before‑use, vignettes, quick checks)
+- /style.capture <file> <style.synth.md> [chunkKB=30] [styleChars=6000]
+- /style.apply <style.synth.md> <topic|file> [out.md] [--words=N]
+
+Synthesis, lossless, study aids
+- /ingest.synth <file> <synth.md> [chunkKB=45] [synthChars=9500]
+- /rewrite.start <synth.md> <out.md>
+- /rewrite.lossless <synth.md> [out.md]
+- /lossless.run <file> [--outdir=DIR] [--chunkKB=45] [--synthChars=12000]
+- /flashcards.from <synth.md> <out.md> [n=200]
+- /glossary.from <synth.md> <out.md>
+- /index.from <synth.md> <out.md>
+
+Prompt Booster
+- /prompt.boost "goal" [--ask] [--apply] [--meta]
+- /prompt.answer — answer booster questions
+- /prompt.apply [next|system] — apply improved prompt
+
+Recipes and macros
+- /run.recipe <recipe.json|yml>
+- /run.quick task=... subject="..." out=path [max=N] [style=no-bs,chad]
+- /macro.save <name> "<command template>"
+- /macro.list | /macro.delete <name>
+- /macro.run <name> [args…]
+
+Snapshots
+- /snapshot [--chunk] — build snapshot.txt or 100KB chunks in snapshot_chunks/
+
+Modes and TUI
+- /mono — toggle monochrome
+- lma_tui.py — launches a Textual UI that wraps the CLI with buttons (capture/status/book controls)
+
+Recommended workflows
+
+A) Zero‑to‑hero book (English)
+- Set style/knobs:
+  /style.narrative on
+  /out.budget off
+  /out.minchars 3000
+  /repeat.warn on
+  /cont.mode anchor
+- Start:
+  /repo.use book.zero2hero "Clinical Psychology"
+  /book.zero2hero "Clinical Psychology" --plan
+- Steer mid‑run (if needed):
+  /book.pause
+  /next "Revisit the last section in the narrative style: define all terms before use, add a short vignette and a quick check; then continue."
+  /book.resume
+
+B) Tight reference → pedagogy
+- Build a synthesis from your corpus:
+  /ingest.synth sources/clinical_corpus.md books/clinical.synth.md 100 16000
+- Lossless rewrite:
+  /rewrite.start books/clinical.synth.md books/clinical.lossless.md
+- Pedagogical run on top:
+  /style.narrative on
+  /book.zero2hero "Clinical Psychology"
+
+C) Exam cram + study aids
+- /exam.cram "Clinical Psychology"
+- /flashcards.from books/clinical.synth.md books/clinical.flashcards.md 220
+- /glossary.from books/clinical.synth.md books/clinical.glossary.md
+- /index.from books/clinical.synth.md books/clinical.index.md
+
+D) Bilingual transform
+- /bilingual.file path/to/en.md --lang=Japanese --outdir=books --chunkKB=45
+
+Density tuning recipes (hands‑off)
+recipes/clinical.narrative.yml
+```yaml
+task: book.zero2hero
+subject: "Clinical Psychology"
+styles: [no-bs]
+style_file: "directives/style.narrative_en.md"   # optional – same overlay text as /style.narrative
+hammer: true
+continuation:
+  mode: anchor
+  minChars: 3000
+  pushPasses: 1
+  repeatWarn: true
+io:
+  output: file
+  outPath: "./books/clinical.manual.en.narrative.md"
+max_chunks: 6
 ```
+Run:
+  /run.recipe recipes/clinical.narrative.yml
 
-## Quick Start
+How continuation works (anchor mode)
+- The tail ~N characters (configurable) of the last assistant output are injected into the next prompt as an anchor.
+- The model is told to "continue exactly from after the anchor; do not reintroduce; do not summarize."
+- This avoids resets, keeps tight continuity, and prevents "chapter 1… again" restarts.
 
-```bash
-# Start the bridge server (if using local backend)
-python -m src.lmastudio.bridge.server
+Repetition guard
+- Jaccard n‑gram similarity between the last tail and the new head of output
+- If similarity > threshold, it warns and pauses; steer with /next
 
-# Or start the compatibility server (OpenAI-compatible API)
-python -m src.lmastudio.bridge.compat_server
+Cloudflare (Bridge backend)
+- If you see a pause with a CF notice, solve the challenge in the browser, then:
+  /cf.resume
+  /book.resume
 
-# Use the CLI to generate a book outline
-lmastudio book outline "Machine Learning Fundamentals"
+Troubleshooting
+- Unknown command: /book.hammer or /out.minchars
+  - If you haven't applied the patch, these may only exist in fallback REPL.
+  - Fix: use this patched version or run LMA_USE_PTK=0 python lma_cli.py
+- Model won't do narrative: ensure /style.narrative on and consider /out.budget off and minChars ~3000
+- Too terse: /out.budget on, /out.minchars 4500–5200, /out.passes 2–3
+- Too verbose: /out.budget off, /out.minchars 2500–3200, /out.passes 0–1
+- Hard restarts: ensure /cont.mode anchor; if still occurs, append a brief "CONTINUATION" hint with /next
+- English only: append a one‑liner to system:
+  "Output must be 100% English. If inputs contain other languages, translate to English before use."
 
-# Write a no-bullshit manual
-lmastudio book nobs "Python for Beginners"
+Developer guide (architecture)
+- src/lmastudio/core: engine, backends, templates, chunking, state, pipeline tools
+- src/lmastudio/cli: command modules, main entrypoint, service management
+- src/lmastudio/modes: book/lossless/bilingual/policy/study/chad wrappers
+- Bridge servers: src/lmastudio/bridge/server.py (simple), compat_server.py (OpenAI‑style)
+- TUI: lma_tui.py (Textual)
 
-# For complete examples, see: examples/commands.md
-```
+Extending styles
+- Add new overlays to lma_templates.py (like NARRATIVE_OVERLAY)
+- Expose toggles in lma_cli.py similar to /style.narrative
+- For run.recipe, pass style_file to apply overlays automatically
 
-## Architecture
+Testing
+- pytest (tests are light-weight)
+- test_cli.py verifies import and key symbols
 
-The project follows a modular architecture:
+Contributing
+- Follow PEP 8; type hints; docstrings
+- Run pre-commit hooks; Ruff/Black
+- Submit PRs with tests and sample commands
 
-```
-src/
-├── lmastudio/
-│   ├── core/           # Core functionality
-│   │   ├── config.py   # Configuration management
-│   │   ├── state.py    # Session state management
-│   │   ├── chunking.py # Text chunking and anchor management
-│   │   ├── templates.py # Prompt templates
-│   │   ├── backends.py # Backend implementations
-│   │   ├── engine.py   # Core engine
-│   │   ├── jobs.py     # Job queue and management
-│   │   └── tools.py    # File system and command tools
-│   ├── modes/          # Different operational modes
-│   │   ├── book.py
-│   │   ├── lossless.py
-│   │   ├── bilingual.py
-│   │   ├── policy.py
-│   │   ├── study.py
-│   │   ├── chad.py
-│   │   └── coder.py
-│   ├── cli/            # Command line interface
-│   │   ├── main.py
-│   │   ├── cmds_*.py   # Command modules
-│   └── bridge/         # CSP-safe bridge server and compatibility API
-│       ├── server.py
-│       └── compat_server.py
-```
-
-## Modes
-
-### Book Authoring
-- `zero2hero`: Comprehensive book from basic to advanced concepts
-- `reference`: Detailed reference material
-- `pop`: Popular science style
-- `nobs`: No-nonsense manual
-- `outline`: Generate detailed outlines
-- `polish`: Tighten prose, remove repetition, fix flow
-- `shrink`: Condense to 70% length while preserving facts
-- `diagram`: Generate Mermaid diagrams
-
-### Lossless Processing
-- `ingest`: Synthesize information
-- `rewrite`: Preserve all meaning while improving text
-- `run`: Comprehensive processing run
-- `improve-flow`: Enhance transitions and readability
-- `break-paragraphs`: Split dense text
-- `enhance-structure`: Add headings and formatting
-
-### Coding
-- Full file system access with safety sandbox
-- Code generation, review, debugging, and feature addition
-
-## OpenAI-Compatible API
-
-LMASudio provides a compatibility server that exposes OpenAI-style endpoints:
-
-```bash
-# Start the compatibility server
-python -m src.lmastudio.bridge.compat_server --host 0.0.0.0 --port 8000
-
-# Use with any OpenAI-compatible SDK
-curl http://localhost:8000/v1/chat/completions \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer your-api-key" \
-  -d '{
-    "model": "gpt-4",
-    "messages": [{"role": "user", "content": "Hello!"}]
-  }'
-```
-
-Endpoints:
-- `POST /v1/chat/completions` - Chat completions
-- `GET /v1/models` - List available models
-
-## Backends
-
-LMASudio supports two backends:
-
-1. **Bridge Backend** (default): Communicates with a local server that handles API requests securely
-2. **OpenRouter Backend**: Direct API calls to OpenRouter services with model cost estimation
-
-## Multi-Instance Support
-
-LMASudio supports running multiple parallel instances for different tasks:
-
-### Starting Multiple Instances
-
-```bash
-# Instance 1
-lmastudio service start-bridge --port 8080
-
-# Instance 2
-lmastudio service start-bridge --port 8081
-
-# Instance 3
-lmastudio service start-bridge --port 8082
-```
-
-### Browser Tab Configuration
-
-Configure each browser tab to connect to the appropriate instance:
-
-- **URL Parameter**: Add `#bridge=8081` to the URL in each tab
-- **DevTools Helper**: Run `lmaSetBridgePort(8081)` in the console of each tab
-
-### Userscript Configuration
-
-The userscript automatically reads the port from:
-1. URL query parameter: `?bridge=8081`
-2. URL hash: `#bridge=8081`
-3. localStorage: `lma_bridge_port`
-4. Fallback: 8080
-
-## Examples
-
-For complete usage examples, see `examples/commands.md` which contains ready-to-use commands for:
-- Nietzsche and Marx study guides
-- Bilingual translation workflows
-- Policy document generation
-- Coding projects
-- Chad mode Q&A sessions
-- And more!
-
-## Contributing
-
-See `CONTRIBUTING.md` for details on how to contribute to this project.
-
-## License
-
+License
 MIT
