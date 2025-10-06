@@ -101,13 +101,13 @@ def main():
         "--port",
         "-p",
         type=int,
-        default=int(os.getenv("LMA_PORT", "8080")),
-        help="Local bridge port (default from LMA_PORT or 8080)",
+        default=int(os.getenv("XSA_PORT", os.getenv("LMA_PORT", "8080"))),
+        help="Local bridge port (default from XSA_PORT, LMA_PORT, or 8080)",
     )
     parser.add_argument(
         "--host",
-        default=os.getenv("LMA_HOST", "127.0.0.1"),
-        help="Local bridge host (default 127.0.0.1)",
+        default=os.getenv("XSA_HOST", os.getenv("LMA_HOST", "127.0.0.1")),
+        help="Local bridge host (default from XSA_HOST, LMA_HOST, or 127.0.0.1)",
     )
     args = parser.parse_args()
 

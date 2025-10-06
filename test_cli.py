@@ -1,21 +1,21 @@
 #!/usr/bin/env python3
 """
-Simple test script to verify that lma_cli.py can be imported and contains expected functionality.
+Simple test script to verify that xsarena_cli can be imported and contains expected functionality.
 """
 
 
 def test_import():
-    """Test that the lma_cli module can be imported without errors."""
+    """Test that the xsarena_cli module can be imported without errors."""
     try:
         import os
         import sys
 
         sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
-        # Import the lma_cli module
-        import lma_cli
+        # Import the xsarena_cli module (backward-compat for test)
+        import xsarena_cli as lma_cli  # backward-compat for test
 
-        print("✓ Successfully imported lma_cli module")
+        print("✓ Successfully imported xsarena_cli module (compatibility alias)")
 
         # Check if key functions exist
         expected_functions = [
@@ -64,7 +64,7 @@ def test_import():
         )
 
     except ImportError as e:
-        print(f"✗ Failed to import lma_cli: {e}")
+        print(f"✗ Failed to import xsarena_cli: {e}")
         return False
     except Exception as e:
         print(f"✗ Error during test: {e}")

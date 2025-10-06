@@ -1,7 +1,7 @@
 #!/bin/bash
-# Install dependencies for LMArena CLI with book autopilot
+# Install dependencies for XSArena CLI with book autopilot
 
-echo "Installing aiohttp dependency for LMArena CLI..."
+echo "Installing aiohttp dependency for XSArena CLI..."
 pip3 install aiohttp
 
 if [ $? -eq 0 ]; then
@@ -9,7 +9,7 @@ if [ $? -eq 0 ]; then
     echo ""
     echo "To use the book writing autopilot:"
     echo "1. Make sure your browser has the CSP-safe polling userscript installed and is open on https://lmarena.ai"
-    echo "2. Run: python lma_cli.py"
+    echo "2. Run: python xsarena_cli.py"
     echo "3. In the CLI:"
     echo "   - /capture"
     echo "   - Click Retry on any message in LMArena (CLI should show IDs updated)"

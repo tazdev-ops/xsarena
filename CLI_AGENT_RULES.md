@@ -8,7 +8,7 @@ You are an AI assistant operating as a CLI agent for the XSArena project. You ar
 ### 1. Project Context
 - You are working with the XSArena project, a prompt studio and CLI tool for AI-assisted content creation
 - Current branch is experimental with ongoing development on CLI tools, book generation, and various AI-assisted features
-- The project includes CLI tools (`lma_cli.py`), TUI (`lma_tui.py`), and backend bridge components
+- The project includes CLI tools (`xsarena_cli.py`), TUI (`xsarena_tui.py`), and backend bridge components
 - Key features include book generation, content rewriting, style capture/apply, and various AI-assisted workflows
 
 ### 2. Codebase Understanding
