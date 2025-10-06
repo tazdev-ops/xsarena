@@ -1,13 +1,15 @@
 """Lossless mode CLI commands for LMASudio."""
+
 import typer
-from typing import Optional
-from ..core.config import Config
-from ..core.state import SessionState
+
 from ..core.backends import create_backend
+from ..core.config import Config
 from ..core.engine import Engine
+from ..core.state import SessionState
 from ..modes.lossless import LosslessMode
 
 app = typer.Typer()
+
 
 @app.command("ingest")
 def lossless_ingest(
@@ -16,12 +18,18 @@ def lossless_ingest(
     """Ingest and synthesize information from text."""
     config = Config()
     state = SessionState()
-    backend = create_backend(config.backend, base_url=config.base_url, api_key=config.api_key, model=config.model)
+    backend = create_backend(
+        config.backend,
+        base_url=config.base_url,
+        api_key=config.api_key,
+        model=config.model,
+    )
     engine = Engine(backend, state)
     lossless_mode = LosslessMode(engine)
-    
+
     result = asyncio.run(lossless_mode.ingest_synth(text))
     print(result)
+
 
 @app.command("rewrite")
 def lossless_rewrite(
@@ -30,26 +38,40 @@ def lossless_rewrite(
     """Rewrite text while preserving all meaning."""
     config = Config()
     state = SessionState()
-    backend = create_backend(config.backend, base_url=config.base_url, api_key=config.api_key, model=config.model)
+    backend = create_backend(
+        config.backend,
+        base_url=config.base_url,
+        api_key=config.api_key,
+        model=config.model,
+    )
     engine = Engine(backend, state)
     lossless_mode = LosslessMode(engine)
-    
+
     result = asyncio.run(lossless_mode.rewrite_lossless(text))
     print(result)
 
+
 @app.command("run")
 def lossless_run(
-    text: str = typer.Argument(..., help="Text to process with comprehensive lossless processing")
+    text: str = typer.Argument(
+        ..., help="Text to process with comprehensive lossless processing"
+    )
 ):
     """Perform a comprehensive lossless processing run."""
     config = Config()
     state = SessionState()
-    backend = create_backend(config.backend, base_url=config.base_url, api_key=config.api_key, model=config.model)
+    backend = create_backend(
+        config.backend,
+        base_url=config.base_url,
+        api_key=config.api_key,
+        model=config.model,
+    )
     engine = Engine(backend, state)
     lossless_mode = LosslessMode(engine)
-    
+
     result = asyncio.run(lossless_mode.lossless_run(text))
     print(result)
+
 
 @app.command("improve-flow")
 def lossless_improve_flow(
@@ -58,12 +80,18 @@ def lossless_improve_flow(
     """Improve the flow and transitions in text."""
     config = Config()
     state = SessionState()
-    backend = create_backend(config.backend, base_url=config.base_url, api_key=config.api_key, model=config.model)
+    backend = create_backend(
+        config.backend,
+        base_url=config.base_url,
+        api_key=config.api_key,
+        model=config.model,
+    )
     engine = Engine(backend, state)
     lossless_mode = LosslessMode(engine)
-    
+
     result = asyncio.run(lossless_mode.improve_flow(text))
     print(result)
+
 
 @app.command("break-paragraphs")
 def lossless_break_paragraphs(
@@ -72,12 +100,18 @@ def lossless_break_paragraphs(
     """Break dense paragraphs into more readable chunks."""
     config = Config()
     state = SessionState()
-    backend = create_backend(config.backend, base_url=config.base_url, api_key=config.api_key, model=config.model)
+    backend = create_backend(
+        config.backend,
+        base_url=config.base_url,
+        api_key=config.api_key,
+        model=config.model,
+    )
     engine = Engine(backend, state)
     lossless_mode = LosslessMode(engine)
-    
+
     result = asyncio.run(lossless_mode.break_paragraphs(text))
     print(result)
+
 
 @app.command("enhance-structure")
 def lossless_enhance_structure(
@@ -86,9 +120,14 @@ def lossless_enhance_structure(
     """Enhance text structure with appropriate headings and formatting."""
     config = Config()
     state = SessionState()
-    backend = create_backend(config.backend, base_url=config.base_url, api_key=config.api_key, model=config.model)
+    backend = create_backend(
+        config.backend,
+        base_url=config.base_url,
+        api_key=config.api_key,
+        model=config.model,
+    )
     engine = Engine(backend, state)
     lossless_mode = LosslessMode(engine)
-    
+
     result = asyncio.run(lossless_mode.enhance_structure(text))
     print(result)

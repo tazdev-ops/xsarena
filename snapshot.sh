@@ -23,7 +23,32 @@ if [ "$DRY_RUN" = true ]; then
     echo
     echo "Project Files to be included:"
     echo "============================="
-    find . -type f -not -path "./books/*" -not -path "./__pycache__/*" -not -path "*/__pycache__/*" -not -path "./.git/*" -not -path "*/build/*" -not -path "*/dist/*" -not -path "*/node_modules/*" -not -path "*/.pytest_cache/*" -not -path "*/.vscode/*" -not -path "*/venv/*" -not -path "*/env/*" -not -path "*/.env/*" -not -path "./nexus.txt" -not -path "./book.md" -not -path "./snapshot.txt" -not -path "./temp_*" | sed 's/^\.\///' | sort
+    find . -type f \
+      -not -path "./books/*" \
+      -not -path "./__pycache__/*" \
+      -not -path "*/__pycache__/*" \
+      -not -path "./.git/*" \
+      -not -path "*/build/*" \
+      -not -path "*/dist/*" \
+      -not -path "*/node_modules/*" \
+      -not -path "*/.pytest_cache/*" \
+      -not -path "*/.vscode/*" \
+      -not -path "*/venv/*" \
+      -not -path "*/env/*" \
+      -not -path "*/.env/*" \
+      -not -path "./nexus.txt" \
+      -not -path "./book.md" \
+      -not -path "./snapshot.txt" \
+      -not -path "./temp_*" \
+      -not -path "./available_models.json" \
+      -not -path "*/.ruff_cache/*" \
+      -not -path "./directives/*" \
+      -not -path "./pipelines/*" \
+      -not -path "./examples/*" \
+      -not -path "./docs/*" \
+      -not -path "./tests/*" \
+      -not -path "./snapshot_chunks/*" \
+      | sed 's/^\.\///' | sort
     echo
     echo "Files to be included (code files only):"
     echo "======================================"
@@ -44,6 +69,14 @@ if [ "$DRY_RUN" = true ]; then
       -not -path "./book.md" \
       -not -path "./snapshot.txt" \
       -not -path "./temp_*" \
+      -not -path "./available_models.json" \
+      -not -path "*/.ruff_cache/*" \
+      -not -path "./directives/*" \
+      -not -path "./pipelines/*" \
+      -not -path "./examples/*" \
+      -not -path "./docs/*" \
+      -not -path "./tests/*" \
+      -not -path "./snapshot_chunks/*" \
       | sed 's/^\.\///' | sort
     echo
     echo "Files excluded: books/, __pycache__, .git/, build/, dist/, node_modules/, etc."
@@ -62,7 +95,32 @@ else
       echo
       echo "Project Files:"
       echo "=============="
-      find . -type f -not -path "./books/*" -not -path "./__pycache__/*" -not -path "*/__pycache__/*" -not -path "./.git/*" -not -path "*/build/*" -not -path "*/dist/*" -not -path "*/node_modules/*" -not -path "*/.pytest_cache/*" -not -path "*/.vscode/*" -not -path "*/venv/*" -not -path "*/env/*" -not -path "*/.env/*" -not -path "./nexus.txt" -not -path "./book.md" -not -path "./snapshot.txt" -not -path "./temp_*" | sed 's/^\.\///' | sort
+      find . -type f \
+        -not -path "./books/*" \
+        -not -path "./__pycache__/*" \
+        -not -path "*/__pycache__/*" \
+        -not -path "./.git/*" \
+        -not -path "*/build/*" \
+        -not -path "*/dist/*" \
+        -not -path "*/node_modules/*" \
+        -not -path "*/.pytest_cache/*" \
+        -not -path "*/.vscode/*" \
+        -not -path "*/venv/*" \
+        -not -path "*/env/*" \
+        -not -path "*/.env/*" \
+        -not -path "./nexus.txt" \
+        -not -path "./book.md" \
+        -not -path "./snapshot.txt" \
+        -not -path "./temp_*" \
+        -not -path "./available_models.json" \
+      -not -path "*/.ruff_cache/*" \
+      -not -path "./directives/*" \
+      -not -path "./pipelines/*" \
+      -not -path "./examples/*" \
+      -not -path "./docs/*" \
+      -not -path "./tests/*" \
+        -not -path "./snapshot_chunks/*" \
+        | sed 's/^\.\///' | sort
     } > temp_tree_output.txt
 
     # Clear the output file
@@ -94,6 +152,14 @@ else
       -not -path "./book.md" \
       -not -path "./snapshot.txt" \
       -not -path "./temp_*" \
+      -not -path "./available_models.json" \
+      -not -path "*/.ruff_cache/*" \
+      -not -path "./directives/*" \
+      -not -path "./pipelines/*" \
+      -not -path "./examples/*" \
+      -not -path "./docs/*" \
+      -not -path "./tests/*" \
+      -not -path "./snapshot_chunks/*" \
       | sed 's/^\.\///' | sort > relevant_files.txt
 
     while IFS= read -r file; do
@@ -110,26 +176,27 @@ else
     # If chunking is requested, split the file
     if [ "$CHUNK_OUTPUT" = true ]; then
         echo "Splitting snapshot into 100KB chunks with special message..."
-        
+
         # Create output directory for chunks
         output_dir="snapshot_chunks"
         mkdir -p "$output_dir"
-        
+
         # Split the file
         split -b ${CHUNK_SIZE} "$OUTPUT_FILE" "${output_dir}/snapshot_part_"
-        
+
         # Add the special message to each chunk
         for file in "${output_dir}/snapshot_part_"*; do
             echo -e "\nSay \"received.\" after this message. DO nothing else." >> "$file"
         done
-        
+
         # Report the result
         num_chunks=$(ls "$output_dir" | wc -l)
         echo "Snapshot has been split into $num_chunks chunk(s)."
         echo "Chunks are located in: $output_dir"
         for chunk in "$output_dir"/*; do
             chunk_name=$(basename "$chunk")
-            chunk_size=$(stat -c%s "$chunk")
+            # GNU stat; if you're on macOS, replace with: stat -f%z
+            chunk_size=$(stat -c%s "$chunk" 2>/dev/null || stat -f%z "$chunk")
             echo " - $chunk_name ($chunk_size characters)"
         done
     else
@@ -140,7 +207,7 @@ else
         echo "- Configuration files"
         echo "- Documentation files"
         echo ""
-        echo "Files excluded: books/, __pycache__, .git/, build/, dist/, node_modules/, etc."
+        echo "Files excluded: books/, __pycache__, .git/, build/, dist/, node_modules/, available_models.json, snapshot_chunks/"
         echo ""
         echo "To create chunked output, run: ./snapshot.sh --chunk"
     fi

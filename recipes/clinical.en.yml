@@ -1,0 +1,7 @@
+task: book.zero2hero
+subject: "Clinical Psychology"
+styles: [no-bs]
+io:
+  output: file
+  outPath: "./books/clinical.manual.en.md"
+max_chunks: 6

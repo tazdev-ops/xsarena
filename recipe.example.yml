@@ -1,0 +1,13 @@
+task: book.zero2hero
+subject: Behavioral Economics
+styles: [no-bs]
+hammer: true
+continuation:
+  mode: anchor
+  anchorLen: 200
+  minChars: 3500
+  pushPasses: 2
+io:
+  output: file
+  outPath: ./books/behavioral-econ.manual.md
+max_chunks: 6
