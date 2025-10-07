@@ -1,0 +1,60 @@
+{
+  "id": "ticket_0005",
+  "file": "/home/mativiters/1/xsarena/xsarena_cli.py",
+  "rules": [
+    "E501",
+    "E722",
+    "F811"
+  ],
+  "issues": [
+    {
+      "code": "E722",
+      "message": "Do not use bare `except`",
+      "line": 3770,
+      "col": 21
+    },
+    {
+      "code": "E722",
+      "message": "Do not use bare `except`",
+      "line": 3783,
+      "col": 21
+    },
+    {
+      "code": "E501",
+      "message": "Line too long (124 > 120)",
+      "line": 3850,
+      "col": 121
+    },
+    {
+      "code": "E501",
+      "message": "Line too long (139 > 120)",
+      "line": 3854,
+      "col": 121
+    },
+    {
+      "code": "E722",
+      "message": "Do not use bare `except`",
+      "line": 4154,
+      "col": 17
+    },
+    {
+      "code": "E722",
+      "message": "Do not use bare `except`",
+      "line": 4203,
+      "col": 21
+    },
+    {
+      "code": "E722",
+      "message": "Do not use bare `except`",
+      "line": 4224,
+      "col": 21
+    },
+    {
+      "code": "F811",
+      "message": "Redefinition of unused `repl` from line 3164",
+      "line": 4358,
+      "col": 11
+    }
+  ],
+  "done": false
+}

@@ -1,0 +1,46 @@
+{
+  "id": "ticket_0016",
+  "file": "/home/mativiters/1/xsarena/src/xsarena/cli/cmds_lossless.py",
+  "rules": [
+    "F821"
+  ],
+  "issues": [
+    {
+      "code": "F821",
+      "message": "Undefined name `asyncio`",
+      "line": 28,
+      "col": 14
+    },
+    {
+      "code": "F821",
+      "message": "Undefined name `asyncio`",
+      "line": 48,
+      "col": 14
+    },
+    {
+      "code": "F821",
+      "message": "Undefined name `asyncio`",
+      "line": 68,
+      "col": 14
+    },
+    {
+      "code": "F821",
+      "message": "Undefined name `asyncio`",
+      "line": 86,
+      "col": 14
+    },
+    {
+      "code": "F821",
+      "message": "Undefined name `asyncio`",
+      "line": 106,
+      "col": 14
+    },
+    {
+      "code": "F821",
+      "message": "Undefined name `asyncio`",
+      "line": 126,
+      "col": 14
+    }
+  ],
+  "done": false
+}

@@ -1,74 +1,56 @@
-"""Backend configuration CLI commands for LMASudio."""
+"""Backend management commands for XSArena."""
 
+import os
 from typing import Optional
 
 import typer
 
-from ..core.backends import create_backend
-from ..core.config import Config
-from ..core.state import SessionState
-
-app = typer.Typer()
+app = typer.Typer(help="Backend configuration commands")
 
 
 @app.command("set")
-def set_backend(
-    backend_type: str = typer.Argument(..., help="Backend type (bridge or openrouter)"),
-    api_key: Optional[str] = typer.Option(None, help="API key for openrouter backend"),
-    model: Optional[str] = typer.Option(None, help="Model to use"),
-    base_url: Optional[str] = typer.Option(None, help="Base URL for bridge backend"),
+def backend_set(
+    router: Optional[str] = typer.Option(None, "--router", help="Set router backend (litellm|openrouter)"),
+    base_url: Optional[str] = typer.Option(None, "--base-url", help="LiteLLM base URL"),
+    api_key: Optional[str] = typer.Option(None, "--api-key", help="API key for backend"),
+    model: Optional[str] = typer.Option(None, "--model", help="Default model to use"),
 ):
-    """Set backend configuration."""
-    config = Config()
+    """Configure backend settings."""
+    changes = []
 
-    config.backend = backend_type
+    if router:
+        os.environ["XSA_ROUTER_BACKEND"] = router
+        changes.append(f"router={router}")
+
+    if base_url:
+        os.environ["LITELLM_BASE"] = base_url
+        changes.append(f"base_url={base_url}")
+
     if api_key:
-        config.api_key = api_key
-    if model:
-        config.model = model
-    if base_url:
-        config.base_url = base_url
+        os.environ["LITELLM_API_KEY"] = api_key
+        os.environ["OPENROUTER_API_KEY"] = api_key  # Also set for OpenRouter
+        changes.append("api_key=***")
 
-    # Save to session or config file
-    state = SessionState()
-    state.settings["backend"] = backend_type
     if model:
-        state.settings["model"] = model
+        os.environ["XSA_DEFAULT_MODEL"] = model
+        changes.append(f"model={model}")
 
-    typer.echo(f"Backend set to: {backend_type}")
-    if model:
-        typer.echo(f"Model set to: {model}")
-    if base_url:
-        typer.echo(f"Base URL set to: {base_url}")
+    if changes:
+        typer.echo(f"Backend settings updated: {', '.join(changes)}")
+    else:
+        typer.echo("Use --router, --base-url, --api-key, or --model to configure settings")
+
+    # Show current settings
+    typer.echo(f"Current router: {os.getenv('XSA_ROUTER_BACKEND', 'openrouter')}")
+    typer.echo(f"Current base URL: {os.getenv('LITELLM_BASE', 'not set for LiteLLM')}")
+    typer.echo(f"Current model: {os.getenv('XSA_DEFAULT_MODEL', 'default')}")
 
 
 @app.command("show")
-def show_backend():
+def backend_show():
     """Show current backend configuration."""
-    config = Config()
-
-    typer.echo("Current Backend Configuration:")
-    typer.echo(f"  Backend: {config.backend}")
-    typer.echo(f"  Model: {config.model}")
-    typer.echo(f"  Base URL: {config.base_url}")
-    typer.echo(f"  API Key: {'Set' if config.api_key else 'Not set'}")
-
-
-@app.command("test")
-def test_backend():
-    """Test the current backend configuration."""
-    config = Config()
-
-    try:
-        backend = create_backend(
-            config.backend,
-            base_url=config.base_url,
-            api_key=config.api_key,
-            model=config.model,
-        )
-        typer.echo(f"Backend {config.backend} configured successfully")
-        # In a real implementation, we would test by making a simple API call
-        typer.echo("Backend test: Configuration valid")
-    except Exception as e:
-        typer.echo(f"Backend test failed: {str(e)}")
-        raise typer.Exit(code=1)
+    typer.echo(f"Router backend: {os.getenv('XSA_ROUTER_BACKEND', 'openrouter')}")
+    typer.echo(f"LiteLLM base: {os.getenv('LITELLM_BASE', 'not set')}")
+    typer.echo(f"OpenRouter API key: {'set' if os.getenv('OPENROUTER_API_KEY') else 'not set'}")
+    typer.echo(f"Default model: {os.getenv('XSA_DEFAULT_MODEL', 'default')}")
+    typer.echo("Available routers: openrouter, litellm")

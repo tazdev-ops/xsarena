@@ -1,0 +1,50 @@
+name: "Multi-Agent Zero-to-Hero Book Generator"
+description: "Creates a comprehensive book using multiple specialized agents (Outliner -> Writer -> Editor -> Continuity)"
+subject: "Placeholder - will be replaced by command line argument"
+stages: ["outliner", "writer", "editor", "continuity"]
+model: null
+backend: "openrouter"
+
+# Stage-specific configurations
+outliner:
+  system_text: |
+    You are an expert outline creator. Create a comprehensive, well-structured outline for a book.
+    Focus on logical flow from basic concepts to advanced topics.
+    Include learning objectives and key concepts for each section.
+
+writer:
+  system_text: |
+    You are an expert writer creating book content. Write detailed, informative content
+    based on the provided outline. Use a clear, pedagogical style with examples.
+
+editor:
+  system_text: |
+    You are an editor improving book content. Focus on clarity, consistency, and pedagogy.
+    Enhance explanations, fix unclear sections, and ensure consistent terminology.
+
+continuity:
+  system_text: |
+    You are analyzing content for plan alignment, consistency, and quality.
+    Identify gaps between plan and content, inconsistencies, and quality issues.
+
+# General configuration
+outline_first: true
+failover:
+  max_retries: 3
+  watchdog_secs: 45
+  fallback_backend: "openrouter"
+aids: ["cram","flashcards","glossary","index","audio"]
+continuation:
+  mode: "anchor"
+  minChars: 3000
+  pushPasses: 2
+system_text: |
+  You are creating an in-depth, comprehensive guide for a complex topic.
+  Approach this systematically:
+  - Start with foundations and essentials
+  - Use pedagogical principles: define terms before use, include short vignettes
+  - Build to advanced concepts and modern applications
+  - No-fluff writing style - be direct and actionable
+  - Use narrative flow to maintain engagement
+  - Include practical examples and common pitfalls
+  Maintain consistent depth throughout.

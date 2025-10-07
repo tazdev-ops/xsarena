@@ -18,14 +18,10 @@ class StudyMode:
 
 {content}"""
 
-        system_prompt = SYSTEM_PROMPTS[
-            "book"
-        ]  # Using book mode for educational content
+        system_prompt = SYSTEM_PROMPTS["book"]  # Using book mode for educational content
         return await self.engine.send_and_collect(prompt, system_prompt)
 
-    async def generate_quiz(
-        self, content: str, num_questions: int = 10, question_type: str = "mixed"
-    ) -> str:
+    async def generate_quiz(self, content: str, num_questions: int = 10, question_type: str = "mixed") -> str:
         """Generate quiz questions from content."""
         prompt = f"""Generate {num_questions} quiz questions from the following content. Use {question_type} question types (multiple choice, short answer, true/false, etc.):
 
@@ -58,9 +54,7 @@ Organize the index in a hierarchical format with main topics and subtopics."""
         system_prompt = SYSTEM_PROMPTS["book"]
         return await self.engine.send_and_collect(prompt, system_prompt)
 
-    async def drill_mode(
-        self, questions: List[str], answers: List[str]
-    ) -> Dict[str, Any]:
+    async def drill_mode(self, questions: List[str], answers: List[str]) -> Dict[str, Any]:
         """Conduct a spaced repetition drill session."""
         # This would typically implement a more complex interaction loop
         # For now, we'll return a simple analysis of the questions

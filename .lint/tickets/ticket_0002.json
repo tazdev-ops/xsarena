@@ -1,0 +1,60 @@
+{
+  "id": "ticket_0002",
+  "file": "/home/mativiters/1/xsarena/xsarena_cli.py",
+  "rules": [
+    "E501",
+    "E722",
+    "F821"
+  ],
+  "issues": [
+    {
+      "code": "E501",
+      "message": "Line too long (138 > 120)",
+      "line": 1676,
+      "col": 121
+    },
+    {
+      "code": "E501",
+      "message": "Line too long (182 > 120)",
+      "line": 1943,
+      "col": 121
+    },
+    {
+      "code": "E501",
+      "message": "Line too long (143 > 120)",
+      "line": 1946,
+      "col": 121
+    },
+    {
+      "code": "E501",
+      "message": "Line too long (143 > 120)",
+      "line": 1973,
+      "col": 121
+    },
+    {
+      "code": "E722",
+      "message": "Do not use bare `except`",
+      "line": 2263,
+      "col": 17
+    },
+    {
+      "code": "E722",
+      "message": "Do not use bare `except`",
+      "line": 2276,
+      "col": 17
+    },
+    {
+      "code": "E722",
+      "message": "Do not use bare `except`",
+      "line": 2297,
+      "col": 17
+    },
+    {
+      "code": "F821",
+      "message": "Undefined name `_ingest_loop`",
+      "line": 2327,
+      "col": 23
+    }
+  ],
+  "done": false
+}

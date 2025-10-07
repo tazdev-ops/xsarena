@@ -1,0 +1,59 @@
+{
+  "id": "ticket_0003",
+  "file": "/home/mativiters/1/xsarena/xsarena_cli.py",
+  "rules": [
+    "E722",
+    "F821"
+  ],
+  "issues": [
+    {
+      "code": "F821",
+      "message": "Undefined name `_ingest_loop`",
+      "line": 2336,
+      "col": 23
+    },
+    {
+      "code": "F821",
+      "message": "Undefined name `_flashcards_from`",
+      "line": 2386,
+      "col": 23
+    },
+    {
+      "code": "F821",
+      "message": "Undefined name `_glossary_from`",
+      "line": 2392,
+      "col": 23
+    },
+    {
+      "code": "F821",
+      "message": "Undefined name `_index_from`",
+      "line": 2398,
+      "col": 23
+    },
+    {
+      "code": "F821",
+      "message": "Undefined name `_translate_file`",
+      "line": 2415,
+      "col": 19
+    },
+    {
+      "code": "F821",
+      "message": "Undefined name `_style_capture`",
+      "line": 2420,
+      "col": 23
+    },
+    {
+      "code": "F821",
+      "message": "Undefined name `_style_apply`",
+      "line": 2427,
+      "col": 32
+    },
+    {
+      "code": "E722",
+      "message": "Do not use bare `except`",
+      "line": 2502,
+      "col": 17
+    }
+  ],
+  "done": false
+}

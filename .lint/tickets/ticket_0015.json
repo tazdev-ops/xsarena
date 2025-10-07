@@ -1,0 +1,54 @@
+{
+  "id": "ticket_0015",
+  "file": "/home/mativiters/1/xsarena/lma_coder.py",
+  "rules": [
+    "E402",
+    "E501",
+    "E741"
+  ],
+  "issues": [
+    {
+      "code": "E741",
+      "message": "Ambiguous variable name: `l`",
+      "line": 545,
+      "col": 42
+    },
+    {
+      "code": "E741",
+      "message": "Ambiguous variable name: `l`",
+      "line": 550,
+      "col": 17
+    },
+    {
+      "code": "E741",
+      "message": "Ambiguous variable name: `l`",
+      "line": 561,
+      "col": 74
+    },
+    {
+      "code": "E402",
+      "message": "Module level import not at top of file",
+      "line": 614,
+      "col": 1
+    },
+    {
+      "code": "E402",
+      "message": "Module level import not at top of file",
+      "line": 615,
+      "col": 1
+    },
+    {
+      "code": "E402",
+      "message": "Module level import not at top of file",
+      "line": 616,
+      "col": 1
+    },
+    {
+      "code": "E501",
+      "message": "Line too long (139 > 120)",
+      "line": 1168,
+      "col": 121
+    }
+  ],
+  "done": false
+}

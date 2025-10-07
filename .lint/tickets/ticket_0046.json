@@ -1,0 +1,16 @@
+{
+  "id": "ticket_0046",
+  "file": "/home/mativiters/1/xsarena/lma_stream.py",
+  "rules": [
+    "E501"
+  ],
+  "issues": [
+    {
+      "code": "E501",
+      "message": "Line too long (115 > 100)",
+      "line": 81,
+      "col": 101
+    }
+  ],
+  "done": false
+}

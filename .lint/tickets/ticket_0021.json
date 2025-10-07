@@ -1,0 +1,22 @@
+{
+  "id": "ticket_0021",
+  "file": "/home/mativiters/1/xsarena/src/xsarena/gui/gtk_app.py",
+  "rules": [
+    "E402"
+  ],
+  "issues": [
+    {
+      "code": "E402",
+      "message": "Module level import not at top of file",
+      "line": 24,
+      "col": 1
+    },
+    {
+      "code": "E402",
+      "message": "Module level import not at top of file",
+      "line": 26,
+      "col": 1
+    }
+  ],
+  "done": false
+}

@@ -1,0 +1,52 @@
+{
+  "id": "ticket_0034",
+  "file": "/home/mativiters/1/xsarena/src/xsarena/modes/bilingual.py",
+  "rules": [
+    "E501"
+  ],
+  "issues": [
+    {
+      "code": "E501",
+      "message": "Line too long (106 > 100)",
+      "line": 21,
+      "col": 101
+    },
+    {
+      "code": "E501",
+      "message": "Line too long (122 > 100)",
+      "line": 30,
+      "col": 101
+    },
+    {
+      "code": "E501",
+      "message": "Line too long (148 > 100)",
+      "line": 38,
+      "col": 101
+    },
+    {
+      "code": "E501",
+      "message": "Line too long (104 > 100)",
+      "line": 47,
+      "col": 101
+    },
+    {
+      "code": "E501",
+      "message": "Line too long (120 > 100)",
+      "line": 56,
+      "col": 101
+    },
+    {
+      "code": "E501",
+      "message": "Line too long (107 > 100)",
+      "line": 77,
+      "col": 101
+    },
+    {
+      "code": "E501",
+      "message": "Line too long (170 > 100)",
+      "line": 89,
+      "col": 101
+    }
+  ],
+  "done": false
+}

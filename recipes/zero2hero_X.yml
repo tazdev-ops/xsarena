@@ -1,0 +1,19 @@
+task: book.zero2hero
+subject: "International relations"        # ← replace with your topic
+styles: [no-bs]     # no‑bullshit language ON
+style_file: "directives/style.narrative_en.md"   # narrative + teach‑before‑use overlay
+custom_system_file: "directives/boost_outline_en.md"  # outline-first + booster scaffold
+hammer: true        # book-hammer (no early wrap-up)
+continuation:
+  mode: anchor
+  anchorLen: 200
+  minChars: 3000     # smoother pacing; raise to 3800–4500 for denser chunks
+  pushPasses: 1
+  repeatWarn: true
+io:
+  output: file
+  outPath: "./books/international_relations.manual.en.md"   # change filename if you like
+max_chunks: 8
+# Optional backend switch (uncomment to avoid browser):
+# backend: openrouter
+# model: openrouter/auto

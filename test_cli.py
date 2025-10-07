@@ -59,9 +59,7 @@ def test_import():
         else:
             print("✓ All expected autopilot variables are present")
 
-        print(
-            "\n✓ All tests passed! The CLI implementation is ready for book autopilot functionality."
-        )
+        print("\n✓ All tests passed! The CLI implementation is ready for book autopilot functionality.")
 
     except ImportError as e:
         print(f"✗ Failed to import xsarena_cli: {e}")

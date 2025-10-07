@@ -1,0 +1,16 @@
+{
+  "id": "ticket_0050",
+  "file": "/home/mativiters/1/xsarena/xsarena_tui.py",
+  "rules": [
+    "E501"
+  ],
+  "issues": [
+    {
+      "code": "E501",
+      "message": "Line too long (103 > 100)",
+      "line": 3,
+      "col": 101
+    }
+  ],
+  "done": false
+}

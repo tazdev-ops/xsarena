@@ -1,0 +1,59 @@
+{
+  "id": "ticket_0004",
+  "file": "/home/mativiters/1/xsarena/xsarena_cli.py",
+  "rules": [
+    "E501",
+    "E722"
+  ],
+  "issues": [
+    {
+      "code": "E722",
+      "message": "Do not use bare `except`",
+      "line": 2515,
+      "col": 17
+    },
+    {
+      "code": "E722",
+      "message": "Do not use bare `except`",
+      "line": 2591,
+      "col": 17
+    },
+    {
+      "code": "E501",
+      "message": "Line too long (135 > 120)",
+      "line": 2819,
+      "col": 121
+    },
+    {
+      "code": "E722",
+      "message": "Do not use bare `except`",
+      "line": 3117,
+      "col": 13
+    },
+    {
+      "code": "E722",
+      "message": "Do not use bare `except`",
+      "line": 3504,
+      "col": 21
+    },
+    {
+      "code": "E722",
+      "message": "Do not use bare `except`",
+      "line": 3517,
+      "col": 21
+    },
+    {
+      "code": "E501",
+      "message": "Line too long (121 > 120)",
+      "line": 3532,
+      "col": 121
+    },
+    {
+      "code": "E722",
+      "message": "Do not use bare `except`",
+      "line": 3572,
+      "col": 17
+    }
+  ],
+  "done": false
+}

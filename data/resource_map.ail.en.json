@@ -1,0 +1,38 @@
+{
+  "resource_map": [
+    {"subtopic": "Old Persian inscriptions", "recommended": [
+      {"book": "Ancient History of Iran (Frye, trans. Rajabnia)", "chapter_or_section": "The Achaemenid Empire"},
+      {"book": "Historical Grammar of Persian (Abolghasemi)", "chapter_or_section": "Old Persian"}
+    ]},
+    {"subtopic": "Pahlavi script & heterograms", "recommended": [
+      {"book": "History of Iranian Literature before Islam (Tafazzoli & Amouzegar)", "chapter_or_section": "Pahlavi script and literature"},
+      {"book": "Historical Grammar of Persian (Abolghasemi)", "chapter_or_section": "Middle Persian"}
+    ]},
+    {"subtopic": "Pahlavi literature (Bundahishn, Dēnkard…)", "recommended": [
+      {"book": "History of Iranian Literature before Islam (Tafazzoli & Amouzegar)", "chapter_or_section": "Pahlavi literature"}
+    ]},
+    {"subtopic": "Sasanian state/religion", "recommended": [
+      {"book": "Iran in the Sasanian Period (Christensen, trans. Yasemi)", "chapter_or_section": "State organization; Religion"},
+      {"book": "Ancient Iran (Molé, trans. Amouzegar)", "chapter_or_section": "Zoroastrianism"}
+    ]},
+    {"subtopic": "Parthian/Seleucid era", "recommended": [
+      {"book": "Ancient History of Iran (Frye)", "chapter_or_section": "Alexander & the Seleucids; The Parthian Period"}
+    ]},
+    {"subtopic": "Avestan basics", "recommended": [
+      {"book": "History of Iranian Literature before Islam (Tafazzoli & Amouzegar)", "chapter_or_section": "Avestan literature"},
+      {"book": "Ancient Iran (Molé)", "chapter_or_section": "Zoroastrianism"}
+    ]},
+    {"subtopic": "Historical linguistics & sound change", "recommended": [
+      {"book": "Historical Grammar of Persian (Abolghasemi)", "chapter_or_section": "From Proto‑Indo‑European to Iranian"},
+      {"book": "Foundations of Linguistics (Rahimian & Razmjoo)", "chapter_or_section": "Historical linguistics"}
+    ]},
+    {"subtopic": "Morphology/phonology/syntax (fundamentals)", "recommended": [
+      {"book": "Foundations of Linguistics (Rahimian & Razmjoo)", "chapter_or_section": "Phonology; Morphology; Syntax"},
+      {"book": "Introduction to Linguistics (Kheirabadi or Bagheri)", "chapter_or_section": "Core chapters"}
+    ]},
+    {"subtopic": "Dari Persian grammar & etymology (easy points)", "recommended": [
+      {"book": "Persian Grammar (Anvari; or Ahmadi‑Givi & Anvari)", "chapter_or_section": "Core grammar"},
+      {"book": "Historical Grammar of Persian (Abolghasemi)", "chapter_or_section": "Etymology basics"}
+    ]}
+  ]
+}

@@ -1,0 +1,37 @@
+{
+  "id": "ticket_0040",
+  "file": "/home/mativiters/1/xsarena/scripts/ruff_take.py",
+  "rules": [
+    "E401",
+    "E501",
+    "F841",
+    "I001"
+  ],
+  "issues": [
+    {
+      "code": "E401",
+      "message": "Multiple imports on one line",
+      "line": 2,
+      "col": 1
+    },
+    {
+      "code": "I001",
+      "message": "Import block is un-sorted or un-formatted",
+      "line": 2,
+      "col": 1
+    },
+    {
+      "code": "E501",
+      "message": "Line too long (130 > 100)",
+      "line": 27,
+      "col": 101
+    },
+    {
+      "code": "F841",
+      "message": "Local variable `e` is assigned to but never used",
+      "line": 29,
+      "col": 29
+    }
+  ],
+  "done": false
+}

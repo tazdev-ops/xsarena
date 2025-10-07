@@ -36,21 +36,15 @@ class BridgeBackend(Backend):
         async with aiohttp.ClientSession() as session:
             # First, we need to push the messages to the server
             data = {
-                "messages": [
-                    {"role": msg.role, "content": msg.content} for msg in messages
-                ],
+                "messages": [{"role": msg.role, "content": msg.content} for msg in messages],
                 "stream": stream,
             }
 
             # Wait for response from the bridge (this would use the polling mechanism)
             # In the actual implementation, this would interact with your CSP-safe polling system
-            async with session.post(
-                f"{self.base_url}/chat/completions", json=data
-            ) as response:
+            async with session.post(f"{self.base_url}/chat/completions", json=data) as response:
                 result = await response.json()
-                return (
-                    result.get("choices", [{}])[0].get("message", {}).get("content", "")
-                )
+                return result.get("choices", [{}])[0].get("message", {}).get("content", "")
 
 
 class OpenRouterBackend(Backend):
@@ -70,15 +64,14 @@ class OpenRouterBackend(Backend):
 
         data = {
             "model": self.model,
-            "messages": [
-                {"role": msg.role, "content": msg.content} for msg in messages
-            ],
+            "messages": [{"role": msg.role, "content": msg.content} for msg in messages],
             "stream": stream,
         }
 
-        async with aiohttp.ClientSession() as session, session.post(
-            f"{self.base_url}/chat/completions", headers=headers, json=data
-        ) as response:
+        async with (
+            aiohttp.ClientSession() as session,
+            session.post(f"{self.base_url}/chat/completions", headers=headers, json=data) as response,
+        ):
             result = await response.json()
             return result.get("choices", [{}])[0].get("message", {}).get("content", "")
 
@@ -96,8 +89,7 @@ class OpenRouterBackend(Backend):
         estimated_cost = {
             "input_tokens": input_tokens,
             "output_tokens": output_tokens,
-            "estimated_cost": (input_tokens * input_cost_per_token)
-            + (output_tokens * output_cost_per_token),
+            "estimated_cost": (input_tokens * input_cost_per_token) + (output_tokens * output_cost_per_token),
         }
 
         return estimated_cost
@@ -107,17 +99,64 @@ class OpenRouterBackend(Backend):
 def create_backend(backend_type: str, **kwargs) -> Backend:
     """Factory function to create the appropriate backend."""
     if backend_type == "bridge":
-        return BridgeBackend(
-            base_url=kwargs.get("base_url", "http://localhost:8080/v1")
-        )
+        return BridgeBackend(base_url=kwargs.get("base_url", "http://localhost:8080/v1"))
     elif backend_type in ("lmarena", "lmarena-ws"):
         # Use your WS bridge’s OpenAI-compatible API
-        return BridgeBackend(
-            base_url=kwargs.get("base_url", "http://127.0.0.1:5102/v1")
-        )
+        return BridgeBackend(base_url=kwargs.get("base_url", "http://127.0.0.1:5102/v1"))
     elif backend_type == "openrouter":
-        return OpenRouterBackend(
-            api_key=kwargs["api_key"], model=kwargs.get("model", "openai/gpt-4o")
+        return OpenRouterBackend(api_key=kwargs["api_key"], model=kwargs.get("model", "openai/gpt-4o"))
+    elif backend_type == "ollama":
+        from .backends_ollama import OllamaBackend
+
+        return OllamaBackend(base=kwargs.get("base_url"), model=kwargs.get("model", "llama3"))
+    elif backend_type == "litellm":
+        return LiteLLMBackend(
+            base_url=kwargs["base_url"], api_key=kwargs["api_key"], model=kwargs.get("model", "openai/gpt-4o")
         )
+    else:
+        raise ValueError(f"Unsupported backend type: {backend_type}")
+
+
+def get_backend(backend_type: str, model: str = None):
+    """Get backend instance based on type and configuration."""
+    import os
+
+    # Check if using LiteLLM
+    if backend_type == "litellm" or os.getenv("XSA_ROUTER_BACKEND") == "litellm":
+        base_url = os.getenv("LITELLM_BASE")
+        api_key = os.getenv("LITELLM_API_KEY")
+
+        if not (base_url and api_key):
+            # Fallback to openrouter if LiteLLM not configured
+            api_key = os.getenv("OPENROUTER_API_KEY")
+            if api_key:
+                return OpenRouterBackend(
+                    api_key=api_key, model=model or os.getenv("XSA_DEFAULT_MODEL", "openai/gpt-4o")
+                )
+            else:
+                raise ValueError("Neither LiteLLM nor OpenRouter API key is configured")
+
+        return LiteLLMBackend(
+            base_url=base_url, api_key=api_key, model=model or os.getenv("XSA_DEFAULT_MODEL", "openai/gpt-4o")
+        )
+
+    elif backend_type == "openrouter":
+        api_key = os.getenv("OPENROUTER_API_KEY")
+        if not api_key:
+            raise ValueError("OPENROUTER_API_KEY environment variable is required for openrouter backend")
+
+        return OpenRouterBackend(api_key=api_key, model=model or os.getenv("XSA_DEFAULT_MODEL", "openai/gpt-4o"))
+
+    elif backend_type == "ollama":
+        from .backends_ollama import OllamaBackend
+
+        base_url = os.getenv("OLLAMA_BASE", "http://127.0.0.1:11434")
+        model = model or os.getenv("XSA_DEFAULT_MODEL", "llama3")
+        return OllamaBackend(base=base_url, model=model)
+
+    elif backend_type in ("bridge", "lmarena", "lmarena-ws"):
+        base_url = os.getenv("XSA_BRIDGE_URL", "http://127.0.0.1:5102/v1")
+        return BridgeBackend(base_url=base_url)
+
     else:
         raise ValueError(f"Unsupported backend type: {backend_type}")

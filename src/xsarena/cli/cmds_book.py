@@ -36,9 +36,7 @@ def book_zero2hero(
 
 
 @app.command("reference")
-def book_reference(
-    topic: str = typer.Argument(..., help="Topic for the reference book")
-):
+def book_reference(topic: str = typer.Argument(..., help="Topic for the reference book")):
     """Create a reference-style book with detailed information."""
     config = Config()
     state = SessionState()
@@ -56,9 +54,7 @@ def book_reference(
 
 
 @app.command("pop")
-def book_pop(
-    topic: str = typer.Argument(..., help="Topic for the popular science book")
-):
+def book_pop(topic: str = typer.Argument(..., help="Topic for the popular science book")):
     """Create a popular science/book style content."""
     config = Config()
     state = SessionState()
@@ -76,9 +72,7 @@ def book_pop(
 
 
 @app.command("nobs")
-def book_nobs(
-    topic: str = typer.Argument(..., help="Topic for the no-bullshit manual")
-):
+def book_nobs(topic: str = typer.Argument(..., help="Topic for the no-bullshit manual")):
     """Create a no-bullshit manual about the topic."""
     config = Config()
     state = SessionState()
@@ -150,9 +144,7 @@ def book_shrink(text: str = typer.Argument(..., help="Text to shrink to 70% leng
 
 
 @app.command("critique")
-def book_critique(
-    text: str = typer.Argument(..., help="Text to critique for repetition and flow")
-):
+def book_critique(text: str = typer.Argument(..., help="Text to critique for repetition and flow")):
     """Critique text for repetition, flow issues, and clarity."""
     config = Config()
     state = SessionState()
@@ -170,11 +162,7 @@ def book_critique(
 
 
 @app.command("diagram")
-def book_diagram(
-    description: str = typer.Argument(
-        ..., help="Description of the diagram to generate"
-    )
-):
+def book_diagram(description: str = typer.Argument(..., help="Description of the diagram to generate")):
     """Generate a Mermaid diagram description."""
     config = Config()
     state = SessionState()
@@ -192,9 +180,7 @@ def book_diagram(
 
 
 @app.command("hammer")
-def book_hammer(
-    enabled: bool = typer.Argument(..., help="Enable or disable coverage hammer")
-):
+def book_hammer(enabled: bool = typer.Argument(..., help="Enable or disable coverage hammer")):
     """Toggle the coverage hammer (anti-wrap continuation hint for self-study)."""
     config = Config()
     state = SessionState()
@@ -204,23 +190,17 @@ def book_hammer(
 
 
 @app.command("budget")
-def output_budget(
-    enabled: bool = typer.Argument(..., help="Enable or disable output budget addendum")
-):
+def output_budget(enabled: bool = typer.Argument(..., help="Enable or disable output budget addendum")):
     """Toggle output budget addendum on book prompts."""
     config = Config()
     state = SessionState()
 
     state.output_budget_snippet_on = enabled
-    print(
-        f"Output budget addendum: {'ON' if state.output_budget_snippet_on else 'OFF'}"
-    )
+    print(f"Output budget addendum: {'ON' if state.output_budget_snippet_on else 'OFF'}")
 
 
 @app.command("push")
-def output_push(
-    enabled: bool = typer.Argument(..., help="Enable or disable output pushing")
-):
+def output_push(enabled: bool = typer.Argument(..., help="Enable or disable output pushing")):
     """Toggle auto-extension within subtopic to hit min length."""
     config = Config()
     state = SessionState()
@@ -230,9 +210,7 @@ def output_push(
 
 
 @app.command("minchars")
-def output_minchars(
-    n: int = typer.Argument(..., help="Set minimal chars per chunk before moving on")
-):
+def output_minchars(n: int = typer.Argument(..., help="Set minimal chars per chunk before moving on")):
     """Set minimum characters per chunk."""
     config = Config()
     state = SessionState()
@@ -245,9 +223,7 @@ def output_minchars(
 
 
 @app.command("passes")
-def output_passes(
-    n: int = typer.Argument(..., help="Set max extension steps per chunk")
-):
+def output_passes(n: int = typer.Argument(..., help="Set max extension steps per chunk")):
     """Set maximum extension passes per chunk."""
     config = Config()
     state = SessionState()
@@ -260,9 +236,7 @@ def output_passes(
 
 
 @app.command("cont-mode")
-def cont_mode(
-    mode: str = typer.Argument(..., help="Set continuation mode (anchor/normal)")
-):
+def cont_mode(mode: str = typer.Argument(..., help="Set continuation mode (anchor/normal)")):
     """Set continuation strategy."""
     config = Config()
     state = SessionState()
@@ -288,9 +262,7 @@ def cont_anchor(n: int = typer.Argument(..., help="Set anchor length in chars"))
 
 
 @app.command("repeat-warn")
-def repeat_warn(
-    enabled: bool = typer.Argument(..., help="Enable or disable repetition warning")
-):
+def repeat_warn(enabled: bool = typer.Argument(..., help="Enable or disable repetition warning")):
     """Toggle repetition warning."""
     config = Config()
     state = SessionState()
@@ -300,11 +272,7 @@ def repeat_warn(
 
 
 @app.command("repeat-thresh")
-def repeat_thresh(
-    threshold: float = typer.Argument(
-        ..., help="Set repetition Jaccard threshold (0..1)"
-    )
-):
+def repeat_thresh(threshold: float = typer.Argument(..., help="Set repetition Jaccard threshold (0..1)")):
     """Set repetition threshold."""
     config = Config()
     state = SessionState()

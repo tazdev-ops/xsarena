@@ -1,0 +1,8 @@
+templates:
+  academic:
+    overlay: "directives/style.narrative_en.md"
+    system_text: |
+      English only. Teach-before-use; formal tone; citations with [ @key].
+  corporate:
+    system_text: |
+      Executive brevity, outcome-first, bullet-light narrative.

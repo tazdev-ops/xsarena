@@ -1,0 +1,16 @@
+{
+  "id": "ticket_0032",
+  "file": "/home/mativiters/1/xsarena/src/xsarena/modes/lossless.py",
+  "rules": [
+    "E501"
+  ],
+  "issues": [
+    {
+      "code": "E501",
+      "message": "Line too long (140 > 120)",
+      "line": 26,
+      "col": 121
+    }
+  ],
+  "done": false
+}

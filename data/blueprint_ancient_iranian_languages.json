@@ -1,0 +1,75 @@
+{
+  "subject": "Ancient Iranian Languages",
+  "duration_weeks": 12,
+  "focus_areas": [
+    {
+      "topic": "Persian Language History & Scripts/Texts",
+      "weight": 3,
+      "subtopics": [
+        "Old Persian inscriptions",
+        "Pahlavi script & heterograms",
+        "Pahlavi literature (Bundahishn, Dēnkard)",
+        "Dari Persian grammar & etymology"
+      ],
+      "recommended_hours": 45
+    },
+    {
+      "topic": "Pre‑Islamic Iranian History",
+      "weight": 2,
+      "subtopics": [
+        "Achaemenid Empire",
+        "Parthian/Seleucid era",
+        "Sasanian state/religion"
+      ],
+      "recommended_hours": 30
+    },
+    {
+      "topic": "Linguistics (General & Historical/Comparative)",
+      "weight": 2,
+      "subtopics": [
+        "Historical linguistics & sound change",
+        "Morphology/phonology/syntax (fundamentals)",
+        "Proto-Iranian to Avestan/Pahlavi transitions"
+      ],
+      "recommended_hours": 30
+    }
+  ],
+  "assessment_format": {
+    "type": "MCQ",
+    "duration_minutes": 120,
+    "target_accuracy": 0.8,
+    "question_distribution": {
+      "high_weight_areas": 0.6,
+      "medium_weight_areas": 0.3,
+      "low_weight_areas": 0.1
+    }
+  },
+  "pedagogical_approach": {
+    "teach_before_use": true,
+    "define_at_first_mention": true,
+    "section_flow": [
+      "Orientation",
+      "Key terms",
+      "Stepwise explanation",
+      "Short worked example",
+      "Quick check",
+      "Pitfalls"
+    ],
+    "narrative_transitions": true
+  },
+  "resources": [
+    "Ancient History of Iran (Frye, trans. Rajabnia)",
+    "Historical Grammar of Persian (Abolghasemi)",
+    "History of Iranian Literature before Islam (Tafazzoli & Amouzegar)",
+    "Iran in the Sasanian Period (Christensen, trans. Yasemi)",
+    "Ancient Iran (Molé, trans. Amouzegar)"
+  ],
+  "transliteration_note": "DIN-style transliteration for Avestan and Old Persian texts",
+  "high_yield_topics": [
+    "Pahlavi heterograms",
+    "Sasanian chronology",
+    "Old Persian cuneiform",
+    "Sound changes from Proto-Iranian",
+    "Morphological changes in Middle Persian"
+  ]
+}

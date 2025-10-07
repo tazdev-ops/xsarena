@@ -1,0 +1,17 @@
+Exam: Iranian Master's Entrance — Ancient Iranian Languages
+Language: English only. If inputs contain Persian, translate to English before use.
+
+Topics (weights reflect syllabus importance):
+- Persian Language History & Scripts/Texts: 3
+- Pre‑Islamic Iranian History: 2
+- Linguistics (General & Historical/Comparative): 2
+
+Constraints:
+- MCQs dominant; ~120 minutes
+- Target ≥ 80% accuracy on high‑weight areas
+- Enforce teach‑before‑use: define any new term at first mention (bold term + 1‑line definition)
+
+Style:
+- Clear academic English; short examples and mini‑drills at section ends
+- Narrative transitions (no "bullet walls" unless checklists/pitfalls)
+- No early wrap‑up; continue exactly where you left off

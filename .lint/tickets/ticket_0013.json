@@ -1,0 +1,58 @@
+{
+  "id": "ticket_0013",
+  "file": "/home/mativiters/1/xsarena/src/xsarena/core/templates.py",
+  "rules": [
+    "E501"
+  ],
+  "issues": [
+    {
+      "code": "E501",
+      "message": "Line too long (126 > 120)",
+      "line": 50,
+      "col": 121
+    },
+    {
+      "code": "E501",
+      "message": "Line too long (129 > 120)",
+      "line": 62,
+      "col": 121
+    },
+    {
+      "code": "E501",
+      "message": "Line too long (138 > 120)",
+      "line": 72,
+      "col": 121
+    },
+    {
+      "code": "E501",
+      "message": "Line too long (142 > 120)",
+      "line": 73,
+      "col": 121
+    },
+    {
+      "code": "E501",
+      "message": "Line too long (163 > 120)",
+      "line": 74,
+      "col": 121
+    },
+    {
+      "code": "E501",
+      "message": "Line too long (133 > 120)",
+      "line": 75,
+      "col": 121
+    },
+    {
+      "code": "E501",
+      "message": "Line too long (144 > 120)",
+      "line": 76,
+      "col": 121
+    },
+    {
+      "code": "E501",
+      "message": "Line too long (131 > 120)",
+      "line": 77,
+      "col": 121
+    }
+  ],
+  "done": false
+}

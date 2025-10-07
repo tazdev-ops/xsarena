@@ -2,9 +2,7 @@
 # Textual TUI for the LMArena Prompt Studio CLI, compatible with Textual versions
 # that provide either TextLog (newer) or Log (older). Adds Bilingual button and fixes thread log issue.
 
-import os
 import subprocess
-import sys
 import threading
 
 from textual.app import App, ComposeResult
@@ -287,9 +285,7 @@ def main():
     try:
         subprocess.run(["xsarena", "--help"], capture_output=True, timeout=5)
     except (FileNotFoundError, subprocess.TimeoutExpired):
-        print(
-            "xsarena_tui.py: xsarena command not found. Make sure xsarena is installed."
-        )
+        print("xsarena_tui.py: xsarena command not found. Make sure xsarena is installed.")
     app = StudioApp()
     app.run()
 

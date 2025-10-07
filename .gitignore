@@ -1,9 +1,8 @@
-# Byte-compiled / optimized / DLL files
+# Python
 __pycache__/
 *.py[cod]
 *$py.class
-
-# Distribution / packaging
+*.so
 .Python
 build/
 develop-eggs/
@@ -20,18 +19,17 @@ wheels/
 *.egg-info/
 .installed.cfg
 *.egg
-
-# Testing
+MANIFEST
 .pytest_cache/
 .coverage
 htmlcov/
-.tox/
-.nox/
-coverage.xml
-*.cover
-.hypothesis/
+.cov/
+.venv/
+venv/
+env/
+ENV/
 
-# IDEs
+# IDE
 .vscode/
 .idea/
 *.swp
@@ -42,30 +40,268 @@ coverage.xml
 .DS_Store
 Thumbs.db
 
-# Books directory
-books/
+# Project-specific
+.xsarena/
+.lmastudio/
+.snapshot_chunks/
+*.bak
+*.bak2
 
-# Temporary files
-*.tmp
-*.temp
+# Logs
 *.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
 
-# Environment
-venv/
-env/
-ENV/
+# Env
 .env
+.env.local
+.env.dev
+.env.prod
 
-# Documentation output
-*.out
-*.pdf
-*.epub
+# Backup files
+*.backup
+*.bak
+*.old
+*.orig
 
-# Generated/bulky artifacts
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+.pytest_cache/
+.pytest/
+.cython/
+
+# Coverage
+.coverage*
+.coverage
+htmlcov/
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# PyInstaller
+*.manifest
+*.spec
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+.cover/
+
+# Translations
+*.mo
+*.pot
+
+# Django stuff:
+*.log
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
+
+# Flask stuff:
+instance/
+.webassets-cache
+
+# Scrapy stuff:
+.scrapy
+
+# Sphinx documentation
+docs/_build/
+
+# PyBuilder
+target/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# IPython
+profile_default/
+ipython_config.py
+
+# pyenv
+.python-version
+
+# pipenv
+Pipfile.lock
+
+# PEP 582
+__pypackages__/
+
+# Celery stuff
+celerybeat-schedule
+celerybeat.pid
+
+# SageMath parsed files
+*.sage.py
+
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Spyder project settings
+.spyderproject
+.spyproject
+
+# Rope project settings
+.ropeproject
+
+# mkdocs documentation
+/site
+
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Pyre
+.pyre/
+
+# pytype
+.pytype/
+
+# Cython
+cython_debug/
+
+# PyCharm
+# Only for development, not release
+.idea/
+
+# Coverage
+.coverage
+
+# Git
+*.rej
+
+# VSCode
+.vscode/
+
+# Vim
+*.swp
+*.swo
+*~
+
+# Mac
+.DS_Store
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Icon?
+!Icon
+
+# Eclipse
+.metadata
+bin/
+tmp/
+*.tmp
+*.bak
+*.swp
+*~.nib
+local.properties
+.settings/
+.loadpath
+.recommenders
+
+# Android Studio
+*.iml
+*.iws
+*.pbxuser
+*.perspective
+*.perspectivev3
+*.project
+*.pydevproject
+*.xcworkspace
+*.xcodeproj
+
+# NetBeans
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+
+# IntelliJ IDEA
+*.iws
+*.iml
+*.ipr
+
+# Visual Studio Code
+.vscode/
+
+# Gradle
+.gradle/
+build/
+
+# Node.js
+node_modules/
+npm-debug.log
+yarn-debug.log*
+yarn-error.log*
+
+# Temporary folders
+tmp/
+temp/
+
+# Python eggs
+*.egg-info/
+
+# XSArena specific artifacts
+books/*.manual.en.md
+books/*.final.md
+books/*.outline.md
+*.synth.md
+*.lossless.md
+*.flashcards.md
+*.glossary.md
+*.index.md
+*.cram.md
 snapshot.txt
 snapshot_chunks/
-available_models.json
-file_bed_server/uploads/
-.lmastudio/logs/
-.lmastudio/checkpoints/
-temp_*
+.snapshot_chunks/
+*.bak
+*.bak2
+
+# XSArena job directories
+.xsarena/jobs/*/section_*.md
+.xsarena/jobs/*/outline.md
+.xsarena/jobs/*/plan.json
+.xsarena/jobs/*/final.md
+.xsarena/jobs/*/checkpoints/
+.xsarena/jobs/*/events.jsonl

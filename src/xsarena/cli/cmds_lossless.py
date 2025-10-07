@@ -12,9 +12,7 @@ app = typer.Typer()
 
 
 @app.command("ingest")
-def lossless_ingest(
-    text: str = typer.Argument(..., help="Text to ingest and synthesize")
-):
+def lossless_ingest(text: str = typer.Argument(..., help="Text to ingest and synthesize")):
     """Ingest and synthesize information from text."""
     config = Config()
     state = SessionState()
@@ -32,9 +30,7 @@ def lossless_ingest(
 
 
 @app.command("rewrite")
-def lossless_rewrite(
-    text: str = typer.Argument(..., help="Text to rewrite while preserving meaning")
-):
+def lossless_rewrite(text: str = typer.Argument(..., help="Text to rewrite while preserving meaning")):
     """Rewrite text while preserving all meaning."""
     config = Config()
     state = SessionState()
@@ -52,11 +48,7 @@ def lossless_rewrite(
 
 
 @app.command("run")
-def lossless_run(
-    text: str = typer.Argument(
-        ..., help="Text to process with comprehensive lossless processing"
-    )
-):
+def lossless_run(text: str = typer.Argument(..., help="Text to process with comprehensive lossless processing")):
     """Perform a comprehensive lossless processing run."""
     config = Config()
     state = SessionState()
@@ -74,9 +66,7 @@ def lossless_run(
 
 
 @app.command("improve-flow")
-def lossless_improve_flow(
-    text: str = typer.Argument(..., help="Text to improve flow for")
-):
+def lossless_improve_flow(text: str = typer.Argument(..., help="Text to improve flow for")):
     """Improve the flow and transitions in text."""
     config = Config()
     state = SessionState()
@@ -94,9 +84,7 @@ def lossless_improve_flow(
 
 
 @app.command("break-paragraphs")
-def lossless_break_paragraphs(
-    text: str = typer.Argument(..., help="Text to break into more readable paragraphs")
-):
+def lossless_break_paragraphs(text: str = typer.Argument(..., help="Text to break into more readable paragraphs")):
     """Break dense paragraphs into more readable chunks."""
     config = Config()
     state = SessionState()
@@ -114,9 +102,7 @@ def lossless_break_paragraphs(
 
 
 @app.command("enhance-structure")
-def lossless_enhance_structure(
-    text: str = typer.Argument(..., help="Text to enhance with better structure")
-):
+def lossless_enhance_structure(text: str = typer.Argument(..., help="Text to enhance with better structure")):
     """Enhance text structure with appropriate headings and formatting."""
     config = Config()
     state = SessionState()

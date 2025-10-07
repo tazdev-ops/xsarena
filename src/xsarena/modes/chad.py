@@ -34,9 +34,7 @@ Be concise but thorough. Support your answer with evidence when available. If un
         questions_content = read_file(questions_file)
 
         # Process each question
-        questions = questions_content.strip().split(
-            "\n\n"
-        )  # Assuming questions are separated by blank lines
+        questions = questions_content.strip().split("\n\n")  # Assuming questions are separated by blank lines
         answers = []
 
         for question in questions:
@@ -67,9 +65,7 @@ Assess the validity of the claim based on the evidence. Be objective and specifi
 
     async def source_analysis(self, sources: List[str], question: str) -> str:
         """Analyze multiple sources to answer a question."""
-        sources_text = "\n\n".join(
-            [f"Source {i+1}: {source}" for i, source in enumerate(sources)]
-        )
+        sources_text = "\n\n".join([f"Source {i+1}: {source}" for i, source in enumerate(sources)])
 
         prompt = f"""Analyze the following sources to answer this question:
 
@@ -96,9 +92,7 @@ Provide evidence for or against the statement. State the veracity clearly and ci
 
     async def summarize_evidence(self, evidence_list: List[str]) -> str:
         """Summarize a list of evidence points."""
-        evidence_text = "\n\n".join(
-            [f"Item {i+1}: {item}" for i, item in enumerate(evidence_list)]
-        )
+        evidence_text = "\n\n".join([f"Item {i+1}: {item}" for i, item in enumerate(evidence_list)])
 
         prompt = f"""Summarize the following evidence items:
 

@@ -1,0 +1,28 @@
+{
+  "id": "ticket_0018",
+  "file": "/home/mativiters/1/xsarena/src/xsarena/modes/bilingual.py",
+  "rules": [
+    "E501"
+  ],
+  "issues": [
+    {
+      "code": "E501",
+      "message": "Line too long (122 > 120)",
+      "line": 28,
+      "col": 121
+    },
+    {
+      "code": "E501",
+      "message": "Line too long (148 > 120)",
+      "line": 36,
+      "col": 121
+    },
+    {
+      "code": "E501",
+      "message": "Line too long (170 > 120)",
+      "line": 85,
+      "col": 121
+    }
+  ],
+  "done": false
+}

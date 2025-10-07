@@ -1,0 +1,154 @@
+{
+  "tickets": [
+    {
+      "path": ".lint/tickets/ticket_0001.json",
+      "id": "ticket_0001",
+      "file": "/home/mativiters/1/xsarena/xsarena_cli.py",
+      "count": 8
+    },
+    {
+      "path": ".lint/tickets/ticket_0002.json",
+      "id": "ticket_0002",
+      "file": "/home/mativiters/1/xsarena/xsarena_cli.py",
+      "count": 8
+    },
+    {
+      "path": ".lint/tickets/ticket_0003.json",
+      "id": "ticket_0003",
+      "file": "/home/mativiters/1/xsarena/xsarena_cli.py",
+      "count": 8
+    },
+    {
+      "path": ".lint/tickets/ticket_0004.json",
+      "id": "ticket_0004",
+      "file": "/home/mativiters/1/xsarena/xsarena_cli.py",
+      "count": 8
+    },
+    {
+      "path": ".lint/tickets/ticket_0005.json",
+      "id": "ticket_0005",
+      "file": "/home/mativiters/1/xsarena/xsarena_cli.py",
+      "count": 8
+    },
+    {
+      "path": ".lint/tickets/ticket_0006.json",
+      "id": "ticket_0006",
+      "file": "/home/mativiters/1/xsarena/lma_templates.py",
+      "count": 8
+    },
+    {
+      "path": ".lint/tickets/ticket_0007.json",
+      "id": "ticket_0007",
+      "file": "/home/mativiters/1/xsarena/lma_templates.py",
+      "count": 8
+    },
+    {
+      "path": ".lint/tickets/ticket_0008.json",
+      "id": "ticket_0008",
+      "file": "/home/mativiters/1/xsarena/lma_templates.py",
+      "count": 2
+    },
+    {
+      "path": ".lint/tickets/ticket_0009.json",
+      "id": "ticket_0009",
+      "file": "/home/mativiters/1/xsarena/src/xsarena/interactive.py",
+      "count": 8
+    },
+    {
+      "path": ".lint/tickets/ticket_0010.json",
+      "id": "ticket_0010",
+      "file": "/home/mativiters/1/xsarena/src/xsarena/interactive.py",
+      "count": 8
+    },
+    {
+      "path": ".lint/tickets/ticket_0011.json",
+      "id": "ticket_0011",
+      "file": "/home/mativiters/1/xsarena/src/xsarena/interactive.py",
+      "count": 2
+    },
+    {
+      "path": ".lint/tickets/ticket_0012.json",
+      "id": "ticket_0012",
+      "file": "/home/mativiters/1/xsarena/src/xsarena/core/templates.py",
+      "count": 8
+    },
+    {
+      "path": ".lint/tickets/ticket_0013.json",
+      "id": "ticket_0013",
+      "file": "/home/mativiters/1/xsarena/src/xsarena/core/templates.py",
+      "count": 8
+    },
+    {
+      "path": ".lint/tickets/ticket_0014.json",
+      "id": "ticket_0014",
+      "file": "/home/mativiters/1/xsarena/src/xsarena/core/templates.py",
+      "count": 1
+    },
+    {
+      "path": ".lint/tickets/ticket_0015.json",
+      "id": "ticket_0015",
+      "file": "/home/mativiters/1/xsarena/lma_coder.py",
+      "count": 7
+    },
+    {
+      "path": ".lint/tickets/ticket_0016.json",
+      "id": "ticket_0016",
+      "file": "/home/mativiters/1/xsarena/src/xsarena/cli/cmds_lossless.py",
+      "count": 6
+    },
+    {
+      "path": ".lint/tickets/ticket_0017.json",
+      "id": "ticket_0017",
+      "file": "/home/mativiters/1/xsarena/src/xsarena/modes/book.py",
+      "count": 5
+    },
+    {
+      "path": ".lint/tickets/ticket_0018.json",
+      "id": "ticket_0018",
+      "file": "/home/mativiters/1/xsarena/src/xsarena/modes/bilingual.py",
+      "count": 3
+    },
+    {
+      "path": ".lint/tickets/ticket_0019.json",
+      "id": "ticket_0019",
+      "file": "/home/mativiters/1/xsarena/src/xsarena/modes/study.py",
+      "count": 3
+    },
+    {
+      "path": ".lint/tickets/ticket_0020.json",
+      "id": "ticket_0020",
+      "file": "/home/mativiters/1/xsarena/scripts/ruff_take.py",
+      "count": 2
+    },
+    {
+      "path": ".lint/tickets/ticket_0021.json",
+      "id": "ticket_0021",
+      "file": "/home/mativiters/1/xsarena/src/xsarena/gui/gtk_app.py",
+      "count": 2
+    },
+    {
+      "path": ".lint/tickets/ticket_0022.json",
+      "id": "ticket_0022",
+      "file": "/home/mativiters/1/xsarena/src/xsarena/cli/cmds_modes.py",
+      "count": 1
+    },
+    {
+      "path": ".lint/tickets/ticket_0023.json",
+      "id": "ticket_0023",
+      "file": "/home/mativiters/1/xsarena/src/xsarena/core/chunking.py",
+      "count": 1
+    },
+    {
+      "path": ".lint/tickets/ticket_0024.json",
+      "id": "ticket_0024",
+      "file": "/home/mativiters/1/xsarena/src/xsarena/core/engine.py",
+      "count": 1
+    },
+    {
+      "path": ".lint/tickets/ticket_0025.json",
+      "id": "ticket_0025",
+      "file": "/home/mativiters/1/xsarena/src/xsarena/modes/lossless.py",
+      "count": 1
+    }
+  ]
+}

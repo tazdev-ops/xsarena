@@ -90,9 +90,7 @@ async def startup_event():
 
 
 @app.post("/v1/chat/completions", response_model=ChatCompletionResponse)
-async def chat_completions(
-    request: ChatCompletionRequest, authorization: str = Depends(verify_api_key)
-):
+async def chat_completions(request: ChatCompletionRequest, authorization: str = Depends(verify_api_key)):
     """Handle chat completion requests compatible with OpenAI API."""
     global engine
 
@@ -101,9 +99,7 @@ async def chat_completions(
 
     try:
         # Convert messages to the format our engine expects
-        user_message = "\n".join(
-            [f"{msg.role}: {msg.content}" for msg in request.messages]
-        )
+        user_message = "\n".join([f"{msg.role}: {msg.content}" for msg in request.messages])
 
         # For now, use the first message as the primary input
         # In a full implementation, we'd process the full message history properly
@@ -169,9 +165,7 @@ def main():
     import argparse
     import os
 
-    parser = argparse.ArgumentParser(
-        description="XSArena OpenAI-Compatible API Server"
-    )
+    parser = argparse.ArgumentParser(description="XSArena OpenAI-Compatible API Server")
     parser.add_argument(
         "--port",
         "-p",

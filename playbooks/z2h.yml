@@ -1,0 +1,24 @@
+name: "Zero-to-Hero Book Generator"
+description: "Creates a comprehensive book from foundations to advanced practice with no-bs narrative overlay and hammer continuation"
+subject: "Placeholder - will be replaced by command line argument"
+outline_first: true
+hammer: true
+failover:
+  max_retries: 3
+  watchdog_secs: 45
+  fallback_backend: "openrouter"
+aids: ["cram","flashcards","glossary","index","audio"]
+continuation:
+  mode: "anchor"
+  minChars: 3000
+  pushPasses: 2
+system_text: |
+  You are creating an in-depth, comprehensive guide for a complex topic.
+  Approach this systematically:
+  - Start with foundations and essentials
+  - Use pedagogical principles: define terms before use, include short vignettes
+  - Build to advanced concepts and modern applications
+  - No-fluff writing style - be direct and actionable
+  - Use narrative flow to maintain engagement
+  - Include practical examples and common pitfalls
+  Maintain consistent depth throughout.

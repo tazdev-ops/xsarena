@@ -34,19 +34,12 @@ class SessionState:
     job_queue: List[Dict] = field(default_factory=list)
     settings: Dict = field(default_factory=dict)
     session_mode: Optional[str] = None  # e.g., "zero2hero", None otherwise
-    coverage_hammer_on: bool = (
-        True  # when True, add a minimal anti-wrap-up line to continue prompts
-    )
+    coverage_hammer_on: bool = True  # when True, add a minimal anti-wrap-up line to continue prompts
     output_budget_snippet_on: bool = True  # append system prompt addendum on book modes
-    output_push_on: bool = (
-        True  # auto-extend within the same subtopic to hit a min length
-    )
-    output_min_chars: int = (
-        4500  # target minimal chunk size before moving on (tune as needed)
-    )
-    output_push_max_passes: int = (
-        3  # at most N extra "continue within current subtopic" micro-steps
-    )
+    output_push_on: bool = True  # auto-extend within the same subtopic to hit a min length
+    output_min_chars: int = 4500  # target minimal chunk size before moving on (tune as needed)
+    output_push_max_passes: int = 3  # at most N extra "continue within current subtopic" micro-steps
+    watchdog_secs: int = 45  # seconds before watchdog cancels the stream
 
     def add_message(self, role: str, content: str):
         """Add a message to the history."""
@@ -77,6 +70,7 @@ class SessionState:
             "current_job_id": self.current_job_id,
             "job_queue": self.job_queue,
             "settings": self.settings,
+            "watchdog_secs": self.watchdog_secs,
         }
 
         with open(filepath, "w") as f:
@@ -102,15 +96,12 @@ class SessionState:
             current_job_id=state_dict.get("current_job_id"),
             job_queue=state_dict.get("job_queue", []),
             settings=state_dict.get("settings", {}),
+            watchdog_secs=state_dict.get("watchdog_secs", 45),
         )
 
         # Restore history
         for msg_dict in state_dict.get("history", []):
-            timestamp = (
-                datetime.fromisoformat(msg_dict["timestamp"])
-                if "timestamp" in msg_dict
-                else datetime.now()
-            )
+            timestamp = datetime.fromisoformat(msg_dict["timestamp"]) if "timestamp" in msg_dict else datetime.now()
             state.history.append(
                 Message(
                     role=msg_dict["role"],

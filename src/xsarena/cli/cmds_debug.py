@@ -62,11 +62,7 @@ def show_config():
 
 
 @app.command("save-state")
-def save_state(
-    filepath: str = typer.Argument(
-        "./.xsarena/session_state.json", help="Path to save state file"
-    )
-):
+def save_state(filepath: str = typer.Argument("./.xsarena/session_state.json", help="Path to save state file")):
     """Save current state to a file."""
     state = SessionState()
     state.save_to_file(filepath)
@@ -74,11 +70,7 @@ def save_state(
 
 
 @app.command("load-state")
-def load_state(
-    filepath: str = typer.Argument(
-        "./.xsarena/session_state.json", help="Path to load state file"
-    )
-):
+def load_state(filepath: str = typer.Argument("./.xsarena/session_state.json", help="Path to load state file")):
     """Load state from a file."""
     state = SessionState.load_from_file(filepath)
     # In a real implementation, we would update the active session with this state
@@ -87,9 +79,7 @@ def load_state(
 
 
 @app.command("toggle-redaction")
-def toggle_redaction(
-    enabled: bool = typer.Argument(..., help="Enable or disable redaction filter")
-):
+def toggle_redaction(enabled: bool = typer.Argument(..., help="Enable or disable redaction filter")):
     """Toggle the redaction filter."""
     if enabled:
         typer.echo("Redaction filter enabled: sensitive information will be filtered")

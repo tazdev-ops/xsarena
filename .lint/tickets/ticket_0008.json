@@ -1,0 +1,22 @@
+{
+  "id": "ticket_0008",
+  "file": "/home/mativiters/1/xsarena/lma_templates.py",
+  "rules": [
+    "E501"
+  ],
+  "issues": [
+    {
+      "code": "E501",
+      "message": "Line too long (135 > 120)",
+      "line": 198,
+      "col": 121
+    },
+    {
+      "code": "E501",
+      "message": "Line too long (196 > 120)",
+      "line": 282,
+      "col": 121
+    }
+  ],
+  "done": false
+}

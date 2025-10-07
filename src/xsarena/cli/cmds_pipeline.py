@@ -26,9 +26,7 @@ def _load_yaml_or_json(path: str) -> dict:
 @app.command("run")
 def pipeline_run(
     file: str = typer.Argument(..., help="Pipeline file (.yml/.yaml/.json)"),
-    apply: bool = typer.Option(
-        False, "--apply", help="Execute steps (default: dry-run)"
-    ),
+    apply: bool = typer.Option(False, "--apply", help="Execute steps (default: dry-run)"),
 ):
     """Run a project pipeline (fix → test → format → commit)."""
     if not os.path.exists(file):

@@ -37,9 +37,7 @@ def byte_chunk(text: str, max_bytes: int) -> List[Chunk]:
             elif last_sentence > max_bytes * 0.7:
                 end = start + last_sentence + 1
 
-        chunks.append(
-            Chunk(text=text[start:end], start_pos=start, end_pos=end, index=index)
-        )
+        chunks.append(Chunk(text=text[start:end], start_pos=start, end_pos=end, index=index))
 
         start = end
         index += 1
@@ -150,9 +148,7 @@ def continuation_anchor(history: List["Message"], anchor_length: int = 300) -> s
             s = prev[-anchor_length:]
             # trim to sentence boundary if possible
             p = max(s.rfind("."), s.rfind("!"), s.rfind("?"))
-            if (
-                p != -1 and p >= len(s) - 120
-            ):  # try to end on sentence end near the tail
+            if p != -1 and p >= len(s) - 120:  # try to end on sentence end near the tail
                 s = s[: p + 1]
             return s.strip()
 

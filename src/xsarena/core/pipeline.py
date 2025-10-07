@@ -8,9 +8,7 @@ def run_step(name: str, args: dict | None = None, apply: bool = False) -> dict:
 
     def _run(cmd: list[str]) -> dict:
         try:
-            proc = subprocess.run(
-                cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True
-            )
+            proc = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
             return {
                 "ok": proc.returncode == 0,
                 "code": proc.returncode,

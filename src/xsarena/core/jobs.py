@@ -101,12 +101,8 @@ class JobQueue:
                 "status": job.status,
                 "created_at": job.created_at.isoformat() if job.created_at else None,
                 "started_at": job.started_at.isoformat() if job.started_at else None,
-                "completed_at": (
-                    job.completed_at.isoformat() if job.completed_at else None
-                ),
-                "result": (
-                    str(job.result) if job.result else None
-                ),  # Store as string to avoid serialization issues
+                "completed_at": (job.completed_at.isoformat() if job.completed_at else None),
+                "result": (str(job.result) if job.result else None),  # Store as string to avoid serialization issues
                 "error": job.error,
             }
             state_data.append(job_dict)

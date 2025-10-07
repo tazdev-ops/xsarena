@@ -1,0 +1,7 @@
+:root {
+  --text-color: #222;
+  --heading-color: #111;
+}
+body { font-family: "DejaVu Serif", Georgia, serif; color: var(--text-color); line-height: 1.5; }
+h1,h2,h3 { color: var(--heading-color); margin-top: 1.2em; }
+code { font-family: "DejaVu Sans Mono", monospace; }

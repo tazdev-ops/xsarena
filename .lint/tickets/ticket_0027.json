@@ -1,0 +1,23 @@
+{
+  "id": "ticket_0027",
+  "file": "/home/mativiters/1/xsarena/scripts/ruff_take.py",
+  "rules": [
+    "E501",
+    "F841"
+  ],
+  "issues": [
+    {
+      "code": "E501",
+      "message": "Line too long (127 > 120)",
+      "line": 31,
+      "col": 121
+    },
+    {
+      "code": "F841",
+      "message": "Local variable `e` is assigned to but never used",
+      "line": 34,
+      "col": 29
+    }
+  ],
+  "done": false
+}

@@ -40,12 +40,8 @@ def start_bridge(
 
 @app.command("start-compat-api")
 def start_compat_api(
-    port: int = typer.Option(
-        8000, "--port", "-p", help="Port for the compatibility API server"
-    ),
-    host: str = typer.Option(
-        "127.0.0.1", "--host", help="Host for the compatibility API server"
-    ),
+    port: int = typer.Option(8000, "--port", "-p", help="Port for the compatibility API server"),
+    host: str = typer.Option("127.0.0.1", "--host", help="Host for the compatibility API server"),
 ):
     """Start the OpenAI-compatible API server on a specific port."""
     env = os.environ.copy()

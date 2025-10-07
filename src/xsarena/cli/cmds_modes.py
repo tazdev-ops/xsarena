@@ -24,9 +24,7 @@ def set_mode(mode: str = typer.Argument(..., help="Set mode to 'direct' or 'batt
 
 
 @app.command("battle-target")
-def set_battle_target(
-    target: str = typer.Argument(..., help="Set battle target to 'A' or 'B'")
-):
+def set_battle_target(target: str = typer.Argument(..., help="Set battle target to 'A' or 'B'")):
     """Set the battle target (A or B)."""
     if target.upper() not in ["A", "B"]:
         typer.echo("Target must be 'A' or 'B'")
@@ -36,11 +34,7 @@ def set_battle_target(
 
 
 @app.command("tavern")
-def set_tavern_mode(
-    enabled: bool = typer.Argument(
-        ..., help="Enable or disable tavern mode (True/False)"
-    )
-):
+def set_tavern_mode(enabled: bool = typer.Argument(..., help="Enable or disable tavern mode (True/False)")):
     """Enable or disable tavern mode (merge multiple system messages)."""
     if enabled:
         typer.echo("Tavern mode enabled: Multiple system messages will be merged")
@@ -49,31 +43,19 @@ def set_tavern_mode(
 
 
 @app.command("bypass")
-def set_bypass_mode(
-    enabled: bool = typer.Argument(
-        ..., help="Enable or disable bypass mode (True/False)"
-    )
-):
+def set_bypass_mode(enabled: bool = typer.Argument(..., help="Enable or disable bypass mode (True/False)")):
     """Enable or disable bypass mode (inject extra user message to bypass filters)."""
     if enabled:
-        typer.echo(
-            "Bypass mode enabled: Extra user message will be added to bypass filters"
-        )
+        typer.echo("Bypass mode enabled: Extra user message will be added to bypass filters")
     else:
         typer.echo("Bypass mode disabled")
 
 
 @app.command("image-handling")
-def set_image_handling(
-    enabled: bool = typer.Argument(
-        ..., help="Enable or disable image handling (True/False)"
-    )
-):
+def set_image_handling(enabled: bool = typer.Argument(..., help="Enable or disable image handling (True/False)")):
     """Enable or disable image handling (parse a2 image streams)."""
     if enabled:
-        typer.echo(
-            "Image handling enabled: a2 image streams will be converted to markdown format"
-        )
+        typer.echo("Image handling enabled: a2 image streams will be converted to markdown format")
     else:
         typer.echo("Image handling disabled")
 

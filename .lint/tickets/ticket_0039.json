@@ -1,0 +1,36 @@
+{
+  "id": "ticket_0039",
+  "file": "/home/mativiters/1/xsarena/scripts/ruff_batch.py",
+  "rules": [
+    "E401",
+    "F401",
+    "I001"
+  ],
+  "issues": [
+    {
+      "code": "E401",
+      "message": "Multiple imports on one line",
+      "line": 2,
+      "col": 1
+    },
+    {
+      "code": "I001",
+      "message": "Import block is un-sorted or un-formatted",
+      "line": 2,
+      "col": 1
+    },
+    {
+      "code": "F401",
+      "message": "`sys` imported but unused",
+      "line": 2,
+      "col": 18
+    },
+    {
+      "code": "F401",
+      "message": "`itertools` imported but unused",
+      "line": 2,
+      "col": 33
+    }
+  ],
+  "done": false
+}

@@ -23,9 +23,7 @@ Maintain the original meaning, tone, and context. Provide a natural translation 
         system_prompt = SYSTEM_PROMPTS["bilingual"]
         return await self.engine.send_and_collect(prompt, system_prompt)
 
-    async def alignment_check(
-        self, source_text: str, translated_text: str, source_lang: str, target_lang: str
-    ) -> str:
+    async def alignment_check(self, source_text: str, translated_text: str, source_lang: str, target_lang: str) -> str:
         """Check alignment between source and translated text."""
         prompt = f"""Analyze the alignment between this source text in {source_lang} and its translation in {target_lang}:
 
@@ -40,9 +38,7 @@ Provide an alignment analysis highlighting any discrepancies, omissions, or mist
         system_prompt = SYSTEM_PROMPTS["bilingual"]
         return await self.engine.send_and_collect(prompt, system_prompt)
 
-    async def swap_direction(
-        self, source_text: str, translated_text: str, source_lang: str, target_lang: str
-    ) -> str:
+    async def swap_direction(self, source_text: str, translated_text: str, source_lang: str, target_lang: str) -> str:
         """Swap the translation direction and verify consistency."""
         prompt = f"""You are provided with a text in {source_lang} and its translation in {target_lang}.
 Now translate the {target_lang} text back to {source_lang} to check consistency:
@@ -79,9 +75,7 @@ Provide an improved translation that better captures the meaning, tone, and nuan
         system_prompt = SYSTEM_PROMPTS["bilingual"]
         return await self.engine.send_and_collect(prompt, system_prompt)
 
-    async def glossary_build(
-        self, text: str, source_lang: str, target_lang: str
-    ) -> Dict[str, str]:
+    async def glossary_build(self, text: str, source_lang: str, target_lang: str) -> Dict[str, str]:
         """Build a glossary of key terms from bilingual text."""
         prompt = f"""Extract key terms and their translations from this bilingual text:
 

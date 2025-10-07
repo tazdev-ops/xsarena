@@ -1,0 +1,46 @@
+{
+  "id": "ticket_0036",
+  "file": "/home/mativiters/1/xsarena/src/xsarena/modes/book.py",
+  "rules": [
+    "E501"
+  ],
+  "issues": [
+    {
+      "code": "E501",
+      "message": "Line too long (145 > 100)",
+      "line": 22,
+      "col": 101
+    },
+    {
+      "code": "E501",
+      "message": "Line too long (134 > 100)",
+      "line": 39,
+      "col": 101
+    },
+    {
+      "code": "E501",
+      "message": "Line too long (141 > 100)",
+      "line": 52,
+      "col": 101
+    },
+    {
+      "code": "E501",
+      "message": "Line too long (125 > 100)",
+      "line": 65,
+      "col": 101
+    },
+    {
+      "code": "E501",
+      "message": "Line too long (138 > 100)",
+      "line": 78,
+      "col": 101
+    },
+    {
+      "code": "E501",
+      "message": "Line too long (141 > 100)",
+      "line": 89,
+      "col": 101
+    }
+  ],
+  "done": false
+}

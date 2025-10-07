@@ -24,6 +24,9 @@ dependencies = [
 tui = [
     "textual>=0.40.0"
 ]
+gtk = [
+    "PyGObject>=3.44"
+]
 dev = [
     "pytest>=7.0.0",
     "mypy>=1.0.0",
@@ -33,14 +36,26 @@ dev = [
 watch = [
     "watchdog>=3.0.0"
 ]
+audio = [
+    "edge-tts>=6.1.10",
+    "ebooklib>=0.18.0",
+    "beautifulsoup4>=4.12.0",
+    "pydub>=0.25.0"
+]
+metrics = [
+    "prometheus-client>=0.19.0"
+]
+cache = [
+    "redis>=4.0.0"
+]
 
 [project.scripts]
-xsarena = "xsarena.cli.core:main"
-xsarena-tui = "xsarena_tui:main"
-xsarena-bridge = "src.xsarena.bridge.server:main"
-# compatibility for one release cycle:
-lmastudio = "xsarena.cli.core:main"
-lmastudio-bridge = "src.xsarena.bridge.server:main"
+xsarena = "xsarena.cli.main:run"
+xsarena-bridge = "xsarena.bridge.server:main"
+xsarena-compat = "xsarena.bridge.compat_server:main"
+# Backward-compatible shims (kept one release cycle)
+lmastudio = "xsarena.cli.main:run"
+lmastudio-bridge = "xsarena.bridge.server:main"
 
 [project.urls]
 Homepage = "https://github.com/your-username/xsarena"
@@ -50,10 +65,26 @@ Repository = "https://github.com/your-username/xsarena"
 where = ["src"]
 
 [tool.ruff]
-line-length = 100
+line-length = 120
+extend-exclude = ["books", "snapshot_chunks", ".xsarena", ".lmastudio", "xsarena.egg-info"]
 
 [tool.ruff.lint]
-select = ["E", "W", "F", "I", "C", "B", "SIM"]
+select = ["E","F","I"]
+ignore = ["SIM"]
+fixable = ["A", "B", "C", "DTZ", "E", "F", "G", "I", "N", "PGH", "PIE", "PL", "PT", "PYI", "RUF", "S", "SIM", "UP", "W", "YTT"]
+unfixable = []
+
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = ["F401"]
+
+[tool.black]
+line-length = 120
+target-version = ["py39"]
+
+[tool.mypy]
+python_version = "3.9"
+ignore_missing_imports = true
+strict_optional = false
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

@@ -1,0 +1,2177 @@
+[
+  {
+    "cell": null,
+    "code": "E741",
+    "end_location": {
+      "column": 43,
+      "row": 545
+    },
+    "filename": "/home/mativiters/1/xsarena/lma_coder.py",
+    "fix": null,
+    "location": {
+      "column": 42,
+      "row": 545
+    },
+    "message": "Ambiguous variable name: `l`",
+    "noqa_row": 545,
+    "url": "https://docs.astral.sh/ruff/rules/ambiguous-variable-name"
+  },
+  {
+    "cell": null,
+    "code": "E741",
+    "end_location": {
+      "column": 18,
+      "row": 550
+    },
+    "filename": "/home/mativiters/1/xsarena/lma_coder.py",
+    "fix": null,
+    "location": {
+      "column": 17,
+      "row": 550
+    },
+    "message": "Ambiguous variable name: `l`",
+    "noqa_row": 550,
+    "url": "https://docs.astral.sh/ruff/rules/ambiguous-variable-name"
+  },
+  {
+    "cell": null,
+    "code": "E741",
+    "end_location": {
+      "column": 75,
+      "row": 561
+    },
+    "filename": "/home/mativiters/1/xsarena/lma_coder.py",
+    "fix": null,
+    "location": {
+      "column": 74,
+      "row": 561
+    },
+    "message": "Ambiguous variable name: `l`",
+    "noqa_row": 561,
+    "url": "https://docs.astral.sh/ruff/rules/ambiguous-variable-name"
+  },
+  {
+    "cell": null,
+    "code": "E402",
+    "end_location": {
+      "column": 16,
+      "row": 614
+    },
+    "filename": "/home/mativiters/1/xsarena/lma_coder.py",
+    "fix": null,
+    "location": {
+      "column": 1,
+      "row": 614
+    },
+    "message": "Module level import not at top of file",
+    "noqa_row": 614,
+    "url": "https://docs.astral.sh/ruff/rules/module-import-not-at-top-of-file"
+  },
+  {
+    "cell": null,
+    "code": "E402",
+    "end_location": {
+      "column": 18,
+      "row": 615
+    },
+    "filename": "/home/mativiters/1/xsarena/lma_coder.py",
+    "fix": null,
+    "location": {
+      "column": 1,
+      "row": 615
+    },
+    "message": "Module level import not at top of file",
+    "noqa_row": 615,
+    "url": "https://docs.astral.sh/ruff/rules/module-import-not-at-top-of-file"
+  },
+  {
+    "cell": null,
+    "code": "E402",
+    "end_location": {
+      "column": 24,
+      "row": 616
+    },
+    "filename": "/home/mativiters/1/xsarena/lma_coder.py",
+    "fix": null,
+    "location": {
+      "column": 1,
+      "row": 616
+    },
+    "message": "Module level import not at top of file",
+    "noqa_row": 616,
+    "url": "https://docs.astral.sh/ruff/rules/module-import-not-at-top-of-file"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 140,
+      "row": 1168
+    },
+    "filename": "/home/mativiters/1/xsarena/lma_coder.py",
+    "fix": null,
+    "location": {
+      "column": 121,
+      "row": 1168
+    },
+    "message": "Line too long (139 > 120)",
+    "noqa_row": 1168,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 134,
+      "row": 29
+    },
+    "filename": "/home/mativiters/1/xsarena/lma_templates.py",
+    "fix": null,
+    "location": {
+      "column": 121,
+      "row": 29
+    },
+    "message": "Line too long (133 > 120)",
+    "noqa_row": 30,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 139,
+      "row": 30
+    },
+    "filename": "/home/mativiters/1/xsarena/lma_templates.py",
+    "fix": null,
+    "location": {
+      "column": 121,
+      "row": 30
+    },
+    "message": "Line too long (138 > 120)",
+    "noqa_row": 30,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 196,
+      "row": 36
+    },
+    "filename": "/home/mativiters/1/xsarena/lma_templates.py",
+    "fix": null,
+    "location": {
+      "column": 121,
+      "row": 36
+    },
+    "message": "Line too long (195 > 120)",
+    "noqa_row": 74,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 195,
+      "row": 39
+    },
+    "filename": "/home/mativiters/1/xsarena/lma_templates.py",
+    "fix": null,
+    "location": {
+      "column": 121,
+      "row": 39
+    },
+    "message": "Line too long (194 > 120)",
+    "noqa_row": 74,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 158,
+      "row": 40
+    },
+    "filename": "/home/mativiters/1/xsarena/lma_templates.py",
+    "fix": null,
+    "location": {
+      "column": 121,
+      "row": 40
+    },
+    "message": "Line too long (157 > 120)",
+    "noqa_row": 74,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 185,
+      "row": 41
+    },
+    "filename": "/home/mativiters/1/xsarena/lma_templates.py",
+    "fix": null,
+    "location": {
+      "column": 121,
+      "row": 41
+    },
+    "message": "Line too long (184 > 120)",
+    "noqa_row": 74,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 125,
+      "row": 46
+    },
+    "filename": "/home/mativiters/1/xsarena/lma_templates.py",
+    "fix": null,
+    "location": {
+      "column": 121,
+      "row": 46
+    },
+    "message": "Line too long (124 > 120)",
+    "noqa_row": 74,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 152,
+      "row": 57
+    },
+    "filename": "/home/mativiters/1/xsarena/lma_templates.py",
+    "fix": null,
+    "location": {
+      "column": 121,
+      "row": 57
+    },
+    "message": "Line too long (151 > 120)",
+    "noqa_row": 74,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 127,
+      "row": 69
+    },
+    "filename": "/home/mativiters/1/xsarena/lma_templates.py",
+    "fix": null,
+    "location": {
+      "column": 121,
+      "row": 69
+    },
+    "message": "Line too long (126 > 120)",
+    "noqa_row": 74,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 144,
+      "row": 98
+    },
+    "filename": "/home/mativiters/1/xsarena/lma_templates.py",
+    "fix": null,
+    "location": {
+      "column": 121,
+      "row": 98
+    },
+    "message": "Line too long (143 > 120)",
+    "noqa_row": 101,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 330,
+      "row": 161
+    },
+    "filename": "/home/mativiters/1/xsarena/lma_templates.py",
+    "fix": null,
+    "location": {
+      "column": 121,
+      "row": 161
+    },
+    "message": "Line too long (329 > 120)",
+    "noqa_row": 178,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 213,
+      "row": 165
+    },
+    "filename": "/home/mativiters/1/xsarena/lma_templates.py",
+    "fix": null,
+    "location": {
+      "column": 121,
+      "row": 165
+    },
+    "message": "Line too long (212 > 120)",
+    "noqa_row": 178,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 139,
+      "row": 166
+    },
+    "filename": "/home/mativiters/1/xsarena/lma_templates.py",
+    "fix": null,
+    "location": {
+      "column": 121,
+      "row": 166
+    },
+    "message": "Line too long (138 > 120)",
+    "noqa_row": 178,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 156,
+      "row": 167
+    },
+    "filename": "/home/mativiters/1/xsarena/lma_templates.py",
+    "fix": null,
+    "location": {
+      "column": 121,
+      "row": 167
+    },
+    "message": "Line too long (155 > 120)",
+    "noqa_row": 178,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 123,
+      "row": 173
+    },
+    "filename": "/home/mativiters/1/xsarena/lma_templates.py",
+    "fix": null,
+    "location": {
+      "column": 121,
+      "row": 173
+    },
+    "message": "Line too long (122 > 120)",
+    "noqa_row": 178,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 131,
+      "row": 197
+    },
+    "filename": "/home/mativiters/1/xsarena/lma_templates.py",
+    "fix": null,
+    "location": {
+      "column": 121,
+      "row": 197
+    },
+    "message": "Line too long (130 > 120)",
+    "noqa_row": 198,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 136,
+      "row": 198
+    },
+    "filename": "/home/mativiters/1/xsarena/lma_templates.py",
+    "fix": null,
+    "location": {
+      "column": 121,
+      "row": 198
+    },
+    "message": "Line too long (135 > 120)",
+    "noqa_row": 198,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 197,
+      "row": 282
+    },
+    "filename": "/home/mativiters/1/xsarena/lma_templates.py",
+    "fix": null,
+    "location": {
+      "column": 121,
+      "row": 282
+    },
+    "message": "Line too long (196 > 120)",
+    "noqa_row": 287,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 128,
+      "row": 31
+    },
+    "filename": "/home/mativiters/1/xsarena/scripts/ruff_take.py",
+    "fix": null,
+    "location": {
+      "column": 121,
+      "row": 31
+    },
+    "message": "Line too long (127 > 120)",
+    "noqa_row": 31,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "F841",
+    "end_location": {
+      "column": 30,
+      "row": 34
+    },
+    "filename": "/home/mativiters/1/xsarena/scripts/ruff_take.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "",
+          "end_location": {
+            "column": 30,
+            "row": 34
+          },
+          "location": {
+            "column": 25,
+            "row": 34
+          }
+        }
+      ],
+      "message": "Remove assignment to unused variable `e`"
+    },
+    "location": {
+      "column": 29,
+      "row": 34
+    },
+    "message": "Local variable `e` is assigned to but never used",
+    "noqa_row": 34,
+    "url": "https://docs.astral.sh/ruff/rules/unused-variable"
+  },
+  {
+    "cell": null,
+    "code": "F821",
+    "end_location": {
+      "column": 21,
+      "row": 28
+    },
+    "filename": "/home/mativiters/1/xsarena/src/xsarena/cli/cmds_lossless.py",
+    "fix": null,
+    "location": {
+      "column": 14,
+      "row": 28
+    },
+    "message": "Undefined name `asyncio`",
+    "noqa_row": 28,
+    "url": "https://docs.astral.sh/ruff/rules/undefined-name"
+  },
+  {
+    "cell": null,
+    "code": "F821",
+    "end_location": {
+      "column": 21,
+      "row": 48
+    },
+    "filename": "/home/mativiters/1/xsarena/src/xsarena/cli/cmds_lossless.py",
+    "fix": null,
+    "location": {
+      "column": 14,
+      "row": 48
+    },
+    "message": "Undefined name `asyncio`",
+    "noqa_row": 48,
+    "url": "https://docs.astral.sh/ruff/rules/undefined-name"
+  },
+  {
+    "cell": null,
+    "code": "F821",
+    "end_location": {
+      "column": 21,
+      "row": 68
+    },
+    "filename": "/home/mativiters/1/xsarena/src/xsarena/cli/cmds_lossless.py",
+    "fix": null,
+    "location": {
+      "column": 14,
+      "row": 68
+    },
+    "message": "Undefined name `asyncio`",
+    "noqa_row": 68,
+    "url": "https://docs.astral.sh/ruff/rules/undefined-name"
+  },
+  {
+    "cell": null,
+    "code": "F821",
+    "end_location": {
+      "column": 21,
+      "row": 86
+    },
+    "filename": "/home/mativiters/1/xsarena/src/xsarena/cli/cmds_lossless.py",
+    "fix": null,
+    "location": {
+      "column": 14,
+      "row": 86
+    },
+    "message": "Undefined name `asyncio`",
+    "noqa_row": 86,
+    "url": "https://docs.astral.sh/ruff/rules/undefined-name"
+  },
+  {
+    "cell": null,
+    "code": "F821",
+    "end_location": {
+      "column": 21,
+      "row": 106
+    },
+    "filename": "/home/mativiters/1/xsarena/src/xsarena/cli/cmds_lossless.py",
+    "fix": null,
+    "location": {
+      "column": 14,
+      "row": 106
+    },
+    "message": "Undefined name `asyncio`",
+    "noqa_row": 106,
+    "url": "https://docs.astral.sh/ruff/rules/undefined-name"
+  },
+  {
+    "cell": null,
+    "code": "F821",
+    "end_location": {
+      "column": 21,
+      "row": 126
+    },
+    "filename": "/home/mativiters/1/xsarena/src/xsarena/cli/cmds_lossless.py",
+    "fix": null,
+    "location": {
+      "column": 14,
+      "row": 126
+    },
+    "message": "Undefined name `asyncio`",
+    "noqa_row": 126,
+    "url": "https://docs.astral.sh/ruff/rules/undefined-name"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 142,
+      "row": 73
+    },
+    "filename": "/home/mativiters/1/xsarena/src/xsarena/cli/cmds_modes.py",
+    "fix": null,
+    "location": {
+      "column": 121,
+      "row": 73
+    },
+    "message": "Line too long (141 > 120)",
+    "noqa_row": 73,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "F821",
+    "end_location": {
+      "column": 47,
+      "row": 137
+    },
+    "filename": "/home/mativiters/1/xsarena/src/xsarena/core/chunking.py",
+    "fix": null,
+    "location": {
+      "column": 40,
+      "row": 137
+    },
+    "message": "Undefined name `Message`",
+    "noqa_row": 137,
+    "url": "https://docs.astral.sh/ruff/rules/undefined-name"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 168,
+      "row": 165
+    },
+    "filename": "/home/mativiters/1/xsarena/src/xsarena/core/engine.py",
+    "fix": null,
+    "location": {
+      "column": 121,
+      "row": 165
+    },
+    "message": "Line too long (167 > 120)",
+    "noqa_row": 165,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 131,
+      "row": 6
+    },
+    "filename": "/home/mativiters/1/xsarena/src/xsarena/core/templates.py",
+    "fix": null,
+    "location": {
+      "column": 121,
+      "row": 6
+    },
+    "message": "Line too long (130 > 120)",
+    "noqa_row": 7,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 136,
+      "row": 7
+    },
+    "filename": "/home/mativiters/1/xsarena/src/xsarena/core/templates.py",
+    "fix": null,
+    "location": {
+      "column": 121,
+      "row": 7
+    },
+    "message": "Line too long (135 > 120)",
+    "noqa_row": 7,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 196,
+      "row": 17
+    },
+    "filename": "/home/mativiters/1/xsarena/src/xsarena/core/templates.py",
+    "fix": null,
+    "location": {
+      "column": 121,
+      "row": 17
+    },
+    "message": "Line too long (195 > 120)",
+    "noqa_row": 55,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 195,
+      "row": 20
+    },
+    "filename": "/home/mativiters/1/xsarena/src/xsarena/core/templates.py",
+    "fix": null,
+    "location": {
+      "column": 121,
+      "row": 20
+    },
+    "message": "Line too long (194 > 120)",
+    "noqa_row": 55,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 158,
+      "row": 21
+    },
+    "filename": "/home/mativiters/1/xsarena/src/xsarena/core/templates.py",
+    "fix": null,
+    "location": {
+      "column": 121,
+      "row": 21
+    },
+    "message": "Line too long (157 > 120)",
+    "noqa_row": 55,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 185,
+      "row": 22
+    },
+    "filename": "/home/mativiters/1/xsarena/src/xsarena/core/templates.py",
+    "fix": null,
+    "location": {
+      "column": 121,
+      "row": 22
+    },
+    "message": "Line too long (184 > 120)",
+    "noqa_row": 55,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 125,
+      "row": 27
+    },
+    "filename": "/home/mativiters/1/xsarena/src/xsarena/core/templates.py",
+    "fix": null,
+    "location": {
+      "column": 121,
+      "row": 27
+    },
+    "message": "Line too long (124 > 120)",
+    "noqa_row": 55,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 152,
+      "row": 38
+    },
+    "filename": "/home/mativiters/1/xsarena/src/xsarena/core/templates.py",
+    "fix": null,
+    "location": {
+      "column": 121,
+      "row": 38
+    },
+    "message": "Line too long (151 > 120)",
+    "noqa_row": 55,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 127,
+      "row": 50
+    },
+    "filename": "/home/mativiters/1/xsarena/src/xsarena/core/templates.py",
+    "fix": null,
+    "location": {
+      "column": 121,
+      "row": 50
+    },
+    "message": "Line too long (126 > 120)",
+    "noqa_row": 55,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 130,
+      "row": 62
+    },
+    "filename": "/home/mativiters/1/xsarena/src/xsarena/core/templates.py",
+    "fix": null,
+    "location": {
+      "column": 121,
+      "row": 62
+    },
+    "message": "Line too long (129 > 120)",
+    "noqa_row": 63,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 139,
+      "row": 72
+    },
+    "filename": "/home/mativiters/1/xsarena/src/xsarena/core/templates.py",
+    "fix": null,
+    "location": {
+      "column": 121,
+      "row": 72
+    },
+    "message": "Line too long (138 > 120)",
+    "noqa_row": 72,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 143,
+      "row": 73
+    },
+    "filename": "/home/mativiters/1/xsarena/src/xsarena/core/templates.py",
+    "fix": null,
+    "location": {
+      "column": 121,
+      "row": 73
+    },
+    "message": "Line too long (142 > 120)",
+    "noqa_row": 73,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 164,
+      "row": 74
+    },
+    "filename": "/home/mativiters/1/xsarena/src/xsarena/core/templates.py",
+    "fix": null,
+    "location": {
+      "column": 121,
+      "row": 74
+    },
+    "message": "Line too long (163 > 120)",
+    "noqa_row": 74,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 134,
+      "row": 75
+    },
+    "filename": "/home/mativiters/1/xsarena/src/xsarena/core/templates.py",
+    "fix": null,
+    "location": {
+      "column": 121,
+      "row": 75
+    },
+    "message": "Line too long (133 > 120)",
+    "noqa_row": 75,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 145,
+      "row": 76
+    },
+    "filename": "/home/mativiters/1/xsarena/src/xsarena/core/templates.py",
+    "fix": null,
+    "location": {
+      "column": 121,
+      "row": 76
+    },
+    "message": "Line too long (144 > 120)",
+    "noqa_row": 76,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 132,
+      "row": 77
+    },
+    "filename": "/home/mativiters/1/xsarena/src/xsarena/core/templates.py",
+    "fix": null,
+    "location": {
+      "column": 121,
+      "row": 77
+    },
+    "message": "Line too long (131 > 120)",
+    "noqa_row": 77,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 127,
+      "row": 87
+    },
+    "filename": "/home/mativiters/1/xsarena/src/xsarena/core/templates.py",
+    "fix": null,
+    "location": {
+      "column": 121,
+      "row": 87
+    },
+    "message": "Line too long (126 > 120)",
+    "noqa_row": 90,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E402",
+    "end_location": {
+      "column": 18,
+      "row": 24
+    },
+    "filename": "/home/mativiters/1/xsarena/src/xsarena/gui/gtk_app.py",
+    "fix": null,
+    "location": {
+      "column": 1,
+      "row": 24
+    },
+    "message": "Module level import not at top of file",
+    "noqa_row": 24,
+    "url": "https://docs.astral.sh/ruff/rules/module-import-not-at-top-of-file"
+  },
+  {
+    "cell": null,
+    "code": "E402",
+    "end_location": {
+      "column": 41,
+      "row": 26
+    },
+    "filename": "/home/mativiters/1/xsarena/src/xsarena/gui/gtk_app.py",
+    "fix": null,
+    "location": {
+      "column": 1,
+      "row": 26
+    },
+    "message": "Module level import not at top of file",
+    "noqa_row": 26,
+    "url": "https://docs.astral.sh/ruff/rules/module-import-not-at-top-of-file"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 197,
+      "row": 330
+    },
+    "filename": "/home/mativiters/1/xsarena/src/xsarena/interactive.py",
+    "fix": null,
+    "location": {
+      "column": 121,
+      "row": 330
+    },
+    "message": "Line too long (196 > 120)",
+    "noqa_row": 335,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 148,
+      "row": 654
+    },
+    "filename": "/home/mativiters/1/xsarena/src/xsarena/interactive.py",
+    "fix": null,
+    "location": {
+      "column": 121,
+      "row": 654
+    },
+    "message": "Line too long (147 > 120)",
+    "noqa_row": 654,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 164,
+      "row": 830
+    },
+    "filename": "/home/mativiters/1/xsarena/src/xsarena/interactive.py",
+    "fix": null,
+    "location": {
+      "column": 121,
+      "row": 830
+    },
+    "message": "Line too long (163 > 120)",
+    "noqa_row": 830,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 132,
+      "row": 1004
+    },
+    "filename": "/home/mativiters/1/xsarena/src/xsarena/interactive.py",
+    "fix": null,
+    "location": {
+      "column": 121,
+      "row": 1004
+    },
+    "message": "Line too long (131 > 120)",
+    "noqa_row": 1004,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 126,
+      "row": 1273
+    },
+    "filename": "/home/mativiters/1/xsarena/src/xsarena/interactive.py",
+    "fix": null,
+    "location": {
+      "column": 121,
+      "row": 1273
+    },
+    "message": "Line too long (125 > 120)",
+    "noqa_row": 1273,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 125,
+      "row": 1546
+    },
+    "filename": "/home/mativiters/1/xsarena/src/xsarena/interactive.py",
+    "fix": null,
+    "location": {
+      "column": 121,
+      "row": 1546
+    },
+    "message": "Line too long (124 > 120)",
+    "noqa_row": 1546,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 146,
+      "row": 1581
+    },
+    "filename": "/home/mativiters/1/xsarena/src/xsarena/interactive.py",
+    "fix": null,
+    "location": {
+      "column": 121,
+      "row": 1581
+    },
+    "message": "Line too long (145 > 120)",
+    "noqa_row": 1581,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 138,
+      "row": 1641
+    },
+    "filename": "/home/mativiters/1/xsarena/src/xsarena/interactive.py",
+    "fix": null,
+    "location": {
+      "column": 121,
+      "row": 1641
+    },
+    "message": "Line too long (137 > 120)",
+    "noqa_row": 1641,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 134,
+      "row": 1680
+    },
+    "filename": "/home/mativiters/1/xsarena/src/xsarena/interactive.py",
+    "fix": null,
+    "location": {
+      "column": 121,
+      "row": 1680
+    },
+    "message": "Line too long (133 > 120)",
+    "noqa_row": 1680,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 139,
+      "row": 1745
+    },
+    "filename": "/home/mativiters/1/xsarena/src/xsarena/interactive.py",
+    "fix": null,
+    "location": {
+      "column": 121,
+      "row": 1745
+    },
+    "message": "Line too long (138 > 120)",
+    "noqa_row": 1745,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 124,
+      "row": 1876
+    },
+    "filename": "/home/mativiters/1/xsarena/src/xsarena/interactive.py",
+    "fix": null,
+    "location": {
+      "column": 121,
+      "row": 1876
+    },
+    "message": "Line too long (123 > 120)",
+    "noqa_row": 1876,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 183,
+      "row": 2064
+    },
+    "filename": "/home/mativiters/1/xsarena/src/xsarena/interactive.py",
+    "fix": null,
+    "location": {
+      "column": 121,
+      "row": 2064
+    },
+    "message": "Line too long (182 > 120)",
+    "noqa_row": 2064,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 144,
+      "row": 2067
+    },
+    "filename": "/home/mativiters/1/xsarena/src/xsarena/interactive.py",
+    "fix": null,
+    "location": {
+      "column": 121,
+      "row": 2067
+    },
+    "message": "Line too long (143 > 120)",
+    "noqa_row": 2067,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 144,
+      "row": 2094
+    },
+    "filename": "/home/mativiters/1/xsarena/src/xsarena/interactive.py",
+    "fix": null,
+    "location": {
+      "column": 121,
+      "row": 2094
+    },
+    "message": "Line too long (143 > 120)",
+    "noqa_row": 2094,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 136,
+      "row": 3013
+    },
+    "filename": "/home/mativiters/1/xsarena/src/xsarena/interactive.py",
+    "fix": null,
+    "location": {
+      "column": 121,
+      "row": 3013
+    },
+    "message": "Line too long (135 > 120)",
+    "noqa_row": 3013,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 122,
+      "row": 3776
+    },
+    "filename": "/home/mativiters/1/xsarena/src/xsarena/interactive.py",
+    "fix": null,
+    "location": {
+      "column": 121,
+      "row": 3776
+    },
+    "message": "Line too long (121 > 120)",
+    "noqa_row": 3776,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 125,
+      "row": 4138
+    },
+    "filename": "/home/mativiters/1/xsarena/src/xsarena/interactive.py",
+    "fix": null,
+    "location": {
+      "column": 121,
+      "row": 4138
+    },
+    "message": "Line too long (124 > 120)",
+    "noqa_row": 4138,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 140,
+      "row": 4142
+    },
+    "filename": "/home/mativiters/1/xsarena/src/xsarena/interactive.py",
+    "fix": null,
+    "location": {
+      "column": 121,
+      "row": 4142
+    },
+    "message": "Line too long (139 > 120)",
+    "noqa_row": 4142,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "invalid-syntax",
+    "end_location": {
+      "column": 26,
+      "row": 4667
+    },
+    "filename": "/home/mativiters/1/xsarena/src/xsarena/interactive.py",
+    "fix": null,
+    "location": {
+      "column": 25,
+      "row": 4667
+    },
+    "message": "Expected a newline after line continuation character",
+    "noqa_row": null,
+    "url": null
+  },
+  {
+    "cell": null,
+    "code": "invalid-syntax",
+    "end_location": {
+      "column": 35,
+      "row": 4667
+    },
+    "filename": "/home/mativiters/1/xsarena/src/xsarena/interactive.py",
+    "fix": null,
+    "location": {
+      "column": 31,
+      "row": 4667
+    },
+    "message": "Simple statements must be separated by newlines or semicolons",
+    "noqa_row": null,
+    "url": null
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 123,
+      "row": 28
+    },
+    "filename": "/home/mativiters/1/xsarena/src/xsarena/modes/bilingual.py",
+    "fix": null,
+    "location": {
+      "column": 121,
+      "row": 28
+    },
+    "message": "Line too long (122 > 120)",
+    "noqa_row": 36,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 149,
+      "row": 36
+    },
+    "filename": "/home/mativiters/1/xsarena/src/xsarena/modes/bilingual.py",
+    "fix": null,
+    "location": {
+      "column": 121,
+      "row": 36
+    },
+    "message": "Line too long (148 > 120)",
+    "noqa_row": 36,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 171,
+      "row": 85
+    },
+    "filename": "/home/mativiters/1/xsarena/src/xsarena/modes/bilingual.py",
+    "fix": null,
+    "location": {
+      "column": 121,
+      "row": 85
+    },
+    "message": "Line too long (170 > 120)",
+    "noqa_row": 85,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 146,
+      "row": 22
+    },
+    "filename": "/home/mativiters/1/xsarena/src/xsarena/modes/book.py",
+    "fix": null,
+    "location": {
+      "column": 121,
+      "row": 22
+    },
+    "message": "Line too long (145 > 120)",
+    "noqa_row": 22,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 135,
+      "row": 39
+    },
+    "filename": "/home/mativiters/1/xsarena/src/xsarena/modes/book.py",
+    "fix": null,
+    "location": {
+      "column": 121,
+      "row": 39
+    },
+    "message": "Line too long (134 > 120)",
+    "noqa_row": 39,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 142,
+      "row": 52
+    },
+    "filename": "/home/mativiters/1/xsarena/src/xsarena/modes/book.py",
+    "fix": null,
+    "location": {
+      "column": 121,
+      "row": 52
+    },
+    "message": "Line too long (141 > 120)",
+    "noqa_row": 52,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 139,
+      "row": 80
+    },
+    "filename": "/home/mativiters/1/xsarena/src/xsarena/modes/book.py",
+    "fix": null,
+    "location": {
+      "column": 121,
+      "row": 80
+    },
+    "message": "Line too long (138 > 120)",
+    "noqa_row": 80,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 142,
+      "row": 91
+    },
+    "filename": "/home/mativiters/1/xsarena/src/xsarena/modes/book.py",
+    "fix": null,
+    "location": {
+      "column": 121,
+      "row": 91
+    },
+    "message": "Line too long (141 > 120)",
+    "noqa_row": 91,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 141,
+      "row": 26
+    },
+    "filename": "/home/mativiters/1/xsarena/src/xsarena/modes/lossless.py",
+    "fix": null,
+    "location": {
+      "column": 121,
+      "row": 26
+    },
+    "message": "Line too long (140 > 120)",
+    "noqa_row": 30,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 124,
+      "row": 17
+    },
+    "filename": "/home/mativiters/1/xsarena/src/xsarena/modes/study.py",
+    "fix": null,
+    "location": {
+      "column": 121,
+      "row": 17
+    },
+    "message": "Line too long (123 > 120)",
+    "noqa_row": 19,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 175,
+      "row": 26
+    },
+    "filename": "/home/mativiters/1/xsarena/src/xsarena/modes/study.py",
+    "fix": null,
+    "location": {
+      "column": 121,
+      "row": 26
+    },
+    "message": "Line too long (174 > 120)",
+    "noqa_row": 30,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 137,
+      "row": 64
+    },
+    "filename": "/home/mativiters/1/xsarena/src/xsarena/modes/study.py",
+    "fix": null,
+    "location": {
+      "column": 121,
+      "row": 64
+    },
+    "message": "Line too long (136 > 120)",
+    "noqa_row": 64,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 197,
+      "row": 328
+    },
+    "filename": "/home/mativiters/1/xsarena/xsarena_cli.py",
+    "fix": null,
+    "location": {
+      "column": 121,
+      "row": 328
+    },
+    "message": "Line too long (196 > 120)",
+    "noqa_row": 333,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 148,
+      "row": 639
+    },
+    "filename": "/home/mativiters/1/xsarena/xsarena_cli.py",
+    "fix": null,
+    "location": {
+      "column": 121,
+      "row": 639
+    },
+    "message": "Line too long (147 > 120)",
+    "noqa_row": 639,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 164,
+      "row": 808
+    },
+    "filename": "/home/mativiters/1/xsarena/xsarena_cli.py",
+    "fix": null,
+    "location": {
+      "column": 121,
+      "row": 808
+    },
+    "message": "Line too long (163 > 120)",
+    "noqa_row": 808,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 132,
+      "row": 959
+    },
+    "filename": "/home/mativiters/1/xsarena/xsarena_cli.py",
+    "fix": null,
+    "location": {
+      "column": 121,
+      "row": 959
+    },
+    "message": "Line too long (131 > 120)",
+    "noqa_row": 959,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 125,
+      "row": 1481
+    },
+    "filename": "/home/mativiters/1/xsarena/xsarena_cli.py",
+    "fix": null,
+    "location": {
+      "column": 121,
+      "row": 1481
+    },
+    "message": "Line too long (124 > 120)",
+    "noqa_row": 1481,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 146,
+      "row": 1516
+    },
+    "filename": "/home/mativiters/1/xsarena/xsarena_cli.py",
+    "fix": null,
+    "location": {
+      "column": 121,
+      "row": 1516
+    },
+    "message": "Line too long (145 > 120)",
+    "noqa_row": 1516,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 138,
+      "row": 1574
+    },
+    "filename": "/home/mativiters/1/xsarena/xsarena_cli.py",
+    "fix": null,
+    "location": {
+      "column": 121,
+      "row": 1574
+    },
+    "message": "Line too long (137 > 120)",
+    "noqa_row": 1574,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 134,
+      "row": 1611
+    },
+    "filename": "/home/mativiters/1/xsarena/xsarena_cli.py",
+    "fix": null,
+    "location": {
+      "column": 121,
+      "row": 1611
+    },
+    "message": "Line too long (133 > 120)",
+    "noqa_row": 1611,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 139,
+      "row": 1676
+    },
+    "filename": "/home/mativiters/1/xsarena/xsarena_cli.py",
+    "fix": null,
+    "location": {
+      "column": 121,
+      "row": 1676
+    },
+    "message": "Line too long (138 > 120)",
+    "noqa_row": 1676,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 183,
+      "row": 1943
+    },
+    "filename": "/home/mativiters/1/xsarena/xsarena_cli.py",
+    "fix": null,
+    "location": {
+      "column": 121,
+      "row": 1943
+    },
+    "message": "Line too long (182 > 120)",
+    "noqa_row": 1943,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 144,
+      "row": 1946
+    },
+    "filename": "/home/mativiters/1/xsarena/xsarena_cli.py",
+    "fix": null,
+    "location": {
+      "column": 121,
+      "row": 1946
+    },
+    "message": "Line too long (143 > 120)",
+    "noqa_row": 1946,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 144,
+      "row": 1973
+    },
+    "filename": "/home/mativiters/1/xsarena/xsarena_cli.py",
+    "fix": null,
+    "location": {
+      "column": 121,
+      "row": 1973
+    },
+    "message": "Line too long (143 > 120)",
+    "noqa_row": 1973,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E722",
+    "end_location": {
+      "column": 23,
+      "row": 2263
+    },
+    "filename": "/home/mativiters/1/xsarena/xsarena_cli.py",
+    "fix": null,
+    "location": {
+      "column": 17,
+      "row": 2263
+    },
+    "message": "Do not use bare `except`",
+    "noqa_row": 2263,
+    "url": "https://docs.astral.sh/ruff/rules/bare-except"
+  },
+  {
+    "cell": null,
+    "code": "E722",
+    "end_location": {
+      "column": 23,
+      "row": 2276
+    },
+    "filename": "/home/mativiters/1/xsarena/xsarena_cli.py",
+    "fix": null,
+    "location": {
+      "column": 17,
+      "row": 2276
+    },
+    "message": "Do not use bare `except`",
+    "noqa_row": 2276,
+    "url": "https://docs.astral.sh/ruff/rules/bare-except"
+  },
+  {
+    "cell": null,
+    "code": "E722",
+    "end_location": {
+      "column": 23,
+      "row": 2297
+    },
+    "filename": "/home/mativiters/1/xsarena/xsarena_cli.py",
+    "fix": null,
+    "location": {
+      "column": 17,
+      "row": 2297
+    },
+    "message": "Do not use bare `except`",
+    "noqa_row": 2297,
+    "url": "https://docs.astral.sh/ruff/rules/bare-except"
+  },
+  {
+    "cell": null,
+    "code": "F821",
+    "end_location": {
+      "column": 35,
+      "row": 2327
+    },
+    "filename": "/home/mativiters/1/xsarena/xsarena_cli.py",
+    "fix": null,
+    "location": {
+      "column": 23,
+      "row": 2327
+    },
+    "message": "Undefined name `_ingest_loop`",
+    "noqa_row": 2327,
+    "url": "https://docs.astral.sh/ruff/rules/undefined-name"
+  },
+  {
+    "cell": null,
+    "code": "F821",
+    "end_location": {
+      "column": 35,
+      "row": 2336
+    },
+    "filename": "/home/mativiters/1/xsarena/xsarena_cli.py",
+    "fix": null,
+    "location": {
+      "column": 23,
+      "row": 2336
+    },
+    "message": "Undefined name `_ingest_loop`",
+    "noqa_row": 2336,
+    "url": "https://docs.astral.sh/ruff/rules/undefined-name"
+  },
+  {
+    "cell": null,
+    "code": "F821",
+    "end_location": {
+      "column": 39,
+      "row": 2386
+    },
+    "filename": "/home/mativiters/1/xsarena/xsarena_cli.py",
+    "fix": null,
+    "location": {
+      "column": 23,
+      "row": 2386
+    },
+    "message": "Undefined name `_flashcards_from`",
+    "noqa_row": 2386,
+    "url": "https://docs.astral.sh/ruff/rules/undefined-name"
+  },
+  {
+    "cell": null,
+    "code": "F821",
+    "end_location": {
+      "column": 37,
+      "row": 2392
+    },
+    "filename": "/home/mativiters/1/xsarena/xsarena_cli.py",
+    "fix": null,
+    "location": {
+      "column": 23,
+      "row": 2392
+    },
+    "message": "Undefined name `_glossary_from`",
+    "noqa_row": 2392,
+    "url": "https://docs.astral.sh/ruff/rules/undefined-name"
+  },
+  {
+    "cell": null,
+    "code": "F821",
+    "end_location": {
+      "column": 34,
+      "row": 2398
+    },
+    "filename": "/home/mativiters/1/xsarena/xsarena_cli.py",
+    "fix": null,
+    "location": {
+      "column": 23,
+      "row": 2398
+    },
+    "message": "Undefined name `_index_from`",
+    "noqa_row": 2398,
+    "url": "https://docs.astral.sh/ruff/rules/undefined-name"
+  },
+  {
+    "cell": null,
+    "code": "F821",
+    "end_location": {
+      "column": 34,
+      "row": 2415
+    },
+    "filename": "/home/mativiters/1/xsarena/xsarena_cli.py",
+    "fix": null,
+    "location": {
+      "column": 19,
+      "row": 2415
+    },
+    "message": "Undefined name `_translate_file`",
+    "noqa_row": 2415,
+    "url": "https://docs.astral.sh/ruff/rules/undefined-name"
+  },
+  {
+    "cell": null,
+    "code": "F821",
+    "end_location": {
+      "column": 37,
+      "row": 2420
+    },
+    "filename": "/home/mativiters/1/xsarena/xsarena_cli.py",
+    "fix": null,
+    "location": {
+      "column": 23,
+      "row": 2420
+    },
+    "message": "Undefined name `_style_capture`",
+    "noqa_row": 2420,
+    "url": "https://docs.astral.sh/ruff/rules/undefined-name"
+  },
+  {
+    "cell": null,
+    "code": "F821",
+    "end_location": {
+      "column": 44,
+      "row": 2427
+    },
+    "filename": "/home/mativiters/1/xsarena/xsarena_cli.py",
+    "fix": null,
+    "location": {
+      "column": 32,
+      "row": 2427
+    },
+    "message": "Undefined name `_style_apply`",
+    "noqa_row": 2427,
+    "url": "https://docs.astral.sh/ruff/rules/undefined-name"
+  },
+  {
+    "cell": null,
+    "code": "E722",
+    "end_location": {
+      "column": 23,
+      "row": 2502
+    },
+    "filename": "/home/mativiters/1/xsarena/xsarena_cli.py",
+    "fix": null,
+    "location": {
+      "column": 17,
+      "row": 2502
+    },
+    "message": "Do not use bare `except`",
+    "noqa_row": 2502,
+    "url": "https://docs.astral.sh/ruff/rules/bare-except"
+  },
+  {
+    "cell": null,
+    "code": "E722",
+    "end_location": {
+      "column": 23,
+      "row": 2515
+    },
+    "filename": "/home/mativiters/1/xsarena/xsarena_cli.py",
+    "fix": null,
+    "location": {
+      "column": 17,
+      "row": 2515
+    },
+    "message": "Do not use bare `except`",
+    "noqa_row": 2515,
+    "url": "https://docs.astral.sh/ruff/rules/bare-except"
+  },
+  {
+    "cell": null,
+    "code": "E722",
+    "end_location": {
+      "column": 23,
+      "row": 2591
+    },
+    "filename": "/home/mativiters/1/xsarena/xsarena_cli.py",
+    "fix": null,
+    "location": {
+      "column": 17,
+      "row": 2591
+    },
+    "message": "Do not use bare `except`",
+    "noqa_row": 2591,
+    "url": "https://docs.astral.sh/ruff/rules/bare-except"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 136,
+      "row": 2819
+    },
+    "filename": "/home/mativiters/1/xsarena/xsarena_cli.py",
+    "fix": null,
+    "location": {
+      "column": 121,
+      "row": 2819
+    },
+    "message": "Line too long (135 > 120)",
+    "noqa_row": 2819,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E722",
+    "end_location": {
+      "column": 19,
+      "row": 3117
+    },
+    "filename": "/home/mativiters/1/xsarena/xsarena_cli.py",
+    "fix": null,
+    "location": {
+      "column": 13,
+      "row": 3117
+    },
+    "message": "Do not use bare `except`",
+    "noqa_row": 3117,
+    "url": "https://docs.astral.sh/ruff/rules/bare-except"
+  },
+  {
+    "cell": null,
+    "code": "E722",
+    "end_location": {
+      "column": 27,
+      "row": 3504
+    },
+    "filename": "/home/mativiters/1/xsarena/xsarena_cli.py",
+    "fix": null,
+    "location": {
+      "column": 21,
+      "row": 3504
+    },
+    "message": "Do not use bare `except`",
+    "noqa_row": 3504,
+    "url": "https://docs.astral.sh/ruff/rules/bare-except"
+  },
+  {
+    "cell": null,
+    "code": "E722",
+    "end_location": {
+      "column": 27,
+      "row": 3517
+    },
+    "filename": "/home/mativiters/1/xsarena/xsarena_cli.py",
+    "fix": null,
+    "location": {
+      "column": 21,
+      "row": 3517
+    },
+    "message": "Do not use bare `except`",
+    "noqa_row": 3517,
+    "url": "https://docs.astral.sh/ruff/rules/bare-except"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 122,
+      "row": 3532
+    },
+    "filename": "/home/mativiters/1/xsarena/xsarena_cli.py",
+    "fix": null,
+    "location": {
+      "column": 121,
+      "row": 3532
+    },
+    "message": "Line too long (121 > 120)",
+    "noqa_row": 3532,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E722",
+    "end_location": {
+      "column": 23,
+      "row": 3572
+    },
+    "filename": "/home/mativiters/1/xsarena/xsarena_cli.py",
+    "fix": null,
+    "location": {
+      "column": 17,
+      "row": 3572
+    },
+    "message": "Do not use bare `except`",
+    "noqa_row": 3572,
+    "url": "https://docs.astral.sh/ruff/rules/bare-except"
+  },
+  {
+    "cell": null,
+    "code": "E722",
+    "end_location": {
+      "column": 27,
+      "row": 3770
+    },
+    "filename": "/home/mativiters/1/xsarena/xsarena_cli.py",
+    "fix": null,
+    "location": {
+      "column": 21,
+      "row": 3770
+    },
+    "message": "Do not use bare `except`",
+    "noqa_row": 3770,
+    "url": "https://docs.astral.sh/ruff/rules/bare-except"
+  },
+  {
+    "cell": null,
+    "code": "E722",
+    "end_location": {
+      "column": 27,
+      "row": 3783
+    },
+    "filename": "/home/mativiters/1/xsarena/xsarena_cli.py",
+    "fix": null,
+    "location": {
+      "column": 21,
+      "row": 3783
+    },
+    "message": "Do not use bare `except`",
+    "noqa_row": 3783,
+    "url": "https://docs.astral.sh/ruff/rules/bare-except"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 125,
+      "row": 3850
+    },
+    "filename": "/home/mativiters/1/xsarena/xsarena_cli.py",
+    "fix": null,
+    "location": {
+      "column": 121,
+      "row": 3850
+    },
+    "message": "Line too long (124 > 120)",
+    "noqa_row": 3850,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 140,
+      "row": 3854
+    },
+    "filename": "/home/mativiters/1/xsarena/xsarena_cli.py",
+    "fix": null,
+    "location": {
+      "column": 121,
+      "row": 3854
+    },
+    "message": "Line too long (139 > 120)",
+    "noqa_row": 3854,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E722",
+    "end_location": {
+      "column": 23,
+      "row": 4154
+    },
+    "filename": "/home/mativiters/1/xsarena/xsarena_cli.py",
+    "fix": null,
+    "location": {
+      "column": 17,
+      "row": 4154
+    },
+    "message": "Do not use bare `except`",
+    "noqa_row": 4154,
+    "url": "https://docs.astral.sh/ruff/rules/bare-except"
+  },
+  {
+    "cell": null,
+    "code": "E722",
+    "end_location": {
+      "column": 27,
+      "row": 4203
+    },
+    "filename": "/home/mativiters/1/xsarena/xsarena_cli.py",
+    "fix": null,
+    "location": {
+      "column": 21,
+      "row": 4203
+    },
+    "message": "Do not use bare `except`",
+    "noqa_row": 4203,
+    "url": "https://docs.astral.sh/ruff/rules/bare-except"
+  },
+  {
+    "cell": null,
+    "code": "E722",
+    "end_location": {
+      "column": 27,
+      "row": 4224
+    },
+    "filename": "/home/mativiters/1/xsarena/xsarena_cli.py",
+    "fix": null,
+    "location": {
+      "column": 21,
+      "row": 4224
+    },
+    "message": "Do not use bare `except`",
+    "noqa_row": 4224,
+    "url": "https://docs.astral.sh/ruff/rules/bare-except"
+  },
+  {
+    "cell": null,
+    "code": "F811",
+    "end_location": {
+      "column": 15,
+      "row": 4358
+    },
+    "filename": "/home/mativiters/1/xsarena/xsarena_cli.py",
+    "fix": null,
+    "location": {
+      "column": 11,
+      "row": 4358
+    },
+    "message": "Redefinition of unused `repl` from line 3164",
+    "noqa_row": 4358,
+    "url": "https://docs.astral.sh/ruff/rules/redefined-while-unused"
+  }
+]

@@ -1,0 +1,28 @@
+{
+  "id": "ticket_0019",
+  "file": "/home/mativiters/1/xsarena/src/xsarena/modes/study.py",
+  "rules": [
+    "E501"
+  ],
+  "issues": [
+    {
+      "code": "E501",
+      "message": "Line too long (123 > 120)",
+      "line": 17,
+      "col": 121
+    },
+    {
+      "code": "E501",
+      "message": "Line too long (174 > 120)",
+      "line": 26,
+      "col": 121
+    },
+    {
+      "code": "E501",
+      "message": "Line too long (136 > 120)",
+      "line": 64,
+      "col": 121
+    }
+  ],
+  "done": false
+}

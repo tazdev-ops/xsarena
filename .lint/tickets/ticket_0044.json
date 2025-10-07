@@ -1,0 +1,28 @@
+{
+  "id": "ticket_0044",
+  "file": "/home/mativiters/1/xsarena/src/xsarena/modes/chad.py",
+  "rules": [
+    "E501"
+  ],
+  "issues": [
+    {
+      "code": "E501",
+      "message": "Line too long (109 > 100)",
+      "line": 24,
+      "col": 101
+    },
+    {
+      "code": "E501",
+      "message": "Line too long (115 > 100)",
+      "line": 81,
+      "col": 101
+    },
+    {
+      "code": "E501",
+      "message": "Line too long (109 > 100)",
+      "line": 92,
+      "col": 101
+    }
+  ],
+  "done": false
+}

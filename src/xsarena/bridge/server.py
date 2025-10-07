@@ -42,9 +42,7 @@ async def handle_chat_completions(request):
 
     try:
         # Wait for a response with a timeout
-        response = await asyncio.wait_for(
-            response_callbacks[session_id].get(), timeout=300
-        )  # 5 minute timeout
+        response = await asyncio.wait_for(response_callbacks[session_id].get(), timeout=300)  # 5 minute timeout
 
         return web.json_response(
             {
@@ -67,9 +65,7 @@ async def handle_chat_completions(request):
             }
         )
     except asyncio.TimeoutError:
-        return web.json_response(
-            {"error": {"type": "timeout", "message": "Request timed out"}}, status=408
-        )
+        return web.json_response({"error": {"type": "timeout", "message": "Request timed out"}}, status=408)
 
 
 @routes.post("/push_response")
@@ -83,9 +79,7 @@ async def push_response(request):
         await response_callbacks[session_id].put(response)
         return web.json_response({"status": "success"})
     else:
-        return web.json_response(
-            {"status": "error", "message": "Invalid session ID"}, status=400
-        )
+        return web.json_response({"status": "error", "message": "Invalid session ID"}, status=400)
 
 
 @routes.get("/health")
@@ -136,9 +130,7 @@ def main():
             response = await handler(request)
             response.headers["Access-Control-Allow-Origin"] = "*"
             response.headers["Access-Control-Allow-Methods"] = "POST, GET, OPTIONS"
-            response.headers["Access-Control-Allow-Headers"] = (
-                "Content-Type, Authorization"
-            )
+            response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization"
             return response
 
         return middleware

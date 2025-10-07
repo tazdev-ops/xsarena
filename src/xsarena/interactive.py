@@ -62,7 +62,7 @@ except ImportError:
 # Import new core components
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 try:
-    from src.lmastudio.core.pipeline import PipelineExecutor
+    from src.xsarena.core.pipeline import PipelineExecutor
 except ImportError:
     PipelineExecutor = None
 
@@ -272,9 +272,7 @@ async def book_load(name: str):
         CONT_MODE = data.get("cont_mode", CONT_MODE)
         CONT_ANCHOR_CHARS = data.get("cont_anchor_chars", CONT_ANCHOR_CHARS)
         OUTPUT_MIN_CHARS = data.get("output_min_chars", OUTPUT_MIN_CHARS)
-        OUTPUT_PUSH_MAX_PASSES = data.get(
-            "output_push_max_passes", OUTPUT_PUSH_MAX_PASSES
-        )
+        OUTPUT_PUSH_MAX_PASSES = data.get("output_push_max_passes", OUTPUT_PUSH_MAX_PASSES)
         BACKEND = data.get("backend", BACKEND)
         MODEL_ID = data.get("model_id", MODEL_ID)
 
@@ -284,9 +282,7 @@ async def book_load(name: str):
         # Offer to resume
         global AUTO_ON, AUTO_TASK
         if AUTO_OUT and not AUTO_ON:
-            warn(
-                "Autopilot is currently OFF. Use /book.start or /book.resume to continue."
-            )
+            warn("Autopilot is currently OFF. Use /book.start or /book.resume to continue.")
 
     except Exception as e:
         err(f"Failed to load checkpoint: {e}")
@@ -327,6 +323,7 @@ QUESTIONS:
 - (<=5)
 """
 
+# ruff: noqa: E501
 META_PROMPT_BOOST_TEMPLATE = """You advise the Prompt Booster. Given the user goal and our tool’s capabilities, propose the best scaffold for the Booster prompt (framing, constraints, guardrails).
 
 Output only:
@@ -354,24 +351,27 @@ CANCEL_REQUESTED: bool = False  # console cancel flag
 # ---- Project/Checkpoint/Macro state ----
 PROJECT_ROOT = os.getcwd()
 PROJECT_CONFIG: dict = {}
-CHECKPOINT_DIR = os.path.join(PROJECT_ROOT, ".lmastudio", "checkpoints")
-MACRO_FILE = os.path.join(PROJECT_ROOT, ".lmastudio", "macros.json")
+STATE_ROOT = ".xsarena"
+LEGACY_STATE_ROOT = ".lmastudio"
+CHECKPOINT_DIR = os.path.join(PROJECT_ROOT, STATE_ROOT, "checkpoints")
+MACRO_FILE = os.path.join(PROJECT_ROOT, STATE_ROOT, "macros.json")
+if not os.path.isdir(os.path.join(PROJECT_ROOT, STATE_ROOT)) and os.path.isdir(
+    os.path.join(PROJECT_ROOT, LEGACY_STATE_ROOT)
+):
+    CHECKPOINT_DIR = os.path.join(PROJECT_ROOT, LEGACY_STATE_ROOT, "checkpoints")
+    MACRO_FILE = os.path.join(PROJECT_ROOT, LEGACY_STATE_ROOT, "macros.json")
 MACROS: Dict[str, str] = {}
 
 # --- Self-study continuation hammer ---
 SESSION_MODE = None  # e.g., "zero2hero", None otherwise
-COVERAGE_HAMMER_ON = (
-    True  # when True, add a minimal anti-wrap-up line to continue prompts
-)
+COVERAGE_HAMMER_ON = True  # when True, add a minimal anti-wrap-up line to continue prompts
 NARRATIVE_ACTIVE = False  # narrative/pedagogy overlay ON/OFF
 
 # --- Output budget / push-to-max controls ---
 OUTPUT_BUDGET_SNIPPET_ON = True  # append system prompt addendum on book modes
 OUTPUT_PUSH_ON = True  # auto-extend within the same subtopic to hit a min length
 OUTPUT_MIN_CHARS = 4500  # target minimal chunk size before moving on (tune as needed)
-OUTPUT_PUSH_MAX_PASSES = (
-    3  # at most N extra "continue within current subtopic" micro-steps
-)
+OUTPUT_PUSH_MAX_PASSES = 3  # at most N extra "continue within current subtopic" micro-steps
 
 # --- Cloudflare controls ---
 CF_BLOCKED = False  # true while CF challenge is active
@@ -382,9 +382,7 @@ BACKEND = "bridge"  # bridge | openrouter
 
 # --- OpenRouter config/state ---
 OR_CLIENT = None
-OR_MODEL = os.getenv(
-    "OPENROUTER_MODEL"
-)  # e.g., "cognitivecomputations/dolphin-mistral-24b-venice-edition:free"
+OR_MODEL = os.getenv("OPENROUTER_MODEL")  # e.g., "cognitivecomputations/dolphin-mistral-24b-venice-edition:free"
 OR_BASE_URL = os.getenv("OPENROUTER_BASE_URL", "https://openrouter.ai/api/v1")
 OR_API_KEY = os.getenv("OPENROUTER_API_KEY") or os.getenv("OPENAI_API_KEY")
 OR_REFERRER = os.getenv("OPENROUTER_REFERRER")  # optional
@@ -393,9 +391,7 @@ OR_HEADERS = None  # built in init
 
 # --- Continuation controls ---
 CONT_MODE = "anchor"  # "anchor" (default) or "normal"
-CONT_ANCHOR_CHARS = (
-    200  # how many chars from the end of last assistant chunk to use as anchor
-)
+CONT_ANCHOR_CHARS = 200  # how many chars from the end of last assistant chunk to use as anchor
 REPEAT_WARN = True  # warn and auto-pause if high repetition detected
 REPEAT_NGRAM = 4  # n-gram size for repetition scoring
 REPEAT_THRESH = 0.35  # Jaccard threshold to warn (0..1); lower = more sensitive
@@ -487,9 +483,7 @@ async def bridge_push(request: web.Request):
         req_id = data.get("request_id")
         payload = data.get("data")
         if not req_id:
-            return _add_cors(
-                web.json_response({"error": "missing request_id"}, status=400)
-            )
+            return _add_cors(web.json_response({"error": "missing request_id"}, status=400))
         q = RESPONSE_CHANNELS.get(req_id)
         if q:
             await q.put(payload)
@@ -507,11 +501,7 @@ async def id_capture_update(request: web.Request):
         data = await request.json()
         sid, mid = data.get("sessionId"), data.get("messageId")
         if not (sid and mid):
-            return _add_cors(
-                web.json_response(
-                    {"error": "missing sessionId or messageId"}, status=400
-                )
-            )
+            return _add_cors(web.json_response({"error": "missing sessionId or messageId"}, status=400))
         SESSION_ID, MESSAGE_ID = sid, mid
         print()
         ok(f"[{now()}] IDs updated:")
@@ -599,14 +589,10 @@ async def send_and_collect(payload: dict, silent: bool = False) -> str:
     if BACKEND == "openrouter":
         return await _send_and_collect_openrouter(payload, silent=silent)
     if not CLIENT_SEEN:
-        warn(
-            "No browser polling detected. Open https://lmarena.ai with the userscript enabled."
-        )
+        warn("No browser polling detected. Open https://lmarena.ai with the userscript enabled.")
         return ""
     if not SESSION_ID or not MESSAGE_ID:
-        warn(
-            "Missing session/message IDs. Use /capture then click Retry in LMArena, or /setids."
-        )
+        warn("Missing session/message IDs. Use /capture then click Retry in LMArena, or /setids.")
         return ""
 
     req_id = str(uuid.uuid4())
@@ -633,9 +619,7 @@ async def send_and_collect(payload: dict, silent: bool = False) -> str:
                 msg = str(chunk["error"])
                 if "401" in msg or "m2m" in msg.lower() or "auth" in msg.lower():
                     if not silent:
-                        print(
-                            f"\n{C.WARN}! Auth not captured. Click Retry once in LMArena, then try again.{C.R}"
-                        )
+                        print(f"\n{C.WARN}! Auth not captured. Click Retry once in LMArena, then try again.{C.R}")
                 else:
                     if not silent:
                         print(f"\n{C.ERR}! Error: {msg}{C.R}")
@@ -682,10 +666,7 @@ async def send_and_collect(payload: dict, silent: bool = False) -> str:
                         image_data_list = json.loads(im.group(1))
                         if isinstance(image_data_list, list) and image_data_list:
                             image_info = image_data_list[0]
-                            if (
-                                image_info.get("type") == "image"
-                                and "image" in image_info
-                            ):
+                            if image_info.get("type") == "image" and "image" in image_info:
                                 md = f"![Image]({image_info['image']})"
                                 parts.append(md)
                                 if not silent:
@@ -733,13 +714,9 @@ def _or_init(force: bool = False):
     if OR_CLIENT and not force:
         return
     if _OpenAIClient is None:
-        raise RuntimeError(
-            "openai package not installed. Run: pip install 'openai>=1.20.0'"
-        )
+        raise RuntimeError("openai package not installed. Run: pip install 'openai>=1.20.0'")
     if not OR_API_KEY:
-        raise RuntimeError(
-            "Missing API key. Set OPENROUTER_API_KEY or OPENAI_API_KEY in your environment."
-        )
+        raise RuntimeError("Missing API key. Set OPENROUTER_API_KEY or OPENAI_API_KEY in your environment.")
     OR_CLIENT = _OpenAIClient(base_url=OR_BASE_URL, api_key=OR_API_KEY)
     headers = {}
     if OR_REFERRER:
@@ -845,12 +822,7 @@ async def autorun_loop():
         accumulated = body
         local_hint = hint
         micro = 0
-        while (
-            OUTPUT_PUSH_ON
-            and len(accumulated) < OUTPUT_MIN_CHARS
-            and micro < OUTPUT_PUSH_MAX_PASSES
-            and AUTO_ON
-        ):
+        while OUTPUT_PUSH_ON and len(accumulated) < OUTPUT_MIN_CHARS and micro < OUTPUT_PUSH_MAX_PASSES and AUTO_ON:
             # Build a local anchor from the accumulated text (not from full HISTORY)
             local_anch = anchor_from_text(accumulated, CONT_ANCHOR_CHARS)
             ext_prompt = (
@@ -862,23 +834,15 @@ async def autorun_loop():
             print()
             print(f"{C.USER}{C.B}You{C.R}: [extend] {ext_prompt}\n")
             ext_reply = await send_and_collect(build_payload(ext_prompt))
-            ext_body, ext_hint = strip_next_marker(
-                ext_reply
-            )  # strip any premature NEXT
+            ext_body, ext_hint = strip_next_marker(ext_reply)  # strip any premature NEXT
             if not ext_body.strip():
                 break
             # Optional repetition guard: stop if highly repetitive vs last portion
             if REPEAT_WARN:
-                prev_tail = anchor_from_text(
-                    accumulated, min(800, CONT_ANCHOR_CHARS * 4)
-                )
-                rep = jaccard_ngrams(
-                    prev_tail, ext_body[: max(400, CONT_ANCHOR_CHARS)], n=REPEAT_NGRAM
-                )
+                prev_tail = anchor_from_text(accumulated, min(800, CONT_ANCHOR_CHARS * 4))
+                rep = jaccard_ngrams(prev_tail, ext_body[: max(400, CONT_ANCHOR_CHARS)], n=REPEAT_NGRAM)
                 if rep > REPEAT_THRESH:
-                    warn(
-                        f"High repetition during extension (Jaccard~{rep:.2f}). Stopping extend; you may /next steer."
-                    )
+                    warn(f"High repetition during extension (Jaccard~{rep:.2f}). Stopping extend; you may /next steer.")
                     break
             accumulated += ("\n\n" if not accumulated.endswith("\n") else "") + ext_body
             if ext_hint:  # keep only the last NEXT if the final step later adds it
@@ -898,13 +862,9 @@ async def autorun_loop():
         # Optional repetition detection (vs previous chunk)
         if REPEAT_WARN:
             prev_tail = continuation_anchor(min(800, CONT_ANCHOR_CHARS * 4))
-            rep = jaccard_ngrams(
-                prev_tail, final_body[: max(400, CONT_ANCHOR_CHARS)], n=REPEAT_NGRAM
-            )
+            rep = jaccard_ngrams(prev_tail, final_body[: max(400, CONT_ANCHOR_CHARS)], n=REPEAT_NGRAM)
             if rep > REPEAT_THRESH:
-                warn(
-                    f"High repetition detected (Jaccard~{rep:.2f}). Auto-pausing. Use /next to steer or /book.resume."
-                )
+                warn(f"High repetition detected (Jaccard~{rep:.2f}). Auto-pausing. Use /next to steer or /book.resume.")
                 AUTO_PAUSE = True
 
         AUTO_COUNT += 1
@@ -917,9 +877,7 @@ async def autorun_loop():
         if (
             any_end_marker(reply)
             or any_end_marker(final_body)
-            or (
-                final_hint and final_hint.upper() in {"END", "DONE", "STOP", "FINISHED"}
-            )
+            or (final_hint and final_hint.upper() in {"END", "DONE", "STOP", "FINISHED"})
         ):
             ok("NEXT: [END] detected — stopping.")
             AUTO_ON = False
@@ -930,9 +888,7 @@ async def autorun_loop():
 
         await asyncio.sleep(AUTO_DELAY)
 
-    ok(
-        f"Autopilot finished after {AUTO_COUNT} chunk(s). Output: {AUTO_OUT or '(none)'}"
-    )
+    ok(f"Autopilot finished after {AUTO_COUNT} chunk(s). Output: {AUTO_OUT or '(none)'}")
     if SAVE_SYSTEM_STACK:
         sys_old = SAVE_SYSTEM_STACK.pop()
         set_system(sys_old)
@@ -985,9 +941,7 @@ INGEST_SYSTEM_SYNTH = (
 
 
 def ingest_user_synth(i, n, synth_text, chunk, limit_chars):
-    synth_excerpt = (
-        synth_text[-limit_chars:] if len(synth_text) > limit_chars else synth_text
-    )
+    synth_excerpt = synth_text[-limit_chars:] if len(synth_text) > limit_chars else synth_text
     return (
         f"INGEST CHUNK {i}/{n}\n\n"
         f"PREVIOUS SYNTHESIS (<= {limit_chars} chars):\n<<<SYNTHESIS\n{synth_excerpt}\nSYNTHESIS>>>\n\n"
@@ -1061,9 +1015,7 @@ async def ingest_synth_loop(path: str, synth_out: str, chunk_kb: int, synth_char
     ING_PATH = path
     ING_POS = 0
     ING_TOTAL = len(parts)
-    ok(
-        f"Ingest SYNTH mode: {ING_TOTAL} chunks (~{chunk_kb} KB each); synth limit ~{SYNTH_LIMIT} chars"
-    )
+    ok(f"Ingest SYNTH mode: {ING_TOTAL} chunks (~{chunk_kb} KB each); synth limit ~{SYNTH_LIMIT} chars")
     SYNTH_TEXT = ""
     save_sys = SYSTEM_PROMPT
     save_win = HISTORY_WINDOW
@@ -1078,9 +1030,7 @@ async def ingest_synth_loop(path: str, synth_out: str, chunk_kb: int, synth_char
             SYNTH_TEXT = reply.strip()
             with open(SYNTH_OUT, "w", encoding="utf-8") as f:
                 f.write(SYNTH_TEXT)
-            print(
-                f"[{now()}] Synth updated {idx}/{len(parts)} — {len(SYNTH_TEXT)} chars"
-            )
+            print(f"[{now()}] Synth updated {idx}/{len(parts)} — {len(SYNTH_TEXT)} chars")
             ING_POS = idx
     finally:
         set_system(save_sys)
@@ -1115,9 +1065,7 @@ async def ingest_style_loop(path: str, out_path: str, chunk_kb: int, style_chars
             style_profile = reply.strip()
             with open(out_path, "w", encoding="utf-8") as f:
                 f.write(style_profile)
-            print(
-                f"[{now()}] Style updated {idx}/{len(parts)} — {len(style_profile)} chars"
-            )
+            print(f"[{now()}] Style updated {idx}/{len(parts)} — {len(style_profile)} chars")
             ING_POS = idx
     finally:
         set_system(save_sys)
@@ -1128,9 +1076,7 @@ async def ingest_style_loop(path: str, out_path: str, chunk_kb: int, style_chars
 
 
 # ---------------- Rewrite from synthesis ----------------
-async def rewrite_start(
-    synth_path: str, out_path: str, system_template: str | None = None
-):
+async def rewrite_start(synth_path: str, out_path: str, system_template: str | None = None):
     with open(synth_path, "r", encoding="utf-8") as f:
         synth = f.read()
     SAVE_SYSTEM_STACK.append(SYSTEM_PROMPT)
@@ -1139,16 +1085,12 @@ async def rewrite_start(
         base_system = system_template
         # Apply output budget addendum if this is a book lossless rewrite template
         if (
-            "book.lossless.rewrite" in str(locals().get("system_template", ""))
-            or len(synth) > 5000
+            "book.lossless.rewrite" in str(locals().get("system_template", "")) or len(synth) > 5000
         ):  # heuristic for lossless rewriting
             if OUTPUT_BUDGET_SNIPPET_ON:
                 base_system = base_system.strip() + "\n\n" + OUTPUT_BUDGET_ADDENDUM
     set_system(
-        base_system
-        + "\n\nSOURCE SYNTHESIS (for this session only):\n<<<SYNTHESIS\n"
-        + synth
-        + "\nSYNTHESIS>>>\n"
+        base_system + "\n\nSOURCE SYNTHESIS (for this session only):\n<<<SYNTHESIS\n" + synth + "\nSYNTHESIS>>>\n"
     )
     global AUTO_OUT, AUTO_ON, AUTO_TASK, AUTO_COUNT, LAST_NEXT_HINT
     AUTO_OUT = out_path
@@ -1162,18 +1104,13 @@ async def rewrite_start(
 
 
 # ---------------- New: Chunked generation with system ----------------
-async def chunked_generate_with_system(
-    synth_path: str, system_template: str, out_path: str, max_chunks=None
-):
+async def chunked_generate_with_system(synth_path: str, system_template: str, out_path: str, max_chunks=None):
     with open(synth_path, "r", encoding="utf-8") as f:
         synth = f.read()
     SAVE_SYSTEM_STACK.append(SYSTEM_PROMPT)
     base_system = system_template
     set_system(
-        base_system
-        + "\n\nSOURCE SYNTHESIS (for this session only):\n<<<SYNTHESIS\n"
-        + synth
-        + "\nSYNTHESIS>>>\n"
+        base_system + "\n\nSOURCE SYNTHESIS (for this session only):\n<<<SYNTHESIS\n" + synth + "\nSYNTHESIS>>>\n"
     )
     global AUTO_OUT, AUTO_ON, AUTO_TASK, AUTO_COUNT, LAST_NEXT_HINT, AUTO_MAX
     AUTO_OUT = out_path
@@ -1270,16 +1207,16 @@ async def prompt_boost(goal: str, ask: bool = True, meta: bool = False):
         sys_boost = sys_boost.strip() + "\n\nADVISORY SCAFFOLD (meta):\n" + scaffold
     set_system(sys_boost)
 
-    user_msg = f"USER GOAL:\n{goal}\n\nIf info is missing, ask up to 5 concise questions; else produce PROMPT/RATIONALE now."
+    user_msg = (
+        f"USER GOAL:\n{goal}\n\nIf info is missing, ask up to 5 concise questions; else produce PROMPT/RATIONALE now."
+    )
     reply = await send_and_collect(build_payload(user_msg))
     parts = _split_booster_sections(reply)
     BOOST_LAST_PROMPT = parts.get("PROMPT")
 
     if parts.get("QUESTIONS") and ask:
         # Hold pending Qs until user answers via /prompt.answer
-        qs = [
-            q.strip("- ").strip() for q in parts["QUESTIONS"].splitlines() if q.strip()
-        ]
+        qs = [q.strip("- ").strip() for q in parts["QUESTIONS"].splitlines() if q.strip()]
         BOOST_PENDING = {
             "goal": goal,
             "questions": qs,
@@ -1366,9 +1303,7 @@ def _load_yaml_or_json(path: str) -> dict:
             return json.load(f)
 
 
-def _apply_style_overlays(
-    sys_text: str, styles: list[str] | None, style_file: str | None
-) -> str:
+def _apply_style_overlays(sys_text: str, styles: list[str] | None, style_file: str | None) -> str:
     text = sys_text
     if styles:
         for s in styles:
@@ -1379,9 +1314,7 @@ def _apply_style_overlays(
                 text = text.strip() + "\n\n" + CHAD_TEMPLATE
         if style_file and os.path.exists(style_file):
             style = open(style_file, "r", encoding="utf-8").read()
-            text = (
-                text.strip() + "\n\nSTYLE OVERLAY:\n<<<STYLE\n" + style + "\nSTYLE>>>"
-            )
+            text = text.strip() + "\n\nSTYLE OVERLAY:\n<<<STYLE\n" + style + "\nSTYLE>>>"
         return text
 
 
@@ -1443,22 +1376,18 @@ async def run_recipe(rec: dict):
     ):
         sys_text = repo_render(task, subject=subject or "Subject")
     elif task == "book.bilingual":
-        sys_text = repo_render(
-            "book.bilingual", subject=subject or "Subject", lang=rec.get("lang", "")
-        )
+        sys_text = repo_render("book.bilingual", subject=subject or "Subject", lang=rec.get("lang", ""))
     elif task == "lossless.rewrite":
         sys_text = PROMPT_REPO["book.lossless.rewrite"]["system"]
     elif task == "translate":
-        sys_text = PROMPT_REPO["translate"]["system"].replace(
-            "{lang}", rec.get("lang", "")
-        )
+        sys_text = PROMPT_REPO["translate"]["system"].replace("{lang}", rec.get("lang", ""))
     elif task == "answer.chad":
         sys_text = CHAD_TEMPLATE
     else:
         # default generic book/system
-        sys_text = PROMPT_REPO.get(task, {}).get("system") or PROMPT_REPO[
-            "book.zero2hero"
-        ]["system"].replace("{subject}", subject or "Subject")
+        sys_text = PROMPT_REPO.get(task, {}).get("system") or PROMPT_REPO["book.zero2hero"]["system"].replace(
+            "{subject}", subject or "Subject"
+        )
 
     # apply overlays
     sys_text = _apply_style_overlays(sys_text, styles, style_file)
@@ -1503,7 +1432,6 @@ async def book_zero2hero(
     if OUTPUT_BUDGET_SNIPPET_ON:
         sys_text = sys_text.strip() + "\n\n" + OUTPUT_BUDGET_ADDENDUM
     set_system(sys_text)
-    SESSION_MODE = "zero2hero"
     if window is not None:
         set_window(window)
     if plan_first:
@@ -1531,9 +1459,7 @@ async def book_reference(
 ):
     ensure_dir(outdir or BOOKS_DIR)
     slug = slugify(subject)
-    out_path = next_available_path(
-        os.path.join(outdir or BOOKS_DIR, f"{slug}.reference.md")
-    )
+    out_path = next_available_path(os.path.join(outdir or BOOKS_DIR, f"{slug}.reference.md"))
     outline_path = os.path.join(outdir or BOOKS_DIR, f"{slug}.reference.outline.md")
     SAVE_SYSTEM_STACK.append(SYSTEM_PROMPT)
     sys_text = repo_render("book.reference", subject=subject)
@@ -1594,9 +1520,7 @@ async def book_pop(
     AUTO_TASK = asyncio.create_task(autorun_loop())
 
 
-async def exam_cram(
-    subject: str, outdir: str | None, max_chunks: int | None, window: int | None
-):
+async def exam_cram(subject: str, outdir: str | None, max_chunks: int | None, window: int | None):
     ensure_dir(outdir or BOOKS_DIR)
     slug = slugify(subject)
     out_path = next_available_path(os.path.join(outdir or BOOKS_DIR, f"{slug}.cram.md"))
@@ -1665,9 +1589,7 @@ async def book_bilingual(
 ):
     ensure_dir(outdir or BOOKS_DIR)
     slug = slugify(subject)
-    out_path = next_available_path(
-        os.path.join(outdir or BOOKS_DIR, f"{slug}.bilingual.md")
-    )
+    out_path = next_available_path(os.path.join(outdir or BOOKS_DIR, f"{slug}.bilingual.md"))
     outline_path = os.path.join(outdir or BOOKS_DIR, f"{slug}.bilingual.outline.md")
     SAVE_SYSTEM_STACK.append(SYSTEM_PROMPT)
     sys_text = repo_render("book.bilingual", subject=subject, lang=lang)
@@ -1729,7 +1651,7 @@ async def policy_from_regulations(
 ):
     ensure_dir(out_dir)
     with open(reg_file, "r", encoding="utf-8") as f:
-        reg_text = f.read()
+        f.read()
 
     base = slugify(os.path.splitext(os.path.basename(reg_file))[0])
     synth_path = os.path.join(out_dir, f"{base}.policy.synth.md")
@@ -1750,9 +1672,7 @@ async def policy_from_regulations(
 
 
 # ---------------- Study helpers ----------------
-async def flashcards_from_synth(
-    synth_path: str, out_path: str, n: int = 200, mode: str = "anki"
-):
+async def flashcards_from_synth(synth_path: str, out_path: str, n: int = 200, mode: str = "anki"):
     synth = open(synth_path, "r", encoding="utf-8").read()
     fmt = "Q: ...\nA: ...\n---" if mode == "anki" else "- Question: ...\n  Answer: ..."
     prompt = (
@@ -1816,18 +1736,11 @@ async def answer_chad(
         "deep": "Aim for ~20–30 lines; still concise.",
     }
     depth_instr = depth_map.get(depth.lower(), depth_map["short"])
-    refs_instr = (
-        "Name canonical sources lightly in-text." if refs else "Do not name sources."
-    )
-    contra_instr = (
-        "Briefly steelman main opposing view, then decide."
-        if contra
-        else "Skip opposing view."
-    )
+    refs_instr = "Name canonical sources lightly in-text." if refs else "Do not name sources."
+    contra_instr = "Briefly steelman main opposing view, then decide." if contra else "Skip opposing view."
 
     user = (
-        f"FORMAT: {fmt}. {depth_instr} {refs_instr} {contra_instr}\n"
-        "QUESTION:\n<<<Q\n" + question.strip() + "\nQ>>>"
+        f"FORMAT: {fmt}. {depth_instr} {refs_instr} {contra_instr}\n" "QUESTION:\n<<<Q\n" + question.strip() + "\nQ>>>"
     )
     # Ask once and restore system
     try:
@@ -1851,9 +1764,7 @@ async def translate_file(path: str, lang: str, chunk_kb: int = 50):
         text = open(path, "r", encoding="utf-8").read()
         parts = chunks_by_bytes(text, max(10_000, chunk_kb * 1024))
         base = os.path.splitext(os.path.basename(path))[0]
-        out_path = next_available_path(
-            os.path.join(BOOKS_DIR, f"{slugify(base)}-{slugify(lang)}.md")
-        )
+        out_path = next_available_path(os.path.join(BOOKS_DIR, f"{slugify(base)}-{slugify(lang)}.md"))
         for i, chunk in enumerate(parts, 1):
             reply = await send_and_collect(build_payload(chunk), silent=True)
             write_to_file(out_path, reply.strip())
@@ -1865,15 +1776,15 @@ async def translate_file(path: str, lang: str, chunk_kb: int = 50):
 
 
 # ---------------- Style apply ----------------
-async def style_apply(
-    style_path: str, topic_or_file: str, out_path: str | None, max_words: int | None
-):
+async def style_apply(style_path: str, topic_or_file: str, out_path: str | None, max_words: int | None):
     style = open(style_path, "r", encoding="utf-8").read()
     SAVE_SYSTEM_STACK.append(SYSTEM_PROMPT)
     set_system(PROMPT_REPO["style.transfer"]["system"].replace("{style}", style))
     if os.path.exists(topic_or_file):
         text = open(topic_or_file, "r", encoding="utf-8").read()
-        user = f"Rewrite the following content in the captured style. Keep meaning intact.\n<<<CONTENT\n{text}\nCONTENT>>>"
+        user = (
+            f"Rewrite the following content in the captured style. Keep meaning intact.\n<<<CONTENT\n{text}\nCONTENT>>>"
+        )
     else:
         user = f"Write in the captured style about: {topic_or_file}"
     if max_words:
@@ -1897,9 +1808,7 @@ async def rewrite_lossless(synth_path: str, out_path: str | None = None):
     await rewrite_start(synth_path, out_path, system_template=sys_template)
 
 
-async def lossless_run(
-    path: str, outdir: str | None = None, chunk_kb: int = 45, synth_chars: int = 12000
-):
+async def lossless_run(path: str, outdir: str | None = None, chunk_kb: int = 45, synth_chars: int = 12000):
     outdir = outdir or BOOKS_DIR
     ensure_dir(outdir)
     base = slugify(os.path.splitext(os.path.basename(path))[0])
@@ -1930,12 +1839,8 @@ def help_text():
     print("  /setids <sess> <msg>  Set IDs manually")
     print("  /showids              Show IDs")
     print("Project & Pipeline:")
-    print(
-        "  /project.init [--dir=.]        Scaffold .lmastudio/, pipelines/, recipes/, etc."
-    )
-    print(
-        "  /pipeline.run <pipeline.yml>   Execute a multi-step workflow (synth -> rewrite -> ...)"
-    )
+    print("  /project.init [--dir=.]        Scaffold .lmastudio/, pipelines/, recipes/, etc.")
+    print("  /pipeline.run <pipeline.yml>   Execute a multi-step workflow (synth -> rewrite -> ...)")
     print("Prompt repo:")
     print("  /repo.list")
     print("  /repo.show <key> [n]")
@@ -1945,47 +1850,28 @@ def help_text():
     print("  /book.reference <subject> [--plan] [--max=N] [--window=N] [--outdir=DIR]")
     print("  /book.nobs <subject> [--plan] [--max=N] [--window=N] [--outdir=DIR]")
     print("  /book.pop <subject> [--plan] [--max=N] [--window=N] [--outdir=DIR]")
-    print(
-        "  /book.bilingual <subject> --lang=LANG [--plan] [--max=N] [--window=N] [--outdir=DIR]"
-    )
+    print("  /book.bilingual <subject> --lang=LANG [--plan] [--max=N] [--window=N] [--outdir=DIR]")
     print("  /exam.cram <subject> [--max=N] [--window=N] [--outdir=DIR]")
+    print("Zero-to-Hero (no-BS + narrative + outline-first + hammer):")
+    print('  /z2h "Subject" [--out=./books/file.md] [--max=N] [--min=N]  (no‑BS + narrative + outline‑first + hammer)')
+    print('  /z2h-list "Subj A; Subj B; ..." [--max=N] [--min=N]        (run multiple subjects sequentially)')
     print("Autopilot control:")
-    print(
-        "  /book.pause | /book.resume | /next <text>   (one-shot override for the next prompt)"
-    )
-    print(
-        "  /book.hammer on|off               Toggle strict no-wrap continuation hint for self-study"
-    )
-    print(
-        "  /book.save [name]                 Save current autopilot state to checkpoint"
-    )
+    print("  /book.pause | /book.resume | /next <text>   (one-shot override for the next prompt)")
+    print("  /book.hammer on|off               Toggle strict no-wrap continuation hint for self-study")
+    print("  /book.save [name]                 Save current autopilot state to checkpoint")
     print("  /book.load <name>                 Load autopilot state from checkpoint")
     print("  /book.start <out.md>              Start manual autopilot (no template)")
     print("  /book.stop | /book.max <N>        Stop or set max chunks")
     print("Output budget:")
-    print(
-        "  /out.budget on|off                 Append OUTPUT BUDGET addendum to book prompts (default on)"
-    )
-    print(
-        "  /out.push on|off                   Auto-extend within a subtopic to hit min length (default on)"
-    )
-    print(
-        "  /out.minchars <N>                  Set minimal chars per chunk before moving on (default 4500)"
-    )
-    print(
-        "  /out.passes <N>                    Max extension steps per chunk (default 3)"
-    )
+    print("  /out.budget on|off                 Append OUTPUT BUDGET addendum to book prompts (default on)")
+    print("  /out.push on|off                   Auto-extend within a subtopic to hit min length (default on)")
+    print("  /out.minchars <N>                  Set minimal chars per chunk before moving on (default 4500)")
+    print("  /out.passes <N>                    Max extension steps per chunk (default 3)")
     print("  /cf.status | /cf.resume | /cf.reset Show/control Cloudflare pause")
-    print(
-        "  /cont.mode [normal|anchor]        Set continuation strategy (default: anchor)"
-    )
-    print(
-        "  /cont.anchor <N>                  Set anchor length in chars (default 200)"
-    )
+    print("  /cont.mode [normal|anchor]        Set continuation strategy (default: anchor)")
+    print("  /cont.anchor <N>                  Set anchor length in chars (default 200)")
     print("  /repeat.warn on|off               Toggle repetition warning (default on)")
-    print(
-        "  /repeat.thresh <0..1>            Set repetition Jaccard threshold (default 0.35)"
-    )
+    print("  /repeat.thresh <0..1>            Set repetition Jaccard threshold (default 0.35)")
     print("Ingestion/Synthesis/Style:")
     print("  /ingest.ack <file> [chunkKB=80]")
     print("  /ingest.synth <file> <synth.md> [chunkKB=45] [synthChars=9500]")
@@ -2008,14 +1894,10 @@ def help_text():
     print("  /index.from <synth.md> <out.md>")
     print("  /translate.file <file> <language> [chunkKB=50]")
     print("Q&A:")
-    print(
-        '  /chad "<question>" [--depth=short|medium|deep] [--prose] [--norefs] [--nocontra]'
-    )
+    print('  /chad "<question>" [--depth=short|medium|deep] [--prose] [--norefs] [--nocontra]')
     print("Prompt Booster:")
     print('  /prompt.boost "goal" [--ask] [--apply] [--meta]')
-    print(
-        "  /prompt.answer                 (answer booster questions; end paste with EOF)"
-    )
+    print("  /prompt.answer                 (answer booster questions; end paste with EOF)")
     print("  /prompt.apply [next|system]    (apply improved prompt)")
     print("Recipes:")
     print("  /run.recipe <recipe.json|yml>")
@@ -2025,23 +1907,15 @@ def help_text():
     print("  /macro.list | /macro.delete <name>")
     print("  /macro.run <name> [arg1 arg2 ...]")
     print("Snapshot:")
-    print(
-        "  /snapshot [--chunk]            Create snapshot.txt (or chunks) via snapshot.sh"
-    )
+    print("  /snapshot [--chunk]            Create snapshot.txt (or chunks) via snapshot.sh")
     print("Prompt & Model:")
-    print(
-        "  /system <line> | /systemfile <path> | /system.append (paste, end with EOF)"
-    )
-    print(
-        "  /style.nobs on|off                  Harden language (plain, no fluff) for current session"
-    )
+    print("  /system <line> | /systemfile <path> | /system.append (paste, end with EOF)")
+    print("  /style.nobs on|off                  Harden language (plain, no fluff) for current session")
     print(
         "  /style.narrative on|off            Narrative + pedagogy overlay (teach-before-use, vignettes, quick checks)"
     )
     print("  /model <uuid|none> | /window <N> | /history.tail | /mono | /clear")
-    print(
-        "  /image on|off                     Toggle markdown images from a2 image streams (default on)"
-    )
+    print("  /image on|off                     Toggle markdown images from a2 image streams (default on)")
     print("  /debug.cont | /debug.ctx")
     print("OpenRouter:")
     print("  /backend bridge|openrouter          Switch backend")
@@ -2056,9 +1930,7 @@ def show_status():
     info("Status:")
     print(f"  Browser polling: {'yes' if CLIENT_SEEN else 'no'}")
     print(f"  IDs: session={SESSION_ID or '-'} message={MESSAGE_ID or '-'}")
-    print(
-        f"  Model: {MODEL_ID or '(session default)'}   History window: {HISTORY_WINDOW}"
-    )
+    print(f"  Model: {MODEL_ID or '(session default)'}   History window: {HISTORY_WINDOW}")
     print(f"  System directive set: {'yes' if SYSTEM_PROMPT.strip() else 'no'}")
     print(
         f"  Ingest: {'ON' if ING_ON else 'OFF'} mode={ING_MODE or '-'} pos={ING_POS}/{ING_TOTAL} file={os.path.basename(ING_PATH) if ING_PATH else '-'}  synth_out={SYNTH_OUT or '-'}"
@@ -2091,7 +1963,14 @@ async def _handle_command(line):
     global AUTO_ON, AUTO_TASK, AUTO_OUT, AUTO_MAX, AUTO_COUNT, LAST_NEXT_HINT, NEXT_OVERRIDE, AUTO_PAUSE
     global ING_ON, ING_TASK, ING_MODE, ING_PATH, ING_POS, ING_TOTAL, ING_CHUNK_BYTES, SYNTH_LIMIT, SYNTH_OUT
     global BACKEND, OR_MODEL, OR_REFERRER, OR_TITLE
-    global COVERAGE_HAMMER_ON, OUTPUT_BUDGET_SNIPPET_ON, OUTPUT_PUSH_ON, OUTPUT_MIN_CHARS, OUTPUT_PUSH_MAX_PASSES, CONT_MODE, CONT_ANCHOR_CHARS
+    global \
+        COVERAGE_HAMMER_ON, \
+        OUTPUT_BUDGET_SNIPPET_ON, \
+        OUTPUT_PUSH_ON, \
+        OUTPUT_MIN_CHARS, \
+        OUTPUT_PUSH_MAX_PASSES, \
+        CONT_MODE, \
+        CONT_ANCHOR_CHARS
 
     if line.startswith("/"):
         parts = line.split(" ", 2)
@@ -2112,9 +1991,7 @@ async def _handle_command(line):
             SESSION_ID, MESSAGE_ID = parts[1], parts[2]
             ok("IDs set.")
         elif cmd == "/showids":
-            print(
-                f"session_id={SESSION_ID or '(unset)'}\nmessage_id={MESSAGE_ID or '(unset)'}"
-            )
+            print(f"session_id={SESSION_ID or '(unset)'}\nmessage_id={MESSAGE_ID or '(unset)'}")
 
         # Repo
         elif cmd == "/repo.list":
@@ -2189,9 +2066,7 @@ async def _handle_command(line):
         # Subject-aware book modes
         elif cmd == "/book.zero2hero":
             if len(parts) < 2:
-                err(
-                    "Usage: /book.zero2hero <subject> [--plan] [--max=N] [--window=N] [--outdir=DIR]"
-                )
+                err("Usage: /book.zero2hero <subject> [--plan] [--max=N] [--window=N] [--outdir=DIR]")
                 prompt()
                 return
             tokens = line.split()[1:]
@@ -2206,12 +2081,12 @@ async def _handle_command(line):
                 elif tk.startswith("--max="):
                     try:
                         maxc = int(tk.split("=", 1)[1])
-                    except:
+                    except (ValueError, TypeError):
                         pass
                 elif tk.startswith("--window="):
                     try:
                         wind = int(tk.split("=", 1)[1])
-                    except:
+                    except (ValueError, TypeError):
                         pass
                 elif tk.startswith("--outdir="):
                     outdir = tk.split("=", 1)[1]
@@ -2227,9 +2102,7 @@ async def _handle_command(line):
 
         elif cmd == "/book.reference":
             if len(parts) < 2:
-                err(
-                    "Usage: /book.reference <subject> [--plan] [--max=N] [--window=N] [--outdir=DIR]"
-                )
+                err("Usage: /book.reference <subject> [--plan] [--max=N] [--window=N] [--outdir=DIR]")
                 prompt()
                 return
             tokens = line.split()[1:]
@@ -2244,12 +2117,12 @@ async def _handle_command(line):
                 elif tk.startswith("--max="):
                     try:
                         maxc = int(tk.split("=", 1)[1])
-                    except:
+                    except (ValueError, TypeError):
                         pass
                 elif tk.startswith("--window="):
                     try:
                         wind = int(tk.split("=", 1)[1])
-                    except:
+                    except (ValueError, TypeError):
                         pass
                 elif tk.startswith("--outdir="):
                     outdir = tk.split("=", 1)[1]
@@ -2265,9 +2138,7 @@ async def _handle_command(line):
 
         elif cmd == "/book.pop":
             if len(parts) < 2:
-                err(
-                    "Usage: /book.pop <subject> [--plan] [--max=N] [--window=N] [--outdir=DIR]"
-                )
+                err("Usage: /book.pop <subject> [--plan] [--max=N] [--window=N] [--outdir=DIR]")
                 prompt()
                 return
             tokens = line.split()[1:]
@@ -2282,12 +2153,12 @@ async def _handle_command(line):
                 elif tk.startswith("--max="):
                     try:
                         maxc = int(tk.split("=", 1)[1])
-                    except:
+                    except (ValueError, TypeError):
                         pass
                 elif tk.startswith("--window="):
                     try:
                         wind = int(tk.split("=", 1)[1])
-                    except:
+                    except (ValueError, TypeError):
                         pass
                 elif tk.startswith("--outdir="):
                     outdir = tk.split("=", 1)[1]
@@ -2315,12 +2186,12 @@ async def _handle_command(line):
                 if tk.startswith("--max="):
                     try:
                         maxc = int(tk.split("=", 1)[1])
-                    except:
+                    except (ValueError, TypeError):
                         pass
                 elif tk.startswith("--window="):
                     try:
                         wind = int(tk.split("=", 1)[1])
-                    except:
+                    except (ValueError, TypeError):
                         pass
                 elif tk.startswith("--outdir="):
                     outdir = tk.split("=", 1)[1]
@@ -2358,13 +2229,135 @@ async def _handle_command(line):
                 else:
                     subject_tokens.append(tk)
             if not subject_tokens or not lang:
-                err(
-                    "Usage: /book.bilingual <subject> --lang=LANG [--plan] [--max=N] [--window=N] [--outdir=DIR]"
-                )
+                err("Usage: /book.bilingual <subject> --lang=LANG [--plan] [--max=N] [--window=N] [--outdir=DIR]")
             else:
-                await book_bilingual(
-                    " ".join(subject_tokens), lang, plan, outdir, maxc, wind
-                )
+                await book_bilingual(" ".join(subject_tokens), lang, plan, outdir, maxc, wind)
+
+        elif cmd == "/z2h":
+            # /z2h "Subject" [--out=./books/file.md] [--max=N] [--min=N]
+            tokens = line.split()[1:]
+            subject_tokens = []
+            out_path = "./books/topic.final.md"
+            max_chunks = 8
+            min_chars = 3000
+            for tk in tokens:
+                if tk.startswith("--out="):
+                    out_path = tk.split("=", 1)[1]
+                elif tk.startswith("--max="):
+                    try:
+                        max_chunks = int(tk.split("=", 1)[1])
+                    except (ValueError, TypeError):
+                        pass
+                elif tk.startswith("--min="):
+                    try:
+                        min_chars = int(tk.split("=", 1)[1])
+                    except (ValueError, TypeError):
+                        pass
+                elif tk.startswith("--"):
+                    pass  # Other flags
+                else:
+                    subject_tokens.append(tk)
+
+            if not subject_tokens:
+                err('Usage: /z2h "Subject" [--out=./books/file.md] [--max=N] [--min=N]')
+            else:
+                subject = " ".join(subject_tokens)
+
+                # Set up the system for z2h mode (no-bs + narrative + outline-first + hammer)
+                SAVE_SYSTEM_STACK.append(SYSTEM_PROMPT)
+                sys_text = repo_render("book.zero2hero", subject=subject)
+                # Apply no-bs overlay
+                sys_text = _apply_style_overlays(sys_text, ["no-bs"], None)
+                if OUTPUT_BUDGET_SNIPPET_ON:
+                    sys_text = sys_text.strip() + "\n\n" + OUTPUT_BUDGET_ADDENDUM
+                set_system(sys_text)
+
+                # Set up continuation and other settings for zero-to-hero
+                globals()["SESSION_MODE"] = "zero2hero"
+                globals()["COVERAGE_HAMMER_ON"] = True
+                globals()["OUTPUT_MIN_CHARS"] = int(min_chars)
+
+                # Set output path
+                ensure_dir(os.path.dirname(out_path) or ".")
+                globals()["AUTO_OUT"] = next_available_path(out_path)
+
+                # Start autopilot
+                globals()["AUTO_ON"] = True
+                globals()["AUTO_COUNT"] = 0
+                globals()["LAST_NEXT_HINT"] = None
+                globals()["AUTO_MAX"] = None if max_chunks in (None, 0) else int(max_chunks)
+
+                ok(f"Zero-to-Hero autopilot ON → {AUTO_OUT} (subject: {subject})")
+                if AUTO_TASK and not AUTO_TASK.done():
+                    AUTO_TASK.cancel()
+                globals()["AUTO_TASK"] = asyncio.create_task(autorun_loop())
+
+        elif cmd == "/z2h-list":
+            # /z2h-list "Subj A; Subj B; ..." [--max=N] [--min=N]
+            tokens = line.split()[1:]
+            subjects_str = ""
+            max_chunks = 8
+            min_chars = 3000
+            for tk in tokens:
+                if tk.startswith("--max="):
+                    try:
+                        max_chunks = int(tk.split("=", 1)[1])
+                    except (ValueError, TypeError):
+                        pass
+                elif tk.startswith("--min="):
+                    try:
+                        min_chars = int(tk.split("=", 1)[1])
+                    except (ValueError, TypeError):
+                        pass
+                elif tk.startswith("--"):
+                    pass  # Other flags
+                else:
+                    subjects_str = tk
+
+            if not subjects_str:
+                err('Usage: /z2h-list "Subj A; Subj B; ..." [--max=N] [--min=N]')
+            else:
+                subjects = [s.strip() for s in subjects_str.split(";") if s.strip()]
+                ok(f"Processing {len(subjects)} subjects sequentially: {subjects}")
+
+                for i, subject in enumerate(subjects):
+                    ok(f"Processing subject {i+1}/{len(subjects)}: {subject}")
+
+                    # Set up the system for z2h mode (no-bs + narrative + outline-first + hammer)
+                    SAVE_SYSTEM_STACK.append(SYSTEM_PROMPT)
+                    sys_text = repo_render("book.zero2hero", subject=subject)
+                    # Apply no-bs overlay
+                    sys_text = _apply_style_overlays(sys_text, ["no-bs"], None)
+                    if OUTPUT_BUDGET_SNIPPET_ON:
+                        sys_text = sys_text.strip() + "\n\n" + OUTPUT_BUDGET_ADDENDUM
+                    set_system(sys_text)
+
+                    # Set up continuation and other settings for zero-to-hero
+                    globals()["SESSION_MODE"] = "zero2hero"
+                    globals()["COVERAGE_HAMMER_ON"] = True
+                    globals()["OUTPUT_MIN_CHARS"] = int(min_chars)
+
+                    # Set output path
+                    slug = slugify(subject)
+                    out_path = f"books/{slug}.final.md"
+                    ensure_dir(os.path.dirname(out_path) or ".")
+                    globals()["AUTO_OUT"] = next_available_path(out_path)
+
+                    # Start autopilot
+                    globals()["AUTO_ON"] = True
+                    globals()["AUTO_COUNT"] = 0
+                    globals()["LAST_NEXT_HINT"] = None
+                    globals()["AUTO_MAX"] = None if max_chunks in (None, 0) else int(max_chunks)
+
+                    ok(f"Zero-to-Hero autopilot ON → {AUTO_OUT}")
+
+                    # Run this subject
+                    await autorun_loop()
+
+                    # Reset for next subject
+                    globals()["AUTO_ON"] = False
+                    if SAVE_SYSTEM_STACK:
+                        set_system(SAVE_SYSTEM_STACK.pop())
 
         elif cmd == "/book.pause":
             AUTO_PAUSE = True
@@ -2408,7 +2401,7 @@ async def _handle_command(line):
                         warn("Value too small; suggest >= 2500.")
                     OUTPUT_MIN_CHARS = max(1000, v)
                     ok(f"OUTPUT_MIN_CHARS={OUTPUT_MIN_CHARS}")
-                except:
+                except (ValueError, TypeError):
                     err("Provide an integer.")
             else:
                 err("Usage: /out.minchars <N>")
@@ -2421,7 +2414,7 @@ async def _handle_command(line):
                         warn("Unusual value; using within [0..10].")
                     OUTPUT_PUSH_MAX_PASSES = max(0, min(10, v))
                     ok(f"OUTPUT_PUSH_MAX_PASSES={OUTPUT_PUSH_MAX_PASSES}")
-                except:
+                except (ValueError, TypeError):
                     err("Provide an integer.")
             else:
                 err("Usage: /out.passes <N>")
@@ -2442,7 +2435,7 @@ async def _handle_command(line):
                     else:
                         CONT_ANCHOR_CHARS = n
                         ok(f"Anchor length: {CONT_ANCHOR_CHARS}")
-                except:
+                except (ValueError, TypeError):
                     err("Provide an integer.")
             else:
                 err("Usage: /cont.anchor <N>")
@@ -2583,9 +2576,7 @@ async def _handle_command(line):
                 global NO_BS_ACTIVE
                 if val == "on" and not NO_BS_ACTIVE:
                     SAVE_SYSTEM_STACK.append(SYSTEM_PROMPT)
-                    set_system(
-                        (SYSTEM_PROMPT.strip() + "\n\n" + NO_BS_ADDENDUM).strip()
-                    )
+                    set_system((SYSTEM_PROMPT.strip() + "\n\n" + NO_BS_ADDENDUM).strip())
                     NO_BS_ACTIVE = True
                     ok("No‑bullshit language ON (session).")
                 elif val == "off" and NO_BS_ACTIVE:
@@ -2605,9 +2596,7 @@ async def _handle_command(line):
                 global NARRATIVE_ACTIVE
                 if val == "on" and not NARRATIVE_ACTIVE:
                     SAVE_SYSTEM_STACK.append(SYSTEM_PROMPT)
-                    set_system(
-                        (SYSTEM_PROMPT.strip() + "\n\n" + NARRATIVE_OVERLAY).strip()
-                    )
+                    set_system((SYSTEM_PROMPT.strip() + "\n\n" + NARRATIVE_OVERLAY).strip())
                     NARRATIVE_ACTIVE = True
                     ok("Narrative + pedagogy overlay ON (session).")
                 elif val == "off" and NARRATIVE_ACTIVE:
@@ -2651,7 +2640,7 @@ async def _handle_command(line):
                         warn("Value too small; suggest >= 2500.")
                     OUTPUT_MIN_CHARS = max(1000, v)
                     ok(f"OUTPUT_MIN_CHARS={OUTPUT_MIN_CHARS}")
-                except:
+                except (ValueError, TypeError):
                     err("Provide an integer.")
             else:
                 err("Usage: /out.minchars <N>")
@@ -2664,7 +2653,7 @@ async def _handle_command(line):
                         warn("Unusual value; using within [0..10].")
                     OUTPUT_PUSH_MAX_PASSES = max(0, min(10, v))
                     ok(f"OUTPUT_PUSH_MAX_PASSES={OUTPUT_PUSH_MAX_PASSES}")
-                except:
+                except (ValueError, TypeError):
                     err("Provide an integer.")
             else:
                 err("Usage: /out.passes <N>")
@@ -2719,9 +2708,7 @@ async def _handle_command(line):
         elif cmd == "/system.append":
             add = await read_multiline()
             if add.strip():
-                SYSTEM_PROMPT = (
-                    SYSTEM_PROMPT + ("\n\n" if SYSTEM_PROMPT.strip() else "") + add
-                ).strip()
+                SYSTEM_PROMPT = (SYSTEM_PROMPT + ("\n\n" if SYSTEM_PROMPT.strip() else "") + add).strip()
                 ok("System appended.")
             else:
                 warn("Nothing pasted.")
@@ -2742,7 +2729,7 @@ async def _handle_command(line):
                     else:
                         REPEAT_THRESH = t
                         ok(f"Repeat threshold: {REPEAT_THRESH}")
-                except:
+                except (ValueError, TypeError):
                     err("Provide a float (0..1).")
             else:
                 err("Usage: /repeat.thresh <0..1>")
@@ -2759,9 +2746,7 @@ async def _handle_command(line):
             print(hr())
             print(f"Context messages included: {len(ctx)}")
             if ctx:
-                print(
-                    f"First in ctx: {ctx[0]['role']} … Last in ctx: {ctx[-1]['role']}"
-                )
+                print(f"First in ctx: {ctx[0]['role']} … Last in ctx: {ctx[-1]['role']}")
             print(hr())
 
         # Cloudflare commands
@@ -2775,12 +2760,11 @@ async def _handle_command(line):
             # You call this after solving CF in the browser.
             CF_BLOCKED = False
             CF_NOTIFIED = False
-            ok(
-                "Cloudflare cleared. Now run /book.resume to continue generation (or keep it paused to /next steer)."
-            )
+            ok("Cloudflare cleared. Now run /book.resume to continue generation (or keep it paused to /next steer).")
 
         elif cmd == "/cf.reset":
             # hard reset flags; won't auto-resume
+            global CF_BLOCKED, CF_NOTIFIED
             CF_BLOCKED = False
             CF_NOTIFIED = False
             ok("CF flags reset.")
@@ -2836,7 +2820,7 @@ async def _handle_command(line):
             if len(parts) == 3:
                 try:
                     chunk_kb = max(8, int(parts[2]))
-                except:
+                except (ValueError, TypeError):
                     pass
             if ING_TASK and not ING_TASK.done():
                 warn("Ingestion already running.")
@@ -2847,44 +2831,32 @@ async def _handle_command(line):
         elif cmd == "/ingest.synth":
             toks = line.split()
             if len(toks) < 3:
-                err(
-                    "Usage: /ingest.synth <file> <synth.md> [chunkKB=45] [synthChars=9500]"
-                )
+                err("Usage: /ingest.synth <file> <synth.md> [chunkKB=45] [synthChars=9500]")
             else:
                 path = toks[1]
                 out = toks[2]
                 chunk_kb = int(toks[3]) if len(toks) >= 4 and toks[3].isdigit() else 45
-                synth_chars = (
-                    int(toks[4]) if len(toks) >= 5 and toks[4].isdigit() else 9500
-                )
+                synth_chars = int(toks[4]) if len(toks) >= 5 and toks[4].isdigit() else 9500
                 if ING_TASK and not ING_TASK.done():
                     warn("Ingestion already running.")
                     prompt()
                     return
-                ING_TASK = asyncio.create_task(
-                    ingest_synth_loop(path, out, chunk_kb, synth_chars)
-                )
+                ING_TASK = asyncio.create_task(ingest_synth_loop(path, out, chunk_kb, synth_chars))
                 ok(f"Started SYNTH ingestion from {path} → {out}")
         elif cmd == "/ingest.lossless":
             toks = line.split()
             if len(toks) < 3:
-                err(
-                    "Usage: /ingest.lossless <file> <synth.md> [chunkKB=45] [synthChars=12000]"
-                )
+                err("Usage: /ingest.lossless <file> <synth.md> [chunkKB=45] [synthChars=12000]")
             else:
                 path = toks[1]
                 out = toks[2]
                 chunk_kb = int(toks[3]) if len(toks) >= 4 and toks[3].isdigit() else 45
-                synth_chars = (
-                    int(toks[4]) if len(toks) >= 5 and toks[4].isdigit() else 12000
-                )
+                synth_chars = int(toks[4]) if len(toks) >= 5 and toks[4].isdigit() else 12000
                 if ING_TASK and not ING_TASK.done():
                     warn("Ingestion already running.")
                     prompt()
                     return
-                ING_TASK = asyncio.create_task(
-                    ingest_synth_loop(path, out, chunk_kb, synth_chars)
-                )
+                ING_TASK = asyncio.create_task(ingest_synth_loop(path, out, chunk_kb, synth_chars))
                 ok(f"Started LOSSLESS synthesis from {path} → {out}")
         elif cmd == "/ingest.stop":
             if ING_ON:
@@ -2897,9 +2869,7 @@ async def _handle_command(line):
         elif cmd == "/style.capture":
             toks = line.split()
             if len(toks) < 3:
-                err(
-                    "Usage: /style.capture <file> <style.synth.md> [chunkKB=30] [styleChars=6000]"
-                )
+                err("Usage: /style.capture <file> <style.synth.md> [chunkKB=30] [styleChars=6000]")
                 prompt()
                 return
             path, out = toks[1], toks[2]
@@ -2909,16 +2879,12 @@ async def _handle_command(line):
                 warn("Ingestion already running.")
                 prompt()
                 return
-            ING_TASK = asyncio.create_task(
-                ingest_style_loop(path, out, chunk_kb, style_chars)
-            )
+            ING_TASK = asyncio.create_task(ingest_style_loop(path, out, chunk_kb, style_chars))
             ok(f"Started style capture from {path} → {out}")
         elif cmd == "/style.apply":
             toks = line.split()
             if len(toks) < 3:
-                err(
-                    "Usage: /style.apply <style.synth.md> <topic|file> [out.md] [--words=N]"
-                )
+                err("Usage: /style.apply <style.synth.md> <topic|file> [out.md] [--words=N]")
                 prompt()
                 return
             style, topic = toks[1], toks[2]
@@ -2928,13 +2894,11 @@ async def _handle_command(line):
                 if tk.startswith("--words="):
                     try:
                         words = int(tk.split("=", 1)[1])
-                    except:
+                    except (ValueError, TypeError):
                         pass
                 else:
                     out = tk
-            await style_apply(
-                style, topic, out, words=None if not words else int(words)
-            )
+            await style_apply(style, topic, out, words=None if not words else int(words))
 
         # Rewrite/Lossless
         elif cmd == "/rewrite.start":
@@ -2956,9 +2920,7 @@ async def _handle_command(line):
         elif cmd == "/lossless.run":
             toks = line.split()
             if len(toks) < 2:
-                err(
-                    "Usage: /lossless.run <file> [--outdir=DIR] [--chunkKB=45] [--synthChars=12000]"
-                )
+                err("Usage: /lossless.run <file> [--outdir=DIR] [--chunkKB=45] [--synthChars=12000]")
                 prompt()
                 return
             path = toks[1]
@@ -2971,12 +2933,12 @@ async def _handle_command(line):
                 elif tk.startswith("--chunkKB="):
                     try:
                         ck = int(tk.split("=", 1)[1])
-                    except:
+                    except (ValueError, TypeError):
                         pass
                 elif tk.startswith("--synthChars="):
                     try:
                         sc = int(tk.split("=", 1)[1])
-                    except:
+                    except (ValueError, TypeError):
                         pass
             await lossless_run(path, outdir, chunk_kb=ck, synth_chars=sc)
 
@@ -2985,9 +2947,7 @@ async def _handle_command(line):
             # /bilingual.file <file> --lang=LANG [--outdir=DIR] [--chunkKB=45]
             toks = line.split()
             if len(toks) < 2:
-                err(
-                    "Usage: /bilingual.file <file> --lang=LANG [--outdir=DIR] [--chunkKB=45]"
-                )
+                err("Usage: /bilingual.file <file> --lang=LANG [--outdir=DIR] [--chunkKB=45]")
             else:
                 path = toks[1]
                 lang = None
@@ -3072,9 +3032,7 @@ async def _handle_command(line):
             # /chad "What is X?" [--depth=short|medium|deep] [--prose] [--norefs] [--nocontra]
             m = re.findall(r'"([^"]+)"', line)
             if not m:
-                err(
-                    'Usage: /chad "your question" [--depth=short|medium|deep] [--prose] [--norefs] [--nocontra]'
-                )
+                err('Usage: /chad "your question" [--depth=short|medium|deep] [--prose] [--norefs] [--nocontra]')
                 prompt()
                 return
             q = m[0]
@@ -3119,15 +3077,13 @@ async def _handle_command(line):
             goal = m[0]
             ask = "--ask" in line
             meta = "--meta" in line
-            pr = await prompt_boost(goal, ask=ask or True, meta=meta)
+            await prompt_boost(goal, ask=ask or True, meta=meta)
             if ("--apply" in line) and BOOST_LAST_PROMPT:
                 prompt_apply("next")
 
         elif cmd == "/prompt.answer":
             # multiline answers
-            ans = await read_multiline(
-                "Paste answers (number or bullet wise). End with: EOF"
-            )
+            ans = await read_multiline("Paste answers (number or bullet wise). End with: EOF")
             if ans.strip():
                 await prompt_answer(ans)
             else:
@@ -3164,11 +3120,7 @@ async def _handle_command(line):
                     else []
                 ),
                 "io": {"output": "file", "outPath": args.get("out")},
-                "max_chunks": (
-                    int(args["max"])
-                    if args.get("max") and args["max"].isdigit()
-                    else None
-                ),
+                "max_chunks": (int(args["max"]) if args.get("max") and args["max"].isdigit() else None),
             }
             await run_recipe(rec)
 
@@ -3305,7 +3257,7 @@ async def _handle_command(line):
                 n = int(parts[1])
                 AUTO_MAX = None if n <= 0 else n
                 ok(f"Auto max={AUTO_MAX or '(unlimited)'}")
-            except:
+            except (ValueError, TypeError):
                 err("Provide an integer.")
         elif cmd == "/book.status":
             show_status()
@@ -3329,18 +3281,12 @@ async def _handle_command(line):
         elif cmd == "/history.tail":
             try:
                 u = next((m for m in reversed(HISTORY) if m["role"] == "user"), None)
-                a = next(
-                    (m for m in reversed(HISTORY) if m["role"] == "assistant"), None
-                )
+                a = next((m for m in reversed(HISTORY) if m["role"] == "assistant"), None)
                 print(hr())
                 if u:
-                    print(
-                        f"Last user: {u['content'][:500] + ('...' if len(u['content'])>500 else '')}"
-                    )
+                    print(f"Last user: {u['content'][:500] + ('...' if len(u['content'])>500 else '')}")
                 if a:
-                    print(
-                        f"Last assistant: {a['content'][:500] + ('...' if len(a['content'])>500 else '')}"
-                    )
+                    print(f"Last assistant: {a['content'][:500] + ('...' if len(a['content'])>500 else '')}")
                 print(hr())
             except Exception as e:
                 err(f"history.tail failed: {e}")
@@ -3350,9 +3296,7 @@ async def _handle_command(line):
 
     # manual chat
     if AUTO_ON:
-        warn(
-            "Autopilot running. Use /book.pause and /next to intervene, or /book.stop to stop."
-        )
+        warn("Autopilot running. Use /book.pause and /next to intervene, or /book.stop to stop.")
         return
     try:
         await ask_collect(line)
@@ -3397,9 +3341,7 @@ async def repl():
                 SESSION_ID, MESSAGE_ID = parts[1], parts[2]
                 ok("IDs set.")
             elif cmd == "/showids":
-                print(
-                    f"session_id={SESSION_ID or '(unset)'}\nmessage_id={MESSAGE_ID or '(unset)'}"
-                )
+                print(f"session_id={SESSION_ID or '(unset)'}\nmessage_id={MESSAGE_ID or '(unset)'}")
 
             # Repo
             elif cmd == "/repo.list":
@@ -3413,11 +3355,7 @@ async def repl():
                     if key not in PROMPT_REPO:
                         err("Unknown key.")
                     else:
-                        n = (
-                            int(toks[2])
-                            if len(toks) >= 3 and toks[2].isdigit()
-                            else 500
-                        )
+                        n = int(toks[2]) if len(toks) >= 3 and toks[2].isdigit() else 500
                         text = PROMPT_REPO[key]["system"]
                         print((text[:n] + ("..." if len(text) > n else "")))
             elif cmd == "/repo.use":
@@ -3478,9 +3416,7 @@ async def repl():
             # Subject-aware book modes
             elif cmd == "/book.zero2hero":
                 if len(parts) < 2:
-                    err(
-                        "Usage: /book.zero2hero <subject> [--plan] [--max=N] [--window=N] [--outdir=DIR]"
-                    )
+                    err("Usage: /book.zero2hero <subject> [--plan] [--max=N] [--window=N] [--outdir=DIR]")
                     prompt()
                     continue
                 tokens = line.split()[1:]
@@ -3495,12 +3431,12 @@ async def repl():
                     elif tk.startswith("--max="):
                         try:
                             maxc = int(tk.split("=", 1)[1])
-                        except:
+                        except (ValueError, TypeError):
                             pass
                     elif tk.startswith("--window="):
                         try:
                             wind = int(tk.split("=", 1)[1])
-                        except:
+                        except (ValueError, TypeError):
                             pass
                     elif tk.startswith("--outdir="):
                         outdir = tk.split("=", 1)[1]
@@ -3516,9 +3452,7 @@ async def repl():
 
             elif cmd == "/book.reference":
                 if len(parts) < 2:
-                    err(
-                        "Usage: /book.reference <subject> [--plan] [--max=N] [--window=N] [--outdir=DIR]"
-                    )
+                    err("Usage: /book.reference <subject> [--plan] [--max=N] [--window=N] [--outdir=DIR]")
                     prompt()
                     continue
                 tokens = line.split()[1:]
@@ -3533,12 +3467,12 @@ async def repl():
                     elif tk.startswith("--max="):
                         try:
                             maxc = int(tk.split("=", 1)[1])
-                        except:
+                        except (ValueError, TypeError):
                             pass
                     elif tk.startswith("--window="):
                         try:
                             wind = int(tk.split("=", 1)[1])
-                        except:
+                        except (ValueError, TypeError):
                             pass
                     elif tk.startswith("--outdir="):
                         outdir = tk.split("=", 1)[1]
@@ -3554,9 +3488,7 @@ async def repl():
 
             elif cmd == "/book.pop":
                 if len(parts) < 2:
-                    err(
-                        "Usage: /book.pop <subject> [--plan] [--max=N] [--window=N] [--outdir=DIR]"
-                    )
+                    err("Usage: /book.pop <subject> [--plan] [--max=N] [--window=N] [--outdir=DIR]")
                     prompt()
                     continue
                 tokens = line.split()[1:]
@@ -3571,12 +3503,12 @@ async def repl():
                     elif tk.startswith("--max="):
                         try:
                             maxc = int(tk.split("=", 1)[1])
-                        except:
+                        except (ValueError, TypeError):
                             pass
                     elif tk.startswith("--window="):
                         try:
                             wind = int(tk.split("=", 1)[1])
-                        except:
+                        except (ValueError, TypeError):
                             pass
                     elif tk.startswith("--outdir="):
                         outdir = tk.split("=", 1)[1]
@@ -3592,9 +3524,7 @@ async def repl():
 
             elif cmd == "/book.nobs":
                 if len(parts) < 2:
-                    err(
-                        "Usage: /book.nobs <subject> [--plan] [--max=N] [--window=N] [--outdir=DIR]"
-                    )
+                    err("Usage: /book.nobs <subject> [--plan] [--max=N] [--window=N] [--outdir=DIR]")
                     prompt()
                     continue
                 tokens = line.split()[1:]
@@ -3609,12 +3539,12 @@ async def repl():
                     elif tk.startswith("--max="):
                         try:
                             maxc = int(tk.split("=", 1)[1])
-                        except:
+                        except (ValueError, TypeError):
                             pass
                     elif tk.startswith("--window="):
                         try:
                             wind = int(tk.split("=", 1)[1])
-                        except:
+                        except (ValueError, TypeError):
                             pass
                     elif tk.startswith("--outdir="):
                         outdir = tk.split("=", 1)[1]
@@ -3653,19 +3583,139 @@ async def repl():
                     else:
                         subject_tokens.append(tk)
                 if not subject_tokens or not lang:
-                    err(
-                        "Usage: /book.bilingual <subject> --lang=LANG [--plan] [--max=N] [--window=N] [--outdir=DIR]"
-                    )
+                    err("Usage: /book.bilingual <subject> --lang=LANG [--plan] [--max=N] [--window=N] [--outdir=DIR]")
                 else:
-                    await book_bilingual(
-                        " ".join(subject_tokens), lang, plan, outdir, maxc, wind
-                    )
+                    await book_bilingual(" ".join(subject_tokens), lang, plan, outdir, maxc, wind)
+
+            elif cmd == "/z2h":
+                # /z2h "Subject" [--out=./books/file.md] [--max=N] [--min=N]
+                tokens = line.split()[1:]
+                subject_tokens = []
+                out_path = "./books/topic.final.md"
+                max_chunks = 8
+                min_chars = 3000
+                for tk in tokens:
+                    if tk.startswith("--out="):
+                        out_path = tk.split("=", 1)[1]
+                    elif tk.startswith("--max="):
+                        try:
+                            max_chunks = int(tk.split("=", 1)[1])
+                        except (ValueError, TypeError):
+                            pass
+                    elif tk.startswith("--min="):
+                        try:
+                            min_chars = int(tk.split("=", 1)[1])
+                        except (ValueError, TypeError):
+                            pass
+                    elif tk.startswith("--"):
+                        pass  # Other flags
+                    else:
+                        subject_tokens.append(tk)
+
+                if not subject_tokens:
+                    err('Usage: /z2h "Subject" [--out=./books/file.md] [--max=N] [--min=N]')
+                else:
+                    subject = " ".join(subject_tokens)
+
+                    # Set up the system for z2h mode (no-bs + narrative + outline-first + hammer)
+                    SAVE_SYSTEM_STACK.append(SYSTEM_PROMPT)
+                    sys_text = repo_render("book.zero2hero", subject=subject)
+                    # Apply no-bs overlay
+                    sys_text = _apply_style_overlays(sys_text, ["no-bs"], None)
+                    if OUTPUT_BUDGET_SNIPPET_ON:
+                        sys_text = sys_text.strip() + "\n\n" + OUTPUT_BUDGET_ADDENDUM
+                    set_system(sys_text)
+
+                    # Set up continuation and other settings for zero-to-hero
+                    globals()["SESSION_MODE"] = "zero2hero"
+                    globals()["COVERAGE_HAMMER_ON"] = True
+                    globals()["OUTPUT_MIN_CHARS"] = int(min_chars)
+
+                    # Set output path
+                    ensure_dir(os.path.dirname(out_path) or ".")
+                    globals()["AUTO_OUT"] = next_available_path(out_path)
+
+                    # Start autopilot
+                    globals()["AUTO_ON"] = True
+                    globals()["AUTO_COUNT"] = 0
+                    globals()["LAST_NEXT_HINT"] = None
+                    globals()["AUTO_MAX"] = None if max_chunks in (None, 0) else int(max_chunks)
+
+                    ok(f"Zero-to-Hero autopilot ON → {AUTO_OUT} (subject: {subject})")
+                    if AUTO_TASK and not AUTO_TASK.done():
+                        AUTO_TASK.cancel()
+                    globals()["AUTO_TASK"] = asyncio.create_task(autorun_loop())
+
+            elif cmd == "/z2h-list":
+                # /z2h-list "Subj A; Subj B; ..." [--max=N] [--min=N]
+                tokens = line.split()[1:]
+                subjects_str = ""
+                max_chunks = 8
+                min_chars = 3000
+                for tk in tokens:
+                    if tk.startswith("--max="):
+                        try:
+                            max_chunks = int(tk.split("=", 1)[1])
+                        except (ValueError, TypeError):
+                            pass
+                    elif tk.startswith("--min="):
+                        try:
+                            min_chars = int(tk.split("=", 1)[1])
+                        except (ValueError, TypeError):
+                            pass
+                    elif tk.startswith("--"):
+                        pass  # Other flags
+                    else:
+                        subjects_str = tk
+
+                if not subjects_str:
+                    err('Usage: /z2h-list "Subj A; Subj B; ..." [--max=N] [--min=N]')
+                else:
+                    subjects = [s.strip() for s in subjects_str.split(";") if s.strip()]
+                    ok(f"Processing {len(subjects)} subjects sequentially: {subjects}")
+
+                    for i, subject in enumerate(subjects):
+                        ok(f"Processing subject {i+1}/{len(subjects)}: {subject}")
+
+                        # Set up the system for z2h mode (no-bs + narrative + outline-first + hammer)
+                        SAVE_SYSTEM_STACK.append(SYSTEM_PROMPT)
+                        sys_text = repo_render("book.zero2hero", subject=subject)
+                        # Apply no-bs overlay
+                        sys_text = _apply_style_overlays(sys_text, ["no-bs"], None)
+                        if OUTPUT_BUDGET_SNIPPET_ON:
+                            sys_text = sys_text.strip() + "\n\n" + OUTPUT_BUDGET_ADDENDUM
+                        set_system(sys_text)
+
+                        # Set up continuation and other settings for zero-to-hero
+                        globals()["SESSION_MODE"] = "zero2hero"
+                        globals()["COVERAGE_HAMMER_ON"] = True
+                        globals()["OUTPUT_MIN_CHARS"] = int(min_chars)
+
+                        # Set output path
+                        slug = slugify(subject)
+                        out_path = f"books/{slug}.final.md"
+                        ensure_dir(os.path.dirname(out_path) or ".")
+                        globals()["AUTO_OUT"] = next_available_path(out_path)
+
+                        # Start autopilot
+                        globals()["AUTO_ON"] = True
+                        globals()["AUTO_COUNT"] = 0
+                        globals()["LAST_NEXT_HINT"] = None
+                        globals()["AUTO_MAX"] = None if max_chunks in (None, 0) else int(max_chunks)
+
+                        ok(f"Zero-to-Hero autopilot ON → {AUTO_OUT}")
+
+                        # Run this subject
+                        await autorun_loop()
+
+                        # Reset for next subject
+                        globals()["AUTO_ON"] = False
+                        if SAVE_SYSTEM_STACK:
+                            set_system(SAVE_SYSTEM_STACK.pop())
 
             elif cmd == "/exam.cram":
                 if len(parts) < 2:
-                    err(
-                        "Usage: /exam.cram <subject> [--max=N] [--window=N] [--outdir=DIR]"
-                    )
+                    err("Usage: /exam.cram <subject> [--max=N] [--window=N] [--outdir=DIR]")
                     prompt()
                     continue
                 tokens = line.split()[1:]
@@ -3677,12 +3727,12 @@ async def repl():
                     if tk.startswith("--max="):
                         try:
                             maxc = int(tk.split("=", 1)[1])
-                        except:
+                        except (ValueError, TypeError):
                             pass
                     elif tk.startswith("--window="):
                         try:
                             wind = int(tk.split("=", 1)[1])
-                        except:
+                        except (ValueError, TypeError):
                             pass
                     elif tk.startswith("--outdir="):
                         outdir = tk.split("=", 1)[1]
@@ -3699,17 +3749,13 @@ async def repl():
             # Autopilot control
             elif cmd == "/book.pause":
                 AUTO_PAUSE = True
-                ok(
-                    "Autopilot paused. Use /book.resume or /next to override next prompt."
-                )
+                ok("Autopilot paused. Use /book.resume or /next to override next prompt.")
             elif cmd == "/book.resume":
                 AUTO_PAUSE = False
                 ok("Autopilot resumed.")
             elif cmd == "/next":
                 if len(parts) < 2:
-                    err(
-                        "Usage: /next <text>. Example: /next Continue up to master's level; do not end after basics."
-                    )
+                    err("Usage: /next <text>. Example: /next Continue up to master's level; do not end after basics.")
                 else:
                     NEXT_OVERRIDE = parts[1]
                     ok(f"Next prompt override set: {NEXT_OVERRIDE!r}")
@@ -3743,7 +3789,7 @@ async def repl():
                             warn("Value too small; suggest >= 2500.")
                         OUTPUT_MIN_CHARS = max(1000, v)
                         ok(f"OUTPUT_MIN_CHARS={OUTPUT_MIN_CHARS}")
-                    except:
+                    except (ValueError, TypeError):
                         err("Provide an integer.")
                 else:
                     err("Usage: /out.minchars <N>")
@@ -3756,7 +3802,7 @@ async def repl():
                             warn("Unusual value; using within [0..10].")
                         OUTPUT_PUSH_MAX_PASSES = max(0, min(10, v))
                         ok(f"OUTPUT_PUSH_MAX_PASSES={OUTPUT_PUSH_MAX_PASSES}")
-                    except:
+                    except (ValueError, TypeError):
                         err("Provide an integer.")
                 else:
                     err("Usage: /out.passes <N>")
@@ -3778,6 +3824,7 @@ async def repl():
 
             elif cmd == "/cf.reset":
                 # hard reset flags; won't auto-resume
+                global CF_BLOCKED, CF_NOTIFIED
                 CF_BLOCKED = False
                 CF_NOTIFIED = False
                 ok("CF flags reset.")
@@ -3796,9 +3843,7 @@ async def repl():
             elif cmd == "/system.append":
                 add = await read_multiline()
                 if add.strip():
-                    SYSTEM_PROMPT = (
-                        SYSTEM_PROMPT + ("\n\n" if SYSTEM_PROMPT.strip() else "") + add
-                    ).strip()
+                    SYSTEM_PROMPT = (SYSTEM_PROMPT + ("\n\n" if SYSTEM_PROMPT.strip() else "") + add).strip()
                     ok("System appended.")
                 else:
                     warn("Nothing pasted.")
@@ -3817,7 +3862,7 @@ async def repl():
                 try:
                     set_window(int(parts[1]))
                     ok(f"Window={HISTORY_WINDOW}")
-                except:
+                except (ValueError, TypeError):
                     err("Provide an integer.")
 
             # OpenRouter commands
@@ -3871,7 +3916,7 @@ async def repl():
                 if len(parts) == 3:
                     try:
                         chunk_kb = max(8, int(parts[2]))
-                    except:
+                    except (ValueError, TypeError):
                         pass
                 if ING_TASK and not ING_TASK.done():
                     warn("Ingestion already running.")
@@ -3882,48 +3927,32 @@ async def repl():
             elif cmd == "/ingest.synth":
                 toks = line.split()
                 if len(toks) < 3:
-                    err(
-                        "Usage: /ingest.synth <file> <synth.md> [chunkKB=45] [synthChars=9500]"
-                    )
+                    err("Usage: /ingest.synth <file> <synth.md> [chunkKB=45] [synthChars=9500]")
                 else:
                     path = toks[1]
                     out = toks[2]
-                    chunk_kb = (
-                        int(toks[3]) if len(toks) >= 4 and toks[3].isdigit() else 45
-                    )
-                    synth_chars = (
-                        int(toks[4]) if len(toks) >= 5 and toks[4].isdigit() else 9500
-                    )
+                    chunk_kb = int(toks[3]) if len(toks) >= 4 and toks[3].isdigit() else 45
+                    synth_chars = int(toks[4]) if len(toks) >= 5 and toks[4].isdigit() else 9500
                     if ING_TASK and not ING_TASK.done():
                         warn("Ingestion already running.")
                         prompt()
                         continue
-                    ING_TASK = asyncio.create_task(
-                        ingest_synth_loop(path, out, chunk_kb, synth_chars)
-                    )
+                    ING_TASK = asyncio.create_task(ingest_synth_loop(path, out, chunk_kb, synth_chars))
                     ok(f"Started SYNTH ingestion from {path} → {out}")
             elif cmd == "/ingest.lossless":
                 toks = line.split()
                 if len(toks) < 3:
-                    err(
-                        "Usage: /ingest.lossless <file> <synth.md> [chunkKB=45] [synthChars=12000]"
-                    )
+                    err("Usage: /ingest.lossless <file> <synth.md> [chunkKB=45] [synthChars=12000]")
                 else:
                     path = toks[1]
                     out = toks[2]
-                    chunk_kb = (
-                        int(toks[3]) if len(toks) >= 4 and toks[3].isdigit() else 45
-                    )
-                    synth_chars = (
-                        int(toks[4]) if len(toks) >= 5 and toks[4].isdigit() else 12000
-                    )
+                    chunk_kb = int(toks[3]) if len(toks) >= 4 and toks[3].isdigit() else 45
+                    synth_chars = int(toks[4]) if len(toks) >= 5 and toks[4].isdigit() else 12000
                     if ING_TASK and not ING_TASK.done():
                         warn("Ingestion already running.")
                         prompt()
                         continue
-                    ING_TASK = asyncio.create_task(
-                        ingest_synth_loop(path, out, chunk_kb, synth_chars)
-                    )
+                    ING_TASK = asyncio.create_task(ingest_synth_loop(path, out, chunk_kb, synth_chars))
                     ok(f"Started LOSSLESS synthesis from {path} → {out}")
             elif cmd == "/ingest.stop":
                 if ING_ON:
@@ -3936,30 +3965,22 @@ async def repl():
             elif cmd == "/style.capture":
                 toks = line.split()
                 if len(toks) < 3:
-                    err(
-                        "Usage: /style.capture <file> <style.synth.md> [chunkKB=30] [styleChars=6000]"
-                    )
+                    err("Usage: /style.capture <file> <style.synth.md> [chunkKB=30] [styleChars=6000]")
                     prompt()
                     continue
                 path, out = toks[1], toks[2]
                 chunk_kb = int(toks[3]) if len(toks) >= 4 and toks[3].isdigit() else 30
-                style_chars = (
-                    int(toks[4]) if len(toks) >= 5 and toks[4].isdigit() else 6000
-                )
+                style_chars = int(toks[4]) if len(toks) >= 5 and toks[4].isdigit() else 6000
                 if ING_TASK and not ING_TASK.done():
                     warn("Ingestion already running.")
                     prompt()
                     continue
-                ING_TASK = asyncio.create_task(
-                    ingest_style_loop(path, out, chunk_kb, style_chars)
-                )
+                ING_TASK = asyncio.create_task(ingest_style_loop(path, out, chunk_kb, style_chars))
                 ok(f"Started style capture from {path} → {out}")
             elif cmd == "/style.apply":
                 toks = line.split()
                 if len(toks) < 3:
-                    err(
-                        "Usage: /style.apply <style.synth.md> <topic|file> [out.md] [--words=N]"
-                    )
+                    err("Usage: /style.apply <style.synth.md> <topic|file> [out.md] [--words=N]")
                     prompt()
                     continue
                 style, topic = toks[1], toks[2]
@@ -3969,13 +3990,11 @@ async def repl():
                     if tk.startswith("--words="):
                         try:
                             words = int(tk.split("=", 1)[1])
-                        except:
+                        except (ValueError, TypeError):
                             pass
                     else:
                         out = tk
-                await style_apply(
-                    style, topic, out, words=None if not words else int(words)
-                )
+                await style_apply(style, topic, out, words=None if not words else int(words))
 
             elif cmd == "/style.nobs":
                 if len(parts) >= 2 and parts[1].strip().lower() in ("on", "off"):
@@ -4002,9 +4021,7 @@ async def repl():
                     global NARRATIVE_ACTIVE
                     if val == "on" and not NARRATIVE_ACTIVE:
                         SAVE_SYSTEM_STACK.append(SYSTEM_PROMPT)
-                        set_system(
-                            (SYSTEM_PROMPT.strip() + "\n\n" + NARRATIVE_OVERLAY).strip()
-                        )
+                        set_system((SYSTEM_PROMPT.strip() + "\n\n" + NARRATIVE_OVERLAY).strip())
                         NARRATIVE_ACTIVE = True
                         ok("Narrative + pedagogy overlay ON (session).")
                     elif val == "off" and NARRATIVE_ACTIVE:
@@ -4047,7 +4064,7 @@ async def repl():
                             warn("Value too small; suggest >= 2500.")
                         OUTPUT_MIN_CHARS = max(1000, v)
                         ok(f"OUTPUT_MIN_CHARS={OUTPUT_MIN_CHARS}")
-                    except:
+                    except (ValueError, TypeError):
                         err("Provide an integer.")
                 else:
                     err("Usage: /out.minchars <N>")
@@ -4060,7 +4077,7 @@ async def repl():
                             warn("Unusual value; using within [0..10].")
                         OUTPUT_PUSH_MAX_PASSES = max(0, min(10, v))
                         ok(f"OUTPUT_PUSH_MAX_PASSES={OUTPUT_PUSH_MAX_PASSES}")
-                    except:
+                    except (ValueError, TypeError):
                         err("Provide an integer.")
                 else:
                     err("Usage: /out.passes <N>")
@@ -4085,9 +4102,7 @@ async def repl():
             elif cmd == "/lossless.run":
                 toks = line.split()
                 if len(toks) < 2:
-                    err(
-                        "Usage: /lossless.run <file> [--outdir=DIR] [--chunkKB=45] [--synthChars=12000]"
-                    )
+                    err("Usage: /lossless.run <file> [--outdir=DIR] [--chunkKB=45] [--synthChars=12000]")
                     prompt()
                     continue
                 path = toks[1]
@@ -4100,12 +4115,12 @@ async def repl():
                     elif tk.startswith("--chunkKB="):
                         try:
                             ck = int(tk.split("=", 1)[1])
-                        except:
+                        except (ValueError, TypeError):
                             pass
                     elif tk.startswith("--synthChars="):
                         try:
                             sc = int(tk.split("=", 1)[1])
-                        except:
+                        except (ValueError, TypeError):
                             pass
                 await lossless_run(path, outdir, chunk_kb=ck, synth_chars=sc)
 
@@ -4114,9 +4129,7 @@ async def repl():
                 # /bilingual.file <file> --lang=LANG [--outdir=DIR] [--chunkKB=45]
                 toks = line.split()
                 if len(toks) < 2:
-                    err(
-                        "Usage: /bilingual.file <file> --lang=LANG [--outdir=DIR] [--chunkKB=45]"
-                    )
+                    err("Usage: /bilingual.file <file> --lang=LANG [--outdir=DIR] [--chunkKB=45]")
                 else:
                     path = toks[1]
                     lang = None
@@ -4201,9 +4214,7 @@ async def repl():
                 # /chad "What is X?" [--depth=short|medium|deep] [--prose] [--norefs] [--nocontra]
                 m = re.findall(r'"([^"]+)"', line)
                 if not m:
-                    err(
-                        'Usage: /chad "your question" [--depth=short|medium|deep] [--prose] [--norefs] [--nocontra]'
-                    )
+                    err('Usage: /chad "your question" [--depth=short|medium|deep] [--prose] [--norefs] [--nocontra]')
                     prompt()
                     continue
                 q = m[0]
@@ -4220,9 +4231,7 @@ async def repl():
                         refs = False
                     elif tk == "--nocontra":
                         contra = False
-                await answer_chad(
-                    q, depth=depth, bullets=bullets, refs=refs, contra=contra
-                )
+                await answer_chad(q, depth=depth, bullets=bullets, refs=refs, contra=contra)
                 prompt()
                 continue
 
@@ -4250,15 +4259,13 @@ async def repl():
                 goal = m[0]
                 ask = "--ask" in line
                 meta = "--meta" in line
-                pr = await prompt_boost(goal, ask=ask or True, meta=meta)
+                await prompt_boost(goal, ask=ask or True, meta=meta)
                 if ("--apply" in line) and BOOST_LAST_PROMPT:
                     prompt_apply("next")
 
             elif cmd == "/prompt.answer":
                 # multiline answers
-                ans = await read_multiline(
-                    "Paste answers (number or bullet wise). End with: EOF"
-                )
+                ans = await read_multiline("Paste answers (number or bullet wise). End with: EOF")
                 if ans.strip():
                     await prompt_answer(ans)
                 else:
@@ -4295,11 +4302,7 @@ async def repl():
                         else []
                     ),
                     "io": {"output": "file", "outPath": args.get("out")},
-                    "max_chunks": (
-                        int(args["max"])
-                        if args.get("max") and args["max"].isdigit()
-                        else None
-                    ),
+                    "max_chunks": (int(args["max"]) if args.get("max") and args["max"].isdigit() else None),
                 }
                 await run_recipe(rec)
 
@@ -4342,9 +4345,7 @@ async def repl():
                     prompt()
                     continue
                 if not PipelineExecutor:
-                    err(
-                        "PipelineExecutor not available. Check imports and dependencies."
-                    )
+                    err("PipelineExecutor not available. Check imports and dependencies.")
                     prompt()
                     continue
 
@@ -4438,7 +4439,7 @@ async def repl():
                     n = int(parts[1])
                     AUTO_MAX = None if n <= 0 else n
                     ok(f"Auto max={AUTO_MAX or '(unlimited)'}")
-                except:
+                except (ValueError, TypeError):
                     err("Provide an integer.")
             elif cmd == "/book.status":
                 show_status()
@@ -4461,21 +4462,13 @@ async def repl():
                 ok("History cleared.")
             elif cmd == "/history.tail":
                 try:
-                    u = next(
-                        (m for m in reversed(HISTORY) if m["role"] == "user"), None
-                    )
-                    a = next(
-                        (m for m in reversed(HISTORY) if m["role"] == "assistant"), None
-                    )
+                    u = next((m for m in reversed(HISTORY) if m["role"] == "user"), None)
+                    a = next((m for m in reversed(HISTORY) if m["role"] == "assistant"), None)
                     print(hr())
                     if u:
-                        print(
-                            f"Last user: {u['content'][:500] + ('...' if len(u['content'])>500 else '')}"
-                        )
+                        print(f"Last user: {u['content'][:500] + ('...' if len(u['content'])>500 else '')}")
                     if a:
-                        print(
-                            f"Last assistant: {a['content'][:500] + ('...' if len(a['content'])>500 else '')}"
-                        )
+                        print(f"Last assistant: {a['content'][:500] + ('...' if len(a['content'])>500 else '')}")
                     print(hr())
                 except Exception as e:
                     err(f"history.tail failed: {e}")
@@ -4495,7 +4488,7 @@ async def repl():
                         else:
                             CONT_ANCHOR_CHARS = n
                             ok(f"Anchor length: {CONT_ANCHOR_CHARS}")
-                    except:
+                    except (ValueError, TypeError):
                         err("Provide an integer.")
                 else:
                     err("Usage: /cont.anchor <N>")
@@ -4516,7 +4509,7 @@ async def repl():
                         else:
                             REPEAT_THRESH = t
                             ok(f"Repeat threshold: {REPEAT_THRESH}")
-                    except:
+                    except (ValueError, TypeError):
                         err("Provide a float (0..1).")
                 else:
                     err("Usage: /repeat.thresh <0..1>")
@@ -4533,9 +4526,7 @@ async def repl():
                 print(hr())
                 print(f"Context messages included: {len(ctx)}")
                 if ctx:
-                    print(
-                        f"First in ctx: {ctx[0]['role']} … Last in ctx: {ctx[-1]['role']}"
-                    )
+                    print(f"First in ctx: {ctx[0]['role']} … Last in ctx: {ctx[-1]['role']}")
                 print(hr())
             else:
                 warn("Unknown command. /help for help.")
@@ -4543,9 +4534,7 @@ async def repl():
 
         # manual chat
         if AUTO_ON:
-            warn(
-                "Autopilot running. Use /book.pause and /next to intervene, or /book.stop to stop."
-            )
+            warn("Autopilot running. Use /book.pause and /next to intervene, or /book.stop to stop.")
             return
         try:
             await ask_collect(line)
@@ -4654,7 +4643,7 @@ async def repl_fallback():
         prompt()
 
 
-async def repl():
+async def main_repl():
     # Check environment variable LMA_USE_PTK=1 to enable PTK
     use_ptk = os.getenv("LMA_USE_PTK", "1") == "1" and PTK_AVAILABLE
     if use_ptk:
@@ -4664,4 +4653,135 @@ async def repl():
 
 
 # ---------------- App bootstrap ----------------
-def start_interactive():\n    main()
+def main():
+    _load_macros()
+    app = web.Application()
+    app.router.add_get("/bridge/poll", bridge_poll)
+    app.router.add_get("/internal/healthz", healthz)
+    app.router.add_post("/bridge/push", bridge_push)
+    app.router.add_post("/internal/id_capture/update", id_capture_update)
+
+    async def _run():
+        # Set up CORS for all routes
+        for route in app.router.routes():
+            route.kwargs["expect_handler"] = _add_cors
+
+        runner = web.AppRunner(app)
+
+        async def cleanup_with_timeout():
+            try:
+                await asyncio.wait_for(runner.cleanup(), timeout=2.0)
+            except asyncio.TimeoutError:
+                print("\nWarning: Runner cleanup timed out.\n")
+
+        async def setup_and_run():
+            try:
+                await runner.setup()
+                # Try to find an available port, starting with 5102
+                port = 5102
+                max_attempts = 20  # Try up to 20 ports
+                for _attempt in range(max_attempts):
+                    try:
+                        site = web.TCPSite(runner, "127.0.0.1", port)
+                        await site.start()
+                        break  # Success, exit the loop
+                    except OSError as e:
+                        if e.errno == 98:  # Address already in use
+                            port += 1
+                            continue
+                        else:
+                            raise e
+                else:
+                    err(f"Could not find an available port after {max_attempts} attempts")
+                    return
+
+                print()
+                info("Listening on:")
+                print(f"  GET  http://127.0.0.1:{port}/bridge/poll")
+                print(f"  POST http://127.0.0.1:{port}/bridge/push")
+                print(f"  POST http://127.0.0.1:{port}/internal/id_capture/update")
+                await main_repl()  # Use main_repl instead of repl since we fixed the original file
+            finally:
+                await cleanup_with_timeout()
+
+        try:
+            asyncio.run(setup_and_run())
+        except (KeyboardInterrupt, SystemExit):
+            pass
+
+    asyncio.create_task(_run())
+
+
+# ---------------- Missing helper functions ----------------
+async def _ingest_loop():
+    """Internal helper to run the appropriate ingest loop based on ING_MODE."""
+    global ING_MODE, ING_PATH
+    if ING_MODE == "ack":
+        # Extract path and chunk size if needed
+        chunk_kb = ING_CHUNK_BYTES // 1024 if ING_CHUNK_BYTES else 45
+        await ingest_ack_loop(ING_PATH, chunk_kb)
+    elif ING_MODE == "synth":
+        synth_out = ING_PATH + ".synth.md"  # default synthetic output path
+        chunk_kb = ING_CHUNK_BYTES // 1024 if ING_CHUNK_BYTES else 45
+        synth_chars = SYNTH_LIMIT if SYNTH_LIMIT else 12000
+        await ingest_synth_loop(ING_PATH, synth_out, chunk_kb, synth_chars)
+    elif ING_MODE == "style":
+        out_path = ING_PATH + ".style.md"  # default style output path
+        chunk_kb = ING_CHUNK_BYTES // 1024 if ING_CHUNK_BYTES else 45
+        style_chars = 3000  # default style character limit
+        await ingest_style_loop(ING_PATH, out_path, chunk_kb, style_chars)
+    else:
+        warn(f"Unknown ingest mode: {ING_MODE}")
+
+
+async def _flashcards_from(path: str):
+    """Generate flashcards from a synthesis file."""
+    out_path = path + ".flashcards.md"
+    n_cards = 50  # default number of cards
+    await flashcards_from_synth(path, out_path, n_cards)
+
+
+async def _glossary_from(path: str):
+    """Generate glossary from a synthesis file."""
+    out_path = path + ".glossary.md"
+    await glossary_from_synth(path, out_path)
+
+
+async def _index_from(path: str):
+    """Generate index from a synthesis file."""
+    out_path = path + ".index.md"
+    await index_from_synth(path, out_path)
+
+
+async def _translate_file(path: str, lang: str, chunk_kb: int = 50):
+    """Translate a file to the specified language."""
+    await translate_file(path, lang, chunk_kb)
+
+
+async def _style_capture(path: str):
+    """Capture style profile from a text file."""
+    out_path = path + ".style.md"
+    chunk_kb = 45
+    style_chars = 3000
+    await ingest_style_loop(path, out_path, chunk_kb, style_chars)
+
+
+async def _style_apply(content: str):
+    """Apply a style profile to content."""
+    # Find the most recently saved style profile
+    import glob
+    import os
+
+    style_files = glob.glob(os.path.join(BOOKS_DIR, "*.style.md"))
+    if not style_files:
+        warn("No style profile found. Run /style.capture first.")
+        return content
+
+    latest_style = max(style_files, key=os.path.getctime)
+    out_path = None  # Output to console instead of file
+    await style_apply(latest_style, content, out_path, None)
+    return content  # This is a placeholder - real implementation would return the styled content
+
+
+def start_interactive():
+    main()

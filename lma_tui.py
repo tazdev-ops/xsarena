@@ -1,8 +1,12 @@
 #!/usr/bin/env python3
-import sys
-import subprocess
+try:
+    import xsarena_tui  # canonical wrapper script
 
-if __name__ == "__main__":
-    print("Deprecated: use `python xsarena_tui.py` (this wrapper calls xsarena_tui.py).", file=sys.stderr)
-    result = subprocess.run([sys.executable, "xsarena_tui.py"] + sys.argv[1:])
-    sys.exit(result.returncode)
+    if __name__ == "__main__":
+        xsarena_tui.StudioApp().run()
+except Exception:
+    # Fallback: run via module path if script missing
+    from xsarena.gui.gtk_app import main as _gtk_main  # if you prefer GTK, keep/skip as needed
+
+    if __name__ == "__main__":
+        _gtk_main()

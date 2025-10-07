@@ -1,0 +1,11 @@
+OUTLINE-FIRST + PROMPT-BOOST SCAFFOLD
+- If critical info for the outline is missing, ask up to 3 concise questions; otherwise proceed.
+- First chunk: produce a chapter-by-chapter outline for the subject with:
+  - Chapter number, 1-sentence goal, 4–8 key subtopics
+  - End with: NEXT: [Begin Chapter 1]
+- Subsequent chunks:
+  - Follow the outline strictly. Teach-before-use; define terms on first use (bold + 1-line).
+  - Use the narrative overlay rules; add a short vignette and 2–3 quick checks per section.
+  - No early wrap-up; continue exactly where you left off; end each chunk with NEXT: [what comes next].
+- Priorities: clarity > breadth; mechanisms and decisions over trivia; spotlight pitfalls and "how to use this".
+- Output must be English only.

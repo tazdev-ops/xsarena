@@ -1,0 +1,16 @@
+{
+  "id": "ticket_0022",
+  "file": "/home/mativiters/1/xsarena/src/xsarena/cli/cmds_modes.py",
+  "rules": [
+    "E501"
+  ],
+  "issues": [
+    {
+      "code": "E501",
+      "message": "Line too long (141 > 120)",
+      "line": 73,
+      "col": 121
+    }
+  ],
+  "done": false
+}

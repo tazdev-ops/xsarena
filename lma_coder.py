@@ -16,9 +16,12 @@
 # NOTE: This agent relies on the model following a strict JSON schema. We enforce it via a tool protocol prompt.
 
 import asyncio
+import builtins
+import contextlib
 import json
 import os
 import re
+import re as _pytest_re
 import shutil
 import subprocess
 import sys
@@ -216,9 +219,7 @@ async def bridge_push(request: web.Request):
         req_id = data.get("request_id")
         payload = data.get("data")
         if not req_id:
-            return _add_cors(
-                web.json_response({"error": "missing request_id"}, status=400)
-            )
+            return _add_cors(web.json_response({"error": "missing request_id"}, status=400))
         q = RESPONSE_CHANNELS.get(req_id)
         if q:
             await q.put(payload)
@@ -236,11 +237,7 @@ async def id_capture_update(request: web.Request):
         data = await request.json()
         sid, mid = data.get("sessionId"), data.get("messageId")
         if not (sid and mid):
-            return _add_cors(
-                web.json_response(
-                    {"error": "missing sessionId or messageId"}, status=400
-                )
-            )
+            return _add_cors(web.json_response({"error": "missing sessionId or messageId"}, status=400))
         SESSION_ID, MESSAGE_ID = sid, mid
         print()
         ok(f"[{now()}] IDs updated:")
@@ -287,14 +284,10 @@ def build_payload_messages(messages: list[dict]) -> dict:
 async def send_and_collect(payload: dict, silent: bool = False) -> str:
     global CANCEL_REQUESTED
     if not CLIENT_SEEN:
-        warn(
-            "No browser polling detected. Open https://lmarena.ai with the userscript enabled."
-        )
+        warn("No browser polling detected. Open https://lmarena.ai with the userscript enabled.")
         return ""
     if not SESSION_ID or not MESSAGE_ID:
-        warn(
-            "Missing session/message IDs. Use /capture then click Retry in LMArena, or /setids."
-        )
+        warn("Missing session/message IDs. Use /capture then click Retry in LMArena, or /setids.")
         return ""
 
     req_id = str(uuid.uuid4())
@@ -330,9 +323,7 @@ async def send_and_collect(payload: dict, silent: bool = False) -> str:
             for p in CF_PATTERNS:
                 if re.search(p, buf, re.IGNORECASE):
                     if not silent:
-                        print(
-                            f"\n{C.WARN}! Cloudflare challenge. Solve it in browser and retry.{C.R}"
-                        )
+                        print(f"\n{C.WARN}! Cloudflare challenge. Solve it in browser and retry.{C.R}")
                     RESPONSE_CHANNELS.pop(req_id, None)
                     return "".join(parts)
             m = ERROR_RE.search(buf)
@@ -386,11 +377,7 @@ def truncate_text(txt: str, label: str = "output") -> str:
         return txt
     head = b[:TRUNC_HEAD].decode("utf-8", errors="ignore")
     tail = b[-TRUNC_TAIL:].decode("utf-8", errors="ignore")
-    return (
-        head
-        + f"\n\n...[TRUNCATED {len(b)-TRUNC_HEAD-TRUNC_TAIL} bytes of {label}]...\n\n"
-        + tail
-    )
+    return head + f"\n\n...[TRUNCATED {len(b) - TRUNC_HEAD - TRUNC_TAIL} bytes of {label}]...\n\n" + tail
 
 
 def tool_list_dir(path: str) -> dict:
@@ -445,9 +432,7 @@ def tool_append_file(path: str, content: str) -> dict:
         return {"ok": False, "error": str(e)}
 
 
-def tool_search_text(
-    path: str, query: str, regex: bool = False, max_results: int = 200
-) -> dict:
+def tool_search_text(path: str, query: str, regex: bool = False, max_results: int = 200) -> dict:
     p = resolve_path(path)
     hits = []
     try:
@@ -489,9 +474,7 @@ def tool_search_text(
         return {"ok": False, "error": str(e)}
 
 
-def tool_replace_text(
-    path: str, find: str, replace: str, regex: bool = False, count: int = 0
-) -> dict:
+def tool_replace_text(path: str, find: str, replace: str, regex: bool = False, count: int = 0) -> dict:
     fp = resolve_path(path)
     if not fp.exists() or not fp.is_file():
         return {"ok": False, "error": "not_found"}
@@ -539,9 +522,7 @@ def tool_apply_patch(path: str, patch: str) -> dict:
     if not fp.exists() or not fp.is_file():
         return {"ok": False, "error": "not_found"}
     try:
-        original = fp.read_text(encoding="utf-8", errors="ignore").splitlines(
-            keepends=True
-        )
+        original = fp.read_text(encoding="utf-8", errors="ignore").splitlines(keepends=True)
         # parse unified diff into hunks
         lines = patch.splitlines(keepends=False)
         i = 0
@@ -564,15 +545,15 @@ def tool_apply_patch(path: str, patch: str) -> dict:
             return s.rstrip("\r\n")
 
         def extract_original(hunk):
-            return [normalize(l[1:]) for l in hunk if l and l[0] in (" ", "-")]
+            return [normalize(line[1:]) for line in hunk if line and line[0] in (" ", "-")]
 
         def extract_final(hunk):
             # context + additions
             out = []
-            for l in hunk:
-                if not l:
+            for line in hunk:
+                if not line:
                     continue
-                tag, body = l[0], normalize(l[1:])
+                tag, body = line[0], normalize(line[1:])
                 if tag in (" ", "+"):
                     out.append(body + "\n")
             return out
@@ -580,10 +561,7 @@ def tool_apply_patch(path: str, patch: str) -> dict:
         content = original[:]  # working copy
         applied = 0
         for header, hunk in hunks:
-            orig_block = [
-                l + ("\n" if not l.endswith("\n") else "")
-                for l in extract_original(hunk)
-            ]
+            orig_block = [line + ("\n" if not line.endswith("\n") else "") for line in extract_original(hunk)]
             final_block = extract_final(hunk)
 
             # find best match (exact first; then fuzzy by context)
@@ -619,9 +597,7 @@ def tool_apply_patch(path: str, patch: str) -> dict:
                 for k in range(0, max(0, len(content) - len(orig_block) + 1)):
                     score = 0
                     for j, ol in enumerate(orig_block):
-                        if k + j < len(content) and normalize(
-                            content[k + j]
-                        ) == normalize(ol):
+                        if k + j < len(content) and normalize(content[k + j]) == normalize(ol):
                             score += 1
                     if score > best[1]:
                         best = (k, score)
@@ -636,9 +612,6 @@ def tool_apply_patch(path: str, patch: str) -> dict:
         return {"ok": True, "applied_hunks": applied}
     except Exception as e:
         return {"ok": False, "error": str(e)}
-
-
-import re as _pytest_re
 
 
 def _parse_pytest_summary(txt: str) -> dict:
@@ -692,9 +665,8 @@ def tool_run_tests(args: str = "-q", cwd: str | None = None) -> dict:
     wd = resolve_path(cwd) if cwd else ROOT.resolve()
     try:
         cmd = f"pytest {args}".strip()
-        if CONFIRM_RUN:
-            if not confirm(f"[cwd={wd}] $ {cmd}"):
-                return {"ok": False, "error": "user_denied"}
+        if CONFIRM_RUN and not confirm(f"[cwd={wd}] $ {cmd}"):
+            return {"ok": False, "error": "user_denied"}
         proc = subprocess.run(
             cmd,
             shell=True,
@@ -742,19 +714,13 @@ async def send_and_collect_openai(window_messages: list[dict]) -> str:
         return ""
     async with aiohttp.ClientSession() as session:
         try:
-            async with session.post(
-                url, json=payload, headers=headers, timeout=STEP_TIMEOUT
-            ) as resp:
+            async with session.post(url, json=payload, headers=headers, timeout=STEP_TIMEOUT) as resp:
                 if resp.status != 200:
                     txt = await resp.text()
-                    print(
-                        f"{C.ERR}! OpenAI-compatible call failed: {resp.status} {txt[:400]}{C.R}"
-                    )
+                    print(f"{C.ERR}! OpenAI-compatible call failed: {resp.status} {txt[:400]}{C.R}")
                     return ""
                 j = await resp.json()
-                return (j.get("choices") or [{}])[0].get("message", {}).get(
-                    "content", ""
-                ) or ""
+                return (j.get("choices") or [{}])[0].get("message", {}).get("content", "") or ""
         except Exception as e:
             print(f"{C.ERR}! OpenAI-compatible call error: {e}{C.R}")
             return ""
@@ -768,9 +734,8 @@ def tool_run_cmd(cmd: str, cwd: str | None = None) -> dict:
         base = os.path.basename(first)
         if base not in ALLOW_CMDS:
             return {"ok": False, "error": f"command_not_allowed: {base}"}
-        if CONFIRM_RUN:
-            if not confirm(f"[cwd={wd}] $ {cmd}"):
-                return {"ok": False, "error": "user_denied"}
+        if CONFIRM_RUN and not confirm(f"[cwd={wd}] $ {cmd}"):
+            return {"ok": False, "error": "user_denied"}
         proc = subprocess.run(
             cmd,
             shell=True,
@@ -897,9 +862,7 @@ async def coder_session(goal: str, steps: int, window: int, hint: str | None):
                     res = tool_write_file(args.get("path", ""), args.get("content", ""))
                     observations.append({"tool": tool, "result": res})
                 elif tool == "append_file":
-                    res = tool_append_file(
-                        args.get("path", ""), args.get("content", "")
-                    )
+                    res = tool_append_file(args.get("path", ""), args.get("content", ""))
                     observations.append({"tool": tool, "result": res})
                 elif tool == "search_text":
                     res = tool_search_text(
@@ -941,13 +904,9 @@ async def coder_session(goal: str, steps: int, window: int, hint: str | None):
                         }
                     )
             except PermissionError as e:
-                observations.append(
-                    {"tool": tool, "result": {"ok": False, "error": str(e)}}
-                )
+                observations.append({"tool": tool, "result": {"ok": False, "error": str(e)}})
             except Exception as e:
-                observations.append(
-                    {"tool": tool, "result": {"ok": False, "error": str(e)}}
-                )
+                observations.append({"tool": tool, "result": {"ok": False, "error": str(e)}})
 
         # prepare observation message (compact)
         obs_text = json.dumps({"observations": observations}, ensure_ascii=False)
@@ -1057,14 +1016,12 @@ async def repl():
                     BACKEND = toks[1]
                     if len(toks) >= 3:
                         OPENAI_BASE = toks[2]
-                    ok(
-                        f"Backend={BACKEND} base={OPENAI_BASE if BACKEND=='openai' else '(polling)'}"
-                    )
+                    ok(f"Backend={BACKEND} base={OPENAI_BASE if BACKEND == 'openai' else '(polling)'}")
                 else:
                     err("Usage: /backend polling|openai [base_url]")
             elif cmd == "/api.key":
                 if len(parts) >= 2:
-                    OPENAI_API_KEY = parts[1].strip()
+                    parts[1].strip()
                     ok("API key set.")
                 else:
                     err("Usage: /api.key <key>")
@@ -1095,9 +1052,7 @@ async def repl():
                     warn("Not running.")
             elif cmd == "/code":
                 if len(parts) < 2:
-                    err(
-                        'Usage: /code "<goal>" [--steps=20] [--window=12] [--timeout=180] [--hint="..."]'
-                    )
+                    err('Usage: /code "<goal>" [--steps=20] [--window=12] [--timeout=180] [--hint="..."]')
                     prompt()
                     continue
                 # naive parse
@@ -1113,20 +1068,14 @@ async def repl():
                 timeout = STEP_TIMEOUT
                 for tk in line.split():
                     if tk.startswith("--steps="):
-                        try:
+                        with contextlib.suppress(builtins.BaseException):
                             steps = int(tk.split("=", 1)[1])
-                        except:
-                            pass
                     elif tk.startswith("--window="):
-                        try:
+                        with contextlib.suppress(builtins.BaseException):
                             window = int(tk.split("=", 1)[1])
-                        except:
-                            pass
                     elif tk.startswith("--timeout="):
-                        try:
+                        with contextlib.suppress(builtins.BaseException):
                             timeout = float(tk.split("=", 1)[1])
-                        except:
-                            pass
                 # separate hint (allow spaces)
                 m = re.search(r"--hint=(.+)$", line)
                 if m:
@@ -1156,9 +1105,7 @@ def main():
     app = web.Application()
     app.router.add_get("/bridge/poll", bridge_poll)
     app.router.add_post("/bridge/push", bridge_push)
-    app.router.add_route(
-        "OPTIONS", "/bridge/push", lambda r: _add_cors(web.Response(text=""))
-    )
+    app.router.add_route("OPTIONS", "/bridge/push", lambda r: _add_cors(web.Response(text="")))
     app.router.add_post("/internal/id_capture/update", id_capture_update)
     app.router.add_route(
         "OPTIONS",
@@ -1216,7 +1163,8 @@ async def repl_ptk():
             continue
         if line is None:
             continue
-        # reuse existing repl handler by injecting into stdin is messy; simplest: copy minimal switch here — or skip using PTK loop for now
+        # reuse existing repl handler by injecting into stdin is messy;
+        # simplest: copy minimal switch here — or skip using PTK loop for now
         # For safety, stick with the classic repl(); PTK remains available for future refactor.
         # (Keep placeholder so we can finalize in next pass.)
         pass

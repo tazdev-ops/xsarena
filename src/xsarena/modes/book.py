@@ -62,7 +62,9 @@ class BookMode:
         """Create a no-bullshit manual about the topic."""
         from ..core.templates import OUTPUT_BUDGET_ADDENDUM, SYSTEM_PROMPTS
 
-        prompt = f"Write a concise, no-nonsense manual about {topic}. Focus on practical information, skip fluff, be direct."
+        prompt = (
+            f"Write a concise, no-nonsense manual about {topic}. Focus on practical information, skip fluff, be direct."
+        )
         system_prompt = SYSTEM_PROMPTS["book"]
 
         # Add output budget addendum if enabled
@@ -96,9 +98,7 @@ class BookMode:
         system_prompt = SYSTEM_PROMPTS["book"]
         return await self.engine.send_and_collect(prompt, system_prompt)
 
-    async def write_chapter(
-        self, topic: str, chapter_num: int, chapter_title: str, outline_section: str
-    ) -> str:
+    async def write_chapter(self, topic: str, chapter_num: int, chapter_title: str, outline_section: str) -> str:
         """Write a specific chapter based on outline."""
         prompt = USER_PROMPTS["chapter"].format(
             topic=topic,
@@ -144,9 +144,7 @@ class BookMode:
         current_content = []
 
         for line in lines:
-            if line.strip().startswith("# Chapter") or line.strip().startswith(
-                "## Chapter"
-            ):
+            if line.strip().startswith("# Chapter") or line.strip().startswith("## Chapter"):
                 # Save previous chapter
                 if current_content:
                     chapters[current_chapter] = "\n".join(current_content)

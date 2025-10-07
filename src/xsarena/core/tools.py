@@ -55,9 +55,7 @@ def read_file(filepath: str, path_jail: Optional[PathJail] = None) -> str:
         return f.read()
 
 
-def write_file(
-    filepath: str, content: str, path_jail: Optional[PathJail] = None
-) -> bool:
+def write_file(filepath: str, content: str, path_jail: Optional[PathJail] = None) -> bool:
     """Write content to a file safely."""
     if path_jail:
         safe_path = path_jail.resolve_path(filepath)
@@ -73,9 +71,7 @@ def write_file(
     return True
 
 
-def append_file(
-    filepath: str, content: str, path_jail: Optional[PathJail] = None
-) -> bool:
+def append_file(filepath: str, content: str, path_jail: Optional[PathJail] = None) -> bool:
     """Append content to a file safely."""
     if path_jail:
         safe_path = path_jail.resolve_path(filepath)
@@ -99,9 +95,7 @@ async def run_cmd(cmd: List[str], timeout: int = 30) -> Dict[str, str]:
         )
 
         try:
-            stdout, stderr = await asyncio.wait_for(
-                process.communicate(), timeout=timeout
-            )
+            stdout, stderr = await asyncio.wait_for(process.communicate(), timeout=timeout)
 
             return {
                 "returncode": process.returncode,

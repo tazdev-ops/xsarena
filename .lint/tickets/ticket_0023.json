@@ -1,0 +1,16 @@
+{
+  "id": "ticket_0023",
+  "file": "/home/mativiters/1/xsarena/src/xsarena/core/chunking.py",
+  "rules": [
+    "F821"
+  ],
+  "issues": [
+    {
+      "code": "F821",
+      "message": "Undefined name `Message`",
+      "line": 137,
+      "col": 40
+    }
+  ],
+  "done": false
+}

@@ -1,0 +1,7 @@
+task: book.zero2hero
+subject: "Ancient Iranian Languages"
+styles: [no-bs]
+io:
+  output: file
+  outPath: "./books/ancient-iranian-languages.manual.en.md"
+max_chunks: 6
