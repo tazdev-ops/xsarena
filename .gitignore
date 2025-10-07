@@ -286,6 +286,7 @@ temp/
 books/*.manual.en.md
 books/*.final.md
 books/*.outline.md
+books/*.md
 *.synth.md
 *.lossless.md
 *.flashcards.md
@@ -297,6 +298,19 @@ snapshot_chunks/
 .snapshot_chunks/
 *.bak
 *.bak2
+
+# Additional book files to exclude
+books/*.book.md
+books/*.content.md
+books/*.outline.md
+books/*.draft.md
+books/*.notes.md
+books/*.summary.md
+books/*.outline.md
+books/*.manual.md
+books/*.outline.en.md
+books/*.final.en.md
+books/*.outline.en.md
 
 # XSArena job directories
 .xsarena/jobs/*/section_*.md
