@@ -1,0 +1,14 @@
+
+ Usage: xsarena doctor [OPTIONS] COMMAND [ARGS]...
+
+ Health checks and a synthetic Z2H smoke test
+
+╭─ Options ────────────────────────────────────────────────────────────────────╮
+│ --help          Show this message and exit.                                  │
+╰──────────────────────────────────────────────────────────────────────────────╯
+╭─ Commands ───────────────────────────────────────────────────────────────────╮
+│ run   Run a synthetic Zero-to-Hero smoke test: - Create defaults if missing  │
+│       - Submit a tiny z2h job (2 chunks) - Wait for completion and verify    │
+│       artifacts                                                              │
+│ env   Print environment and quick checks (no run).                           │
+╰──────────────────────────────────────────────────────────────────────────────╯

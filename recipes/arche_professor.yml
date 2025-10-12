@@ -1,0 +1,11 @@
+task: answer.chad
+subject: "Archetypal Professor Transformer"
+system_text: |
+  {{file: directives/arche_professor.en.md}}
+io:
+  output: file
+  outPath: "./books/arche_professor.out.md"
+max_chunks: 1
+prelude:
+  - "/out.minchars 1400"
+# Usage: after it starts, paste your SOURCE_TEXT block when prompted (or run /next with the block)

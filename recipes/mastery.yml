@@ -1,0 +1,18 @@
+task: book.zero2hero
+subject: "Your Topic"
+system_text: |
+  {{file: directives/agent_quickref.md}}
+prelude:
+  - "/style.nobs on"
+  - "/style.narrative on"
+  - "/cont.mode anchor"
+  - "/repeat.warn on"
+io:
+  output: file
+  outPath: "./books/your-topic.final.md"
+max_chunks: 12
+continuation:
+  mode: anchor
+  minChars: 4200
+  pushPasses: 1
+  repeatWarn: true

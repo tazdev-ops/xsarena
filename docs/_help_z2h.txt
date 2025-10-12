@@ -1,0 +1,14 @@
+
+ Usage: xsarena z2h [OPTIONS] SUBJECT
+
+ Zero-to-Hero: Create comprehensive content on a topic
+
+╭─ Arguments ──────────────────────────────────────────────────────────────────╮
+│ *    subject      TEXT  [required]                                           │
+╰──────────────────────────────────────────────────────────────────────────────╯
+╭─ Options ────────────────────────────────────────────────────────────────────╮
+│ --out         TEXT                                                           │
+│ --max         INTEGER  [default: 8]                                          │
+│ --min         INTEGER  [default: 3000]                                       │
+│ --help                 Show this message and exit.                           │
+╰──────────────────────────────────────────────────────────────────────────────╯

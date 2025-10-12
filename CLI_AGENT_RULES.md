@@ -88,7 +88,16 @@ Your final reports must be exhaustive, including:
 - Maintain consistency with existing code style
 - Respect the project's conventions for configuration and documentation
 
-### 12. Safety & Best Practices
+### 12. QuickRef Guidelines
+- The Agent QuickRef files provide standardized workflows and settings in `directives/`:
+  - `directives/agent_quickref.md` - Standard narrative approach
+  - `directives/agent_quickref.compressed.md` - Compressed narrative approach
+  - `directives/agent_quickref.bilingual.md` - Bilingual transformation approach
+- Use these files as system text templates to ensure consistent AI behavior
+- A ready-made recipe is available at `recipes/mastery.yml` for quick deployment
+- These files establish consistent defaults: English-only, teach-before-use narrative, anchor continuation mode, and anti-wrap settings
+
+### 13. Safety & Best Practices
 - Never commit or modify files without user permission
 - Always backup important files before modifying
 - Verify your changes won't break existing functionality

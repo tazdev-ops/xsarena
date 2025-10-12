@@ -1,0 +1,50 @@
+
+ Usage: xsarena [OPTIONS] COMMAND [ARGS]...
+
+ XSArena - AI-powered writing and coding studio
+
+╭─ Options ────────────────────────────────────────────────────────────────────╮
+│ --backend                   TEXT     Backend to use (bridge or openrouter)   │
+│                                      [default: bridge]                       │
+│ --model                     TEXT     Model to use [default: default]         │
+│ --window                    INTEGER  Window size for history [default: 100]  │
+│ --install-completion                 Install completion for the current      │
+│                                      shell.                                  │
+│ --show-completion                    Show completion for the current shell,  │
+│                                      to copy it or customize the             │
+│                                      installation.                           │
+│ --help                               Show this message and exit.             │
+╰──────────────────────────────────────────────────────────────────────────────╯
+╭─ Commands ───────────────────────────────────────────────────────────────────╮
+│ z2h         Zero-to-Hero: Create comprehensive content on a topic            │
+│ z2h-list    Process multiple subjects in a list                              │
+│ book        Book authoring commands                                          │
+│ lossless    Lossless text processing commands                                │
+│ backend     Backend configuration commands                                   │
+│ debug       Debugging commands                                               │
+│ mode        Mode toggles and settings                                        │
+│ service     Service management (start servers)                               │
+│ pipeline    Pipeline runner (fix → test → format → commit)                   │
+│ jobs        Job management commands                                          │
+│ doctor      Health checks and a synthetic Z2H smoke test                     │
+│ serve       Local web preview                                                │
+│ publish     Export books to EPUB/PDF                                         │
+│ audio       Convert EPUB to audiobook (Edge TTS or external tool)            │
+│ quality     Quality scoring & auto-rewrite                                   │
+│ import      Import PDF/DOCX/MD → Markdown in sources/                        │
+│ init        Initialize project scaffolding                                   │
+│ style       Capture/apply writing styles                                     │
+│ wizard      Interactive scaffolding                                          │
+│ diagram     Generate diagrams from Mermaid                                   │
+│ summary     Job metrics summary                                              │
+│ templates   Templates registry                                               │
+│ snapshot    Snapshot utilities (create, diff, share)                         │
+│ coder       Advanced coding session with tickets, patches, and git           │
+│             integration                                                      │
+│ joy         Daily joy, streaks, achievements                                 │
+│ coach       Coach drills and Boss mini-exams                                 │
+│ fun         ELI5, stories, personas, toggles                                 │
+│ zen         Zen focus sessions                                               │
+│ surprise    Surprise me                                                      │
+│ rp          Roleplay sessions (personas, say, boundaries, model, export)     │
+╰──────────────────────────────────────────────────────────────────────────────╯

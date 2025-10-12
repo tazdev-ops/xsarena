@@ -5,13 +5,26 @@
 #   python scripts/snapshot_py_only.py                # defaults: src legacy contrib scripts
 #   python scripts/snapshot_py_only.py DIR... -o out.txt
 
-from pathlib import Path
 import sys
+from pathlib import Path
 
 DEFAULT_DIRS = ["src", "legacy", "contrib", "scripts"]
-SKIP_DIRS = {".git", "__pycache__", ".xsarena", "books", "snapshot_chunks",
-             "dist", "build", "node_modules", ".venv", "venv", ".mypy_cache",
-             ".ruff_cache", ".pytest_cache"}
+SKIP_DIRS = {
+    ".git",
+    "__pycache__",
+    ".xsarena",
+    "books",
+    "snapshot_chunks",
+    "dist",
+    "build",
+    "node_modules",
+    ".venv",
+    "venv",
+    ".mypy_cache",
+    ".ruff_cache",
+    ".pytest_cache",
+}
+
 
 def parse_args(argv):
     out = "snapshot_py.txt"
@@ -28,9 +41,11 @@ def parse_args(argv):
         dirs = DEFAULT_DIRS[:]
     return dirs, out
 
+
 def should_skip(path: Path) -> bool:
     # Skip if any parent directory is in SKIP_DIRS
     return any(part in SKIP_DIRS for part in path.parts)
+
 
 def collect_py_files(root: Path, dirs):
     files = set()
@@ -49,6 +64,7 @@ def collect_py_files(root: Path, dirs):
     # Also include top-level .py if user passed "."
     return sorted(files, key=lambda x: x.as_posix())
 
+
 def main():
     root = Path(".").resolve()
     dirs, out_path = parse_args(sys.argv[1:])
@@ -57,7 +73,7 @@ def main():
     out.parent.mkdir(parents=True, exist_ok=True)
 
     with out.open("w", encoding="utf-8", errors="replace", newline="\n") as w:
-        w.write(f"=== PY SNAPSHOT ===\n")
+        w.write("=== PY SNAPSHOT ===\n")
         w.write(f"ROOT: {root}\n")
         w.write(f"DIRS: {', '.join(dirs)}\n")
         w.write(f"FILES: {len(files)}\n\n")
@@ -74,6 +90,7 @@ def main():
             w.write(f"--- END FILE {rel} ---\n\n")
 
     print(f"✅ Wrote → {out}  (files: {len(files)})")
+
 
 if __name__ == "__main__":
     main()

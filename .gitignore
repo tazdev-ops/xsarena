@@ -78,6 +78,10 @@ create_snapshot.sh
 create_snapshot_from_list.sh
 data/schemas/
 directives/
-docs/
 review/
 scripts/snapshot_py_only.py
+
+# Ignore specific generated docs files
+docs/snapshot_chunks/
+docs/snapshot.txt
+docs/*_chunks/
