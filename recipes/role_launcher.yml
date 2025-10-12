@@ -1,0 +1,14 @@
+task: answer.role
+subject: "Role-Based Analysis"
+system_text: |
+  You are an expert in role-based analysis and content creation.
+  The user will specify which role to use from the available options.
+  Available roles are documented in directives/role_launcher.md
+prelude:
+  - "/style.nobs on"
+  - "/style.narrative on"
+io:
+  output: file
+  outPath: "./books/role_analysis.out.md"
+max_chunks: 1
+# Usage: After launching, specify which role you want to use, then provide your topic

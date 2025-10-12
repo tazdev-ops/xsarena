@@ -129,6 +129,70 @@ The snapshot should exclude:
 - The snapshot file itself
 - Temporary files
 
+## Using QuickPaste Blocks
+
+### 15. QuickPaste Blocks for Common Tasks
+These ready-made command blocks can be pasted directly into the REPL for common operations:
+
+**Block A — Quick Book (Bridge, after /capture)**
+Replace TOPIC once. Paste the whole block.
+```
+/style.nobs on
+/style.narrative on
+/cont.mode anchor
+/out.minchars 4200
+/out.passes 1
+/repeat.warn on
+/z2h "TOPIC" --out=./books/TOPIC.final.md --max=12 --min=4200
+```
+
+**Block B — OpenRouter setup + run**
+Replace TOPIC and paste.
+```
+/backend openrouter
+/or.model openrouter/auto
+/or.status
+/style.nobs on
+/style.narrative on
+/cont.mode anchor
+/out.minchars 4200
+/out.passes 1
+/repeat.warn on
+/z2h "TOPIC" --out=./books/TOPIC.final.md --max=12 --min=4200
+```
+
+**Block C — JobSpec-first (single paste, fully repeatable)**
+This is truly one block: it triggers /run.inline and includes the spec. Replace TOPIC and paste everything (including EOF).
+```
+/run.inline
+task: book.zero2hero
+subject: "TOPIC"
+styles: [no-bs]
+system_text: |
+  English only. Teach-before-use narrative. Prose flow; avoid bullet walls.
+prelude:
+  - "/cont.mode anchor"
+  - "/repeat.warn on"
+io:
+  output: file
+  outPath: "./books/TOPIC.final.md"
+max_chunks: 12
+continuation:
+  mode: anchor
+  minChars: 4200
+  pushPasses: 1
+  repeatWarn: true
+EOF
+```
+
+### 16. Helpful Macros and Tips
+- **Cancel/resume anytime**: /cancel, /book.pause, /book.resume
+- **If it gets listy**: /out.passes 0
+- **If too short**: /out.minchars 4800; /out.passes 2
+- **One-liner macro**:
+  - Save: /macro.save z2h.go "/z2h \"${1}\" --out=./books/${1|slug}.final.md --max=12 --min=4200"
+  - Use: /macro.run z2h.go "Your Topic"
+
 ## Final Notes
 - Be creative in your approach to problem-solving
 - Feel free to add or ask about anything that would improve the development process
