@@ -69,3 +69,15 @@ file_bed_server/uploads/
 .lmastudio/logs/
 .lmastudio/checkpoints/
 temp_*
+
+# Project-specific generated files
+.xsarena/
+DEPRECATIONS.md
+IMPORTANT_FILES_LIST.md
+create_snapshot.sh
+create_snapshot_from_list.sh
+data/schemas/
+directives/
+docs/
+review/
+scripts/snapshot_py_only.py

@@ -41,23 +41,23 @@ read -p "Do you want to proceed with cleanup? (yes/no): " -n 1 -r
 echo
 if [[ $REPLY =~ ^[Yy]$ ]]; then
     echo -e "\n🧹 Performing cleanup..."
-    
+
     # Remove caches
     find . -type d \( -name "__pycache__" -o -name ".ruff_cache" -o -name ".pytest_cache" -o -name ".mypy_cache" \) -prune -exec rm -rf {} + 2>/dev/null || true
-    
+
     # Remove compiled files
     find . -type f \( -name "*.pyc" -o -name "*.pyo" -o -name ".DS_Store" -o -name "Thumbs.db" \) -delete 2>/dev/null || true
-    
+
     # Remove temporary snapshot files
     rm -f snapshot.txt snapshot_manual.txt 2>/dev/null || true
     rm -rf snapshot_chunks/ 2>/dev/null || true
-    
+
     # Remove empty directories (excluding protected paths)
     find . -type d -empty \
         -not -path "./.git*" -not -path "./books*" -not -path "./.xsarena*" -not -path "./snapshot_chunks*" -not -path "." \
         -not -path "./legacy*" -not -path "./src*" \
         -delete 2>/dev/null || true
-    
+
     echo "✅ Cleanup completed!"
 else
     echo "⏭️  Cleanup skipped."
