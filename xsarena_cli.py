@@ -358,7 +358,9 @@ STATE_ROOT = ".xsarena"
 LEGACY_STATE_ROOT = ".lmastudio"
 CHECKPOINT_DIR = os.path.join(PROJECT_ROOT, STATE_ROOT, "checkpoints")
 MACRO_FILE = os.path.join(PROJECT_ROOT, STATE_ROOT, "macros.json")
-if not os.path.isdir(os.path.join(PROJECT_ROOT, STATE_ROOT)) and os.path.isdir(os.path.join(PROJECT_ROOT, LEGACY_STATE_ROOT)):
+if not os.path.isdir(os.path.join(PROJECT_ROOT, STATE_ROOT)) and os.path.isdir(
+    os.path.join(PROJECT_ROOT, LEGACY_STATE_ROOT)
+):
     CHECKPOINT_DIR = os.path.join(PROJECT_ROOT, LEGACY_STATE_ROOT, "checkpoints")
     MACRO_FILE = os.path.join(PROJECT_ROOT, LEGACY_STATE_ROOT, "macros.json")
 MACROS: Dict[str, str] = {}
@@ -2033,6 +2035,9 @@ def help_text():
     print(
         "  /snapshot [--chunk]            Create snapshot.txt (or chunks) via snapshot.sh"
     )
+    print(
+        "  /quickpaste                    Paste a multi-line block of commands; end with EOF"
+    )
     print("Prompt & Model:")
     print(
         "  /system <line> | /systemfile <path> | /system.append (paste, end with EOF)"
@@ -2098,6 +2103,9 @@ async def _handle_command(line):
     global BACKEND, OR_MODEL, OR_REFERRER, OR_TITLE
     global COVERAGE_HAMMER_ON, OUTPUT_BUDGET_SNIPPET_ON, OUTPUT_PUSH_ON, OUTPUT_MIN_CHARS, OUTPUT_PUSH_MAX_PASSES, CONT_MODE, CONT_ANCHOR_CHARS
 
+    # Tolerate pasted blocks that include a leading terminal prompt ">"
+    if line.startswith(">"):
+        line = line.lstrip("> ").strip()
     if line.startswith("/"):
         parts = line.split(" ", 2)
         cmd = parts[0].lower()
@@ -2105,6 +2113,9 @@ async def _handle_command(line):
         # Core
         if cmd == "/help":
             help_text()
+            print(
+                "  /quickpaste               Paste a multi-line block of slash commands; end with EOF"
+            )
         elif cmd == "/exit":
             print("Bye.")
             raise SystemExit(0)
@@ -3144,6 +3155,13 @@ async def _handle_command(line):
             if len(parts) >= 2 and parts[1].strip().lower() in ("next", "system"):
                 where = parts[1].strip().lower()
             prompt_apply(where)
+        elif cmd == "/quickpaste":
+            block = await read_multiline("Paste QuickPaste block. End with: EOF")
+            if not block.strip():
+                warn("No content pasted.")
+            else:
+                await _run_quickpaste(block)
+            return
 
         # Recipe runner commands
         elif cmd == "/run.recipe":
@@ -3364,6 +3382,80 @@ async def _handle_command(line):
         await ask_collect(line)
     except Exception as e:
         err(f"Error: {e}")
+
+
+# --------------- QuickPaste runner ----------------
+async def _run_quickpaste(block_text: str):
+    """
+    Run a pasted block of slash commands (end with EOF in the REPL).
+    Features:
+      - Strips leading '> ' from each line (tolerant copy-paste).
+      - Supports inline /system.append ... EOF blocks inside the pasted block.
+      - Supports inline /run.inline (recipe text) ... EOF blocks inside the pasted block.
+      - Ignores empty lines and lines starting with '#'.
+    """
+    lines = block_text.splitlines()
+    i = 0
+    n = len(lines)
+    while i < n:
+        raw = lines[i].rstrip("\n")
+        i += 1
+        if not raw.strip():
+            continue
+        # Strip leading '>' and whitespace (tolerant paste)
+        if raw.lstrip().startswith(">"):
+            raw = raw.lstrip()[1:].lstrip()
+        line = raw.strip()
+        if not line or line.startswith("#"):
+            continue
+        # Handle /system.append block
+        if line == "/system.append":
+            buf = []
+            while i < n:
+                t = lines[i].rstrip("\n")
+                i += 1
+                if t.strip() == "EOF":
+                    break
+                buf.append(t)
+            add = "\n".join(buf).strip()
+            if add:
+                # Append to system prompt directly
+                global SYSTEM_PROMPT
+                SYSTEM_PROMPT = (
+                    SYSTEM_PROMPT + ("\n\n" if SYSTEM_PROMPT.strip() else "") + add
+                ).strip()
+                ok("System appended (QuickPaste).")
+            continue
+        # Handle /run.inline block (inline recipe)
+        if line == "/run.inline":
+            buf = []
+            while i < n:
+                t = lines[i].rstrip("\n")
+                i += 1
+                if t.strip() == "EOF":
+                    break
+                buf.append(t)
+            rec_text = "\n".join(buf).strip()
+            if rec_text:
+                ensure_dir(os.path.join(PROJECT_ROOT, ".xsarena"))
+                tmp_path = os.path.join(PROJECT_ROOT, ".xsarena", "inline_recipe.yml")
+                with open(tmp_path, "w", encoding="utf-8") as f:
+                    f.write(rec_text)
+                await run_recipe_file(tmp_path)
+            continue
+        # Normal slash command or chat line
+        if line.startswith("/"):
+            await _handle_command(line)
+        else:
+            await ask_collect(line)
+
+
+async def quickpaste_cmd():
+    block = await read_multiline("Paste QuickPaste block. End with: EOF")
+    if not block.strip():
+        warn("No content pasted.")
+        return
+    await _run_quickpaste(block)
 
 
 async def repl():
@@ -4276,6 +4368,12 @@ async def repl():
                 if len(parts) >= 2 and parts[1].strip().lower() in ("next", "system"):
                     where = parts[1].strip().lower()
                 prompt_apply(where)
+            elif cmd == "/quickpaste":
+                block = await read_multiline("Paste QuickPaste block. End with: EOF")
+                if not block.strip():
+                    warn("No content pasted.")
+                else:
+                    await _run_quickpaste(block)
 
             # Recipe runner commands
             elif cmd == "/run.recipe":
@@ -4663,7 +4761,9 @@ async def repl_fallback():
 
 async def repl():
     # Check environment variable XSA_USE_PTK=1 to enable PTK (with LMA_USE_PTK as fallback)
-    use_ptk = (os.getenv("XSA_USE_PTK", os.getenv("LMA_USE_PTK","1")) == "1") and PTK_AVAILABLE
+    use_ptk = (
+        os.getenv("XSA_USE_PTK", os.getenv("LMA_USE_PTK", "1")) == "1"
+    ) and PTK_AVAILABLE
     if use_ptk:
         await repl_prompt_toolkit()
     else:
