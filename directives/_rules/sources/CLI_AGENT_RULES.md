@@ -281,3 +281,8 @@ EOF
 - `xsarena adapt suppress-ls` - List current suppressions
 - `xsarena adapt suppress-clear <check>|all` - Clear suppressions
 - Suppressions stored in `.xsarena/ops/pointers.json`
+
+## Memory Policy
+
+### ONE ORDER handling
+- After I paste a ONE ORDER, save it to review/one_order_<ts>.md and append to directives/_rules/sources/ORDERS_LOG.md, then run: bash scripts/merge_session_rules.sh
