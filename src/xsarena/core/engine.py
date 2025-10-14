@@ -1,4 +1,4 @@
-"""Core engine for LMASudio - handles communication with backends and manages session state."""
+"""Core engine for XSArena - handles communication with backends and manages session state."""
 
 import re
 from typing import Callable, List, Optional
@@ -37,14 +37,15 @@ class Engine:
         # Add the current user prompt
         messages.append(Message(role="user", content=user_prompt))
 
-        # Add continuation context if in anchor mode
+        # Add continuation context if in anchor mode - use unified format
         if self.state.continuation_mode == "anchor" and self.state.anchors:
             anchor_text = " ".join(self.state.anchors[-3:])  # Use last 3 anchors
-            anchor_prompt = build_anchor_prompt(anchor_text, self.state.anchor_length)
+            # Use the unified anchor format by calling build_anchor_continue_prompt
+            anchor_prompt = await self.build_anchor_continue_prompt(anchor_text)
             if anchor_prompt:
                 # Append to the last user message or add as a new assistant message
                 if messages and messages[-1].role == "user":
-                    messages[-1].content += anchor_prompt
+                    messages[-1].content += "\n" + anchor_prompt
                 else:
                     messages.append(Message(role="user", content=anchor_prompt))
 
@@ -141,27 +142,40 @@ class Engine:
 
     async def build_anchor_continue_prompt(self, anchor: str) -> str:
         """Build an anchor continuation prompt."""
-        # A compact, subject-free continuation instruction
+        # A compact, subject-free continuation instruction - unified format
         return (
-            "Continue exactly from after the following anchor. Do not repeat the anchor. "
-            "Do not reintroduce the subject or previous headings; do not summarize; pick up mid-paragraph if needed.\n"
+            "Continue exactly from after the anchor; do not repeat or reintroduce; no summary.\n"
             "ANCHOR:\n<<<ANCHOR\n" + anchor + "\nANCHOR>>>\n"
             "Continue."
         )
 
     async def autopilot_run(
-        self, initial_prompt: str = "BEGIN", max_chunks: Optional[int] = None
+        self,
+        initial_prompt: str = "BEGIN",
+        max_chunks: Optional[int] = None,
+        on_chunk=None,
+        on_event=None,
+        system_prompt: Optional[str] = None,
     ):
-        """Run an autopilot loop with output pushing functionality."""
+        """Run an autopilot loop with optional callbacks.
+        on_chunk(idx: int, body: str, hint: Optional[str])
+        on_event(type: str, payload: dict)
+        """
         from .chunking import anchor_from_text, continuation_anchor, jaccard_ngrams
 
         first = True
         chunk_count = 0
 
         while max_chunks is None or chunk_count < max_chunks:
+            if on_event:
+                try:
+                    on_event("chunk_start", {"idx": chunk_count + 1})
+                except Exception:
+                    pass
+
             # Decide next prompt
             if first:
-                user_text = initial_prompt if initial_prompt != "BEGIN" else "BEGIN"
+                user_text = initial_prompt if initial_prompt != "BEGIN" else "BEGIN: Continue exactly from after the anchor; do not repeat or reintroduce; no summary."
                 first = False
             else:
                 if self.state.continuation_mode == "anchor":
@@ -182,7 +196,7 @@ class Engine:
                     user_text = "continue."
 
             # First segment
-            reply = await self.send_and_collect(user_text)
+            reply = await self.send_and_collect(user_text, system_prompt=system_prompt)
             body, hint = await self.strip_next_marker(
                 reply
             )  # strip NEXT from main body; capture hint
@@ -206,7 +220,7 @@ class Engine:
                     "Do not write a NEXT line yet; do not conclude."
                 )
 
-                ext_reply = await self.send_and_collect(ext_prompt)
+                ext_reply = await self.send_and_collect(ext_prompt, system_prompt=system_prompt)
                 ext_body, ext_hint = await self.strip_next_marker(
                     ext_reply
                 )  # strip any premature NEXT
@@ -254,6 +268,11 @@ class Engine:
                     print(f"High repetition detected (Jaccard~{rep:.2f}).")
 
             chunk_count += 1
+            if on_chunk:
+                try:
+                    on_chunk(chunk_count, final_body, final_hint)
+                except Exception:
+                    pass
 
             # Stop on explicit END
             if final_hint and final_hint.upper() in {"END", "DONE", "STOP", "FINISHED"}:
