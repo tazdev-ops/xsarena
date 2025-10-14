@@ -247,17 +247,19 @@ def create_snapshot(out_path: str | None = None) -> Path:
     return out
 
 
-def chunk_file(input_file: Path, chunk_size: int = 300000, output_dir: str = "snapshot_chunks"):
+def chunk_file(input_file: Path, chunk_size: int = 350000, output_dir: str = "~/snapshot_chunks"):
     """
     Chunk the input file into smaller pieces with a message appended to each chunk.
     
     Args:
         input_file: Path to the input file to be chunked
-        chunk_size: Size of each chunk in bytes (default 300KB to aim for ~300kb total)
-        output_dir: Directory to store the chunks
+        chunk_size: Size of each chunk in bytes (default 350KB to aim for ~350kb total)
+        output_dir: Directory to store the chunks (default: ~/snapshot_chunks)
     """
+    # Expand home directory
+    output_dir_expanded = Path(output_dir).expanduser()
     # Create output directory
-    Path(output_dir).mkdir(parents=True, exist_ok=True)
+    output_dir_expanded.mkdir(parents=True, exist_ok=True)
     
     # Read the input file
     with open(input_file, 'rb') as f:
@@ -277,14 +279,14 @@ def chunk_file(input_file: Path, chunk_size: int = 300000, output_dir: str = "sn
         
         # Create chunk filename
         chunk_filename = f"chunk_{i+1:03d}.txt"
-        chunk_path = Path(output_dir) / chunk_filename
+        chunk_path = output_dir_expanded / chunk_filename
         
         # Write chunk data + message
         with open(chunk_path, 'wb') as chunk_file:
             chunk_file.write(chunk_data)
             chunk_file.write(message.encode('utf-8'))
     
-    print(f"Chunked {input_file} into {num_chunks} chunks in {output_dir}/")
+    print(f"Chunked {input_file} into {num_chunks} chunks in {output_dir_expanded}/")
     print(f"Chunk size: {chunk_size} bytes, Total chunks: {num_chunks}")
     return num_chunks
 
@@ -301,8 +303,8 @@ def main():
     )
     parser.add_argument(
         "-o", "--output-dir",
-        default="snapshot_chunks",
-        help="Output directory for chunks (default: snapshot_chunks)"
+        default="~/snapshot_chunks",
+        help="Output directory for chunks (default: ~/snapshot_chunks)"
     )
     parser.add_argument(
         "--snapshot-path",

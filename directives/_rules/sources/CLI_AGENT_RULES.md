@@ -293,3 +293,8 @@ EOF
 - Snapshot files must be within 300-400KB range
 - Use `tools/minimal_snapshot_optimized.py` for size-optimized snapshots
 - If snapshot exceeds 400KB, review and limit included files
+
+### Anti-recursion check
+- After creating a snapshot, verify it doesn't include previous snapshots in the output
+- Check snapshot content for recursive inclusion of snapshot files
+- Look for patterns like xsa_min_snapshot*.txt or similar in the output tree/file list
