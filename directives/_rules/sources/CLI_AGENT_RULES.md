@@ -298,3 +298,13 @@ EOF
 - After creating a snapshot, verify it doesn't include previous snapshots in the output
 - Check snapshot content for recursive inclusion of snapshot files
 - Look for patterns like xsa_min_snapshot*.txt or similar in the output tree/file list
+
+## Low AI Reliability Considerations
+
+### Context and Instruction Issues
+- Lower AI is unreliable and sometimes available when context runs out
+- Instructions from lower AI may include problems or contradictions
+- Always verify implementation completeness using `xsarena checklist status`
+- When lower AI gives instructions, cross-reference with established patterns
+- If lower AI instructions conflict with working implementations, prioritize working code
+- Use `docs/IMPLEMENTATION_CHECKLIST.md` as authoritative reference for completed work

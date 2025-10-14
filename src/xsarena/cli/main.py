@@ -31,6 +31,7 @@ from .cmds_run import app as run_app
 from .cmds_report import app as report_app
 from .cmds_adapt import app as adapt_app
 from .cmds_boot import app as boot_app
+from .cmds_checklist import app as checklist_app
 from .service import app as service_app
 
 app = typer.Typer(help="XSArena — AI-powered writing and coding studio")
@@ -64,6 +65,7 @@ app.add_typer(run_app, name="run", help="Unified runner (book/continue)")
 app.add_typer(report_app, name="report", help="Create a redacted report bundle")
 app.add_typer(adapt_app, name="adapt", help="Adaptive inspection and safe fixes")
 app.add_typer(boot_app, name="boot", help="Startup reader (startup.yml)")
+app.add_typer(checklist_app, name="checklist", help="Implementation checklist and verification")
 
 
 @app.callback()
