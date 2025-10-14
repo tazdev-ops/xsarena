@@ -198,3 +198,86 @@ EOF
 - Feel free to add or ask about anything that would improve the development process
 - Always prioritize maintaining the integrity of the codebase
 - When in doubt, generate a snapshot and consult with the higher AI
+
+## Project-Keeping Rules (Added via ONE ORDER)
+
+### Preflight for any change:
+- Always run: xsarena fix run; xsarena backend ping; xsarena doctor run
+- Work on a feature branch (ops/sync-<stamp> or feat/<topic>); never on main
+
+### Cleanup (TTL + ephemeral):
+- Any helper/probe must start with a header on the first line: # XSA-EPHEMERAL ttl=3d
+- Preferred locations: review/ or .xsarena/tmp/ (never repo root)
+- Run regular sweeps:
+  - xsarena clean sweep            # dry
+  - xsarena clean sweep --apply    # weekly
+- Snapshot artifacts must not be committed:
+  - Ignore: snapshot_chunks/, xsa_min_snapshot*.txt, review/, .xsarena/tmp/
+
+### Content layout (enforced):
+- books/finals: *.final.md, *.manual.en.md
+- books/outlines: *.outline.md
+- books/flashcards: *flashcards*.md
+- books/archive: tiny (<64B), duplicates, obsolete
+- directives/_rules/rules.merged.md is canonical; sources in directives/_rules/sources/
+- directives/roles: role.*.md; directives/quickref: agent_quickref*.md; directives/prompts: prompt_*.txt
+
+### Docs/help drift:
+- If any src/xsarena/cli/*.py changes, regenerate help:
+  - bash scripts/gen_docs.sh
+  - If help changed, commit with: docs: update CLI help
+
+### Snapshot discipline:
+- Use only python tools/min_snapshot.py (or xsarena snapshot write)
+- Default location: $HOME/xsa_min_snapshot.txt
+- Do not commit snapshot outputs; delete after sending
+
+### Jobs/run discipline:
+- Prefer narrative + no_bs; avoid compressed unless explicitly chosen
+- Use descriptive lengths: standard, long, very-long, max; spans: medium, long, book
+- For resuming, use tail-anchor continue; only use until-end when you trust the model to emit NEXT: [END]
+
+## Reporting Policy
+
+### Reporting levels (use the right level for the request):
+- Minimal: `xsarena report quick [--book <path>]` (default level for most requests)
+- Focused: `xsarena report job <job_id> [--book <path>]` (when a specific run failed or regressed)
+- Full: `xsarena report full [--book <path>]` (only when asked)
+
+### Best practices:
+- Always attach a short human summary in report.md:
+  - Expected vs Actual, Command used, any manual tweaks, time/branch.
+- Use quick when:
+  - You need help interpreting quality/continuation issues; include the book path for a head/tail sample.
+- Use job when:
+  - A run failed, retried, or stalled; include the job id.
+- Use full only when:
+  - You're asked for recipes or directives context or a deeper dive is required.
+
+## Adaptive Ops Rules
+
+### Adaptive inspection and fixing
+- Always run `xsarena adapt inspect` after large edits or pull/rebase; read plan in review/adapt_plan_*.json
+- Only run `xsarena adapt fix --apply` on a feature branch; commit with chore(adapt): safe fixes
+- If wiring warnings appear (main.py missing a command import/register), do NOT auto-patch; open an intent and ask for guidance (xsarena ops intent-new "Wire command: X")
+- If help docs are missing: run scripts/gen_docs.sh; commit with docs: update CLI help
+- If adapt detects risky changes or unrecognized drift, escalate:
+  - `xsarena ops handoff --book <final.md>`
+  - `xsarena report quick --book <final.md>`
+
+## Reporting and Git Policy
+
+### Reporting
+- `xsarena report quick --book <final.md>` - Generate diagnostic bundle with book sample
+- Snapshots only via `xsarena snapshot write` (to $HOME/xsa_min_snapshot.txt)
+
+### Git policy
+- Feature branches: feat/<topic>, fix/<topic>, chore/<topic>, ops/<topic>
+- Conventional commits: feat:, fix:, chore:, docs:, refactor:, test:, build:, ci:
+- Run `scripts/prepush_check.sh` before push (lint/format/tests/help drift; no ephemeral in diff)
+
+### Adapt learning
+- `xsarena adapt suppress-add <check> [--pattern "..."]` - Suppress expected/benign warnings
+- `xsarena adapt suppress-ls` - List current suppressions
+- `xsarena adapt suppress-clear <check>|all` - Clear suppressions
+- Suppressions stored in `.xsarena/ops/pointers.json`
