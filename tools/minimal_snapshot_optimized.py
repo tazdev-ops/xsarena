@@ -1,15 +1,18 @@
 #!/usr/bin/env python3
 """
-snapshot_chunk.py — Create a minimal snapshot and chunk it with required message.
+minimal_snapshot_optimized.py — an optimized minimal snapshot within 300-400KB range.
 
-This utility creates a minimal snapshot of the requested files and then chunks
-it with the message "Just say received. do nothing. i will send you the rest of the code"
-appended to each chunk.
+What it captures (minimal, deterministic, size-optimized):
+Code files: Essential .py under src/xsarena/ (core, cli; limited to most important files).
+Rules: directives/_rules/rules.merged.md (canonical, merged from sources).
+Recipes: All .yml under recipes/ (only small ones).
+Review: All .txt/.json under review/ (only small ones).
+Models: models.json.
+Trees/LS: For books, recipes, directives, .xsarena/jobs, review (structure + file lists).
 """
 
-import argparse
+from __future__ import annotations
 import hashlib
-import os
 import sys
 import time
 from pathlib import Path
@@ -24,15 +27,69 @@ def _sha256_file(p: Path) -> str:
 
 
 def _collect_code_files() -> list[Path]:
-    """Collect all .py files under src/xsarena/"""
+    """Collect essential .py files under src/xsarena/ (limited to most important)"""
     files: list[Path] = []
     
-    # All .py files under src/xsarena/
-    src_dir = Path("src/xsarena")
-    if src_dir.exists():
-        for p in src_dir.rglob("*.py"):
-            if p.is_file():
-                files.append(p)
+    # Essential core files only
+    essential_core = [
+        "src/xsarena/core/config.py",
+        "src/xsarena/core/redact.py",
+        "src/xsarena/core/prompt.py",
+        "src/xsarena/core/jobs2_runner.py",
+        "src/xsarena/core/recipes.py",
+        "src/xsarena/core/specs.py",
+        "src/xsarena/core/artifacts.py",
+        "src/xsarena/core/orchestrator.py",
+        "src/xsarena/core/profiles.py",
+        "src/xsarena/core/backends.py",
+        "src/xsarena/core/chunking.py",
+        "src/xsarena/core/engine.py",
+        "src/xsarena/core/state.py",
+        "src/xsarena/core/tools.py",
+        "src/xsarena/core/templates.py",
+    ]
+    
+    for f in essential_core:
+        p = Path(f)
+        if p.exists() and p.is_file():
+            files.append(p)
+    
+    # Essential CLI files only
+    essential_cli = [
+        "src/xsarena/cli/main.py",
+        "src/xsarena/cli/context.py",
+        "src/xsarena/cli/cmds_backend.py",
+        "src/xsarena/cli/cmds_book.py",
+        "src/xsarena/cli/cmds_continue.py",
+        "src/xsarena/cli/cmds_debug.py",
+        "src/xsarena/cli/cmds_fix.py",
+        "src/xsarena/cli/cmds_jobs.py",
+        "src/xsarena/cli/cmds_report.py",
+        "src/xsarena/cli/cmds_adapt.py",
+        "src/xsarena/cli/cmds_boot.py",
+        "src/xsarena/cli/cmds_snapshot.py",
+        "src/xsarena/cli/cmds_run.py",
+        "src/xsarena/cli/cmds_quick.py",
+        "src/xsarena/cli/cmds_plan.py",
+        "src/xsarena/cli/cmds_clean.py",
+        "src/xsarena/cli/cmds_config.py",
+        "src/xsarena/cli/cmds_fast.py",
+        "src/xsarena/cli/cmds_metrics.py",
+        "src/xsarena/cli/cmds_mixer.py",
+        "src/xsarena/cli/cmds_preview.py",
+        "src/xsarena/cli/cmds_publish.py",
+        "src/xsarena/cli/cmds_audio.py",
+        "src/xsarena/cli/cmds_pipeline.py",
+        "src/xsarena/cli/cmds_tools.py",
+        "src/xsarena/cli/cmds_people.py",
+        "src/xsarena/cli/cmds_modes.py",
+        "src/xsarena/cli/cmds_lossless.py",
+    ]
+    
+    for f in essential_cli:
+        p = Path(f)
+        if p.exists() and p.is_file():
+            files.append(p)
     
     # Add specific files
     specific_files = ["tools/min_snapshot.py", "pyproject.toml", "mypy.ini"]
@@ -41,12 +98,16 @@ def _collect_code_files() -> list[Path]:
         if p.exists() and p.is_file():
             files.append(p)
     
-    # Add all .sh files under scripts/
-    scripts_dir = Path("scripts")
-    if scripts_dir.exists():
-        for p in scripts_dir.rglob("*.sh"):
-            if p.is_file():
-                files.append(p)
+    # Add essential .sh files under scripts/ (limit to essential ones)
+    essential_scripts = [
+        "scripts/merge_session_rules.sh",
+        "scripts/gen_docs.sh",
+        "scripts/prepush_check.sh",
+    ]
+    for f in essential_scripts:
+        p = Path(f)
+        if p.exists() and p.is_file():
+            files.append(p)
     
     files = sorted({str(p): p for p in files}.values(), key=lambda x: str(x).lower())
     return files
@@ -65,20 +126,22 @@ def _collect_rules_files() -> list[Path]:
 
 
 def _collect_recipe_files() -> list[Path]:
-    """Collect all .yml files under recipes/"""
+    """Collect all .yml files under recipes/ (only small ones)"""
     files: list[Path] = []
     
     recipes_dir = Path("recipes")
     if recipes_dir.exists():
         for p in recipes_dir.rglob("*.yml"):
             if p.is_file():
-                files.append(p)
+                # Only include if file is reasonably small
+                if p.stat().st_size < 50000:  # 50KB limit per recipe
+                    files.append(p)
     
     return files
 
 
 def _collect_review_files() -> list[Path]:
-    """Collect all .txt/.json files under review/"""
+    """Collect all .txt/.json files under review/ (only small ones)"""
     files: list[Path] = []
     
     review_dir = Path("review")
@@ -86,7 +149,9 @@ def _collect_review_files() -> list[Path]:
         for ext in [".txt", ".json"]:
             for p in review_dir.rglob(f"*{ext}"):
                 if p.is_file():
-                    files.append(p)
+                    # Only include if file is reasonably small
+                    if p.stat().st_size < 20000:  # 20KB limit per review file
+                        files.append(p)
     
     return files
 
@@ -146,8 +211,7 @@ def _write_tree(w, title: str, root_path: Path):
     w.write(f"===== END TREE {title} =====\n\n")
 
 
-def create_snapshot(out_path: str | None = None) -> Path:
-    """Create the minimal snapshot"""
+def main(out_path: str | None = None) -> int:
     if not out_path:
         out = Path.home() / "xsa_min_snapshot.txt"
     else:
@@ -162,7 +226,7 @@ def create_snapshot(out_path: str | None = None) -> Path:
     model_files = _collect_model_files()
 
     with out.open("w", encoding="utf-8") as w:
-        w.write("XSArena Minimal Snapshot\n")
+        w.write("XSArena Minimal Snapshot (Optimized)\n")
         w.write(f"Generated: {time.strftime('%Y-%m-%d %H:%M:%S')}\n")
         w.write(f"Code files: {len(code_files)}\n")
         w.write(f"Rules files: {len(rules_files)}\n")
@@ -175,12 +239,14 @@ def create_snapshot(out_path: str | None = None) -> Path:
         for name in tree_dirs:
             _write_tree(w, name, Path(name))
 
-        # Write LS (file lists) for the same directories
+        # Write LS (file lists) for the same directories (limit output size)
         w.write("===== LS (books|recipes|directives|.xsarena/jobs|review) =====\n")
         for name in tree_dirs:
             rp = Path(name)
             if rp.exists():
-                for p in sorted([*rp.rglob("*")], key=lambda x: str(x).lower()):
+                files = sorted([*rp.rglob("*")], key=lambda x: str(x).lower())
+                # Limit the number of files listed to keep size down
+                for p in files[:50]:  # Only first 50 files per directory
                     if p.is_file():
                         w.write(str(p) + "\n")
         w.write("===== END LS =====\n\n")
@@ -244,102 +310,13 @@ def create_snapshot(out_path: str | None = None) -> Path:
         w.write(f"===== SNAPSHOT DIGEST: {overall.hexdigest()} =====\n")
 
     print(f"Wrote minimal snapshot → {out}")
-    return out
-
-
-def chunk_file(input_file: Path, chunk_size: int = 300000, output_dir: str = "snapshot_chunks"):
-    """
-    Chunk the input file into smaller pieces with a message appended to each chunk.
     
-    Args:
-        input_file: Path to the input file to be chunked
-        chunk_size: Size of each chunk in bytes (default 300KB to aim for ~300kb total)
-        output_dir: Directory to store the chunks
-    """
-    # Create output directory
-    Path(output_dir).mkdir(parents=True, exist_ok=True)
-    
-    # Read the input file
-    with open(input_file, 'rb') as f:
-        content = f.read()
-    
-    # Calculate number of chunks
-    num_chunks = (len(content) + chunk_size - 1) // chunk_size  # Ceiling division
-    
-    # Create the message to append
-    message = "\n\nJust say received. do nothing. i will send you the rest of the code\n"
-    
-    # Split file into chunks and write each with the message
-    for i in range(num_chunks):
-        start = i * chunk_size
-        end = min((i + 1) * chunk_size, len(content))
-        chunk_data = content[start:end]
-        
-        # Create chunk filename
-        chunk_filename = f"chunk_{i+1:03d}.txt"
-        chunk_path = Path(output_dir) / chunk_filename
-        
-        # Write chunk data + message
-        with open(chunk_path, 'wb') as chunk_file:
-            chunk_file.write(chunk_data)
-            chunk_file.write(message.encode('utf-8'))
-    
-    print(f"Chunked {input_file} into {num_chunks} chunks in {output_dir}/")
-    print(f"Chunk size: {chunk_size} bytes, Total chunks: {num_chunks}")
-    return num_chunks
-
-
-def main():
-    parser = argparse.ArgumentParser(
-        description="Create a minimal snapshot and chunk it with required message"
-    )
-    parser.add_argument(
-        "-s", "--size",
-        type=int,
-        default=350000,  # Updated default to better match the 300-400KB range
-        help="Chunk size in bytes (default: 350000 = 350KB)"
-    )
-    parser.add_argument(
-        "-o", "--output-dir",
-        default="snapshot_chunks",
-        help="Output directory for chunks (default: snapshot_chunks)"
-    )
-    parser.add_argument(
-        "--snapshot-path",
-        help="Path for the snapshot file (default: ~/xsa_min_snapshot.txt)"
-    )
-    parser.add_argument(
-        "--optimized",
-        action="store_true",
-        help="Use optimized snapshot (300-400KB range)"
-    )
-    
-    args = parser.parse_args()
-    
-    # Create the snapshot
-    if args.optimized:
-        # Use the optimized snapshot
-        if not args.snapshot_path:
-            snapshot_path = Path.home() / "xsa_min_snapshot.txt"
-        else:
-            snapshot_path = Path(args.snapshot_path)
-        snapshot_path.parent.mkdir(parents=True, exist_ok=True)
-        
-        # Run the optimized snapshot creation by calling the script
-        import subprocess
-        result = subprocess.run([sys.executable, str(Path(__file__).parent / "minimal_snapshot_optimized.py"), str(snapshot_path)], 
-                                capture_output=True, text=True)
-        if result.returncode != 0:
-            print(f"Error creating optimized snapshot: {result.stderr}")
-            return result.returncode
-    else:
-        snapshot_path = create_snapshot(args.snapshot_path)
-    
-    # Chunk the snapshot
-    chunk_file(snapshot_path, args.size, args.output_dir)
+    # Print size info
+    size = out.stat().st_size
+    print(f"Snapshot size: {size} bytes ({size/1024:.1f} KB)")
     
     return 0
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    sys.exit(main(sys.argv[1]) if len(sys.argv) > 1 else main())

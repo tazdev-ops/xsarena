@@ -286,3 +286,10 @@ EOF
 
 ### ONE ORDER handling
 - After I paste a ONE ORDER, save it to review/one_order_<ts>.md and append to directives/_rules/sources/ORDERS_LOG.md, then run: bash scripts/merge_session_rules.sh
+
+## Snapshot Policy
+
+### Size constraint
+- Snapshot files must be within 300-400KB range
+- Use `tools/minimal_snapshot_optimized.py` for size-optimized snapshots
+- If snapshot exceeds 400KB, review and limit included files
