@@ -8,3 +8,4 @@
   - Files touched: CLI_AGENT_RULES.md
   - Tests: xsarena doctor env (PASS)
   - Snapshot: snapshots/after_cleanup_final.tar.gz
+- Stabilized autopilot + bridge v2; tests green; see review/report_*.tar.gz
