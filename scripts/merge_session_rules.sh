@@ -23,3 +23,4 @@ find directives -maxdepth 1 -type f -name "role.*.md" | sort -f | while read -r 
 find directives -maxdepth 1 -type f -name "style.*.md" | sort -f | while read -r f; do add "$f"; done
 
 echo "Merged → $out"
+python tools/dedupe_rules_merged.py directives/_rules/rules.merged.md || true

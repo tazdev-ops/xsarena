@@ -1,0 +1,111 @@
+Metadata-Version: 2.4
+Name: xsarena
+Version: 0.1.0
+Summary: AI-powered writing and coding studio
+Author: XSArena Team
+License: MIT
+Project-URL: Homepage, https://github.com/your-username/xsarena
+Project-URL: Repository, https://github.com/your-username/xsarena
+Requires-Python: >=3.9
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Requires-Dist: typer>=0.9.0
+Requires-Dist: python-dotenv>=1.0.0
+Requires-Dist: aiohttp>=3.8.0
+Requires-Dist: pydantic>=2.0.0
+Requires-Dist: PyYAML>=6.0
+Requires-Dist: rich>=13.0.0
+Requires-Dist: fastapi>=0.100.0
+Requires-Dist: uvicorn[standard]>=0.23.0
+Requires-Dist: websockets>=11.0
+Requires-Dist: requests>=2.31.0
+Provides-Extra: tui
+Requires-Dist: textual>=0.40.0; extra == "tui"
+Provides-Extra: dev
+Requires-Dist: pytest>=7.0.0; extra == "dev"
+Requires-Dist: mypy>=1.0.0; extra == "dev"
+Requires-Dist: ruff>=0.1.0; extra == "dev"
+Requires-Dist: black>=23.0.0; extra == "dev"
+Provides-Extra: watch
+Requires-Dist: watchdog>=3.0.0; extra == "watch"
+Provides-Extra: metrics
+Requires-Dist: prometheus-client>=0.19.0; extra == "metrics"
+Dynamic: license-file
+
+# XSArena — AI Writing, Study, and CLI Studio
+
+Bridge‑first, long‑form authoring with strict continuation and dense, readable chunks. Use it to generate books, outlines, pedagogy rewrites, flashcards, and structured analysis.
+
+Highlights
+- Bridge-first backend (local server + browser userscript), OpenRouter optional
+- Continuation via anchors; micro-extends to hit target length per chunk
+- Strong style overlays (narrative, no‑BS), repetition guard, coverage hammer
+- Jobs runner with autopilot + events; recipes and mixer/fast workflows
+- Deterministic snapshots; minimal snapshot tool for sharing state
+
+Install
+- Python 3.9+ recommended
+- pip install -e ".[dev]"
+- Start the bridge:
+  - xsarena service start-bridge
+  - In the browser (lmarena.ai), add #bridge=8080 to the URL
+
+Quick start (Bridge)
+- Health + self-heal:
+  - xsarena backend ping
+  - xsarena fix run
+- UK elections/parties run (long, dense, narrative not compressed):
+  xsarena fast start "Political History of the UK — Elections and Parties (c. 1832–present)" \
+    --base zero2hero --no-bs --narrative --no-compressed \
+    --max 30 --min 5800 --passes 3 \
+    --out ./books/finals/political-history-of-the-uk.elections.final.md
+
+Key commands
+- Book mode: xsarena book zero2hero "Topic"
+- Mixer (compose/edit system text then run): xsarena mix start "Subject" --edit
+- Jobs (run recipe): xsarena jobs run recipes/subject.yml --apply
+- Snapshot (code-only minimal snapshot): python tools/min_snapshot.py
+- Cleanup (TTL-based sweeper): xsarena clean sweep --dry  (then add --apply)
+- Doctor: xsarena doctor run
+- Self-heal: xsarena fix run
+
+Recipes and prompts
+- Drop recipes in ./recipes/*.yml (examples in repo)
+- Mixer writes prompt previews to directives/_mixer/
+- Preview a recipe and generate a real sample:
+  xsarena preview run recipes/clinical.en.yml --sample
+
+File layout (content)
+- books/
+  - finals/       … final outputs (.final.md, .manual.en.md)
+  - outlines/     … outlines (.outline.md)
+  - flashcards/   … flashcards
+  - archive/      … tiny/old/duplicates
+- directives/
+  - _rules/       … rules.merged.md (canonical); sources in _rules/sources/
+  - roles/        … role.*.md
+  - quickref/     … agent_quickref.*.md
+  - prompts/      … prompt_*.txt
+- review/         … probes (safe to delete; TTL-based cleanup)
+- .xsarena/       … jobs, logs, snapshots, tmp
+
+Housekeeping
+- Mark one-off helpers with header: # XSA-EPHEMERAL ttl=3d
+- Sweep periodically:
+  xsarena clean sweep --dry
+  xsarena clean sweep --apply
+- Clean content layout (idempotent):
+  APPLY=1 bash scripts/apply_content_fixes.sh
+  APPLY=1 bash scripts/declutter_phase2.sh
+
+Troubleshooting
+- Bridge not responding → xsarena backend ping; xsarena doctor run
+- Chunk too short → increase --min and --passes
+- Too listy → narrative on; compressed off; passes 0–1
+- Repeats or restarts → ensure cont.mode anchor; keep coverage hammer on
+- Before sharing state → xsarena fix run; python tools/min_snapshot.py
+
+Contributing
+- Code style: Ruff/Black, type hints
+- Tests: pytest -q
+- Docs regen: see scripts/gen_docs.sh

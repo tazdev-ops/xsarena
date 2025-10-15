@@ -109,3 +109,46 @@ def report_full(
                 try: _write(outdir / "directives" / p.relative_to("directives"), redact(_read(p, 120_000)))
                 except Exception: pass
     tar = Path("review") / f"report_{rid}.tar.gz"; _pack(outdir, tar); typer.echo(f"[report] full → {tar}")
+
+
+import time
+from pathlib import Path as _Path
+
+@app.command("handoff")
+def handoff(book: str = typer.Option(None, "--book", help="Optional path to a relevant book"),
+            outdir: str = typer.Option("docs/handoff", help="Output directory")):
+    """Create a handoff file for higher AI with snapshot digest and context."""
+    out_dir = _Path(outdir); out_dir.mkdir(parents=True, exist_ok=True)
+    ts = time.strftime("%Y%m%d-%H%M%S")
+    path = out_dir / f"HANDOFF_{ts}.md"
+
+    snap = _Path(".xsarena/snapshots/final_snapshot.txt")
+    digest = ""
+    if snap.exists():
+        import hashlib
+        digest = hashlib.sha256(snap.read_bytes()).hexdigest()
+
+    head = []
+    if book:
+        try:
+            b = _Path(book)
+            if b.exists():
+                text = b.read_text(encoding="utf-8", errors="replace")
+                head = [text[:1200], text[-1200:]] if len(text) > 2400 else [text]
+        except Exception:
+            pass
+
+    body = f"""# Handoff
+Branch: (git rev-parse --abbrev-ref HEAD)
+Snapshot digest (sha256 of final_snapshot.txt): {digest or '(none)'}
+Commands run:
+Expected vs Actual:
+Errors/Logs:
+Job ID/context (if any):
+Ask:
+
+## Book sample
+{(''.join(['\n--- head ---\n', head[0], '\n--- tail ---\n', head[1]]) if len(head)==2 else (head[0] if head else '(none)'))}
+"""
+    path.write_text(body, encoding="utf-8")
+    typer.echo(f"[OK] Handoff written → {path}")

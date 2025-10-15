@@ -16,7 +16,7 @@
 
 ### Core Commands
 - `lma_cli.py` → `xsarena` (main entry point)
-- `/book.zero2hero` → `xsarena z2h "topic"` (enhanced version)
+- `/book.zero2hero` → `xsarena book zero2hero "topic"` (enhanced version)
 - `/book.reference` → `xsarena book reference "topic"`
 - `/book.nobs` → `xsarena book nobs "topic"`
 - `/book.pop` → `xsarena book pop "topic"`

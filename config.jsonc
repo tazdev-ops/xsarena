@@ -1,0 +1,15 @@
+{
+  // Main session ID, used as a fallback
+  "session_id": "YOUR_SESSION_ID_HERE",
+  "message_id": "YOUR_MESSAGE_ID_HERE",
+
+  // For id_updater.py to remember your last choice
+  "id_updater_last_mode": "direct_chat",
+  "id_updater_battle_target": "A",
+  
+  // Enables combining multiple system prompts into one
+  "tavern_mode_enabled": false,
+  
+  // If a model is not in model_endpoint_map.json, use the main session_id above
+  "use_default_ids_if_mapping_not_found": true
+}

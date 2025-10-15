@@ -61,7 +61,7 @@ This document contains standard operating procedures and runbooks for common XSA
 
 **Steps**:
 1. Prepare environment: `xsarena doctor env`
-2. Generate JobSpec: `xsarena z2h "Your Topic" --print-spec > recipes/topic.yml`
+2. Generate JobSpec: `xsarena book zero2hero "Your Topic" --print-spec > recipes/topic.yml`
 3. Review and edit spec: `cat recipes/topic.yml` (optional)
 4. Run with spec: `xsarena run.recipe recipes/topic.yml`
 5. Monitor progress: `xsarena serve run` (optional, for live preview)
@@ -91,7 +91,7 @@ This document contains standard operating procedures and runbooks for common XSA
 1. Prepare source corpus: `cat sources/topic/*.* > sources/topic_corpus.md`
 2. Create synthesis: `xsarena lossless ingest sources/topic_corpus.md books/topic.synth.md --chunk-kb 100 --synth-chars 16000`
 3. Lossless rewrite: `xsarena lossless rewrite books/topic.synth.md books/topic.lossless.md`
-4. Generate pedagogical content: `xsarena z2h "Topic" --out=./books/topic.final.md`
+4. Generate pedagogical content: `xsarena book zero2hero "Topic" --out=./books/topic.final.md`
 5. Create study aids: `xsarena flashcards from books/topic.lossless.md`, `xsarena glossary from books/topic.lossless.md`, etc.
 
 ### 4. Mastery-Level Content Creation
@@ -106,7 +106,7 @@ This document contains standard operating procedures and runbooks for common XSA
 
 **Commands**:
 ```
-xsarena z2h "Your Topic" --out=./books/topic.final.md --max=24 --min=4200
+xsarena book zero2hero "Your Topic" --out=./books/topic.final.md --max=24 --min=4200
 # During run, apply:
 /style.compressed on
 /out.passes 2
@@ -256,7 +256,7 @@ xsarena z2h "Your Topic" --out=./books/topic.final.md --max=24 --min=4200
 ### 17. Multi-Agent Pipeline
 **Purpose**: Use Outliner → Writer → Editor → Continuity agents
 
-**Command**: `xsarena z2h "Topic" --playbook z2h_multi`
+**Command**: `xsarena book zero2hero "Topic" --playbook z2h_multi`
 
 **Note**: Each stage improves content quality and consistency.
 
@@ -305,11 +305,11 @@ xsarena z2h "Your Topic" --out=./books/topic.final.md --max=24 --min=4200
 ### Method 1: Using --print-spec flag
 Generate a complete JobSpec from any z2h command:
 ```
-xsarena z2h "Your Topic" --max=6 --min=3000 --print-spec
+xsarena book zero2hero "Your Topic" --max=6 --min=3000 --print-spec
 ```
 This will print the canonical YAML specification to stdout. You can redirect it to a file:
 ```
-xsarena z2h "Your Topic" --max=3000 --print-spec > recipes/my_topic.yml
+xsarena book zero2hero "Your Topic" --max=3000 --print-spec > recipes/my_topic.yml
 ```
 
 ### Method 2: Using the wizard

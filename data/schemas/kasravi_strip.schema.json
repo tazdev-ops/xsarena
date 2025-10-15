@@ -1,0 +1,63 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Kasravi–Oliver Quick Strip",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "pause_and_quote","literal_scene","trick_ladder","grant_and_escalate",
+    "jargon_to_plain","reality_check","incentives_map","qa_rebuttals",
+    "naked_residue","steelman","verdict"
+  ],
+  "properties": {
+    "pause_and_quote": {"type": "string"},
+    "literal_scene": {"type": "string"},
+    "trick_ladder": {
+      "type": "array",
+      "items": {"type": "string"},
+      "minItems": 1
+    },
+    "grant_and_escalate": {"type": "string"},
+    "jargon_to_plain": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["term","plain"],
+        "properties": {
+          "term": {"type": "string"},
+          "plain": {"type": "string"}
+        }
+      }
+    },
+    "reality_check": {"type": "string"},
+    "incentives_map": {
+      "type": "array",
+      "items": {"type": "string"}
+    },
+    "qa_rebuttals": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["you_will_say","answer"],
+        "properties": {
+          "you_will_say": {"type": "string"},
+          "answer": {"type": "string"}
+        }
+      }
+    },
+    "naked_residue": {"type": "string"},
+    "steelman": {"type": "string"},
+    "verdict": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["emptiness_logic","emptiness_moral","harm","kicker"],
+      "properties": {
+        "emptiness_logic": {"type": "integer", "minimum": 0, "maximum": 10},
+        "emptiness_moral": {"type": "integer", "minimum": 0, "maximum": 10},
+        "harm": {"type": "string"},
+        "kicker": {"type": "string"}
+      }
+    }
+  }
+}

@@ -1,0 +1,5 @@
+[console_scripts]
+lmastudio = xsarena.cli.main:run
+lmastudio-bridge = xsarena.bridge.server:main
+xsarena = xsarena.cli.main:run
+xsarena-bridge = xsarena.bridge.server:main

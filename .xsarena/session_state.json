@@ -1,0 +1,19 @@
+{
+  "history": [],
+  "anchors": [],
+  "continuation_mode": "anchor",
+  "anchor_length": 300,
+  "repetition_threshold": 0.8,
+  "repetition_ngram": 4,
+  "repetition_warn": true,
+  "backend": "bridge",
+  "model": "default",
+  "window_size": 100,
+  "settings": {},
+  "session_mode": null,
+  "coverage_hammer_on": true,
+  "output_budget_snippet_on": true,
+  "output_push_on": true,
+  "output_min_chars": 4500,
+  "output_push_max_passes": 3
+}

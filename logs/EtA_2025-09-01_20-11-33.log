@@ -1,0 +1,8 @@
+2025-09-01 20:11:33,961 - audiobook_generator.py:76 - run - INFO - Starting audiobook generation...
+2025-09-01 20:11:33,961 - audiobook_generator.py:161 - run - ERROR - Error during audiobook generation: Unsupported file format: /home/mativiters/sassanians.pdf
+Traceback (most recent call last):
+  File "/opt/epub_to_audiobook/audiobook_generator/core/audiobook_generator.py", line 77, in run
+    book_parser = get_book_parser(self.config)
+  File "/opt/epub_to_audiobook/audiobook_generator/book_parsers/base_book_parser.py", line 45, in get_book_parser
+    raise NotImplementedError(f"Unsupported file format: {config.input_file}")
+NotImplementedError: Unsupported file format: /home/mativiters/sassanians.pdf

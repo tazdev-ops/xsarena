@@ -17,31 +17,38 @@
 ╰──────────────────────────────────────────────────────────────────────────────╯
 ╭─ Commands ───────────────────────────────────────────────────────────────────╮
 │ version                                                                      │
-│ book        Book authoring commands                                          │
-│ lossless    Lossless text processing commands                                │
-│ backend     Backend configuration commands                                   │
-│ debug       Debugging commands                                               │
-│ mode        Mode toggles and settings                                        │
-│ mix         Mode mixer with prompt preview/edit                              │
-│ fast        Fast headless mode with standardized parameters                  │
-│ jobs        Job execution (recipes, book generation)                         │
-│ preview     Preview prompt + style sample for recipes                        │
-│ publish     Publishing tools (PDF, EPUB, web)                                │
-│ audio       Audio generation (TTS, podcasts)                                 │
-│ snapshot    Snapshot tools with chunking and redaction                       │
-│ metrics     Metrics and observability                                        │
-│ service     Service management (start servers)                               │
-│ pipeline    Pipeline runner (fix → test → format → commit)                   │
-│ continue    Continue from file tail (anchor)                                 │
-│ fix         Self-heal configuration/state                                    │
-│ config      Configuration management                                         │
-│ clean       Cleanup (TTL-based sweeper)                                      │
-│ plan        Plan from seeds in editor, then run a long book                  │
-│ quick       Quick launcher (wait for capture, profiles)                      │
-│ run         Unified runner (book/continue)                                   │
-│ report      Create a redacted report bundle                                  │
-│ adapt       Adaptive inspection and safe fixes                               │
-│ boot        Startup reader (startup.yml)                                     │
-│ checklist   Implementation checklist and verification                        │
+│ interactive   Interactive REPL (modular)                                     │
+│ book          Book authoring commands                                        │
+│ lossless      Lossless text processing commands                              │
+│ backend       Backend configuration commands                                 │
+│ debug         Debugging commands                                             │
+│ coder         Advanced coding session with tickets, patches, and git         │
+│               integration                                                    │
+│ mode          Mode toggles and settings                                      │
+│ mix           Mode mixer with prompt preview/edit                            │
+│ fast          Fast headless mode with standardized parameters                │
+│ jobs          Job execution (recipes, book generation)                       │
+│ preview       Preview prompt + style sample for recipes                      │
+│ publish       Publishing tools (PDF, EPUB, web)                              │
+│ audio         Audio generation (TTS, podcasts)                               │
+│ snapshot      Snapshot tools with chunking and redaction                     │
+│ metrics       Metrics and observability                                      │
+│ service       Service management (start servers)                             │
+│ upgrade       Version-aware upgrader                                         │
+│ macros        Macro registry                                                 │
+│ playground    Prompt composition and sampling                                │
+│ doctor        Health checks and smoke tests                                  │
+│ pipeline      Pipeline runner (fix → test → format → commit)                 │
+│ continue      Continue from file tail (anchor)                               │
+│ fix           Self-heal configuration/state                                  │
+│ config        Configuration management                                       │
+│ clean         Cleanup (TTL-based sweeper)                                    │
+│ plan          Plan from seeds in editor, then run a long book                │
+│ quick         Quick launcher (wait for capture, profiles)                    │
+│ run           Unified runner (book/continue)                                 │
+│ report        Create a redacted report bundle                                │
+│ adapt         Adaptive inspection and safe fixes                             │
+│ boot          Startup reader (startup.yml)                                   │
+│ checklist     Implementation checklist and verification                      │
 ╰──────────────────────────────────────────────────────────────────────────────╯
 

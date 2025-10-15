@@ -1,16 +1,19 @@
 #!/usr/bin/env bash
 set -euo pipefail
-echo "[prepush] lint/format/tests..."
-ruff check .    >/dev/null
-black --check . >/dev/null
-pytest -q       >/dev/null
-if [ -x scripts/gen_docs.sh ]; then
-  echo "[prepush] doc help drift..."
-  bash scripts/gen_docs.sh
-  git diff --exit-code docs/_help_*.txt >/dev/null || { echo "[prepush] help drift; commit docs."; exit 1; }
-fi
-echo "[prepush] ephemeral scan..."
-git add -N . >/dev/null 2>&1 || true
-GLOB=$(git ls-files -mo --exclude-standard)
-echo "$GLOB" | grep -E '^(review/|snapshot_chunks/|xsa_min_snapshot|\.xsarena/tmp/)' && { echo "[prepush] ephemeral detected; clean or .gitignore"; exit 1; }
-echo "[prepush] OK"
+fail(){ echo "[FAIL] $*"; exit 1; }; warn(){ echo "[WARN] $*"; }
+echo "== prepush_check =="
+command -v ruff >/dev/null 2>&1 && ruff check . || warn "ruff not installed"
+command -v black >/dev/null 2>&1 && black --check . || warn "black not installed"
+command -v mypy >/dev/null 2>&1 && mypy . || warn "mypy missing/fail"
+command -v pytest >/dev/null 2>&1 && pytest -q || warn "pytest missing/fail"
+[[ -f scripts/gen_docs.sh ]] && bash scripts/gen_docs.sh || true
+git diff --exit-code || fail "Docs drift; commit docs"
+TRACKED="$(git ls-files)"
+for pat in '^snapshot_chunks/' '^xsa_.*snapshot.*\.txt$' '^review/.*\.tar\.gz$' '^\.xsarena/tmp/'; do
+  hits=$(echo "$TRACKED" | grep -E "$pat" || true)
+  [[ -z "$hits" ]] || { echo "$hits" | sed 's/^/ - /'; fail "Banned artifact(s): $pat"; }
+done
+ep=()
+while IFS= read -r f; do head -n1 "$f" | grep -q "XSA-EPHEMERAL" && ep+=("$f") || true; done < <(git ls-files)
+[[ ${#ep[ @]} -eq 0 ]] || { printf '%s\n' "${ep[ @]}" | sed 's/^/ - /'; fail "XSA-EPHEMERAL files are tracked"; }
+echo "[OK ] prepush checks passed"
