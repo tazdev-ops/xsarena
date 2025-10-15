@@ -30,6 +30,7 @@ def _apply_style_overlays(
                 text.strip() + "\n\nSTYLE OVERLAY:\n<<<STYLE\n" + style + "\nSTYLE>>>"
             )
         return text
+    return text
 
 
 def set_system(text: str, state: Dict):

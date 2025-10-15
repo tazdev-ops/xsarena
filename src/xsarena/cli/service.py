@@ -100,5 +100,28 @@ Multi-instance Usage Guide:
     typer.echo(help_text)
 
 
+@app.command("start-bridge-v2")
+def start_bridge_v2(port: int = typer.Option(5102, "--port", "-p"), host: str = typer.Option("127.0.0.1", "--host")):
+    """Start the bridge v2 (WS + SSE) server."""
+    env = os.environ.copy()
+    cmd = [sys.executable, "-m", "xsarena.bridge_v2.api_server"]
+    typer.echo(f"Starting bridge v2 on {host}:{port}")
+    env["PORT"] = str(port)
+    try:
+        subprocess.run(cmd, env=env)
+    except KeyboardInterrupt:
+        typer.echo("\nBridge v2 stopped")
+
+
+@app.command("start-id-updater")
+def start_id_updater():
+    """Start the ID updater helper (captures session/message IDs from browser)."""
+    cmd = [sys.executable, "tools/id_updater.py"]
+    try:
+        subprocess.run(cmd)
+    except KeyboardInterrupt:
+        typer.echo("\nID Updater stopped")
+
+
 if __name__ == "__main__":
     app()

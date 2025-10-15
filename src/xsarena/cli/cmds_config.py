@@ -11,7 +11,8 @@ app = typer.Typer(help="Configuration management")
 @app.command("show")
 def config_show():
     """Show current configuration."""
-    cli: CLIContext = typer.get_current_context().obj
+    from .context import CLIContext
+    cli: CLIContext = CLIContext.load()
     
     typer.echo("Current Configuration:")
     typer.echo(f"  Backend: {cli.config.backend}")
@@ -40,7 +41,11 @@ def config_set(
     redaction_enabled: bool = typer.Option(None, "--redaction/--no-redaction", help="Enable or disable redaction"),
 ):
     """Set configuration values."""
-    cli: CLIContext = typer.get_current_context().obj
+    from .context import CLIContext
+    from ..core.config import Config
+    
+    # Load existing config from file, but allow override of specific values
+    config = Config.load_from_file(".xsarena/config.yml")
     
     updates = {}
     if backend is not None:
@@ -62,14 +67,13 @@ def config_set(
     if redaction_enabled is not None:
         updates["redaction_enabled"] = redaction_enabled
     
-    # Update the config
+    # Update the config with new values
     for key, value in updates.items():
-        setattr(cli.config, key, value)
+        setattr(config, key, value)
     
-    # Also update the state to reflect the changes
-    for key, value in updates.items():
-        if hasattr(cli.state, key):
-            setattr(cli.state, key, value)
+    # Create a basic CLIContext to save the config
+    # We avoid loading the full context with the problematic backend
+    cli: CLIContext = CLIContext.load(cfg=config)
     
     # Save the updated config to file
     config_path = Path(".xsarena/config.yml")
@@ -85,7 +89,8 @@ def config_set(
 @app.command("reset")
 def config_reset():
     """Reset configuration to defaults."""
-    cli: CLIContext = typer.get_current_context().obj
+    from .context import CLIContext
+    cli: CLIContext = CLIContext.load()
     
     # Create a new default config
     default_config = Config()

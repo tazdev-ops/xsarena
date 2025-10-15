@@ -29,7 +29,7 @@ class Backend(ABC):
 class BridgeBackend(Backend):
     """Backend that communicates with the local bridge server."""
 
-    def __init__(self, base_url: str = "http://localhost:8080/v1", timeout: int = 60):
+    def __init__(self, base_url: str = "http://127.0.0.1:5102/v1", timeout: int = 60):
         self.base_url = os.getenv("XSA_BRIDGE_URL", base_url)
         self.session_id = None
         self.timeout = timeout
@@ -97,17 +97,18 @@ class OpenRouterBackend(Backend):
         
         for attempt in range(2):
             try:
-                async with aiohttp.ClientSession() as session, session.post(
-                    f"{self.base_url}/chat/completions", headers=headers, json=data
-                ) as response:
-                    if response.status >= 500 and attempt == 0:
-                        await asyncio.sleep(0.5)
-                        continue
-                    if response.status != 200:
-                        text = (await response.text())[:300]
-                        raise RuntimeError(f"OpenRouter error {response.status}: {text}")
-                    result = await response.json()
-                    return result.get("choices", [{}])[0].get("message", {}).get("content", "")
+                async with aiohttp.ClientSession() as session:
+                    async with session.post(
+                        f"{self.base_url}/chat/completions", headers=headers, json=data
+                    ) as response:
+                        if response.status >= 500 and attempt == 0:
+                            await asyncio.sleep(0.5)
+                            continue
+                        if response.status != 200:
+                            text = (await response.text())[:300]
+                            raise RuntimeError(f"OpenRouter error {response.status}: {text}")
+                        result = await response.json()
+                        return result.get("choices", [{}])[0].get("message", {}).get("content", "")
             except aiohttp.ClientError as e:
                 if attempt == 0:
                     await asyncio.sleep(0.5)
@@ -140,7 +141,7 @@ def create_backend(backend_type: str, **kwargs) -> Backend:
     """Factory function to create the appropriate backend."""
     if backend_type == "bridge":
         return BridgeBackend(
-            base_url=kwargs.get("base_url", "http://localhost:8080/v1")
+            base_url=kwargs.get("base_url", "http://127.0.0.1:5102/v1")
         )
     elif backend_type in ("lmarena", "lmarena-ws"):
         # Use your WS bridge’s OpenAI-compatible API
@@ -148,8 +149,9 @@ def create_backend(backend_type: str, **kwargs) -> Backend:
             base_url=kwargs.get("base_url", "http://127.0.0.1:5102/v1")
         )
     elif backend_type == "openrouter":
-        return OpenRouterBackend(
-            api_key=kwargs["api_key"], model=kwargs.get("model", "openai/gpt-4o")
-        )
+        api_key = kwargs.get("api_key") or os.getenv("OPENROUTER_API_KEY")
+        if not api_key:
+            raise ValueError("OpenRouter API key not configured. Set OPENROUTER_API_KEY or pass api_key=...")
+        return OpenRouterBackend(api_key=api_key, model=kwargs.get("model", "openai/gpt-4o"))
     else:
         raise ValueError(f"Unsupported backend type: {backend_type}")

@@ -21,7 +21,7 @@ class CLIContext:
 
     @classmethod
     def load(cls, cfg: Optional[Config] = None, state_path: Optional[str] = None) -> "CLIContext":
-        cfg = cfg or Config()
+        cfg = cfg or (Config.load_from_file(".xsarena/config.yml") if Path(".xsarena/config.yml").exists() else Config())
         state_path = Path(state_path or "./.xsarena/session_state.json")
         state_path.parent.mkdir(parents=True, exist_ok=True)
 

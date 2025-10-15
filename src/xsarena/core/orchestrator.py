@@ -59,9 +59,14 @@ async def seed_continue(engine, book_path: Path, system_text: str, min_chars: in
         if not first.startswith("\n"):
             f.write("\n\n")
         f.write(first.strip())
+    
+    def _append_chunk(idx: int, body: str, hint: Optional[str]):
+        with book_path.open("a", encoding="utf-8") as f:
+            f.write(("\n\n" if not body.startswith("\n") else "") + body)
+    
     if chunks is None:
-        await engine.autopilot_run(initial_prompt="BEGIN", max_chunks=None)
+        await engine.autopilot_run(initial_prompt="BEGIN", max_chunks=None, on_chunk=_append_chunk, system_prompt=system_text)
     else:
         remain = max(0, chunks - 1)
         if remain > 0:
-            await engine.autopilot_run(initial_prompt="BEGIN", max_chunks=remain)
+            await engine.autopilot_run(initial_prompt="BEGIN", max_chunks=remain, on_chunk=_append_chunk, system_prompt=system_text)
