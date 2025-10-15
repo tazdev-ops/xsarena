@@ -1,4 +1,4 @@
-"""Book authoring modes for LMASudio."""
+"""Book authoring modes for XSArena."""
 
 from typing import Dict, Optional
 

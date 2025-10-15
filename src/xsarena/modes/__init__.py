@@ -1,1 +1,1 @@
-"""Mode modules for LMASudio."""
+"""Mode modules for XSArena."""

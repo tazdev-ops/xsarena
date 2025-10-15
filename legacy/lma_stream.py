@@ -1,14 +1,11 @@
-# Legacy shim: stream/chunk helpers
-try:
-    pass
-except Exception:
-    pass
+#!/usr/bin/env python3
+# lma_stream.py — shared parsing helpers for legacy CLI
 
-# Keep minimal local implementations for protocol parsing to avoid tight coupling
 import json
 import re
 
 
+# Extract streaming text chunks from LMArena a0/b0 protocol
 def extract_text_chunks(buf: str):
     out = []
     while True:
@@ -21,6 +18,7 @@ def extract_text_chunks(buf: str):
             j = buf.find('"', i)
             if j == -1:
                 return out, buf
+            # count preceding backslashes
             bs = 0
             k = j - 1
             while k >= 0 and buf[k] == "\\":
@@ -41,6 +39,7 @@ def extract_text_chunks(buf: str):
     return out, buf
 
 
+# NEXT: [...] detection
 NEXT_RE = re.compile(r"^\s*NEXT:\s*(.+)\s*$", re.MULTILINE)
 
 
@@ -55,17 +54,7 @@ def strip_next_marker(text: str):
     return text.rstrip(), hint
 
 
-def build_anchor_continue_prompt(anchor: str) -> str:
-    return (
-        "Continue exactly from after the following anchor. Do not repeat the anchor. "
-        "Do not reintroduce the subject or previous headings; do not summarize; pick up mid-paragraph if needed.\n"
-        "ANCHOR:\n<<<ANCHOR\n" + (anchor or "") + "\nANCHOR>>>\n"
-        "Continue."
-    )
-
-
 def anchor_from_text(txt: str, tail_chars: int) -> str:
-    """Create an anchor from arbitrary text."""
     if not txt:
         return ""
     s = txt[-tail_chars:]
@@ -76,13 +65,20 @@ def anchor_from_text(txt: str, tail_chars: int) -> str:
 
 
 def jaccard_ngrams(a: str, b: str, n: int = 4) -> float:
-    """Calculate Jaccard similarity between two strings using n-grams."""
-
     def ngrams(x):
-        x = " ".join(x.split())  # normalize whitespace
+        x = re.sub(r"\s+", " ", x.strip())
         return set([x[i : i + n] for i in range(0, max(0, len(x) - n + 1))])
 
     A, B = ngrams(a), ngrams(b)
     if not A or not B:
         return 0.0
     return len(A & B) / len(A | B)
+
+
+def build_anchor_continue_prompt(anchor: str) -> str:
+    return (
+        "Continue exactly from after the following anchor. Do not repeat the anchor. "
+        "Do not reintroduce the subject or previous headings; do not summarize; pick up mid-paragraph if needed.\n"
+        "ANCHOR:\n<<<ANCHOR\n" + (anchor or "") + "\nANCHOR>>>\n"
+        "Continue."
+    )

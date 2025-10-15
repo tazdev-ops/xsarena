@@ -1,93 +1,47 @@
-Listening on:
-  GET  http://127.0.0.1:5102/bridge/poll
-  POST http://127.0.0.1:5102/bridge/push
-  POST http://127.0.0.1:5102/internal/id_capture/update
---------------------------------------------------------------------------------
-Minimal LMArena CLI — Prompt Studio
-Core:
-  /help                 Show this help
-  /status               Show state
-  /capture              Capture IDs (then click Retry in LMArena)
-  /setids <sess> <msg>  Set IDs manually
-  /showids              Show IDs
-Project & Pipeline:
-  /project.init [--dir=.]        Scaffold .xsarena/, pipelines/, recipes/, etc.
-  /pipeline.run <pipeline.yml>   Execute a multi-step workflow (synth -> rewrite -> ...)
-Prompt repo:
-  /repo.list
-  /repo.show <key> [n]
-  /repo.use <key> [args]      (advanced)
-Books (subject-aware):
-  /book.zero2hero <subject> [--plan] [--max=N] [--window=N] [--outdir=DIR]
-  /book.reference <subject> [--plan] [--max=N] [--window=N] [--outdir=DIR]
-  /book.nobs <subject> [--plan] [--max=N] [--window=N] [--outdir=DIR]
-  /book.pop <subject> [--plan] [--max=N] [--window=N] [--outdir=DIR]
-  /book.bilingual <subject> --lang=LANG [--plan] [--max=N] [--window=N] [--outdir=DIR]
-  /exam.cram <subject> [--max=N] [--window=N] [--outdir=DIR]
-Autopilot control:
-  /book.pause | /book.resume | /next <text>   (one-shot override for the next prompt)
-  /book.hammer on|off               Toggle strict no-wrap continuation hint for self-study
-  /book.save [name]                 Save current autopilot state to checkpoint
-  /book.load <name>                 Load autopilot state from checkpoint
-  /book.start <out.md>              Start manual autopilot (no template)
-  /book.stop | /book.max <N>        Stop or set max chunks
-Output budget:
-  /out.budget on|off                 Append OUTPUT BUDGET addendum to book prompts (default on)
-  /out.push on|off                   Auto-extend within a subtopic to hit min length (default on)
-  /out.minchars <N>                  Set minimal chars per chunk before moving on (default 4500)
-  /out.passes <N>                    Max extension steps per chunk (default 3)
-  /cf.status | /cf.resume | /cf.reset Show/control Cloudflare pause
-  /cont.mode [normal|anchor]        Set continuation strategy (default: anchor)
-  /cont.anchor <N>                  Set anchor length in chars (default 200)
-  /repeat.warn on|off               Toggle repetition warning (default on)
-  /repeat.thresh <0..1>            Set repetition Jaccard threshold (default 0.35)
-Ingestion/Synthesis/Style:
-  /ingest.ack <file> [chunkKB=80]
-  /ingest.synth <file> <synth.md> [chunkKB=45] [synthChars=9500]
-  /ingest.lossless <file> <synth.md> [chunkKB=45] [synthChars=12000]
-  /style.capture <file> <style.synth.md> [chunkKB=30] [styleChars=6000]
-  /style.apply <style.synth.md> <topic|file> [out.md] [--words=N]
-Rewrite:
-  /rewrite.start <synth.md> <out.md>
-  /rewrite.lossless <synth.md> [out.md]
-One-shot pipeline:
-  /lossless.run <file> [--outdir=DIR] [--chunkKB=45] [--synthChars=12000]
-Special tools:
-  /bilingual.file <file> --lang=LANG [--outdir=DIR] [--chunkKB=45]
-  /policy.from <reg_file> <out_dir> [--org='...'] [--jurisdiction='...'] [--chunkKB=45] [--synthChars=16000]
-Study/Translate:
-  /flashcards.from <synth.md> <out.md> [n=200]
-  /glossary.from <synth.md> <out.md>
-  /index.from <synth.md> <out.md>
-  /translate.file <file> <language> [chunkKB=50]
-Q&A:
-  /chad "<question>" [--depth=short|medium|deep] [--prose] [--norefs] [--nocontra]
-Prompt Booster:
-  /prompt.boost "goal" [--ask] [--apply] [--meta]
-  /prompt.answer                 (answer booster questions; end paste with EOF)
-  /prompt.apply [next|system]    (apply improved prompt)
-Recipes:
-  /run.recipe <recipe.json|yml>
-  /run.quick task=... subject="..." out=path [max=N] [style=no-bs,chad]
-Macros:
-  /macro.save <name> "<command template>"
-  /macro.list | /macro.delete <name>
-  /macro.run <name> [arg1 arg2 ...]
-Snapshot:
-  /snapshot [--chunk]            Create snapshot.txt (or chunks) via snapshot.sh
-  /quickpaste                    Paste a multi-line block of commands; end with EOF
-Prompt & Model:
-  /system <line> | /systemfile <path> | /system.append (paste, end with EOF)
-  /style.nobs on|off                  Harden language (plain, no fluff) for current session
-  /style.narrative on|off            Narrative + pedagogy overlay (teach-before-use, vignettes, quick checks)
-  /model <uuid|none> | /window <N> | /history.tail | /mono | /clear
-  /image on|off                     Toggle markdown images from a2 image streams (default on)
-  /debug.cont | /debug.ctx
-OpenRouter:
-  /backend bridge|openrouter          Switch backend
-  /or.model <model>                  Set OpenRouter model
-  /or.ref <url> | /or.title <text>   Set optional headers
-  /or.status                         Show OpenRouter status
-  /exit                              Exit the CLI
---------------------------------------------------------------------------------
->
+                                                                                
+ Usage: xsarena [OPTIONS] COMMAND [ARGS]...                                     
+                                                                                
+ XSArena — AI-powered writing and coding studio                                 
+                                                                                
+╭─ Options ────────────────────────────────────────────────────────────────────╮
+│ --backend                   TEXT     Backend to use (bridge or openrouter)   │
+│                                      [default: bridge]                       │
+│ --model                     TEXT     Model to use [default: default]         │
+│ --window                    INTEGER  Window size for history [default: 100]  │
+│ --install-completion                 Install completion for the current      │
+│                                      shell.                                  │
+│ --show-completion                    Show completion for the current shell,  │
+│                                      to copy it or customize the             │
+│                                      installation.                           │
+│ --help                               Show this message and exit.             │
+╰──────────────────────────────────────────────────────────────────────────────╯
+╭─ Commands ───────────────────────────────────────────────────────────────────╮
+│ version                                                                      │
+│ book        Book authoring commands                                          │
+│ lossless    Lossless text processing commands                                │
+│ backend     Backend configuration commands                                   │
+│ debug       Debugging commands                                               │
+│ mode        Mode toggles and settings                                        │
+│ mix         Mode mixer with prompt preview/edit                              │
+│ fast        Fast headless mode with standardized parameters                  │
+│ jobs        Job execution (recipes, book generation)                         │
+│ preview     Preview prompt + style sample for recipes                        │
+│ publish     Publishing tools (PDF, EPUB, web)                                │
+│ audio       Audio generation (TTS, podcasts)                                 │
+│ snapshot    Snapshot tools with chunking and redaction                       │
+│ metrics     Metrics and observability                                        │
+│ service     Service management (start servers)                               │
+│ pipeline    Pipeline runner (fix → test → format → commit)                   │
+│ continue    Continue from file tail (anchor)                                 │
+│ fix         Self-heal configuration/state                                    │
+│ config      Configuration management                                         │
+│ clean       Cleanup (TTL-based sweeper)                                      │
+│ plan        Plan from seeds in editor, then run a long book                  │
+│ quick       Quick launcher (wait for capture, profiles)                      │
+│ run         Unified runner (book/continue)                                   │
+│ report      Create a redacted report bundle                                  │
+│ adapt       Adaptive inspection and safe fixes                               │
+│ boot        Startup reader (startup.yml)                                     │
+│ checklist   Implementation checklist and verification                        │
+╰──────────────────────────────────────────────────────────────────────────────╯
+

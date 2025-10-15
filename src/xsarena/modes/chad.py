@@ -1,4 +1,4 @@
-"""Chad mode (evidence-based Q&A) for LMASudio."""
+"""Chad mode (evidence-based Q&A) for XSArena."""
 
 from typing import List
 

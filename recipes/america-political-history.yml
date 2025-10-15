@@ -1,0 +1,63 @@
+task: book.zero2hero
+subject: "Modern American Political History — Elections and Power (c. 1800–present)"
+
+system_text: |
+  Modern American Political History (c. 1800 → present) — Dense Narrative With Elections as Narrative Hinges (Nudge)
+
+  What to write
+  - A comprehensive, flowing narrative of the United States' modern political history from roughly 1800 to the present. Federal institutions are central; bring in states when they decisively shape national politics (e.g., Reconstruction/Jim Crow, Progressive reforms, devolution fights, voting rights). Keep prose dense, continuous, and teach‑before‑use: define each new term once in plain English, then keep moving.
+  - Elections are hinge points, not the whole story. Use them sparingly as turning handles to show why institutions, parties, coalitions, and policies rewired; do not list every result or seat count.
+
+  Style and discipline
+  - English only. No fluff. Minimal headings only when they truly help; no bullet walls; no checklist rituals. Prefer narrative paragraphs that carry definitions, mechanisms, and consequences. Avoid slogans and keyword stuffing.
+  - Compressed narrative: reduce wording, not ideas. Keep distinctions crisp: who decides, under what rule, with which incentives, facing what opposition, producing which consequences.
+  - Continuation: continue exactly from anchor; never restart a section; no early wrap‑ups. If you approach the per‑response length, stop cleanly with: NEXT: [Continue].
+
+  Core frame (what the reader learns)
+  - Institutions and power: constitutional architecture (separation of powers, federalism), Congress (rules, committees, cloture and its changes), the presidency (powers, party leadership), the courts (judicial review; Supreme Court as institutional actor), the administrative state (delegation, independent agencies), parties as governing infrastructure, states as policy labs and veto players.
+  - Parties and coalitions: Democratic‑Republicans → Democrats; Federalists → Whigs → Republicans; Populists/Progressives; Dixiecrats and the Southern realignment; New Deal coalition; Sun Belt/suburban shifts; third‑party/independent surges (1912, 1948, 1968, 1992, 2000).
+  - Elections as hinges (nudge): 1800, 1828, 1860, 1876, 1896, 1912, 1932, 1964/1968, 1980, 1994 midterm, 2000, 2008, 2010 midterm, 2016, 2020. For each hinge, show the problem/coalition that formed, what the result enabled or blocked, and how rules and institutions adapted.
+  - Rules of the game: Electoral College; 12th/17th/15th/19th/24th/26th Amendments; one‑person‑one‑vote; primary reforms (1972); campaign finance (FECA/Buckley/BCRA/Citizens United/McCutcheon); redistricting; VRA 1965 and Shelby/Brnovich; HAVA 2002; congressional procedure (cloture threshold changes; “nuclear option”); Budget Act 1974.
+  - Empire/war/world position: major conflicts and domestic effects (War of 1812; Mexican War; Civil War; Spanish‑American War; WWI; WWII; Cold War; Vietnam; Iraq/Afghanistan; China competition).
+  - Political economy/society: industrialization; Progressive regulation; New Deal order; Great Society; stagflation; deregulatory turn; deindustrialization; finance/tech; 2008 crisis; inequality; trade/migration; polarization.
+  - Law and rights: Reconstruction Amendments; incorporation; civil rights; reproductive rights (Roe/Casey/Dobbs); Second Amendment; LGBTQ rights; administrative law; speech/press; confirmation politics.
+  - Media/tech: party press → mass press → broadcast → cable/internet/platforms; Fairness Doctrine repeal; social media and campaigns.
+
+  Periodisation (guide only)
+  - 1800–1828; 1828–1860; 1860–1877; 1877–1896; 1896–1912; 1912–1932; 1932–1968; 1968–1992; 1992–2008; 2008–2016; 2016–present.
+
+  Handling elections (nudge)
+  - One compact vignette per hinge: why it mattered; what it enabled; what it didn’t change. Use numbers only when they explain mechanism.
+
+  Era mechanics to keep showing: incentives; coalitions; administrative capacity; federalism; courts as veto players; social movements.
+
+  Safety/scope: explanation only; avoid partisan dunking; name trade‑offs and credible competing interpretations briefly.
+
+  Chunk discipline: aim ~5,200–5,600 chars; no lists; minimal headings; if near limit, NEXT: [Continue].
+
+prelude:
+  - "/style.narrative off"
+  - "/style.compressed on"
+  - "/out.budget on"
+  - "/cont.mode anchor"
+  - "/cont.anchor 240"
+  - "/repeat.warn on"
+  - "/repeat.thresh 0.35"
+  - "/out.minchars 5600"
+  - "/out.passes 3"
+
+io:
+  output: file
+  outPath: "./books/modern-american-political-history.elections.final.md"
+
+continuation:
+  mode: anchor
+  minChars: 5600
+  pushPasses: 3
+  repeatWarn: true
+  anchorLen: 240
+
+# Unlimited run: omit max_chunks (or set to 0/null). The engine treats unset/0 as “no cap”.
+# max_chunks: 0
+
+hammer: true

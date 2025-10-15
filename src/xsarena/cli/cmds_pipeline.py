@@ -1,4 +1,4 @@
-"""Pipeline CLI commands for LMASudio."""
+"""Pipeline CLI commands for XSArena."""
 
 import json
 import os

@@ -1,0 +1,75 @@
+task: book.zero2hero
+subject: "Modern Political History of Britain — Elections and Power (c. 1800–present)"
+system_text: |
+  Modern Political History of Britain (c. 1800 → present) — Dense Narrative With Elections as Narrative Hinges (Nudge)
+
+  What to write
+  - A comprehensive, flowing narrative of Britain's modern political history from roughly 1800 to the present day. England, Scotland, Wales, and (for the Union's story) Ireland/Northern Ireland are in scope. Keep prose dense, continuous, and teach‑before‑use: define terms the first time in one plain sentence, then move on.
+  - Elections are hinge points, not the whole show. Use them as turning handles to explain why institutions, parties, policies, and public life rewire; do not list every result. A short vignette per crucial election is enough.
+
+  Style and discipline
+  - English only. No fluff. Minimal headings only if they truly help; no bullet walls; no checklist rituals. Prefer narrative paragraphs that carry definitions, mechanisms, and consequences. Avoid slogans and keyword stuffing.
+  - Compressed narrative: reduce wording, not ideas. Keep distinctions crisp (who decides, under what rule, with what incentives, facing which opposition, creating which consequences).
+  - Continuation: continue exactly from anchor; never restart a section; no early wrap‑ups. If you approach the per‑response length, stop cleanly with: NEXT: [Continue].
+
+  Core frame (what the reader learns)
+  - Institutions and power: Crown‑in‑Parliament; Cabinet/PM; Commons vs Lords; monarch's evolving role; civil service; local government; judicial shifts (Law Lords → UK Supreme Court); territorial governance (Union, Home Rule, devolution).
+  - Parties and coalitions: Tories/Conservatives, Whigs/Liberals, Labour, Liberal Democrats; nationalist parties (SNP, Plaid), NI parties (DUP, Sinn Féin, UUP, SDLP, Alliance); minor parties and episodic surges (UKIP, Brexit Party, Greens).
+  - Elections as hinges (nudge): Reform elections (1832, 1868, 1885), the Liberal landslide (1906), post‑war realigners (1945), Thatcher (1979), New Labour (1997), Coalition (2010), Brexit shock (2016 referendum) and 2017/2019 as re‑sorting tests. For each crucial hinge, show: what problem/coalition formed, what the result enabled/blocked, and how institutions adapted.
+  - Rules of the game: rotten boroughs; Reform Acts 1832/1867/1884; Representation of the People Acts (1918, 1928, 1969); Parliament Acts (1911, 1949); Corrupt and Illegal Practices Acts; Boundary Commissions; party finance (PPERA 2000); broadcasting/press norms; AV referendum (2011); devolved electoral systems.
+  - Empire, war, and world position: imperial politics and their domestic pull; First World War state expansion; interwar turbulence; Second World War total mobilisation; post‑war welfare settlement and retreat; Europe (1973 accession, Maastricht, Lisbon); Brexit (2016–) as constitutional and party‑system strain.
+  - Political economy and society: industrialisation and Chartism; franchise expansion and labour organisation; post‑war consensus; 1970s stagflation; Thatcherite restructuring; "Big Bang" finance; 2008 crisis and austerity; migration; media/party technology; polarisation and de‑alignment; devolution and multi‑level governance.
+  - Law and rights: HRA 1998; devolution statutes; FOIA 2000; Supreme Court (2009); constitutional cases that moved practice (Miller, prorogation).
+
+  Periodisation (use for flow, not as hard headings)
+  - 1800–1832 Late Georgian order; union with Ireland; pre‑Reform pressures.
+  - 1832–1867 The first Reform settlement; party re‑formation; Peelites, Corn Laws, and administrative state seeds.
+  - 1867–1884 Mass politics accelerates; the second/third Reform Acts; constituency redesign; party caucus modernises.
+  - 1884–1914 Liberal heyday, Labour's birth, Irish Home Rule crisis; Lords vs Commons; Parliament Act 1911.
+  - 1914–1918 Total war and franchise revolution; coalition governance; the 1918 settlement.
+  - 1918–1945 Interwar volatility; minority governments; 1931 crisis; wartime coalition; 1945 settlement.
+  - 1945–1979 Consensus and its fray; Europe debates begin; industrial conflict; EEC referendum (1975).
+  - 1979–1997 Thatcher/Major: market turn, unions, Europe splits; electoral geography changes.
+  - 1997–2010 New Labour: devolution, HRA/FOIA, Lords reform; constitutional modernisation; 2008 crisis.
+  - 2010–2016 Coalition and fragmentation; AV referendum; Scottish independence referendum (2014); pre‑Brexit strains.
+  - 2016–present Brexit as constitutional stress test; party re‑sorting; devolution aftershocks; NI protocol; 2019 hinge; COVID as state test; current dilemmas.
+
+  How to handle elections (nudge, not obsession)
+  - When you reach a hinge election, write one compact vignette:
+    - Why this election mattered (problem/coalition/institutional bottleneck).
+    - What the result enabled (statutes, reforms, regime/coalition change).
+    - What it did not change (institutional inertia, constraints, judicial or EU limits).
+  - Do not list every seat count. Mention numbers only when they illuminate a mechanism (e.g., landslide → legislative capacity; hung parliament → coalition procedure; boundary skew → malapportionment narrative).
+
+  Era mechanics to keep showing
+  - Incentives: who wins, who pays, how rules structure choices (FPTP vs devolved PR; funding rules; media law).
+  - Coalitions and interests: class/regional/religious cleavage evolution; unionism vs nationalism; London vs the regions; "one‑nation" vs "market" Conservatism; Labour's internal realignments.
+  - Administrative capacity: how the civil service, quangos, and agencies become central players; judicialisation of politics (post‑HRA/Supreme Court).
+  - Devolution: Scotland/Wales/NI elections and institutions; intergovernmental bargaining; English localism and mayoralties.
+
+  Vignettes (short, precise)
+  - Keep each vignette to 6–12 sentences. Anchor in a scene: a legislative bottleneck; a leadership contest's logic; a campaign innovation; a court judgement's constraint; a devolution milestone.
+
+  Safety and scope
+  - History/explanation only. Avoid moralising and partisan dunking; name trade‑offs.
+  - If a claim is contested, present the main interpretations in one tight paragraph, then state what is most consistent with institutional evidence.
+
+  Chunk discipline
+  - Target ~4,800–5,200 characters per chunk (dense). No lists. Minimal headings. If you approach the limit, stop cleanly with: NEXT: [Continue].
+
+  End‑state
+  - Conclude with "what changed vs what stayed" across institutions, parties, rules, and political economy; what elections actually moved and what they could not.
+
+io:
+  output: file
+  outPath: "./books/modern-britain-political-history.elections.final.md"
+
+continuation:
+  mode: anchor
+  minChars: 4800
+  pushPasses: 2
+  repeatWarn: true
+
+max_chunks: 14
+
+hammer: true

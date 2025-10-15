@@ -2,6 +2,7 @@
 
 import typer
 
+from .context import CLIContext
 from ..core.config import Config
 from ..core.state import SessionState
 
@@ -11,7 +12,8 @@ app = typer.Typer()
 @app.command("state")
 def show_state():
     """Show current session state."""
-    state = SessionState()
+    cli: CLIContext = typer.get_current_context().obj
+    state = cli.state
 
     typer.echo("Session State:")
     typer.echo(f"  History length: {len(state.history)}")
@@ -24,28 +26,32 @@ def show_state():
     typer.echo(f"  Window Size: {state.window_size}")
     typer.echo(f"  Current Job ID: {state.current_job_id}")
     typer.echo(f"  Job Queue Length: {len(state.job_queue)}")
+    typer.echo(f"  Redaction Enabled: {state.settings.get('redaction_enabled', False)}")
 
 
 @app.command("clear-history")
 def clear_history():
     """Clear the conversation history."""
-    state = SessionState()
-    state.history.clear()
+    cli: CLIContext = typer.get_current_context().obj
+    cli.state.history.clear()
+    cli.save()
     typer.echo("Conversation history cleared")
 
 
 @app.command("clear-anchors")
 def clear_anchors():
     """Clear the anchors."""
-    state = SessionState()
-    state.anchors.clear()
+    cli: CLIContext = typer.get_current_context().obj
+    cli.state.anchors.clear()
+    cli.save()
     typer.echo("Anchors cleared")
 
 
 @app.command("config")
 def show_config():
     """Show current configuration."""
-    config = Config()
+    cli: CLIContext = typer.get_current_context().obj
+    config = cli.config
 
     typer.echo("Current Configuration:")
     typer.echo(f"  Backend: {config.backend}")
@@ -68,8 +74,8 @@ def save_state(
     )
 ):
     """Save current state to a file."""
-    state = SessionState()
-    state.save_to_file(filepath)
+    cli: CLIContext = typer.get_current_context().obj
+    cli.state.save_to_file(filepath)
     typer.echo(f"State saved to {filepath}")
 
 
@@ -80,10 +86,11 @@ def load_state(
     )
 ):
     """Load state from a file."""
-    state = SessionState.load_from_file(filepath)
+    cli: CLIContext = typer.get_current_context().obj
+    cli.state = SessionState.load_from_file(filepath)
     # In a real implementation, we would update the active session with this state
     typer.echo(f"State loaded from {filepath}")
-    typer.echo(f"Loaded state has history length: {len(state.history)}")
+    typer.echo(f"Loaded state has history length: {len(cli.state.history)}")
 
 
 @app.command("toggle-redaction")
@@ -91,9 +98,22 @@ def toggle_redaction(
     enabled: bool = typer.Argument(..., help="Enable or disable redaction filter")
 ):
     """Toggle the redaction filter."""
+    cli: CLIContext = typer.get_current_context().obj
+    
+    # Set the redaction setting in the state
+    cli.state.settings["redaction_enabled"] = enabled
+    
     if enabled:
-        typer.echo("Redaction filter enabled: sensitive information will be filtered")
+        # Import the redact function from core.redact module
+        try:
+            from ..core.redact import redact
+            cli.engine.set_redaction_filter(redact)
+            typer.echo("Redaction filter enabled: sensitive information will be filtered")
+        except ImportError:
+            typer.echo("Redaction filter enabled but redact module not available")
     else:
+        cli.engine.set_redaction_filter(None)
         typer.echo("Redaction filter disabled")
-
-    # In the actual engine, this would update the redaction filter
+    
+    # Save the state
+    cli.save()

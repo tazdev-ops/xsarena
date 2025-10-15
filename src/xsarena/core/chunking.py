@@ -1,4 +1,4 @@
-"""Text chunking and anchor management for LMASudio."""
+"""Text chunking and anchor management for XSArena."""
 
 from dataclasses import dataclass
 from typing import List
@@ -60,9 +60,9 @@ def build_anchor_prompt(anchor_text: str, anchor_length: int = 300) -> str:
     if last_sentence_end != -1 and last_sentence_end > anchor_length * 0.7:
         anchor = anchor[last_sentence_end + 1 :].strip()
 
-    if anchor:
-        return f"\n\n[CONTINUATION CONTEXT: {anchor}]"
-    return ""
+    if not anchor:
+        return ""
+    return f"\nANCHOR:\n<<<ANCHOR\n{anchor}\nANCHOR>>>\nContinue exactly from after the anchor; do not repeat or reintroduce; no summary."
 
 
 def detect_repetition(text: str, threshold: float = 0.8) -> bool:

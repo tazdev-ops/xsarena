@@ -1,4 +1,4 @@
-"""Session state management for LMASudio."""
+"""Session state management for XSArena."""
 
 import json
 import os
@@ -68,6 +68,14 @@ class SessionState:
                 for m in self.history
             ],
             "anchors": self.anchors,
+            # persist knobs for continuity across runs
+            "coverage_hammer_on": self.coverage_hammer_on,
+            "output_budget_snippet_on": self.output_budget_snippet_on,
+            "output_push_on": self.output_push_on,
+            "output_min_chars": self.output_min_chars,
+            "output_push_max_passes": self.output_push_max_passes,
+            "repetition_ngram": self.repetition_ngram,
+            "repetition_warn": self.repetition_warn,
             "continuation_mode": self.continuation_mode,
             "anchor_length": self.anchor_length,
             "repetition_threshold": self.repetition_threshold,
@@ -103,6 +111,14 @@ class SessionState:
             job_queue=state_dict.get("job_queue", []),
             settings=state_dict.get("settings", {}),
         )
+        # restore knobs
+        state.coverage_hammer_on = state_dict.get("coverage_hammer_on", True)
+        state.output_budget_snippet_on = state_dict.get("output_budget_snippet_on", True)
+        state.output_push_on = state_dict.get("output_push_on", True)
+        state.output_min_chars = state_dict.get("output_min_chars", 4500)
+        state.output_push_max_passes = state_dict.get("output_push_max_passes", 3)
+        state.repetition_ngram = state_dict.get("repetition_ngram", 4)
+        state.repetition_warn = state_dict.get("repetition_warn", True)
 
         # Restore history
         for msg_dict in state_dict.get("history", []):

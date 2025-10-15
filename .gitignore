@@ -81,7 +81,20 @@ directives/
 review/
 scripts/snapshot_py_only.py
 
+# Additional gitignore entries from housekeeping
+xsarena.egg-info/
+docs/_help_*.txt
+snapshot_chunks/
+.xsarena/agent/* logs
+
 # Ignore specific generated docs files
 docs/snapshot_chunks/
 docs/snapshot.txt
 docs/*_chunks/
+xsa_min_snapshot*.txt
+
+# Ephemeral and local artifacts
+snapshot_chunks/
+xsa_min_snapshot*.txt
+review/
+.xsarena/tmp/

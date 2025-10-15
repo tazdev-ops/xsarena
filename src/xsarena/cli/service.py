@@ -22,7 +22,7 @@ def start_bridge(
     cmd = [
         sys.executable,
         "-m",
-        "src.xsarena.bridge.server",
+        "xsarena.bridge.server",
         "--port",
         str(port),
         "--host",
@@ -31,6 +31,7 @@ def start_bridge(
 
     typer.echo(f"Starting bridge server on {host}:{port}")
     typer.echo(f"Command: {' '.join(cmd)}")
+    typer.echo(f"Note: In your browser, set #bridge={port} in the URL to connect to this server")
 
     try:
         subprocess.run(cmd, env=env)
@@ -55,7 +56,7 @@ def start_compat_api(
     cmd = [
         sys.executable,
         "-m",
-        "src.xsarena.bridge.compat_server",
+        "xsarena.bridge.compat_server",
         "--port",
         str(port),
         "--host",

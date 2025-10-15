@@ -1,4 +1,4 @@
-"""Lossless processing modes for LMASudio."""
+"""Lossless processing modes for XSArena."""
 
 from ..core.engine import Engine
 from ..core.templates import SYSTEM_PROMPTS

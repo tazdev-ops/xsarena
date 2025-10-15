@@ -1,73 +1,56 @@
-"""Backend configuration CLI commands for LMASudio."""
+"""Backend configuration CLI commands for XSArena."""
 
 from typing import Optional
 
 import typer
 
-from ..core.backends import create_backend
-from ..core.config import Config
-from ..core.state import SessionState
+from .context import CLIContext
 
 app = typer.Typer()
 
 
 @app.command("set")
 def set_backend(
+    ctx: typer.Context,
     backend_type: str = typer.Argument(..., help="Backend type (bridge or openrouter)"),
     api_key: Optional[str] = typer.Option(None, help="API key for openrouter backend"),
     model: Optional[str] = typer.Option(None, help="Model to use"),
     base_url: Optional[str] = typer.Option(None, help="Base URL for bridge backend"),
 ):
-    """Set backend configuration."""
-    config = Config()
-
-    config.backend = backend_type
+    """Set backend configuration (persistent)."""
+    cli: CLIContext = ctx.obj
+    cli.state.backend = backend_type
+    if model:
+        cli.state.model = model
     if api_key:
-        config.api_key = api_key
-    if model:
-        config.model = model
+        cli.config.api_key = api_key  # not persisted to disk; use env or secrets store
     if base_url:
-        config.base_url = base_url
-
-    # Save to session or config file
-    state = SessionState()
-    state.settings["backend"] = backend_type
-    if model:
-        state.settings["model"] = model
-
-    typer.echo(f"Backend set to: {backend_type}")
-    if model:
-        typer.echo(f"Model set to: {model}")
-    if base_url:
-        typer.echo(f"Base URL set to: {base_url}")
+        cli.config.base_url = base_url
+    cli.rebuild_engine()
+    cli.save()
+    typer.echo(f"Backend: {cli.state.backend}")
+    typer.echo(f"Model: {cli.state.model}")
+    typer.echo(f"Base URL: {cli.config.base_url}")
 
 
 @app.command("show")
-def show_backend():
+def show_backend(ctx: typer.Context):
     """Show current backend configuration."""
-    config = Config()
-
+    cli: CLIContext = ctx.obj
     typer.echo("Current Backend Configuration:")
-    typer.echo(f"  Backend: {config.backend}")
-    typer.echo(f"  Model: {config.model}")
-    typer.echo(f"  Base URL: {config.base_url}")
-    typer.echo(f"  API Key: {'Set' if config.api_key else 'Not set'}")
+    typer.echo(f"  Backend: {cli.state.backend}")
+    typer.echo(f"  Model: {cli.state.model}")
+    typer.echo(f"  Base URL: {cli.config.base_url}")
+    typer.echo(f"  API Key: {'Set' if cli.config.api_key else 'Not set'}")
 
 
 @app.command("test")
-def test_backend():
+def test_backend(ctx: typer.Context):
     """Test the current backend configuration."""
-    config = Config()
-
+    cli: CLIContext = ctx.obj
     try:
-        backend = create_backend(
-            config.backend,
-            base_url=config.base_url,
-            api_key=config.api_key,
-            model=config.model,
-        )
-        typer.echo(f"Backend {config.backend} configured successfully")
-        # In a real implementation, we would test by making a simple API call
+        cli.rebuild_engine()
+        typer.echo(f"Backend {cli.state.backend} configured successfully")
         typer.echo("Backend test: Configuration valid")
     except Exception as e:
         typer.echo(f"Backend test failed: {str(e)}")

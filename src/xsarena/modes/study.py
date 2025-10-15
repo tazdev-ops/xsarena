@@ -1,4 +1,4 @@
-"""Study and learning modes for LMASudio."""
+"""Study and learning modes for XSArena."""
 
 from typing import Any, Dict, List
 

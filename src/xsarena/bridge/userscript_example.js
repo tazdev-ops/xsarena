@@ -1,8 +1,8 @@
 // ==UserScript==
-// @name         LMASudio Bridge Userscript
+// @name         XSArena Bridge Userscript
 // @namespace    http://tampermonkey.net/
 // @version      0.1
-// @description  Bridge to connect LMArena with local LMASudio server
+// @description  Bridge to connect LMArena with local XSArena server
 // @author       You
 // @match        https://lmarena.ai/*
 // @grant        GM_xmlhttpRequest
@@ -27,7 +27,7 @@
         }
     }
     const BASE = resolveBase();
-    console.log("[LMASudioBridge] Using bridge:", BASE);
+    console.log("[XSArenaBridge] Using bridge:", BASE);
 
     // Quick setter in devtools: lmaSetBridgePort(5103)
     window.lmaSetBridgePort = function(p){ localStorage.setItem("lma_bridge_port", String(p)); location.reload(); };
@@ -76,6 +76,6 @@
     }
 
     // Example usage of the bridge
-    // This would connect to the actual LMASudio engine
-    console.log("LMASudio Bridge initialized, connecting to:", BASE);
+    // This would connect to the actual XSArena engine
+    console.log("XSArena Bridge initialized, connecting to:", BASE);
 })();

@@ -1,4 +1,4 @@
-"""Bilingual processing modes for LMASudio."""
+"""Bilingual processing modes for XSArena."""
 
 from typing import Dict
 

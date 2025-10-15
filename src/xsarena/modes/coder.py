@@ -1,4 +1,4 @@
-"""Coder mode for LMASudio."""
+"""Coder mode for XSArena."""
 
 from ..core.engine import Engine
 from ..core.templates import SYSTEM_PROMPTS

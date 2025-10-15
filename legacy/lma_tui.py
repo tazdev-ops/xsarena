@@ -1,9 +1,8 @@
 #!/usr/bin/env python3
-import runpy
 import sys
+import subprocess
 
-print(
-    "Deprecated: LMA TUI moved to legacy/lma_tui.py; prefer `xsarena serve`.",
-    file=sys.stderr,
-)
-sys.exit(runpy.run_path("legacy/lma_tui.py") or 0)
+if __name__ == "__main__":
+    print("Deprecated: use `python xsarena_tui.py` (this wrapper calls xsarena_tui.py).", file=sys.stderr)
+    result = subprocess.run([sys.executable, "xsarena_tui.py"] + sys.argv[1:])
+    sys.exit(result.returncode)

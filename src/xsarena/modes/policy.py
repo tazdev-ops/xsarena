@@ -1,4 +1,4 @@
-"""Policy analysis modes for LMASudio."""
+"""Policy analysis modes for XSArena."""
 
 from typing import List
 

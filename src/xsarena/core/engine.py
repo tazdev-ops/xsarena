@@ -186,8 +186,8 @@ class Engine:
                         user_text = await self.build_anchor_continue_prompt(anch)
                         # Add coverage hammer for self-study runs
                         if (
-                            self.state.session_mode == "zero2hero"
-                            and self.state.coverage_hammer_on
+                            getattr(self.state, "session_mode", None) == "zero2hero"
+                            and getattr(self.state, "coverage_hammer_on", False)
                         ):
                             user_text += "\nDo not conclude or summarize; coverage is not complete. Continue teaching the field and its subfields to the target depth."
                     else:

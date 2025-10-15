@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import asyncio
 import json
 import pathlib
 from typing import Optional
@@ -7,14 +8,6 @@ import typer
 
 from ..core.backends import create_backend
 from ..core.engine import Engine
-from ..core.roleplay import (
-    append_turn,
-    export_markdown,
-    load_session,
-    new_session,
-    redact_boundary_violations,
-    save_session,
-)
 from ..core.state import SessionState
 
 app = typer.Typer(help="Roleplay engine: start, say, boundaries, model, export")
@@ -31,6 +24,13 @@ def _load_personas():
 
 @app.command("list")
 def rp_list_personas():
+    try:
+        from ..core.roleplay import load_session, new_session, save_session
+    except ImportError:
+        typer.echo("Error: core.roleplay module not available. This is an optional extra.", err=True)
+        typer.echo("To enable this feature, install the extras: pip install xsarena[extras]", err=True)
+        raise typer.Exit(1)
+        
     personas = _load_personas()
     for key, val in personas.items():
         print(f"{key}: {val.get('title','')}")
@@ -45,6 +45,20 @@ def rp_start(
     rating: str = typer.Option("sfw", "--rating"),
     safeword: str = typer.Option("PAUSE", "--safeword"),
 ):
+    try:
+        from ..core.roleplay import (
+            append_turn,
+            export_markdown,
+            load_session,
+            new_session,
+            redact_boundary_violations,
+            save_session,
+        )
+    except ImportError:
+        typer.echo("Error: core.roleplay module not available. This is an optional extra.", err=True)
+        typer.echo("To enable this feature, install the extras: pip install xsarena[extras]", err=True)
+        raise typer.Exit(1)
+        
     personas = _load_personas()
     if persona not in personas:
         print("Unknown persona. Use: xsarena rp list")
@@ -74,6 +88,20 @@ def rp_start(
 
 @app.command("say")
 def rp_say(sess_id: str, text: str):
+    try:
+        from ..core.roleplay import (
+            append_turn,
+            export_markdown,
+            load_session,
+            new_session,
+            redact_boundary_violations,
+            save_session,
+        )
+    except ImportError:
+        typer.echo("Error: core.roleplay module not available. This is an optional extra.", err=True)
+        typer.echo("To enable this feature, install the extras: pip install xsarena[extras]", err=True)
+        raise typer.Exit(1)
+        
     s = load_session(sess_id)
     # Safeword check
     if s.boundaries.safeword and s.boundaries.safeword in text:
@@ -105,16 +133,19 @@ def rp_say(sess_id: str, text: str):
         )
         + "\nassistant:"
     )
-    reply = eng.send_and_collect(user, system_prompt=sys)
+    reply = asyncio.run(eng.send_and_collect(user, system_prompt=sys))
     reply = redact_boundary_violations(s.boundaries, reply)
     append_turn(sess_id, "assistant", reply)
     print(reply)
     # Check if we should award an achievement
     current_session = load_session(sess_id)
     if len(current_session.turns) >= 10:
-        from ..core.joy import add_achievement
-
-        add_achievement("RP Explorer")
+        try:
+            from ..core.joy import add_achievement
+            add_achievement("RP Explorer")
+        except ImportError:
+            # Joy module is optional, skip achievement
+            pass
 
 
 @app.command("mem")
@@ -123,6 +154,20 @@ def rp_memory(
     add: Optional[str] = typer.Option(None, "--add"),
     show: bool = typer.Option(False, "--show"),
 ):
+    try:
+        from ..core.roleplay import (
+            append_turn,
+            export_markdown,
+            load_session,
+            new_session,
+            redact_boundary_violations,
+            save_session,
+        )
+    except ImportError:
+        typer.echo("Error: core.roleplay module not available. This is an optional extra.", err=True)
+        typer.echo("To enable this feature, install the extras: pip install xsarena[extras]", err=True)
+        raise typer.Exit(1)
+        
     s = load_session(sess_id)
     if add:
         s.memory.append(add)
@@ -139,6 +184,20 @@ def rp_model(
     backend: Optional[str] = typer.Option(None, "--backend"),
     model: Optional[str] = typer.Option(None, "--model"),
 ):
+    try:
+        from ..core.roleplay import (
+            append_turn,
+            export_markdown,
+            load_session,
+            new_session,
+            redact_boundary_violations,
+            save_session,
+        )
+    except ImportError:
+        typer.echo("Error: core.roleplay module not available. This is an optional extra.", err=True)
+        typer.echo("To enable this feature, install the extras: pip install xsarena[extras]", err=True)
+        raise typer.Exit(1)
+        
     s = load_session(sess_id)
     if backend:
         s.backend = backend
@@ -154,6 +213,20 @@ def rp_bounds(
     rating: Optional[str] = typer.Option(None, "--rating"),
     safeword: Optional[str] = typer.Option(None, "--safeword"),
 ):
+    try:
+        from ..core.roleplay import (
+            append_turn,
+            export_markdown,
+            load_session,
+            new_session,
+            redact_boundary_violations,
+            save_session,
+        )
+    except ImportError:
+        typer.echo("Error: core.roleplay module not available. This is an optional extra.", err=True)
+        typer.echo("To enable this feature, install the extras: pip install xsarena[extras]", err=True)
+        raise typer.Exit(1)
+        
     s = load_session(sess_id)
     if rating:
         s.boundaries.rating = rating
@@ -167,6 +240,20 @@ def rp_bounds(
 
 @app.command("export")
 def rp_export(sess_id: str):
+    try:
+        from ..core.roleplay import (
+            append_turn,
+            export_markdown,
+            load_session,
+            new_session,
+            redact_boundary_violations,
+            save_session,
+        )
+    except ImportError:
+        typer.echo("Error: core.roleplay module not available. This is an optional extra.", err=True)
+        typer.echo("To enable this feature, install the extras: pip install xsarena[extras]", err=True)
+        raise typer.Exit(1)
+        
     p = export_markdown(sess_id)
     if p:
         print(f"Transcript → {p}")
@@ -177,22 +264,24 @@ def rp_export(sess_id: str):
 #!/usr/bin/env python3
 import time
 
-import typer
-
-from ..core.joy import add_achievement, log_event
-
 app = typer.Typer(help="Coach drills and Boss mini-exams")
 
 
 def _ask_q(eng: Engine, subject: str):
     sys = "Generate a single short MCQ with 4 options (A-D) and the correct answer letter at the end on a new line like: ANSWER: C"
-    rep = eng.send_and_collect(f"Subject: {subject}", system_prompt=sys)
+    rep = asyncio.run(eng.send_and_collect(f"Subject: {subject}", system_prompt=sys))
     return rep
 
 
 @app.command("start")
 def coach_start(subject: str, minutes: int = 10):
     """Timed coach drill with immediate feedback."""
+    try:
+        from ..core.joy import add_achievement, log_event
+    except ImportError:
+        # Joy module is optional, skip achievements
+        add_achievement = log_event = lambda *args, **kwargs: None
+    
     eng = Engine(create_backend("openrouter"), SessionState())
     end = time.time() + minutes * 60
     score = 0
@@ -222,6 +311,12 @@ def coach_start(subject: str, minutes: int = 10):
 @app.command("quiz")
 def coach_quiz(subject: str, n: int = 10):
     """A quick N-question MCQ quiz."""
+    try:
+        from ..core.joy import add_achievement, log_event
+    except ImportError:
+        # Joy module is optional, skip achievements
+        add_achievement = log_event = lambda *args, **kwargs: None
+    
     eng = Engine(create_backend("openrouter"), SessionState())
     score = 0
     for i in range(n):
@@ -244,6 +339,12 @@ def coach_quiz(subject: str, n: int = 10):
 @app.command("boss")
 def boss_start(subject: str, n: int = 20, minutes: int = 25):
     """Timed Boss mini-exam; auto-creates a repair prompt."""
+    try:
+        from ..core.joy import add_achievement, log_event
+    except ImportError:
+        # Joy module is optional, skip achievements
+        add_achievement = log_event = lambda *args, **kwargs: None
+    
     eng = Engine(create_backend("openrouter"), SessionState())
     end = time.time() + minutes * 60
     score = 0
@@ -274,9 +375,9 @@ def boss_start(subject: str, n: int = 20, minutes: int = 25):
         pack = "\n\n".join(
             m["q"] + f"\nYOUR:{m['your']}\nCORRECT:{m['correct']}" for m in misses[:8]
         )
-        rep = eng.send_and_collect(
+        rep = asyncio.run(eng.send_and_collect(
             f"Subject: {subject}\nMISSES:\n{pack}", system_prompt=sys
-        )
+        ))
         out = pathlib.Path("books") / f"{subject.lower().replace(' ','-')}.repair.md"
         out.write_text(rep, encoding="utf-8")
         print(f"Repair chapter → {out}")

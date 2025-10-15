@@ -1,10 +1,48 @@
-"""Prompt templates for LMASudio."""
+"""Prompt templates for XSArena."""
+
+# Style overlays
+NARRATIVE_OVERLAY = """PEDAGOGY & NARRATIVE OVERLAY
+- Tone: explanatory narrative with smooth transitions; avoid bullet walls except for checklists/pitfalls.
+- Teach-before-use: on first mention, define every new term in 1 line (term in bold + short parenthetical).
+  If you must preview a later idea, add "Preview: …" as a one-sentence gloss.
+- Section pattern per subtopic:
+  1) Orientation (why it matters; when used)
+  2) Key terms (1-line definitions)
+  3) Concept explained stepwise (no unexplained jumps)
+  4) Short worked example or vignette
+  5) Quick check (2–3 items) to test understanding
+  6) Pitfalls (1–3 precise traps)
+- Paragraphs: ~4–6 sentences. One idea per paragraph. No slash-packed lists; write choices explicitly.
+- Jargon: minimize; always define at first use. Keep terms consistent.
+- Cross-refs: only after definition; otherwise add a 1-sentence inline gloss.
+- Keep mini-drills practical (identify, discriminate, apply).
+"""
+
+COMPRESSED_OVERLAY = """COMPRESSED NARRATIVE OVERLAY
+- Style: compressed narrative prose; minimal headings; no bullet walls.
+- Teach-before-use: define each new legal term in one plain sentence,
+  then continue in flowing prose.
+- Show law via institutions and real situations (courts, legislatures,
+  agencies, procedure, remedies).
+- Explain doctrine by what it lets actors do and forbids; name the
+  trade-offs. No slogans or keyword stuffing.
+- Use generic fact patterns if you can't cite precisely. Educational,
+  not legal advice.
+- If near length limit, stop cleanly and end with: NEXT: [Continue].
+"""
+
+NO_BS_ADDENDUM = """LANGUAGE CONSTRAINTS
+- Plain, direct language; avoid pompous terms and circumlocutions.
+- Prefer short sentences and concrete nouns/verbs.
+- Remove throat‑clearing, meta commentary, and rhetorical filler.
+"""
 
 # Output budget addendum
 OUTPUT_BUDGET_ADDENDUM = """OUTPUT BUDGET
 - Use the full available output window in each response. Do not hold back or end early.
 - If you approach the limit mid-subtopic, stop cleanly (no wrap-up). You will resume exactly where you left off on the next input.
-- Do not jump ahead or skip subtopics to stay concise. Continue teaching until the whole field and subfields reach the target depth."""
+- Do not jump ahead or skip subtopics to stay concise. Continue teaching until the whole field and subfields reach the target depth.
+"""
 
 # System prompts for different modes
 SYSTEM_PROMPTS = {
@@ -14,7 +52,7 @@ Focus on accuracy, clarity, and depth in your writing.""",
     "book.zero2hero": """SUBJECT: {subject}
 
 ROLE
-You are a seasoned practitioner and teacher in [FIELD]. Write a comprehensive, high‑density self‑study manual that takes a serious learner from foundations to a master's‑level grasp and practice.
+You are a seasoned practitioner and teacher in {subject}. Write a comprehensive, high‑density self‑study manual that takes a serious learner from foundations to a master's‑level grasp and practice.
 
 COVERAGE CONTRACT (do not violate)
 - Scope: cover the entire field and its major subfields, theory → methods → applications → pitfalls → practice. Include core debates, default choices (and when to deviate), and limits of claims.

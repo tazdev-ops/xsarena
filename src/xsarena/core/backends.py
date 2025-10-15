@@ -1,10 +1,12 @@
-"""Backend implementations for LMASudio."""
+"""Backend implementations for XSArena."""
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 import aiohttp
+import os
+import asyncio
 
 
 @dataclass
@@ -27,13 +29,15 @@ class Backend(ABC):
 class BridgeBackend(Backend):
     """Backend that communicates with the local bridge server."""
 
-    def __init__(self, base_url: str = "http://localhost:8080/v1"):
-        self.base_url = base_url
+    def __init__(self, base_url: str = "http://localhost:8080/v1", timeout: int = 60):
+        self.base_url = os.getenv("XSA_BRIDGE_URL", base_url)
         self.session_id = None
+        self.timeout = timeout
 
     async def send(self, messages: List[Message], stream: bool = False) -> str:
         """Send messages to the bridge server."""
-        async with aiohttp.ClientSession() as session:
+        timeout = aiohttp.ClientTimeout(total=self.timeout)
+        async with aiohttp.ClientSession(timeout=timeout) as session:
             # First, we need to push the messages to the server
             data = {
                 "messages": [
@@ -44,13 +48,22 @@ class BridgeBackend(Backend):
 
             # Wait for response from the bridge (this would use the polling mechanism)
             # In the actual implementation, this would interact with your CSP-safe polling system
-            async with session.post(
-                f"{self.base_url}/chat/completions", json=data
-            ) as response:
-                result = await response.json()
-                return (
-                    result.get("choices", [{}])[0].get("message", {}).get("content", "")
-                )
+            for attempt in range(2):
+                try:
+                    async with session.post(f"{self.base_url}/chat/completions", json=data) as resp:
+                        if resp.status >= 500 and attempt == 0:
+                            await asyncio.sleep(0.5)
+                            continue
+                        if resp.status != 200:
+                            text = (await resp.text())[:300]
+                            raise RuntimeError(f"Bridge error {resp.status}: {text}")
+                        result = await resp.json()
+                        return result.get("choices", [{}])[0].get("message", {}).get("content", "") or ""
+                except aiohttp.ClientError as e:
+                    if attempt == 0:
+                        await asyncio.sleep(0.5)
+                        continue
+                    raise
 
 
 class OpenRouterBackend(Backend):
@@ -66,6 +79,8 @@ class OpenRouterBackend(Backend):
         headers = {
             "Authorization": f"Bearer {self.api_key}",
             "Content-Type": "application/json",
+            "HTTP-Referer": os.getenv("OPENROUTER_HTTP_REFERER", "https://github.com/xsarena"),
+            "X-Title": os.getenv("OPENROUTER_X_TITLE", "XSArena"),
         }
 
         data = {
@@ -76,11 +91,28 @@ class OpenRouterBackend(Backend):
             "stream": stream,
         }
 
-        async with aiohttp.ClientSession() as session, session.post(
-            f"{self.base_url}/chat/completions", headers=headers, json=data
-        ) as response:
-            result = await response.json()
-            return result.get("choices", [{}])[0].get("message", {}).get("content", "")
+        # Only support stream=False for now
+        if stream:
+            raise ValueError("OpenRouterBackend does not support streaming yet")
+        
+        for attempt in range(2):
+            try:
+                async with aiohttp.ClientSession() as session, session.post(
+                    f"{self.base_url}/chat/completions", headers=headers, json=data
+                ) as response:
+                    if response.status >= 500 and attempt == 0:
+                        await asyncio.sleep(0.5)
+                        continue
+                    if response.status != 200:
+                        text = (await response.text())[:300]
+                        raise RuntimeError(f"OpenRouter error {response.status}: {text}")
+                    result = await response.json()
+                    return result.get("choices", [{}])[0].get("message", {}).get("content", "")
+            except aiohttp.ClientError as e:
+                if attempt == 0:
+                    await asyncio.sleep(0.5)
+                    continue
+                raise
 
     def estimate_cost(self, messages: List[Message]) -> Dict[str, float]:
         """Estimate the token usage and cost."""

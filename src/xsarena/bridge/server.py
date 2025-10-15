@@ -1,4 +1,4 @@
-"""CSP-safe bridge server for LMASudio."""
+"""CSP-safe bridge server for XSArena."""
 
 import argparse
 import asyncio
@@ -96,7 +96,7 @@ async def health_check(request):
 
 def main():
     """Run the bridge server with configurable port."""
-    parser = argparse.ArgumentParser(description="LMASudio Bridge Server")
+    parser = argparse.ArgumentParser(description="XSArena Bridge Server")
     parser.add_argument(
         "--port",
         "-p",
@@ -111,39 +111,30 @@ def main():
     )
     args = parser.parse_args()
 
-    app = web.Application()
-    app.add_routes(routes)
-
-    # Add CORS headers
-    async def cors_handler(request):
-        resp = web.Response()
+    @web.middleware
+    async def cors_middleware(request, handler):
+        if request.method == "OPTIONS":
+            resp = web.Response()
+            resp.headers["Access-Control-Allow-Origin"] = "*"
+            resp.headers["Access-Control-Allow-Methods"] = "POST, GET, OPTIONS"
+            resp.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization"
+            return resp
+        resp = await handler(request)
         resp.headers["Access-Control-Allow-Origin"] = "*"
         resp.headers["Access-Control-Allow-Methods"] = "POST, GET, OPTIONS"
         resp.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization"
         return resp
 
+    app = web.Application(middlewares=[cors_middleware])
+
     @routes.options("/v1/chat/completions")
     @routes.options("/push_response")
     @routes.options("/health")
-    async def options_handler(request):
-        return cors_handler(request)
+    async def options_handler(_request):
+        return web.Response()  # cors_middleware will set headers
 
-    # Add middleware to handle CORS
-    async def cors_middleware(app, handler):
-        async def middleware(request):
-            if request.method == "OPTIONS":
-                return await cors_handler(request)
-            response = await handler(request)
-            response.headers["Access-Control-Allow-Origin"] = "*"
-            response.headers["Access-Control-Allow-Methods"] = "POST, GET, OPTIONS"
-            response.headers["Access-Control-Allow-Headers"] = (
-                "Content-Type, Authorization"
-            )
-            return response
-
-        return middleware
-
-    app.middlewares.append(cors_middleware)
+    # register routes after all route functions (including OPTIONS) are defined
+    app.add_routes(routes)
 
     logging.basicConfig(level=logging.INFO)
 

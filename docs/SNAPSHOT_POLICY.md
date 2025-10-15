@@ -49,3 +49,29 @@ When debugging JobSpec-related issues, ensure your snapshot includes:
 - .xsarena/jobs/<job_id>/job.json (for job configuration)
 - .xsarena/jobs/<job_id>/events.jsonl (for execution events)
 - src/xsarena/core/jobs2.py (for runner implementation)
+
+## Pro Snapshot (Advanced)
+The pro snapshot tool (`tools/snapshot_pro.py`) provides enhanced debugging capabilities:
+
+**Features**:
+- System information (Python version, platform, working directory)
+- Git status and branch information
+- Directory trees and listings for specified paths
+- Code manifest with SHA-256 hashes for all Python files
+- Canonical rules digest (first 200 lines of rules.merged.md)
+- Comprehensive job summaries with events
+- Redacted configuration and session state
+- Recipe and book content samples
+- Review artifacts inclusion
+- Combined snapshot digest for integrity verification
+
+**Usage**:
+```bash
+# Basic usage (creates ~/xsa_snapshot_pro.txt)
+python tools/snapshot_pro.py
+
+# With custom options
+python tools/snapshot_pro.py --out /tmp/snapshot.txt --max-inline 100000
+```
+
+**When to use**: For complex debugging scenarios requiring comprehensive system state, especially when escalating to higher AI systems or for detailed analysis of multi-component issues.

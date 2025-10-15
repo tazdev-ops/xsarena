@@ -1,4 +1,4 @@
-"""File system and command tools for LMASudio."""
+"""File system and command tools for XSArena."""
 
 import asyncio
 from pathlib import Path

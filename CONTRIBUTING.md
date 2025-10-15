@@ -1,6 +1,6 @@
-# Contributing to LMASudio
+# Contributing to XSArena
 
-Thank you for your interest in contributing to LMASudio! This document outlines the process for contributing to this project.
+Thank you for your interest in contributing to XSArena! This document outlines the process for contributing to this project.
 
 ## Development Setup
 

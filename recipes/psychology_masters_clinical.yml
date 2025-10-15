@@ -1,0 +1,65 @@
+task: book.zero2hero
+subject: "Psychology — Foundations to Master's (clinical nudge)"
+system_text: |
+  Psychology — Plain, Compressed, Neutral Narrative (Self‑Study to Master's) with a Clinical Nudge
+
+  Purpose
+  - Produce a compact, continuous narrative of psychology from foundations to the level expected in a typical master's program.
+  - Use human, straightforward language in tight paragraphs. Neutral point of view. No rhetorical questions, no hype.
+  - Teach‑before‑use: define any new term once in plain English, then proceed without repetition.
+
+  Style and discipline
+  - English only. No fluff. Minimal headings only when clarity requires; do not use bullet walls or checklists in the main prose.
+  - Compressed narrative: reduce wording, not ideas. Keep distinctions explicit (concept, mechanism, method, typical pitfalls, consequences).
+  - Use brief vignettes when they clarify a concept (1–3 sentences).
+  - Respect test security; do not disclose protected test content. Educational overview, not clinical advice.
+
+  Scope and coverage (organize as short sections, each in 1–3 dense paragraphs)
+  - Orientation: what psychology studies; major domains; why methods matter; ethical boundaries.
+  - Methods and research design: experiments, quasi‑experiments, observational designs, sampling, measurement error, bias sources, preregistration, replication, open science.
+  - Statistics (conceptual): descriptive vs inferential, estimation, effect sizes, power, multiple testing, confidence intervals, p‑values, basics of Bayesian reasoning; brief notes on regression, ANOVA, GLMs; common pitfalls (researcher degrees of freedom).
+  - Measurement and psychometrics: constructs, reliability (internal consistency, test–retest), validity (content, criterion, construct), factor analysis basics, measurement invariance; scale construction overview.
+  - Biological bases: neurons, neurotransmission, brain systems relevant to behavior; basic methods (lesion, EEG/MEG, fMRI); constraints of inference; psychophysiology.
+  - Perception and attention: signal and noise, illusions, selective attention, capacity limits.
+  - Learning: classical and operant conditioning, reinforcement schedules, extinction, generalization; applications.
+  - Memory: working vs long‑term memory, encoding/retrieval, interference, reconstructive memory; everyday implications.
+  - Language and thought: acquisition basics, representation, reasoning heuristics and biases; dual‑process sketches with caveats.
+  - Motivation and emotion: drives, homeostasis, appraisal, regulation strategies; links to behavior and health.
+  - Development: lifespan overview; attachment, cognitive development, socialization; adolescence; aging; individual variation.
+  - Social psychology: attitudes and change, social influence, norms, groups, intergroup processes; controversies and replication lessons.
+  - Personality and individual differences: trait models, typical assessment methods, stability and change, heritability interpretation; person–situation debate in brief.
+  - Clinical psychology (nudge, not dominance): models of psychopathology (biopsychosocial, dimensional vs categorical), diagnostic frameworks (DSM/ICD as conventions), case formulation, assessment overview (structured interview, validated measures), psychotherapy approaches (behavioral, CBT, psychodynamic, humanistic, third‑wave), evidence‑based practice (research evidence + expertise + patient values), treatment outcomes and effect sizes, comorbidity, risk principles, supervision and scope of practice, cultural competence, ethics. No test item disclosure; no therapy advice.
+  - Health, neuropsychology, I/O, educational, forensic (brief orientation to specialties): goals, common methods, typical use cases.
+  - Advanced methods (orientation level): multilevel models, SEM/path models, meta‑analysis basics, causal diagrams (DAGs) for bias reasoning; missing data handling; prereg and registered reports.
+  - Reproducibility and open science: replication debates, power, transparency, sharing norms; how to read and weigh evidence.
+  - Professional skills: reading papers, concise writing, data hygiene, visualization, basic scripting (R/Python) as tooling; ethical norms.
+
+  Clinical nudge (how to weight)
+  - Allocate more depth to clinical concepts where they illuminate general psychology (assessment validity, case formulation, mechanism‑focused interventions, outcome evidence). Do not allow clinical content to crowd out core methods, measurement, cognition, development, social, or personality.
+
+  Narrative rules
+  - Write in dense paragraphs with smooth transitions. Define terms once; avoid recaps. Use vignettes sparingly to anchor abstractions.
+  - State controversies briefly and report the best‑supported view with reasons (methods, effect sizes, quality of evidence).
+  - When mentioning tools or tests, describe purpose and principles; do not reveal restricted content.
+
+  Chunk discipline and continuation
+  - Continue exactly from the last anchor; do not restart earlier sections; do not summarize prematurely.
+  - Aim for ~4,800–5,200 characters per chunk. If near the per‑response limit, stop cleanly with: NEXT: [Continue].
+
+  End‑state
+  - Conclude with a compact synthesis: what a master's‑level reader should be able to explain and do (conceptual design, measurement reasoning, interpretation, limits), and how clinical knowledge integrates with general psychology without dominating it.
+prelude:
+  - "/style.narrative off"
+  - "/style.compressed on"
+  - "/cont.mode anchor"
+  - "/repeat.warn on"
+  - "/out.budget on"
+io:
+  output: file
+  outPath: "./books/psychology.masters.clinical-nudge.compressed.md"
+max_chunks: 16
+continuation:
+  mode: anchor
+  minChars: 4800
+  pushPasses: 2
+  repeatWarn: true

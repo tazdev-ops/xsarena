@@ -1,13 +1,12 @@
-
- Usage: xsarena snapshot [OPTIONS] COMMAND [ARGS]...
-
- Snapshot utilities (create, diff, share)
-
+                                                                                
+ Usage: xsarena snapshot [OPTIONS] COMMAND [ARGS]...                            
+                                                                                
+ Snapshot tools with chunking and redaction                                     
+                                                                                
 ╭─ Options ────────────────────────────────────────────────────────────────────╮
 │ --help          Show this message and exit.                                  │
 ╰──────────────────────────────────────────────────────────────────────────────╯
 ╭─ Commands ───────────────────────────────────────────────────────────────────╮
-│ run     Create a project snapshot with enhanced features.                    │
-│ diff    Create a diff between two snapshot files.                            │
-│ share   Share a snapshot via paste service (placeholder implementation).     │
+│ write   Write a single-file minimal snapshot to $HOME or a provided path.    │
 ╰──────────────────────────────────────────────────────────────────────────────╯
+

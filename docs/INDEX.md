@@ -4,6 +4,7 @@
 - [README.md](../README.md) - Canonical user manual (exhaustive)
 - [CLI_AGENT_RULES.md](../CLI_AGENT_RULES.md) - Complete operating rules and appendices
 - [ARCHITECTURE.md](ARCHITECTURE.md) - System architecture and components overview
+- [PROJECT_MAP.md](PROJECT_MAP.md) - Project structure and component overview
 
 ## Quick Reference
 - [docs/SHORTCUTS.md](SHORTCUTS.md) - Agent shortcuts and modes

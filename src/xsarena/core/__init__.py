@@ -1,1 +1,1 @@
-"""Core modules for LMASudio."""
+"""Core modules for XSArena."""

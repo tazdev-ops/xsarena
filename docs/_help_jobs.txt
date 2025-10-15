@@ -1,24 +1,19 @@
-
- Usage: xsarena jobs [OPTIONS] COMMAND [ARGS]...
-
- Job management commands
-
+                                                                                
+ Usage: xsarena jobs [OPTIONS] COMMAND [ARGS]...                                
+                                                                                
+ Job execution (recipes, book generation)                                       
+                                                                                
 ╭─ Options ────────────────────────────────────────────────────────────────────╮
 │ --help          Show this message and exit.                                  │
 ╰──────────────────────────────────────────────────────────────────────────────╯
 ╭─ Commands ───────────────────────────────────────────────────────────────────╮
-│ z2h        Zero-to-Hero command - generates comprehensive content on a topic │
-│ run        Run a job that has been submitted                                 │
-│ z2h-list   Process multiple subjects in a list                               │
-│ ls         List all jobs                                                     │
-│ log        Show job log events                                               │
+│ run       Run a job from recipe file (book generation, zero2hero, etc.).     │
+│ ls                                                                           │
+│ log                                                                          │
+│ summary                                                                      │
 │ resume                                                                       │
-│ cancel     Cancel a job                                                      │
+│ cancel                                                                       │
 │ fork                                                                         │
-│ open       Open the job's artifacts folder                                   │
-│ summary    Show job summary with chunks, stalls, retries, failovers, total   │
-│            tokens/cost, elapsed time                                         │
-│ budget                                                                       │
-│ pause                                                                        │
 │ watch                                                                        │
 ╰──────────────────────────────────────────────────────────────────────────────╯
+

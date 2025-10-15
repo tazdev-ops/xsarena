@@ -4664,4 +4664,5 @@ async def repl():
 
 
 # ---------------- App bootstrap ----------------
-def start_interactive():\n    main()
+def start_interactive():
+    main()
