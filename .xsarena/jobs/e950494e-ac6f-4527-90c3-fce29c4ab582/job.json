@@ -1,0 +1,41 @@
+{
+  "id": "e950494e-ac6f-4527-90c3-fce29c4ab582",
+  "name": "Fast run: Anchors & NEXT Smoke",
+  "playbook": {
+    "name": "Fast run: Anchors & NEXT Smoke",
+    "task": "book.zero2hero",
+    "subject": "Anchors & NEXT Smoke",
+    "system_text": "Goal: pedagogical manual from foundations to practice with steady depth; no early wrap-ups.\nLANGUAGE CONSTRAINTS\n- Plain, direct language; avoid pompous terms and circumlocutions.\n- Prefer short sentences and concrete nouns/verbs.\n- Remove throat\u2011clearing, meta commentary, and rhetorical filler.\nCOMPRESSED NARRATIVE OVERLAY\n- Style: compressed narrative prose; minimal headings; no bullet walls.\n- Teach-before-use: define each new legal term in one plain sentence,\n  then continue in flowing prose.\n- Show law via institutions and real situations (courts, legislatures,\n  agencies, procedure, remedies).\n- Explain doctrine by what it lets actors do and forbids; name the\n  trade-offs. No slogans or keyword stuffing.\n- Use generic fact patterns if you can't cite precisely. Educational,\n  not legal advice.\n- If near length limit, stop cleanly and end with: NEXT: [Continue].\nContinuation: continue exactly from anchor; do not restart sections; do not summarize prematurely. If nearing length limit, stop cleanly with: NEXT: [Continue].",
+    "max_chunks": 2,
+    "continuation": {
+      "mode": "anchor",
+      "minChars": 1200,
+      "pushPasses": 1,
+      "repeatWarn": true
+    },
+    "io": {
+      "output": "file",
+      "outPath": "./books/finals/anchors-next-smoke.final.md"
+    }
+  },
+  "params": {
+    "max_chunks": 2,
+    "continuation": {
+      "mode": "anchor",
+      "minChars": 1200,
+      "pushPasses": 1,
+      "repeatWarn": true
+    },
+    "io": {
+      "output": "file",
+      "outPath": "./books/finals/anchors-next-smoke.final.md"
+    }
+  },
+  "backend": "bridge",
+  "state": "FAILED",
+  "retries": 0,
+  "created_at": "2025-10-16T02:04:01.729354",
+  "updated_at": "2025-10-16T02:04:02",
+  "artifacts": {},
+  "meta": {}
+}

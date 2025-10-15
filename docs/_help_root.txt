@@ -38,7 +38,11 @@
 │ macros        Macro registry                                                 │
 │ playground    Prompt composition and sampling                                │
 │ doctor        Health checks and smoke tests                                  │
+│ people        Roleplay engine: start, say, boundaries, model, export         │
+│ tools         Fun explainers, personas, and toggles                          │
 │ pipeline      Pipeline runner (fix → test → format → commit)                 │
+│ coach         Coaching drills and boss exams                                 │
+│ joy           Daily activities, streaks, and achievements                    │
 │ continue      Continue from file tail (anchor)                               │
 │ fix           Self-heal configuration/state                                  │
 │ config        Configuration management                                       │
