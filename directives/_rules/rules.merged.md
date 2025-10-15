@@ -1,5 +1,5 @@
 
-
+<!-- Internal operator material; not required for normal users -->
 <!-- ===== BEGIN: directives/_rules/sources/CLI_AGENT_RULES.md ===== -->
 
 # CLI Agent Rules & Guidelines for XSArena Project

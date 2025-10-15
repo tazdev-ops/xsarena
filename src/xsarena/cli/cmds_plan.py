@@ -8,35 +8,9 @@ import yaml
 from .context import CLIContext
 from ..core.prompt import compose_prompt
 from ..core.jobs2_runner import JobRunner
+from ..core.specs import LENGTH_PRESETS, SPAN_PRESETS, DEFAULT_PROFILES
 
 app = typer.Typer(help="Plan from rough seeds in your editor, then run a long, dense book.")
-
-# Descriptive presets (no numbers shown to user)
-LENGTH_PRESETS = {
-    "standard": {"min": 4200, "passes": 1},
-    "long": {"min": 5800, "passes": 3},
-    "very-long": {"min": 6200, "passes": 4},
-    "max": {"min": 6800, "passes": 5},
-}
-SPAN_PRESETS = {"medium": 12, "long": 24, "book": 40}
-
-PROFILES = {
-    "clinical-masters": {
-        "overlays": ["narrative", "no_bs"],
-        "extra": ("Clinical focus: teach‑before‑use; define clinical terms in plain English; "
-                  "cover models of psychopathology, assessment validity, case formulation, mechanisms, "
-                  "evidence‑based practice (evidence + expertise + patient values), outcomes/effect sizes; "
-                  "neutral narrative; avoid slogans/keywords; do not disclose protected test items.")
-    },
-    "elections-focus": {
-        "overlays": ["narrative", "no_bs"],
-        "extra": ("Focus: treat elections as hinge points to explain coalitions, party systems, and institutional change; "
-                  "avoid seat lists unless they explain mechanism; dense narrative; no bullet walls.")
-    },
-    "compressed-handbook": {"overlays": ["compressed", "no_bs"], "extra": "Compressed narrative handbook; minimal headings; no bullet walls; no slogans."},
-    "pop-explainer": {"overlays": ["no_bs"], "extra": "Accessible narrative explainer for general audiences; neutral tone; no hype."},
-    "bilingual-pairs": {"overlays": ["narrative", "no_bs", "bilingual"], "extra": "Output sections as EN/FA pairs with identical structure; translate labels only."},
-}
 
 _PLANNER_PROMPT = """You are an editorial planner for a long-form self-study manual.
 The user will provide rough seeds (topics/notes). Your job:
@@ -108,7 +82,7 @@ def plan_start(
     overlays = ["narrative", "no_bs"]  # default: narrative (not compressed)
     extra_note = ""
     if profile:
-        spec = PROFILES.get(profile)
+        spec = DEFAULT_PROFILES.get(profile)
         if not spec:
             typer.echo(f"Unknown profile: {profile}")
             raise typer.Exit(2)

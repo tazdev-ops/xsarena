@@ -11,10 +11,27 @@ app = typer.Typer()
 
 @app.command("start-bridge")
 def start_bridge(
-    port: int = typer.Option(8080, "--port", "-p", help="Port for the bridge server"),
+    port: int = typer.Option(5102, "--port", "-p", help="Port for the bridge server"),
     host: str = typer.Option("127.0.0.1", "--host", help="Host for the bridge server"),
 ):
-    """Start the bridge server on a specific port."""
+    """Start the bridge server on a specific port (defaults to v2)."""
+    typer.echo("⚠️  DEPRECATION WARNING: Use 'xsarena service start-bridge-v2' instead.")
+    env = os.environ.copy()
+    cmd = [sys.executable, "-m", "xsarena.bridge_v2.api_server"]
+    typer.echo(f"Starting bridge v2 server on {host}:{port} (redirected from legacy command)")
+    env["PORT"] = str(port)
+    try:
+        subprocess.run(cmd, env=env)
+    except KeyboardInterrupt:
+        typer.echo("\nBridge v2 server stopped")
+
+
+@app.command("start-bridge-v1")
+def start_bridge_v1(
+    port: int = typer.Option(8080, "--port", "-p", help="Port for the legacy bridge server"),
+    host: str = typer.Option("127.0.0.1", "--host", help="Host for the bridge server"),
+):
+    """Start the legacy bridge server on a specific port."""
     env = os.environ.copy()
     env["XSA_PORT"] = str(port)
     env["XSA_HOST"] = host
@@ -29,14 +46,14 @@ def start_bridge(
         host,
     ]
 
-    typer.echo(f"Starting bridge server on {host}:{port}")
+    typer.echo(f"Starting legacy bridge server on {host}:{port}")
     typer.echo(f"Command: {' '.join(cmd)}")
     typer.echo(f"Note: In your browser, set #bridge={port} in the URL to connect to this server")
 
     try:
         subprocess.run(cmd, env=env)
     except KeyboardInterrupt:
-        typer.echo("\nBridge server stopped")
+        typer.echo("\nLegacy bridge server stopped")
 
 
 @app.command("start-compat-api")

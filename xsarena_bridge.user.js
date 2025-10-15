@@ -1,5 +1,5 @@
 // ==UserScript==
-// @name         Minimal LMArena Bridge (CSP-safe polling, no fetch override)
+// @name         XSArena Bridge (CSP-safe polling, no fetch override)
 // @namespace    http://tampermonkey.net/
 // @version      0.4
 // @description  Poll local CLI via GM_xmlhttpRequest, capture IDs via PerformanceObserver, stream chunks back.

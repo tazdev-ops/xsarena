@@ -5,6 +5,8 @@ app = typer.Typer(help="Interactive REPL (modular)")
 
 @app.command("start")
 def start():
-    """Start the modular interactive REPL."""
-    typer.echo("ERROR: The modular REPL is not fully implemented and cannot be started.")
-    typer.echo("A required 'state' object is missing from the function call specified in the original order.")
+    """Start the interactive REPL."""
+    typer.echo("ℹ️  Interactive REPL is deprecated. Use 'xsarena run book' for canonical runs.")
+    typer.echo("For project management, use 'xsarena project ...' commands.")
+    typer.echo("For continued writing, use 'xsarena continue start ...'.")
+    typer.echo("See documentation for the recommended workflow.")

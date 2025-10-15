@@ -144,7 +144,10 @@ def create_backend(backend_type: str, **kwargs) -> Backend:
             base_url=kwargs.get("base_url", "http://127.0.0.1:5102/v1")
         )
     elif backend_type in ("lmarena", "lmarena-ws"):
-        # Use your WS bridge’s OpenAI-compatible API
+        # DEPRECATED: Use 'bridge' instead
+        import warnings
+        warnings.warn(f"Backend type '{backend_type}' is deprecated. Use 'bridge' instead.", DeprecationWarning)
+        # Use your WS bridge's OpenAI-compatible API
         return BridgeBackend(
             base_url=kwargs.get("base_url", "http://127.0.0.1:5102/v1")
         )

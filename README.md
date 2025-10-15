@@ -1,4 +1,21 @@
-# XSArena — AI Writing, Study, and CLI Studio
+# XSArena
+
+## Mission
+XSArena is a human writer workflow tool that bridges to LMArena for long-form content creation. It focuses on providing a structured approach to writing books, manuals, and other long-form content with AI assistance.
+
+## Quick Start
+
+1. Install the userscript (`xsarena_bridge.user.js`) and open LMArena in your browser
+2. Start the bridge server: `xsarena service start-bridge-v2` (port 5102)
+3. Run a book: `xsarena run book "Your Topic" --length standard --span medium`
+4. For browser connection, set `#bridge=5102` in the URL (or use the default port 5102)
+
+> Note: For legacy bridge v1 users, you can still run `xsarena service start-bridge-v1` (port 8080).
+
+## Canonical Workflow
+- Use `xsarena run book` as the single canonical path for all book generation
+- For continued writing from existing files, use `xsarena continue start <file>`
+- For project management, use `xsarena project ...` commands — AI Writing, Study, and CLI Studio
 
 Bridge‑first, long‑form authoring with strict continuation and dense, readable chunks. Use it to generate books, outlines, pedagogy rewrites, flashcards, and structured analysis.
 

@@ -17,8 +17,7 @@ def joy_daily(subject: str):
     try:
         from ..core.joy import add_achievement, bump_streak, get_state, log_event, sparkline
     except ImportError:
-        typer.echo("Error: core.joy module not available. This is an optional extra.", err=True)
-        typer.echo("To enable this feature, install the extras: pip install xsarena[extras]", err=True)
+        typer.echo("Feature not included in this build. See documentation for installation instructions.", err=True)
         raise typer.Exit(1)
         
     eng = Engine(create_backend("openrouter"), SessionState())
@@ -39,8 +38,7 @@ def joy_streak():
     try:
         from ..core.joy import get_state, sparkline
     except ImportError:
-        typer.echo("Error: core.joy module not available. This is an optional extra.", err=True)
-        typer.echo("To enable this feature, install the extras: pip install xsarena[extras]", err=True)
+        typer.echo("Feature not included in this build. See documentation for installation instructions.", err=True)
         raise typer.Exit(1)
         
     s = get_state()
@@ -54,8 +52,7 @@ def joy_achievements():
     try:
         from ..core.joy import get_state
     except ImportError:
-        typer.echo("Error: core.joy module not available. This is an optional extra.", err=True)
-        typer.echo("To enable this feature, install the extras: pip install xsarena[extras]", err=True)
+        typer.echo("Feature not included in this build. See documentation for installation instructions.", err=True)
         raise typer.Exit(1)
         
     s = get_state()

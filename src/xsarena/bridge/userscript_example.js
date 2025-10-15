@@ -1,5 +1,5 @@
 // ==UserScript==
-// @name         LMArena API Bridge
+// @name         XSArena API Bridge
 // @namespace    http://tampermonkey.net/
 // @version      2.5
 // @description  Bridges LMArena to a local API server via WebSocket.

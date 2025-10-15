@@ -1,6 +1,8 @@
 from __future__ import annotations
 from pathlib import Path
 from typing import Optional
+import os
+import yaml
 
 import typer
 
@@ -30,6 +32,9 @@ def fast_start(
     passes: int = typer.Option(1, "--passes", help="Auto-extend passes per chunk (0..3)"),
     backend: str = typer.Option("bridge", "--backend", "-B", help="Backend to use (bridge or openrouter)"),
 ):
+    """DEPRECATED: Use 'xsarena run book' instead."""
+    typer.echo("⚠️  DEPRECATED: Use 'xsarena run book' instead.")
+    
     base = base.lower()
     overlays = []
     if no_bs: overlays.append("no_bs")
@@ -56,12 +61,11 @@ def fast_start(
     # write recipe for audit
     recipes = Path("recipes"); recipes.mkdir(exist_ok=True)
     rp = recipes / f"fast_{_slugify(subject)}.yml"
-    import yaml
     with open(rp, "w", encoding="utf-8") as f:
         yaml.safe_dump(rec, f, sort_keys=False, allow_unicode=True)
     typer.echo(f"[fast] Recipe saved → {rp}")
 
-    # run
+    # run using the canonical run path
     import os
     os.environ["XSA_BACKEND"] = backend
     runner = JobRunner({})

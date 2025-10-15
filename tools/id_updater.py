@@ -6,11 +6,38 @@ import re
 import threading
 import os
 import requests
+import yaml
+from pathlib import Path
 
 HOST, PORT = "127.0.0.1", 5103
 CONFIG_PATH = 'config.jsonc'
 
 def update_config_value(key, value):
+    # First, try to update .xsarena/config.yml
+    yaml_config_path = Path(".xsarena/config.yml")
+    if yaml_config_path.exists():
+        try:
+            with open(yaml_config_path, 'r', encoding='utf-8') as f:
+                yaml_config = yaml.safe_load(f) or {}
+            
+            # Ensure bridge section exists
+            if "bridge" not in yaml_config:
+                yaml_config["bridge"] = {}
+            
+            # Update the value
+            yaml_config["bridge"][key] = value
+            
+            # Write back to YAML config
+            yaml_config_path.parent.mkdir(parents=True, exist_ok=True)
+            with open(yaml_config_path, 'w', encoding='utf-8') as f:
+                yaml.safe_dump(yaml_config, f, default_flow_style=False)
+            
+            print(f"✅ Updated {key} in {yaml_config_path}")
+        except Exception as e:
+            print(f"❌ Error updating '{yaml_config_path}': {e}")
+            return False
+    
+    # Then, update the original config.jsonc as fallback
     try:
         with open(CONFIG_PATH, 'r', encoding='utf-8') as f:
             content = f.read()

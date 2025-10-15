@@ -2,6 +2,7 @@
 
 import typer
 from pathlib import Path
+import yaml
 
 from .context import CLIContext
 from ..core.config import Config
@@ -26,6 +27,17 @@ def config_show():
     typer.echo(f"  Timeout: {cli.config.timeout}")
     typer.echo(f"  Redaction Enabled: {cli.config.redaction_enabled}")
     typer.echo(f"  API Key: {'Set' if cli.config.api_key else 'Not set (use environment variable)'}")
+    
+    # Show bridge-specific config if available
+    config_path = Path(".xsarena/config.yml")
+    if config_path.exists():
+        with open(config_path, 'r') as f:
+            yaml_config = yaml.safe_load(f) or {}
+        bridge_config = yaml_config.get("bridge", {})
+        if bridge_config:
+            typer.echo("  Bridge Configuration:")
+            typer.echo(f"    Session ID: {bridge_config.get('session_id', 'Not set')}")
+            typer.echo(f"    Message ID: {bridge_config.get('message_id', 'Not set')}")
 
 
 @app.command("set")
@@ -39,6 +51,8 @@ def config_set(
     repetition_threshold: float = typer.Option(None, "--repetition-threshold", help="Set repetition threshold"),
     timeout: int = typer.Option(None, "--timeout", help="Set request timeout"),
     redaction_enabled: bool = typer.Option(None, "--redaction/--no-redaction", help="Enable or disable redaction"),
+    bridge_session: str = typer.Option(None, "--bridge-session", help="Set bridge session ID"),
+    bridge_message: str = typer.Option(None, "--bridge-message", help="Set bridge message ID"),
 ):
     """Set configuration values."""
     from .context import CLIContext
@@ -79,6 +93,31 @@ def config_set(
     config_path = Path(".xsarena/config.yml")
     config_path.parent.mkdir(parents=True, exist_ok=True)
     cli.config.save_to_file(str(config_path))
+    
+    # Handle bridge-specific settings (stored in bridge section of YAML)
+    if bridge_session or bridge_message:
+        # Load existing config YAML
+        if config_path.exists():
+            with open(config_path, 'r') as f:
+                yaml_config = yaml.safe_load(f) or {}
+        else:
+            yaml_config = {}
+        
+        # Ensure bridge section exists
+        if "bridge" not in yaml_config:
+            yaml_config["bridge"] = {}
+        
+        # Update bridge IDs if provided
+        if bridge_session:
+            yaml_config["bridge"]["session_id"] = bridge_session
+        if bridge_message:
+            yaml_config["bridge"]["message_id"] = bridge_message
+        
+        # Write back to YAML
+        with open(config_path, 'w') as f:
+            yaml.safe_dump(yaml_config, f, default_flow_style=False)
+        
+        typer.echo(f"Bridge IDs updated in {config_path}")
     
     # Save the state as well
     cli.save()

@@ -27,8 +27,7 @@ def rp_list_personas():
     try:
         from ..core.roleplay import load_session, new_session, save_session
     except ImportError:
-        typer.echo("Error: core.roleplay module not available. This is an optional extra.", err=True)
-        typer.echo("To enable this feature, install the extras: pip install xsarena[extras]", err=True)
+        typer.echo("Feature not included in this build. See documentation for installation instructions.", err=True)
         raise typer.Exit(1)
         
     personas = _load_personas()
@@ -55,8 +54,7 @@ def rp_start(
             save_session,
         )
     except ImportError:
-        typer.echo("Error: core.roleplay module not available. This is an optional extra.", err=True)
-        typer.echo("To enable this feature, install the extras: pip install xsarena[extras]", err=True)
+        typer.echo("Feature not included in this build. See documentation for installation instructions.", err=True)
         raise typer.Exit(1)
         
     personas = _load_personas()
@@ -98,8 +96,7 @@ def rp_say(sess_id: str, text: str):
             save_session,
         )
     except ImportError:
-        typer.echo("Error: core.roleplay module not available. This is an optional extra.", err=True)
-        typer.echo("To enable this feature, install the extras: pip install xsarena[extras]", err=True)
+        typer.echo("Feature not included in this build. See documentation for installation instructions.", err=True)
         raise typer.Exit(1)
         
     s = load_session(sess_id)
@@ -164,8 +161,7 @@ def rp_memory(
             save_session,
         )
     except ImportError:
-        typer.echo("Error: core.roleplay module not available. This is an optional extra.", err=True)
-        typer.echo("To enable this feature, install the extras: pip install xsarena[extras]", err=True)
+        typer.echo("Feature not included in this build. See documentation for installation instructions.", err=True)
         raise typer.Exit(1)
         
     s = load_session(sess_id)
@@ -194,8 +190,7 @@ def rp_model(
             save_session,
         )
     except ImportError:
-        typer.echo("Error: core.roleplay module not available. This is an optional extra.", err=True)
-        typer.echo("To enable this feature, install the extras: pip install xsarena[extras]", err=True)
+        typer.echo("Feature not included in this build. See documentation for installation instructions.", err=True)
         raise typer.Exit(1)
         
     s = load_session(sess_id)
@@ -223,8 +218,7 @@ def rp_bounds(
             save_session,
         )
     except ImportError:
-        typer.echo("Error: core.roleplay module not available. This is an optional extra.", err=True)
-        typer.echo("To enable this feature, install the extras: pip install xsarena[extras]", err=True)
+        typer.echo("Feature not included in this build. See documentation for installation instructions.", err=True)
         raise typer.Exit(1)
         
     s = load_session(sess_id)
@@ -250,8 +244,7 @@ def rp_export(sess_id: str):
             save_session,
         )
     except ImportError:
-        typer.echo("Error: core.roleplay module not available. This is an optional extra.", err=True)
-        typer.echo("To enable this feature, install the extras: pip install xsarena[extras]", err=True)
+        typer.echo("Feature not included in this build. See documentation for installation instructions.", err=True)
         raise typer.Exit(1)
         
     p = export_markdown(sess_id)

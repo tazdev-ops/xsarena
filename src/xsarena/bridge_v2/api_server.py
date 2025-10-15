@@ -33,12 +33,25 @@ def _parse_jsonc(jsonc_string: str) -> dict:
 
 def load_config():
     global CONFIG
+    # Try .xsarena/config.yml first, then fall back to JSONC files
     try:
-        with open('config.jsonc', 'r', encoding='utf-8') as f:
-            CONFIG = _parse_jsonc(f.read())
-        logger.info("Successfully loaded configuration from 'config.jsonc'.")
+        import yaml
+        from pathlib import Path
+        
+        yaml_config_path = Path(".xsarena/config.yml")
+        if yaml_config_path.exists():
+            with open(yaml_config_path, 'r', encoding='utf-8') as f:
+                yaml_config = yaml.safe_load(f) or {}
+            # Extract bridge config if present
+            CONFIG = yaml_config.get("bridge", {})
+            logger.info(f"Successfully loaded configuration from '{yaml_config_path}'.")
+        else:
+            # Fallback to original JSONC loading
+            with open('config.jsonc', 'r', encoding='utf-8') as f:
+                CONFIG = _parse_jsonc(f.read())
+            logger.info("Successfully loaded configuration from 'config.jsonc'.")
     except Exception as e:
-        logger.error(f"Failed to load 'config.jsonc': {e}. Using default config.")
+        logger.error(f"Failed to load configuration: {e}. Using default config.")
         CONFIG = {}
 
 def load_model_map():
