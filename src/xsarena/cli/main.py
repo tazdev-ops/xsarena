@@ -1,52 +1,49 @@
 from .cmds_upgrade import app as upgrade_app
+
 """Main CLI entry point for XSArena."""
 
-import asyncio
 import typer
 
-from .cmds_backend import app as backend_app
-from .context import CLIContext
 from ..core.config import Config
+from .cmds_adapt import app as adapt_app
+from .cmds_audio import app as audio_app
+from .cmds_backend import app as backend_app
 
 # Import mode handlers
 from .cmds_book import app as book_app
-from .cmds_coder import app as coder_app
-from .cmds_debug import app as debug_app
-from .cmds_lossless import app as lossless_app
-from .cmds_modes import app as modes_app
-from .cmds_mixer import app as mix_app
-from .cmds_fast import app as fast_app
-from .cmds_jobs import app as jobs_app
-from .cmds_preview import app as preview_app
-from .cmds_publish import app as publish_app
-from .cmds_audio import app as audio_app
-from .cmds_snapshot import app as snapshot_app
-from .cmds_metrics import app as metrics_app
-from .cmds_pipeline import app as pipeline_app
+from .cmds_boot import app as boot_app
+from .cmds_checklist import app as checklist_app
+from .cmds_clean import app as clean_app
 
 # Import additional command groups
 from .cmds_coach import app as coach_app
-from .cmds_joy import app as joy_app
-from .cmds_people import app as people_app
-from .cmds_tools import app as tools_app
-
+from .cmds_coder import app as coder_app
 from .cmds_config import app as config_app
 from .cmds_continue import app as continue_app
-from .cmds_fix import app as fix_app
-from .cmds_clean import app as clean_app
-from .cmds_plan import app as plan_app
-from .cmds_quick import app as quick_app
-from .cmds_run import app as run_app
-from .cmds_report import app as report_app
-from .cmds_macros import app as macros_app
-from .cmds_playground import app as playground_app
+from .cmds_debug import app as debug_app
 from .cmds_doctor import app as doctor_app
-from .cmds_adapt import app as adapt_app
-from .cmds_boot import app as boot_app
-from .cmds_checklist import app as checklist_app
-from .cmds_interactive import app as interactive_app
+from .cmds_fast import app as fast_app
+from .cmds_fix import app as fix_app
+from .cmds_jobs import app as jobs_app
+from .cmds_joy import app as joy_app
+from .cmds_lossless import app as lossless_app
+from .cmds_macros import app as macros_app
+from .cmds_metrics import app as metrics_app
+from .cmds_mixer import app as mix_app
+from .cmds_modes import app as modes_app
+from .cmds_people import app as people_app
+from .cmds_pipeline import app as pipeline_app
+from .cmds_plan import app as plan_app
+from .cmds_playground import app as playground_app
+from .cmds_preview import app as preview_app
+from .cmds_publish import app as publish_app
+from .cmds_quick import app as quick_app
+from .cmds_report import app as report_app
+from .cmds_run import app as run_app
+from .cmds_snapshot import app as snapshot_app
+from .cmds_tools import app as tools_app
+from .context import CLIContext
 from .service import app as service_app
-from .interactive.repl import repl as _interactive_repl
 
 app = typer.Typer(help="XSArena — AI-powered writing and coding studio")
 
@@ -55,22 +52,36 @@ app.add_typer(book_app, name="book", help="Book authoring commands")
 app.add_typer(lossless_app, name="lossless", help="Lossless text processing commands")
 app.add_typer(backend_app, name="backend", help="Backend configuration commands")
 app.add_typer(debug_app, name="debug", help="Debugging commands")
-app.add_typer(coder_app, name="coder", help="Advanced coding session with tickets, patches, and git integration")
+app.add_typer(
+    coder_app,
+    name="coder",
+    help="Advanced coding session with tickets, patches, and git integration",
+)
 app.add_typer(modes_app, name="mode", help="Mode toggles and settings")
 app.add_typer(mix_app, name="mix", help="Mode mixer with prompt preview/edit")
-app.add_typer(fast_app, name="fast", help="Fast headless mode with standardized parameters")
+app.add_typer(
+    fast_app, name="fast", help="Fast headless mode with standardized parameters"
+)
 app.add_typer(jobs_app, name="jobs", help="Job execution (recipes, book generation)")
-app.add_typer(preview_app, name="preview", help="Preview prompt + style sample for recipes")
+app.add_typer(
+    preview_app, name="preview", help="Preview prompt + style sample for recipes"
+)
 app.add_typer(publish_app, name="publish", help="Publishing tools (PDF, EPUB, web)")
 app.add_typer(audio_app, name="audio", help="Audio generation (TTS, podcasts)")
-app.add_typer(snapshot_app, name="snapshot", help="Snapshot tools with chunking and redaction")
+app.add_typer(
+    snapshot_app, name="snapshot", help="Snapshot tools with chunking and redaction"
+)
 app.add_typer(metrics_app, name="metrics", help="Metrics and observability")
 app.add_typer(service_app, name="service", help="Service management (start servers)")
 app.add_typer(upgrade_app, name="upgrade", help="Version-aware upgrader")
 app.add_typer(macros_app, name="macros", help="Macro registry")
 app.add_typer(playground_app, name="playground", help="Prompt composition and sampling")
 app.add_typer(doctor_app, name="doctor", help="Health checks and smoke tests")
-app.add_typer(people_app, name="people", help="Roleplay engine: start, say, boundaries, model, export")
+app.add_typer(
+    people_app,
+    name="people",
+    help="Roleplay engine: start, say, boundaries, model, export",
+)
 app.add_typer(tools_app, name="tools", help="Fun explainers, personas, and toggles")
 app.add_typer(
     pipeline_app, name="pipeline", help="Pipeline runner (fix → test → format → commit)"
@@ -82,14 +93,20 @@ app.add_typer(continue_app, name="continue", help="Continue from file tail (anch
 app.add_typer(fix_app, name="fix", help="Self-heal configuration/state")
 app.add_typer(config_app, name="config", help="Configuration management")
 app.add_typer(clean_app, name="clean", help="Cleanup (TTL-based sweeper)")
-app.add_typer(plan_app, name="plan", help="Plan from seeds in editor, then run a long book")
-app.add_typer(quick_app, name="quick", help="Quick launcher (wait for capture, profiles)")
+app.add_typer(
+    plan_app, name="plan", help="Plan from seeds in editor, then run a long book"
+)
+app.add_typer(
+    quick_app, name="quick", help="Quick launcher (wait for capture, profiles)"
+)
 app.add_typer(run_app, name="run", help="Unified runner (book/continue)")
 app.add_typer(report_app, name="report", help="Create a redacted report bundle")
 app.add_typer(adapt_app, name="adapt", help="Adaptive inspection and safe fixes")
 app.add_typer(boot_app, name="boot", help="Startup reader (startup.yml)")
-app.add_typer(checklist_app, name="checklist", help="Implementation checklist and verification")
-app.add_typer(interactive_app, name="interactive", help="Interactive REPL (modular)")
+app.add_typer(
+    checklist_app, name="checklist", help="Implementation checklist and verification"
+)
+
 
 
 @app.callback()
@@ -101,7 +118,7 @@ def main(
 ):
     """
     XSArena - AI-powered writing and coding studio
-    
+
     XSArena uses Bridge-first architecture by default. This means it connects to a local
     bridge server that relays requests to the actual LMArena backend through your browser.
     """
@@ -119,13 +136,9 @@ def main(
 @app.command("version")
 def _version():
     from .. import __version__
+
     typer.echo(f"XSArena v{__version__}")
 
-
-@app.command("interactive")
-def interactive():
-    """Start the modular interactive REPL."""
-    asyncio.run(_interactive_repl())
 
 
 def run():
