@@ -2,11 +2,13 @@
 import os
 from pathlib import Path
 from typing import Optional
+
 import yaml
 from dotenv import load_dotenv
 from pydantic import BaseModel
 
 load_dotenv()
+
 
 class Config(BaseModel):
     backend: str = "bridge"
@@ -17,7 +19,9 @@ class Config(BaseModel):
     repetition_threshold: float = 0.8
     max_retries: int = 3
     api_key: Optional[str] = os.getenv("OPENROUTER_API_KEY")
-    base_url: str = "http://127.0.0.1:8080/v1" # This will be corrected by the fix command
+    base_url: str = (
+        "http://127.0.0.1:8080/v1"  # This will be corrected by the fix command
+    )
     timeout: int = 300
     redaction_enabled: bool = False
 

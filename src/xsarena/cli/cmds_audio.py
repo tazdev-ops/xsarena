@@ -4,10 +4,15 @@ import typer
 
 app = typer.Typer(help="Audio service: text-to-speech and audio generation tools.")
 
+
 @app.command("tts")
 def audio_tts(
-    input_file: str = typer.Argument(..., help="Input text/markdown file to convert to speech"),
-    output_file: str = typer.Option("", "--output", "-o", help="Output audio file path"),
+    input_file: str = typer.Argument(
+        ..., help="Input text/markdown file to convert to speech"
+    ),
+    output_file: str = typer.Option(
+        "", "--output", "-o", help="Output audio file path"
+    ),
     voice: str = typer.Option("default", "--voice", "-v", help="Voice to use for TTS"),
     speed: float = typer.Option(1.0, "--speed", "-s", help="Speech speed multiplier"),
 ):
@@ -23,7 +28,9 @@ def audio_tts(
 @app.command("chapter-audio")
 def audio_chapters(
     input_file: str = typer.Argument(..., help="Input markdown book with chapters"),
-    output_dir: str = typer.Option("./audio", "--output", "-o", help="Output directory for audio files"),
+    output_dir: str = typer.Option(
+        "./audio", "--output", "-o", help="Output directory for audio files"
+    ),
 ):
     """Generate audio for each chapter of a book."""
     typer.echo(f"Generating chapter audio from {input_file}...")
@@ -33,8 +40,12 @@ def audio_chapters(
 
 @app.command("podcast")
 def audio_podcast(
-    input_file: str = typer.Argument(..., help="Input content to convert to podcast format"),
-    output_file: str = typer.Option("", "--output", "-o", help="Output podcast audio file"),
+    input_file: str = typer.Argument(
+        ..., help="Input content to convert to podcast format"
+    ),
+    output_file: str = typer.Option(
+        "", "--output", "-o", help="Output podcast audio file"
+    ),
 ):
     """Generate a podcast from text content."""
     typer.echo(f"Generating podcast from {input_file}...")

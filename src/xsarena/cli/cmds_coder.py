@@ -191,6 +191,3 @@ def import_ruff_tickets():
             continue
 
     typer.echo(f"[coder] Imported {created_count} ruff tickets to coder")
-
-
-

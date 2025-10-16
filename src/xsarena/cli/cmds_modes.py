@@ -3,8 +3,6 @@
 import typer
 
 from .context import CLIContext
-from ..core.config import Config
-from ..core.state import SessionState
 
 app = typer.Typer()
 

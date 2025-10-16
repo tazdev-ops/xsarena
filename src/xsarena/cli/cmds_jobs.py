@@ -6,7 +6,7 @@ import os
 import typer
 import yaml
 
-from ..core.jobs2_runner import JobRunner
+
 
 app = typer.Typer(help="Jobs runner (recipes, fast runs, summaries)")
 

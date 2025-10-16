@@ -1,9 +1,7 @@
 #!/usr/bin/env python3
-import time
 import asyncio
-import json
 import pathlib
-from typing import Optional
+import time
 
 import typer
 
@@ -28,7 +26,7 @@ def coach_start(subject: str, minutes: int = 10):
     except ImportError:
         # Joy module is optional, skip achievements
         add_achievement = log_event = lambda *args, **kwargs: None
-    
+
     eng = Engine(create_backend("openrouter"), SessionState())
     end = time.time() + minutes * 60
     score = 0
@@ -63,7 +61,7 @@ def coach_quiz(subject: str, n: int = 10):
     except ImportError:
         # Joy module is optional, skip achievements
         add_achievement = log_event = lambda *args, **kwargs: None
-    
+
     eng = Engine(create_backend("openrouter"), SessionState())
     score = 0
     for i in range(n):
@@ -91,7 +89,7 @@ def boss_start(subject: str, n: int = 20, minutes: int = 25):
     except ImportError:
         # Joy module is optional, skip achievements
         add_achievement = log_event = lambda *args, **kwargs: None
-    
+
     eng = Engine(create_backend("openrouter"), SessionState())
     end = time.time() + minutes * 60
     score = 0
@@ -122,9 +120,11 @@ def boss_start(subject: str, n: int = 20, minutes: int = 25):
         pack = "\n\n".join(
             m["q"] + f"\nYOUR:{m['your']}\nCORRECT:{m['correct']}" for m in misses[:8]
         )
-        rep = asyncio.run(eng.send_and_collect(
-            f"Subject: {subject}\nMISSES:\n{pack}", system_prompt=sys
-        ))
+        rep = asyncio.run(
+            eng.send_and_collect(
+                f"Subject: {subject}\nMISSES:\n{pack}", system_prompt=sys
+            )
+        )
         out = pathlib.Path("books") / f"{subject.lower().replace(' ','-')}.repair.md"
         out.write_text(rep, encoding="utf-8")
         print(f"Repair chapter → {out}")

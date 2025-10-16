@@ -27,9 +27,12 @@ def rp_list_personas():
     try:
         from ..core.roleplay import load_session, new_session, save_session
     except ImportError:
-        typer.echo("Feature not included in this build. See documentation for installation instructions.", err=True)
+        typer.echo(
+            "Feature not included in this build. See documentation for installation instructions.",
+            err=True,
+        )
         raise typer.Exit(1)
-        
+
     personas = _load_personas()
     for key, val in personas.items():
         print(f"{key}: {val.get('title','')}")
@@ -54,9 +57,12 @@ def rp_start(
             save_session,
         )
     except ImportError:
-        typer.echo("Feature not included in this build. See documentation for installation instructions.", err=True)
+        typer.echo(
+            "Feature not included in this build. See documentation for installation instructions.",
+            err=True,
+        )
         raise typer.Exit(1)
-        
+
     personas = _load_personas()
     if persona not in personas:
         print("Unknown persona. Use: xsarena rp list")
@@ -96,9 +102,12 @@ def rp_say(sess_id: str, text: str):
             save_session,
         )
     except ImportError:
-        typer.echo("Feature not included in this build. See documentation for installation instructions.", err=True)
+        typer.echo(
+            "Feature not included in this build. See documentation for installation instructions.",
+            err=True,
+        )
         raise typer.Exit(1)
-        
+
     s = load_session(sess_id)
     # Safeword check
     if s.boundaries.safeword and s.boundaries.safeword in text:
@@ -139,6 +148,7 @@ def rp_say(sess_id: str, text: str):
     if len(current_session.turns) >= 10:
         try:
             from ..core.joy import add_achievement
+
             add_achievement("RP Explorer")
         except ImportError:
             # Joy module is optional, skip achievement
@@ -161,9 +171,12 @@ def rp_memory(
             save_session,
         )
     except ImportError:
-        typer.echo("Feature not included in this build. See documentation for installation instructions.", err=True)
+        typer.echo(
+            "Feature not included in this build. See documentation for installation instructions.",
+            err=True,
+        )
         raise typer.Exit(1)
-        
+
     s = load_session(sess_id)
     if add:
         s.memory.append(add)
@@ -190,9 +203,12 @@ def rp_model(
             save_session,
         )
     except ImportError:
-        typer.echo("Feature not included in this build. See documentation for installation instructions.", err=True)
+        typer.echo(
+            "Feature not included in this build. See documentation for installation instructions.",
+            err=True,
+        )
         raise typer.Exit(1)
-        
+
     s = load_session(sess_id)
     if backend:
         s.backend = backend
@@ -218,9 +234,12 @@ def rp_bounds(
             save_session,
         )
     except ImportError:
-        typer.echo("Feature not included in this build. See documentation for installation instructions.", err=True)
+        typer.echo(
+            "Feature not included in this build. See documentation for installation instructions.",
+            err=True,
+        )
         raise typer.Exit(1)
-        
+
     s = load_session(sess_id)
     if rating:
         s.boundaries.rating = rating
@@ -244,9 +263,12 @@ def rp_export(sess_id: str):
             save_session,
         )
     except ImportError:
-        typer.echo("Feature not included in this build. See documentation for installation instructions.", err=True)
+        typer.echo(
+            "Feature not included in this build. See documentation for installation instructions.",
+            err=True,
+        )
         raise typer.Exit(1)
-        
+
     p = export_markdown(sess_id)
     if p:
         print(f"Transcript → {p}")

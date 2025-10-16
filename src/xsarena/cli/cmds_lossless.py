@@ -1,10 +1,11 @@
 """Lossless mode CLI commands for XSArena."""
 
 import asyncio
+
 import typer
 
-from .context import CLIContext
 from ..modes.lossless import LosslessMode
+from .context import CLIContext
 
 app = typer.Typer()
 
@@ -12,7 +13,7 @@ app = typer.Typer()
 @app.command("ingest")
 def lossless_ingest(
     ctx: typer.Context,
-    text: str = typer.Argument(..., help="Text to ingest and synthesize")
+    text: str = typer.Argument(..., help="Text to ingest and synthesize"),
 ):
     """Ingest and synthesize information from text."""
     cli: CLIContext = ctx.obj
@@ -25,7 +26,7 @@ def lossless_ingest(
 @app.command("rewrite")
 def lossless_rewrite(
     ctx: typer.Context,
-    text: str = typer.Argument(..., help="Text to rewrite while preserving meaning")
+    text: str = typer.Argument(..., help="Text to rewrite while preserving meaning"),
 ):
     """Rewrite text while preserving all meaning."""
     cli: CLIContext = ctx.obj
@@ -40,7 +41,7 @@ def lossless_run(
     ctx: typer.Context,
     text: str = typer.Argument(
         ..., help="Text to process with comprehensive lossless processing"
-    )
+    ),
 ):
     """Perform a comprehensive lossless processing run."""
     cli: CLIContext = ctx.obj
@@ -52,8 +53,7 @@ def lossless_run(
 
 @app.command("improve-flow")
 def lossless_improve_flow(
-    ctx: typer.Context,
-    text: str = typer.Argument(..., help="Text to improve flow for")
+    ctx: typer.Context, text: str = typer.Argument(..., help="Text to improve flow for")
 ):
     """Improve the flow and transitions in text."""
     cli: CLIContext = ctx.obj
@@ -66,7 +66,7 @@ def lossless_improve_flow(
 @app.command("break-paragraphs")
 def lossless_break_paragraphs(
     ctx: typer.Context,
-    text: str = typer.Argument(..., help="Text to break into more readable paragraphs")
+    text: str = typer.Argument(..., help="Text to break into more readable paragraphs"),
 ):
     """Break dense paragraphs into more readable chunks."""
     cli: CLIContext = ctx.obj
@@ -79,7 +79,7 @@ def lossless_break_paragraphs(
 @app.command("enhance-structure")
 def lossless_enhance_structure(
     ctx: typer.Context,
-    text: str = typer.Argument(..., help="Text to enhance with better structure")
+    text: str = typer.Argument(..., help="Text to enhance with better structure"),
 ):
     """Enhance text structure with appropriate headings and formatting."""
     cli: CLIContext = ctx.obj

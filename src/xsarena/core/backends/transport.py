@@ -1,12 +1,15 @@
 """Transport interface and event models for XSArena backends."""
+
 from abc import ABC, abstractmethod
-from typing import Any, Dict, List, Optional
-from pydantic import BaseModel, Field
 from enum import Enum
+from typing import Any, Dict, List, Optional
+
+from pydantic import BaseModel
 
 
 class EventStatus(str, Enum):
     """Status of events."""
+
     PENDING = "pending"
     PROCESSING = "processing"
     SUCCESS = "success"
@@ -16,6 +19,7 @@ class EventStatus(str, Enum):
 
 class BaseEvent(BaseModel):
     """Base class for all events."""
+
     event_id: str
     timestamp: float
     status: EventStatus = EventStatus.PENDING
@@ -24,12 +28,14 @@ class BaseEvent(BaseModel):
 
 class JobStarted(BaseEvent):
     """Event when a job starts."""
+
     job_id: str
     spec: Dict[str, Any]
 
 
 class JobFailed(BaseEvent):
     """Event when a job fails."""
+
     job_id: str
     error_message: str
     error_type: Optional[str] = None
@@ -37,6 +43,7 @@ class JobFailed(BaseEvent):
 
 class ChunkStarted(BaseEvent):
     """Event when a chunk processing starts."""
+
     job_id: str
     chunk_id: str
     content: str
@@ -44,6 +51,7 @@ class ChunkStarted(BaseEvent):
 
 class ChunkDone(BaseEvent):
     """Event when a chunk processing completes."""
+
     job_id: str
     chunk_id: str
     result: str
@@ -52,6 +60,7 @@ class ChunkDone(BaseEvent):
 
 class ChunkFailed(BaseEvent):
     """Event when a chunk processing fails."""
+
     job_id: str
     chunk_id: str
     error_message: str
@@ -60,6 +69,7 @@ class ChunkFailed(BaseEvent):
 
 class JobCompleted(BaseEvent):
     """Event when a job completes successfully."""
+
     job_id: str
     result_path: str
     total_chunks: int
@@ -68,7 +78,7 @@ class JobCompleted(BaseEvent):
 
 class BackendTransport(ABC):
     """Abstract base class for backend transport implementations."""
-    
+
     @abstractmethod
     async def send(self, payload: Dict[str, Any]) -> Dict[str, Any]:
         """Send a payload to the backend and return the response."""

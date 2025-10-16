@@ -1,9 +1,11 @@
 """Version command for XSArena."""
 
 import typer
+
 from .. import __version__
 
 app = typer.Typer(help="Version information for XSArena")
+
 
 @app.command("version")
 def show_version():

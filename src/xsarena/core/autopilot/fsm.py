@@ -1,15 +1,18 @@
 """Finite State Machine for the Autopilot orchestrator."""
-from enum import Enum
-from typing import Any, Dict, Optional
-from pydantic import BaseModel
+
 import asyncio
 import logging
+from enum import Enum
+from typing import Any, Dict, Optional
+
+from pydantic import BaseModel
 
 logger = logging.getLogger(__name__)
 
 
 class State(str, Enum):
     """States for the Autopilot FSM."""
+
     IDLE = "idle"
     SEED = "seed"
     EXTEND = "extend"
@@ -20,6 +23,7 @@ class State(str, Enum):
 
 class FSMContext(BaseModel):
     """Context for the FSM containing state and data."""
+
     current_state: State = State.IDLE
     run_spec: Optional[Dict[str, Any]] = None
     job_id: Optional[str] = None
@@ -32,7 +36,7 @@ class FSMContext(BaseModel):
 
 class AutopilotFSM:
     """Finite State Machine for the autopilot orchestrator."""
-    
+
     def __init__(self):
         self.context = FSMContext()
         self.state_handlers = {
@@ -43,7 +47,7 @@ class AutopilotFSM:
             State.END: self._handle_end,
             State.ERROR: self._handle_error,
         }
-    
+
     async def transition(self, new_state: State, data: Optional[Dict[str, Any]] = None):
         """Transition to a new state."""
         logger.info(f"Transitioning from {self.context.current_state} to {new_state}")
@@ -53,13 +57,13 @@ class AutopilotFSM:
             for key, value in data.items():
                 if hasattr(self.context, key):
                     setattr(self.context, key, value)
-    
+
     async def _handle_idle(self) -> bool:
         """Handle the IDLE state."""
         logger.debug("Handling IDLE state")
         # Wait for a run spec to be provided
         return True  # Continue FSM
-    
+
     async def _handle_seed(self) -> bool:
         """Handle the SEED state."""
         logger.debug("Handling SEED state")
@@ -75,7 +79,7 @@ class AutopilotFSM:
             logger.error(f"Error in SEED state: {e}")
             await self.transition(State.ERROR, {"error_message": str(e)})
             return False
-    
+
     async def _handle_extend(self) -> bool:
         """Handle the EXTEND state."""
         logger.debug("Handling EXTEND state")
@@ -89,7 +93,7 @@ class AutopilotFSM:
             logger.error(f"Error in EXTEND state: {e}")
             await self.transition(State.ERROR, {"error_message": str(e)})
             return False
-    
+
     async def _handle_commit(self) -> bool:
         """Handle the COMMIT state."""
         logger.debug("Handling COMMIT state")
@@ -103,27 +107,27 @@ class AutopilotFSM:
             logger.error(f"Error in COMMIT state: {e}")
             await self.transition(State.ERROR, {"error_message": str(e)})
             return False
-    
+
     async def _handle_end(self) -> bool:
         """Handle the END state."""
         logger.debug("Handling END state")
         return False  # Stop FSM
-    
+
     async def _handle_error(self) -> bool:
         """Handle the ERROR state."""
         logger.error(f"Handling ERROR state: {self.context.error_message}")
         return False  # Stop FSM
-    
+
     async def run(self, run_spec: Dict[str, Any]) -> FSMContext:
         """Run the FSM with the given run specification."""
         logger.info("Starting Autopilot FSM")
-        
+
         # Initialize the context with the run spec
         self.context.run_spec = run_spec
-        
+
         # Start with SEED state
         await self.transition(State.SEED)
-        
+
         # Main loop
         continue_fsm = True
         while continue_fsm:
@@ -132,8 +136,13 @@ class AutopilotFSM:
                 continue_fsm = await current_handler()
             else:
                 logger.error(f"No handler for state: {self.context.current_state}")
-                await self.transition(State.ERROR, {"error_message": f"No handler for state: {self.context.current_state}"})
+                await self.transition(
+                    State.ERROR,
+                    {
+                        "error_message": f"No handler for state: {self.context.current_state}"
+                    },
+                )
                 continue_fsm = False
-        
+
         logger.info(f"FSM completed with final state: {self.context.current_state}")
         return self.context

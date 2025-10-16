@@ -1,5 +1,6 @@
 import importlib
 
+
 def test_import_modes():
     for mod in [
         "xsarena.modes.book",

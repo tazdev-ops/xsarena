@@ -7,7 +7,7 @@ from typing import List, Optional
 import typer
 import yaml
 
-from ..core.jobs2_runner import JobRunner
+
 from ..core.prompt import compose_prompt
 from ..core.specs import DEFAULT_PROFILES, LENGTH_PRESETS, SPAN_PRESETS
 from .context import CLIContext

@@ -27,6 +27,7 @@ Requires Python 3.8+
 """
 
 from __future__ import annotations
+
 import argparse
 import hashlib
 import io
@@ -39,23 +40,33 @@ import sys
 import time
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Iterable, List, Optional, Tuple
+from typing import List, Optional, Tuple
+
 
 # ---------- Redaction ----------
 def _fallback_redact(text: str) -> str:
     if not text:
         return text
     pats = [
-        (re.compile(r'(?i)(api[_-]?key|secret|token|password|pwd|auth|bearer)[\s:=]+\s*["\']?([A-Za-z0-9_\-]{16,})["\']?'), r'\1="[REDACTED]"'),
-        (re.compile(r'\b[A-Za-z0-9._%+-]+ @[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b'), '[REDACTED_EMAIL]'),
-        (re.compile(r'\b(?:[0-9]{1,3}\.){3}[0-9]{1,3}\b'), '[REDACTED_IP]'),
-        (re.compile(r'https?://[^\s<>"]+'), '[REDACTED_URL]'),
-        (re.compile(r'\b[A-Za-z0-9]{30,}\b'), '[REDACTED_LONG_TOKEN]'),
+        (
+            re.compile(
+                r'(?i)(api[_-]?key|secret|token|password|pwd|auth|bearer)[\s:=]+\s*["\']?([A-Za-z0-9_\-]{16,})["\']?'
+            ),
+            r'\1="[REDACTED]"',
+        ),
+        (
+            re.compile(r"\b[A-Za-z0-9._%+-]+ @[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b"),
+            "[REDACTED_EMAIL]",
+        ),
+        (re.compile(r"\b(?:[0-9]{1,3}\.){3}[0-9]{1,3}\b"), "[REDACTED_IP]"),
+        (re.compile(r'https?://[^\s<>"]+'), "[REDACTED_URL]"),
+        (re.compile(r"\b[A-Za-z0-9]{30,}\b"), "[REDACTED_LONG_TOKEN]"),
     ]
     out = text
     for rgx, rep in pats:
         out = rgx.sub(rep, out)
     return out
+
 
 try:
     from xsarena.core.redact import redact as redact_text  # type: ignore
@@ -63,16 +74,47 @@ except Exception:
     redact_text = _fallback_redact
 
 # ---------- Helpers ----------
-TEXT_EXTS = {".md", ".markdown", ".txt", ".yml", ".yaml", ".json", ".py", ".toml", ".ini", ".js", ".sh"}
+TEXT_EXTS = {
+    ".md",
+    ".markdown",
+    ".txt",
+    ".yml",
+    ".yaml",
+    ".json",
+    ".py",
+    ".toml",
+    ".ini",
+    ".js",
+    ".sh",
+}
 CODE_EXTS = {".py"}
-EXCLUDE_DIRS = {".git", "__pycache__", "venv", ".venv", ".mypy_cache", ".pytest_cache", "node_modules", "dist", "build"}
+EXCLUDE_DIRS = {
+    ".git",
+    "__pycache__",
+    "venv",
+    ".venv",
+    ".mypy_cache",
+    ".pytest_cache",
+    "node_modules",
+    "dist",
+    "build",
+}
 
-DEFAULT_DIRS = ["books", "recipes", "directives", ".xsarena/jobs", "review", "src/xsarena"]
+DEFAULT_DIRS = [
+    "books",
+    "recipes",
+    "directives",
+    ".xsarena/jobs",
+    "review",
+    "src/xsarena",
+]
 DEFAULT_MAX_INLINE = 200_000
 DEFAULT_CHUNK_BYTES = 122_880  # 120 KB
 
+
 def now_ts() -> str:
     return time.strftime("%Y%m%d-%H%M%S", time.gmtime())
+
 
 def read_bytes(p: Path, limit: int) -> Tuple[str, bool]:
     try:
@@ -86,6 +128,7 @@ def read_bytes(p: Path, limit: int) -> Tuple[str, bool]:
     tail = data[-half:].decode("utf-8", errors="replace")
     return head + "\n---TRUNCATED---\n" + tail, True
 
+
 def first_line(p: Path) -> str:
     try:
         with p.open("r", encoding="utf-8", errors="replace") as f:
@@ -93,8 +136,10 @@ def first_line(p: Path) -> str:
     except Exception:
         return ""
 
+
 def is_ephemeral(p: Path) -> bool:
     return "XSA-EPHEMERAL" in first_line(p)
+
 
 def sha256_file(p: Path) -> str:
     h = hashlib.sha256()
@@ -103,11 +148,13 @@ def sha256_file(p: Path) -> str:
             h.update(chunk)
     return h.hexdigest()
 
+
 def safe_rel(p: Path) -> str:
     try:
         return str(p.relative_to(Path.cwd()))
     except Exception:
         return str(p)
+
 
 # ---------- ASCII Tree ----------
 def build_tree(paths: List[Path]) -> dict:
@@ -116,12 +163,13 @@ def build_tree(paths: List[Path]) -> dict:
         parts = list(p.parts)
         cur = root
         for i, part in enumerate(parts):
-            is_file = (i == len(parts) - 1)
+            is_file = i == len(parts) - 1
             cur.setdefault(part, {} if not is_file else None)
             if cur[part] is None:
                 break
             cur = cur[part]
     return root
+
 
 def render_tree(d: dict, prefix: str = "") -> List[str]:
     lines: List[str] = []
@@ -135,6 +183,7 @@ def render_tree(d: dict, prefix: str = "") -> List[str]:
             lines.extend(render_tree(sub, prefix + ext))
     return lines
 
+
 def write_tree_section(w: io.TextIOBase, title: str, root_path: Path):
     w.write(f"===== TREE {title} =====\n")
     if not root_path.exists():
@@ -147,14 +196,19 @@ def write_tree_section(w: io.TextIOBase, title: str, root_path: Path):
         w.write(line + "\n")
     w.write(f"===== END TREE {title} =====\n\n")
 
+
 # ---------- Git info ----------
 def git_info_lines() -> List[str]:
     out: List[str] = []
+
     def run(cmd: List[str]) -> Optional[str]:
         try:
-            return subprocess.check_output(cmd, stderr=subprocess.DEVNULL).decode().strip()
+            return (
+                subprocess.check_output(cmd, stderr=subprocess.DEVNULL).decode().strip()
+            )
         except Exception:
             return None
+
     if not run(["git", "rev-parse", "--git-dir"]):
         out.append("Git: (not a git repository)")
         return out
@@ -163,10 +217,14 @@ def git_info_lines() -> List[str]:
     status = run(["git", "status", "--porcelain"]) or ""
     out.append(f"Git branch: {branch}")
     out.append(f"Git HEAD: {head}")
-    out.append(f"Git status: {'clean' if not status else str(len(status.splitlines())) + ' change(s)'}")
+    out.append(
+        f"Git status: {'clean' if not status else str(len(status.splitlines())) + ' change(s)'}"
+    )
     return out
 
+
 # ---------- Jobs summary ----------
+
 
 @dataclass
 class JobStats:
@@ -179,6 +237,7 @@ class JobStats:
     first_ts: str
     last_ts: str
     last_events: List[dict]
+
 
 def summarize_job(job_dir: Path) -> JobStats:
     jid = job_dir.name
@@ -203,26 +262,45 @@ def summarize_job(job_dir: Path) -> JobStats:
                     ev = json.loads(ln)
                 except Exception:
                     continue
-                t = ev.get("type"); ts = ev.get("ts", "")
-                if not first: first = ts
-                if ts: last = ts
-                if t == "chunk_done": chunks += 1
-                elif t == "retry": retries += 1
-                elif t == "failover": failovers += 1
-                elif t == "watchdog_timeout": watchdogs += 1
+                t = ev.get("type")
+                ts = ev.get("ts", "")
+                if not first:
+                    first = ts
+                if ts:
+                    last = ts
+                if t == "chunk_done":
+                    chunks += 1
+                elif t == "retry":
+                    retries += 1
+                elif t == "failover":
+                    failovers += 1
+                elif t == "watchdog_timeout":
+                    watchdogs += 1
                 events.append(ev)
         except Exception:
             pass
-    return JobStats(jid, state, chunks, retries, failovers, watchdogs, first, last, events[-5:])
+    return JobStats(
+        jid, state, chunks, retries, failovers, watchdogs, first, last, events[-5:]
+    )
+
 
 # ---------- Important files derivation ----------
 IMPORTANT_HINTS = [
-    "README.md", "pyproject.toml", "mypy.ini", "models.json",
+    "README.md",
+    "pyproject.toml",
+    "mypy.ini",
+    "models.json",
     "directives/_rules/rules.merged.md",
-    "docs/INDEX.md", "docs/IMPORTANT_FILES.md", "IMPORTANT_FILES_LIST.md",
-    "tools/min_snapshot.py", "tools/snapshot_pro.py", "tools/situation_report.py",
-    ".xsarena/config.yml", ".xsarena/session_state.json",
+    "docs/INDEX.md",
+    "docs/IMPORTANT_FILES.md",
+    "IMPORTANT_FILES_LIST.md",
+    "tools/min_snapshot.py",
+    "tools/snapshot_pro.py",
+    "tools/situation_report.py",
+    ".xsarena/config.yml",
+    ".xsarena/session_state.json",
 ]
+
 
 def discover_file_refs_from_docs() -> List[str]:
     refs: set[str] = set()
@@ -235,7 +313,7 @@ def discover_file_refs_from_docs() -> List[str]:
         Path("STATE.md"),
         Path("CONFIG_REFERENCE.md"),
     ]
-    pat = re.compile(r'(?<![A-Za-z0-9_/.-])([A-Za-z0-9._/\-]+(?:\.[A-Za-z0-9]+))')
+    pat = re.compile(r"(?<![A-Za-z0-9_/.-])([A-Za-z0-9._/\-]+(?:\.[A-Za-z0-9]+))")
     for p in candidates:
         if p.exists():
             try:
@@ -255,12 +333,14 @@ def discover_file_refs_from_docs() -> List[str]:
             refs.add(h)
     return sorted(refs, key=lambda x: x.lower())
 
+
 def save_important_files_list(paths: List[str], out: Path):
     try:
         out.parent.mkdir(parents=True, exist_ok=True)
         out.write_text("\n".join(paths) + "\n", encoding="utf-8")
     except Exception:
         pass
+
 
 # ---------- Manifest ----------
 def code_manifest(code_root: str = "src/xsarena") -> Tuple[List[Tuple[str, str]], str]:
@@ -281,6 +361,7 @@ def code_manifest(code_root: str = "src/xsarena") -> Tuple[List[Tuple[str, str]]
         overall.update(h.encode("utf-8", errors="ignore"))
     return entries, overall.hexdigest()
 
+
 # ---------- Report writer ----------
 def write_header(w: io.TextIOBase, args, ts: str):
     w.write("XSArena Single-File Situation Report\n")
@@ -290,17 +371,23 @@ def write_header(w: io.TextIOBase, args, ts: str):
     w.write(f"Args: {vars(args)}\n")
     w.write("Redaction: secrets/emails/IPs/URLs/long tokens are masked.\n\n")
 
+
 def write_exec_summary(w: io.TextIOBase):
     w.write("=== Executive Summary ===\n")
     # Minimal, safe summary
-    w.write("XSArena is a bridge-first CLI studio for dense, long-form content (books, study manuals).\n")
-    w.write("This report includes tree/LS, rules digest, config/session, recipes, book samples, review signals, jobs summary, and a code manifest.\n")
+    w.write(
+        "XSArena is a bridge-first CLI studio for dense, long-form content (books, study manuals).\n"
+    )
+    w.write(
+        "This report includes tree/LS, rules digest, config/session, recipes, book samples, review signals, jobs summary, and a code manifest.\n"
+    )
     try:
         for line in git_info_lines():
             w.write(line + "\n")
     except Exception:
         pass
     w.write("\n")
+
 
 def write_ls_section(w: io.TextIOBase, name: str, root: Path):
     w.write(f"===== LS ({name}) =====\n")
@@ -312,7 +399,10 @@ def write_ls_section(w: io.TextIOBase, name: str, root: Path):
         w.write("(missing)\n")
     w.write(f"===== END LS ({name}) =====\n\n")
 
-def write_rules_digest(w: io.TextIOBase, path="directives/_rules/rules.merged.md", max_lines=200):
+
+def write_rules_digest(
+    w: io.TextIOBase, path="directives/_rules/rules.merged.md", max_lines=200
+):
     p = Path(path)
     w.write("===== RULES DIGEST =====\n")
     if not p.exists():
@@ -327,7 +417,10 @@ def write_rules_digest(w: io.TextIOBase, path="directives/_rules/rules.merged.md
             w.write(f"[error] reading rules: {e}\n\n")
     w.write("===== END RULES DIGEST =====\n\n")
 
-def write_inline_file(w: io.TextIOBase, p: Path, max_inline: int, include_ephemeral: bool):
+
+def write_inline_file(
+    w: io.TextIOBase, p: Path, max_inline: int, include_ephemeral: bool
+):
     if not p.exists() or not p.is_file():
         w.write(f"--- (missing) {safe_rel(p)} ---\n")
         return
@@ -339,11 +432,15 @@ def write_inline_file(w: io.TextIOBase, p: Path, max_inline: int, include_epheme
     w.write(txt + ("\n" if not txt.endswith("\n") else ""))
     w.write(f"===== END INCLUDED FILE: {safe_rel(p)} =====\n\n")
 
-def write_config_and_session(w: io.TextIOBase, max_inline: int, include_ephemeral: bool):
+
+def write_config_and_session(
+    w: io.TextIOBase, max_inline: int, include_ephemeral: bool
+):
     w.write("===== CONFIG & SESSION =====\n")
     for name in [".xsarena/config.yml", ".xsarena/session_state.json"]:
         write_inline_file(w, Path(name), max_inline, include_ephemeral)
     w.write("===== END CONFIG & SESSION =====\n\n")
+
 
 def write_recipes_digest(w: io.TextIOBase, max_inline: int, include_ephemeral: bool):
     w.write("===== RECIPES DIGEST =====\n")
@@ -354,6 +451,7 @@ def write_recipes_digest(w: io.TextIOBase, max_inline: int, include_ephemeral: b
         for p in sorted(base.rglob("*.yml"), key=lambda x: str(x).lower()):
             write_inline_file(w, p, max_inline, include_ephemeral)
     w.write("===== END RECIPES DIGEST =====\n\n")
+
 
 def write_books_samples(w: io.TextIOBase, max_inline: int, include_ephemeral: bool):
     w.write("===== BOOKS SAMPLES =====\n")
@@ -366,6 +464,7 @@ def write_books_samples(w: io.TextIOBase, max_inline: int, include_ephemeral: bo
                 write_inline_file(w, p, min(max_inline, 50_000), include_ephemeral)
     w.write("===== END BOOKS SAMPLES =====\n\n")
 
+
 def write_review_signals(w: io.TextIOBase, max_inline: int, include_ephemeral: bool):
     w.write("===== REVIEW SIGNALS =====\n")
     base = Path("review")
@@ -373,10 +472,17 @@ def write_review_signals(w: io.TextIOBase, max_inline: int, include_ephemeral: b
         w.write("(missing review)\n\n")
     else:
         # Prefer small text/json signals
-        for patt in ["*.txt", "adapt_plan_*.json", "inventory.json", "quick_tree_ls.txt", "books_sha256.txt"]:
+        for patt in [
+            "*.txt",
+            "adapt_plan_*.json",
+            "inventory.json",
+            "quick_tree_ls.txt",
+            "books_sha256.txt",
+        ]:
             for p in sorted(base.glob(patt), key=lambda x: str(x).lower()):
                 write_inline_file(w, p, min(max_inline, 80_000), include_ephemeral)
     w.write("===== END REVIEW SIGNALS =====\n\n")
+
 
 def write_jobs_summary(w: io.TextIOBase):
     w.write("===== JOBS SUMMARY =====\n")
@@ -384,9 +490,13 @@ def write_jobs_summary(w: io.TextIOBase):
     if not base.exists():
         w.write("(none)\n")
     else:
-        for job_dir in sorted([p for p in base.iterdir() if p.is_dir()], key=lambda x: x.name):
+        for job_dir in sorted(
+            [p for p in base.iterdir() if p.is_dir()], key=lambda x: x.name
+        ):
             js = summarize_job(job_dir)
-            w.write(f"- Job {js.id}  State: {js.state}  Chunks: {js.chunks}  Retries: {js.retries}  Failovers: {js.failovers}  Watchdogs: {js.watchdogs}\n")
+            w.write(
+                f"- Job {js.id}  State: {js.state}  Chunks: {js.chunks}  Retries: {js.retries}  Failovers: {js.failovers}  Watchdogs: {js.watchdogs}\n"
+            )
             if js.first_ts or js.last_ts:
                 w.write(f"  Window: {js.first_ts} → {js.last_ts}\n")
             if js.last_events:
@@ -394,6 +504,7 @@ def write_jobs_summary(w: io.TextIOBase):
                 for ev in js.last_events:
                     w.write(f"    - {ev.get('ts','')}  {ev.get('type','?')}\n")
     w.write("\n===== END JOBS SUMMARY =====\n\n")
+
 
 def write_manifest(w: io.TextIOBase) -> Tuple[List[Tuple[str, str]], str]:
     entries, digest = code_manifest("src/xsarena")
@@ -403,19 +514,29 @@ def write_manifest(w: io.TextIOBase) -> Tuple[List[Tuple[str, str]], str]:
     w.write(f"===== SNAPSHOT DIGEST: {digest} =====\n\n")
     return entries, digest
 
+
 # ---------- Healthcheck ----------
 def healthcheck(report: Path, important: List[str]) -> str:
     out = report.with_suffix(".health.md")
     text = report.read_text(encoding="utf-8", errors="replace")
+
     def has(mark: str) -> bool:
-        return (mark in text)
+        return mark in text
+
     lines = []
     lines.append("# Situation Report Healthcheck")
     lines.append(f"Report: {report}")
     need_marks = [
-        "===== TREE ", "===== LS (", "===== RULES DIGEST", "===== CONFIG & SESSION",
-        "===== RECIPES DIGEST", "===== BOOKS SAMPLES", "===== REVIEW SIGNALS",
-        "===== JOBS SUMMARY", "===== MANIFEST (CODE)", "===== SNAPSHOT DIGEST:"
+        "===== TREE ",
+        "===== LS (",
+        "===== RULES DIGEST",
+        "===== CONFIG & SESSION",
+        "===== RECIPES DIGEST",
+        "===== BOOKS SAMPLES",
+        "===== REVIEW SIGNALS",
+        "===== JOBS SUMMARY",
+        "===== MANIFEST (CODE)",
+        "===== SNAPSHOT DIGEST:",
     ]
     lines.append("## Section presence")
     for m in need_marks:
@@ -424,26 +545,32 @@ def healthcheck(report: Path, important: List[str]) -> str:
     missing = 0
     for p in important:
         tag = f"BEGIN INCLUDED FILE: {p}"
-        present = (tag in text)
+        present = tag in text
         lines.append(f"- {p}: {'OK' if present else 'MISSING'}")
         if not present:
             missing += 1
     # manifest size
     import io as _io
+
     buf = _io.StringIO(text)
     in_manifest = False
     manifest_lines = 0
     for ln in buf.getvalue().splitlines():
         if ln.strip() == "===== MANIFEST (CODE) =====":
-            in_manifest = True; continue
+            in_manifest = True
+            continue
         if ln.startswith("===== SNAPSHOT DIGEST:"):
-            in_manifest = False; continue
+            in_manifest = False
+            continue
         if in_manifest and ln.strip():
             manifest_lines += 1
     lines.append(f"\n## Manifest lines: {manifest_lines}")
-    lines.append(f"\n## Verdict: {'PASS' if all(has(m) for m in need_marks) and missing==0 and manifest_lines>=30 else 'WARN/FAIL'}")
+    lines.append(
+        f"\n## Verdict: {'PASS' if all(has(m) for m in need_marks) and missing==0 and manifest_lines>=30 else 'WARN/FAIL'}"
+    )
     out.write_text("\n".join(lines) + "\n", encoding="utf-8")
     return str(out)
+
 
 # ---------- Chunking ----------
 def chunk_file(path: Path, chunk_bytes: int, footer: str) -> List[str]:
@@ -475,18 +602,25 @@ def chunk_file(path: Path, chunk_bytes: int, footer: str) -> List[str]:
         n += 1
     return parts
 
+
 # ---------- Rules update ----------
-def append_one_order_to_orders_log(ts: str, report_path: Path, parts: List[str], important_file: Path):
+def append_one_order_to_orders_log(
+    ts: str, report_path: Path, parts: List[str], important_file: Path
+):
     src = Path("directives/_rules/sources/ORDERS_LOG.md")
     if not src.parent.exists():
         return
     block = []
     block.append("\n\n# ONE ORDER — Situation Report + Chunking")
-    block.append(f"- Timestamp (UTC): {time.strftime('%Y-%m-%d %H:%M:%S', time.gmtime())}")
+    block.append(
+        f"- Timestamp (UTC): {time.strftime('%Y-%m-%d %H:%M:%S', time.gmtime())}"
+    )
     block.append(f"- Report: {report_path}")
     block.append(f"- Chunks: {', '.join(Path(p).name for p in parts)}")
     block.append(f"- Important files list refreshed: {important_file}")
-    block.append("- Instruction: future sessions must build a single-file report, healthcheck, and chunk into ≤120KB with the footer “Answer received. Do nothing else”.")
+    block.append(
+        "- Instruction: future sessions must build a single-file report, healthcheck, and chunk into ≤120KB with the footer “Answer received. Do nothing else”."
+    )
     try:
         old = src.read_text(encoding="utf-8", errors="replace") if src.exists() else ""
         src.write_text(old + "\n".join(block) + "\n", encoding="utf-8")
@@ -500,15 +634,40 @@ def append_one_order_to_orders_log(ts: str, report_path: Path, parts: List[str],
         except Exception:
             pass
 
+
 # ---------- Main ----------
 def main():
-    ap = argparse.ArgumentParser(description="XSArena: single-file situation report + 120KB chunking.")
-    ap.add_argument("--dirs", nargs="*", default=DEFAULT_DIRS, help="Dirs for TREE + LS")
-    ap.add_argument("--max-inline", type=int, default=DEFAULT_MAX_INLINE, help="Max bytes per included file")
-    ap.add_argument("--include-ephemeral", action="store_true", help="Include XSA-EPHEMERAL files")
-    ap.add_argument("--chunk-bytes", type=int, default=DEFAULT_CHUNK_BYTES, help="Max bytes per chunk (before footer)")
-    ap.add_argument("--footer", default="Answer received. Do nothing else", help="Footer line to append to each chunk")
-    ap.add_argument("--update-rules", action="store_true", help="Append ONE ORDER to ORDERS_LOG.md and re-merge rules")
+    ap = argparse.ArgumentParser(
+        description="XSArena: single-file situation report + 120KB chunking."
+    )
+    ap.add_argument(
+        "--dirs", nargs="*", default=DEFAULT_DIRS, help="Dirs for TREE + LS"
+    )
+    ap.add_argument(
+        "--max-inline",
+        type=int,
+        default=DEFAULT_MAX_INLINE,
+        help="Max bytes per included file",
+    )
+    ap.add_argument(
+        "--include-ephemeral", action="store_true", help="Include XSA-EPHEMERAL files"
+    )
+    ap.add_argument(
+        "--chunk-bytes",
+        type=int,
+        default=DEFAULT_CHUNK_BYTES,
+        help="Max bytes per chunk (before footer)",
+    )
+    ap.add_argument(
+        "--footer",
+        default="Answer received. Do nothing else",
+        help="Footer line to append to each chunk",
+    )
+    ap.add_argument(
+        "--update-rules",
+        action="store_true",
+        help="Append ONE ORDER to ORDERS_LOG.md and re-merge rules",
+    )
     args = ap.parse_args()
 
     ts = now_ts()
@@ -590,10 +749,17 @@ def main():
 
     # 6) Ask clarifications (printed for operator)
     print("\nQuestions for operator:")
-    print("1) Do you want additional directories included in TREE/LS (e.g., docs, tools, scripts)?")
-    print("2) Should ephemeral XSA-EPHEMERAL files be included next time? (--include-ephemeral)")
+    print(
+        "1) Do you want additional directories included in TREE/LS (e.g., docs, tools, scripts)?"
+    )
+    print(
+        "2) Should ephemeral XSA-EPHEMERAL files be included next time? (--include-ephemeral)"
+    )
     print("3) Is 120KB chunk size acceptable, or adjust via --chunk-bytes?")
-    print("4) Did the report capture all important files you expect? If not, list paths to add.")
+    print(
+        "4) Did the report capture all important files you expect? If not, list paths to add."
+    )
+
 
 if __name__ == "__main__":
     sys.exit(main())

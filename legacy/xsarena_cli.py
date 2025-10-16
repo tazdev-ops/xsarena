@@ -27,7 +27,6 @@ from datetime import datetime
 from typing import Dict, List
 
 from aiohttp import web
-
 from lma_stream import (
     anchor_from_text,
     build_anchor_continue_prompt,
@@ -38,11 +37,11 @@ from lma_stream import (
 from lma_templates import (
     BOOK_PLAN_PROMPT,
     CHAD_TEMPLATE,
+    COMPRESSED_OVERLAY,
     NARRATIVE_OVERLAY,
     NO_BS_ADDENDUM,
     OUTPUT_BUDGET_ADDENDUM,
     PROMPT_REPO,
-    COMPRESSED_OVERLAY,
 )
 
 try:
@@ -1746,7 +1745,7 @@ def _load_yaml_or_json(path: str) -> dict:
     import os
     if not os.path.exists(path):
         raise FileNotFoundError(f"Recipe file not found: {path}")
-    
+
     try:
         import yaml  # type: ignore
 
@@ -1877,7 +1876,7 @@ async def run_recipe(rec: dict):
 
     SAVE_SYSTEM_STACK.append(SYSTEM_PROMPT)
     set_system(sys_text.strip())
-    
+
     # Preview hook
     if PREVIEW_ON:
         cont = await _preview_before_run(subject or "book", SYSTEM_PROMPT, out_path)
@@ -1886,7 +1885,7 @@ async def run_recipe(rec: dict):
             if SAVE_SYSTEM_STACK:
                 set_system(SAVE_SYSTEM_STACK.pop())
             return
-    
+
     if out_path:
         ensure_dir(os.path.dirname(out_path) or ".")
         globals()["AUTO_OUT"] = next_available_path(out_path)
@@ -1927,7 +1926,7 @@ async def book_zero2hero(
         plan_reply = await send_and_collect(build_payload(BOOK_PLAN_PROMPT))
         write_to_file(outline_path, plan_reply.strip())
         ok(f"Saved outline → {outline_path}")
-    
+
     # Preview hook
     if PREVIEW_ON:
         cont = await _preview_before_run(subject, SYSTEM_PROMPT, out_path)
@@ -1936,7 +1935,7 @@ async def book_zero2hero(
             if SAVE_SYSTEM_STACK:
                 set_system(SAVE_SYSTEM_STACK.pop())
             return
-    
+
     global AUTO_OUT, AUTO_ON, AUTO_TASK, AUTO_COUNT, LAST_NEXT_HINT, AUTO_MAX
     AUTO_OUT = out_path
     AUTO_ON = True
@@ -1974,7 +1973,7 @@ async def book_reference(
         plan_reply = await send_and_collect(build_payload(plan))
         write_to_file(outline_path, plan_reply.strip())
         ok(f"Saved outline → {outline_path}")
-    
+
     # Preview hook
     if PREVIEW_ON:
         cont = await _preview_before_run(subject, SYSTEM_PROMPT, out_path)
@@ -1983,7 +1982,7 @@ async def book_reference(
             if SAVE_SYSTEM_STACK:
                 set_system(SAVE_SYSTEM_STACK.pop())
             return
-    
+
     global AUTO_OUT, AUTO_ON, AUTO_TASK, AUTO_COUNT, LAST_NEXT_HINT, AUTO_MAX
     AUTO_OUT = out_path
     AUTO_ON = True
@@ -2019,7 +2018,7 @@ async def book_pop(
         plan_reply = await send_and_collect(build_payload(plan))
         write_to_file(outline_path, plan_reply.strip())
         ok(f"Saved outline → {outline_path}")
-    
+
     # Preview hook
     if PREVIEW_ON:
         cont = await _preview_before_run(subject, SYSTEM_PROMPT, out_path)
@@ -2028,7 +2027,7 @@ async def book_pop(
             if SAVE_SYSTEM_STACK:
                 set_system(SAVE_SYSTEM_STACK.pop())
             return
-    
+
     global AUTO_OUT, AUTO_ON, AUTO_TASK, AUTO_COUNT, LAST_NEXT_HINT, AUTO_MAX
     AUTO_OUT = out_path
     AUTO_ON = True
@@ -2054,7 +2053,7 @@ async def exam_cram(
     set_system(sys_text)
     if window is not None:
         set_window(window)
-    
+
     # Preview hook
     if PREVIEW_ON:
         cont = await _preview_before_run(subject, SYSTEM_PROMPT, out_path)
@@ -2063,7 +2062,7 @@ async def exam_cram(
             if SAVE_SYSTEM_STACK:
                 set_system(SAVE_SYSTEM_STACK.pop())
             return
-    
+
     global AUTO_OUT, AUTO_ON, AUTO_TASK, AUTO_COUNT, LAST_NEXT_HINT, AUTO_MAX
     AUTO_OUT = out_path
     AUTO_ON = True
@@ -2099,7 +2098,7 @@ async def book_nobs(
         plan_reply = await send_and_collect(build_payload(plan))
         write_to_file(outline_path, plan_reply.strip())
         ok(f"Saved outline → {outline_path}")
-    
+
     # Preview hook
     if PREVIEW_ON:
         cont = await _preview_before_run(subject, SYSTEM_PROMPT, out_path)
@@ -2108,7 +2107,7 @@ async def book_nobs(
             if SAVE_SYSTEM_STACK:
                 set_system(SAVE_SYSTEM_STACK.pop())
             return
-    
+
     global AUTO_OUT, AUTO_ON, AUTO_TASK, AUTO_COUNT, LAST_NEXT_HINT, AUTO_MAX
     AUTO_OUT = out_path
     AUTO_ON = True
@@ -3866,7 +3865,7 @@ async def _handle_command(line):
                 print(hr())
             except Exception as e:
                 err(f"history.tail failed: {e}")
-        
+
         # ---------------- Mixer commands ----------------
         elif cmd == "/mix.list":
             ov = _mixer_overlays()
@@ -3880,7 +3879,8 @@ async def _handle_command(line):
             return
 
         elif cmd == "/mix.start":
-            import re, shlex
+            import re
+            import shlex
             m = re.findall(r'"([^"]+)"', line)
             if not m:
                 err('Usage: /mix.start "Subject" [--base=zero2hero|reference|pop|nobs] [--no-bs|--no-no-bs] [--narrative|--no-narrative] [--compressed|--no-compressed] [--bilingual|--no-bilingual] [--min=N] [--passes=N] [--max=N] [--out=PATH] [--no-edit] [--dry]')
@@ -3971,7 +3971,8 @@ async def _handle_command(line):
             return
 
         elif cmd == "/mix.preview":
-            import re, shlex
+            import re
+            import shlex
             m = re.findall(r'"([^"]+)"', line)
             if not m:
                 err('Usage: /mix.preview "Subject" [--base=zero2hero|reference|pop|nobs] '

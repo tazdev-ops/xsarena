@@ -1,16 +1,19 @@
 """Scheduler for XSArena jobs with concurrency and quiet hours."""
+
 import asyncio
-import time
 from datetime import datetime
-from typing import List, Dict, Any, Optional
-from .model import JobRunnerV3, JobV3
+from typing import Any, Dict, List, Optional
+
 from ..backends.transport import BackendTransport
+from .model import JobRunnerV3
 
 
 class Scheduler:
     """Job scheduler with concurrency control and quiet hours."""
-    
-    def __init__(self, max_concurrent: int = 1, quiet_hours: Optional[Dict[str, tuple]] = None):
+
+    def __init__(
+        self, max_concurrent: int = 1, quiet_hours: Optional[Dict[str, tuple]] = None
+    ):
         self.max_concurrent = max_concurrent
         self.quiet_hours = quiet_hours or {}  # e.g., {"monday": (22, 6)} for 10PM-6AM
         self.running_jobs: Dict[str, asyncio.Task] = {}
@@ -25,11 +28,11 @@ class Scheduler:
         """Check if it's currently quiet hours."""
         if not self.quiet_hours:
             return False
-            
+
         now = datetime.now()
         day = now.strftime("%A").lower()
         current_hour = now.hour
-        
+
         if day in self.quiet_hours:
             start_hour, end_hour = self.quiet_hours[day]
             if start_hour <= current_hour < end_hour:
@@ -37,7 +40,7 @@ class Scheduler:
             elif start_hour > end_hour:  # Overnight hours (e.g., 22 to 6)
                 if current_hour >= start_hour or current_hour < end_hour:
                     return True
-        
+
         return False
 
     async def submit_job(self, job_id: str) -> bool:
@@ -46,7 +49,7 @@ class Scheduler:
             # Add to queue for later processing
             self.job_queue.append(job_id)
             return True
-        
+
         if len(self.running_jobs) < self.max_concurrent:
             # Run immediately
             task = asyncio.create_task(self._run_job(job_id))
@@ -61,7 +64,7 @@ class Scheduler:
         """Internal method to run a job."""
         if not self.transport:
             raise ValueError("Transport not set for scheduler")
-        
+
         # Create a job runner and run the job
         runner = JobRunnerV3()
         try:
@@ -70,7 +73,7 @@ class Scheduler:
             # Remove from running jobs when done
             if job_id in self.running_jobs:
                 del self.running_jobs[job_id]
-            
+
             # Check if there are queued jobs to run
             await self._process_queue()
 
@@ -79,7 +82,7 @@ class Scheduler:
         while self.job_queue and len(self.running_jobs) < self.max_concurrent:
             if self.is_quiet_time():
                 break  # Don't process during quiet hours
-                
+
             job_id = self.job_queue.pop(0)
             task = asyncio.create_task(self._run_job(job_id))
             self.running_jobs[job_id] = task
@@ -113,7 +116,7 @@ class Scheduler:
             "queued_jobs": len(self.job_queue),
             "is_quiet_time": self.is_quiet_time(),
             "running_job_ids": list(self.running_jobs.keys()),
-            "queued_job_ids": self.job_queue.copy()
+            "queued_job_ids": self.job_queue.copy(),
         }
 
     async def run_scheduler(self):
@@ -121,6 +124,6 @@ class Scheduler:
         while True:
             # Process queued jobs if there's capacity
             await self._process_queue()
-            
+
             # Wait before checking again
             await asyncio.sleep(1)

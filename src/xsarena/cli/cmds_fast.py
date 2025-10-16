@@ -7,7 +7,6 @@ from typing import Optional
 import typer
 import yaml
 
-from ..core.jobs2_runner import JobRunner
 from ..core.prompt import compose_prompt
 from ..core.recipes import recipe_from_mixer
 

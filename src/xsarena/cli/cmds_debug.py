@@ -2,9 +2,8 @@
 
 import typer
 
-from .context import CLIContext
-from ..core.config import Config
 from ..core.state import SessionState
+from .context import CLIContext
 
 app = typer.Typer()
 
@@ -99,21 +98,24 @@ def toggle_redaction(
 ):
     """Toggle the redaction filter."""
     cli: CLIContext = typer.get_current_context().obj
-    
+
     # Set the redaction setting in the state
     cli.state.settings["redaction_enabled"] = enabled
-    
+
     if enabled:
         # Import the redact function from core.redact module
         try:
             from ..core.redact import redact
+
             cli.engine.set_redaction_filter(redact)
-            typer.echo("Redaction filter enabled: sensitive information will be filtered")
+            typer.echo(
+                "Redaction filter enabled: sensitive information will be filtered"
+            )
         except ImportError:
             typer.echo("Redaction filter enabled but redact module not available")
     else:
         cli.engine.set_redaction_filter(None)
         typer.echo("Redaction filter disabled")
-    
+
     # Save the state
     cli.save()

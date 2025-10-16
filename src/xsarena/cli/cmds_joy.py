@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-import random
 import asyncio
+import random
 
 import typer
 
@@ -15,11 +15,20 @@ app = typer.Typer(help="Daily joy, streaks, achievements, and surprises")
 def joy_daily(subject: str):
     """10-minute micro-plan for the day: 1 subtopic, 2 quick checks, 1 pitfall, 1 flashcard seed."""
     try:
-        from ..core.joy import add_achievement, bump_streak, get_state, log_event, sparkline
+        from ..core.joy import (
+            add_achievement,
+            bump_streak,
+            get_state,
+            log_event,
+            sparkline,
+        )
     except ImportError:
-        typer.echo("Feature not included in this build. See documentation for installation instructions.", err=True)
+        typer.echo(
+            "Feature not included in this build. See documentation for installation instructions.",
+            err=True,
+        )
         raise typer.Exit(1)
-        
+
     eng = Engine(create_backend("openrouter"), SessionState())
     sys = (
         "You are a friendly study coach. Create a 10-minute micro-plan for the given subject:\n"
@@ -38,9 +47,12 @@ def joy_streak():
     try:
         from ..core.joy import get_state, sparkline
     except ImportError:
-        typer.echo("Feature not included in this build. See documentation for installation instructions.", err=True)
+        typer.echo(
+            "Feature not included in this build. See documentation for installation instructions.",
+            err=True,
+        )
         raise typer.Exit(1)
-        
+
     s = get_state()
     print(f"Streak: {s['streak']}  [{sparkline(7)}]  Last: {s.get('last_day')}")
     if s["achievements"]:
@@ -52,9 +64,12 @@ def joy_achievements():
     try:
         from ..core.joy import get_state
     except ImportError:
-        typer.echo("Feature not included in this build. See documentation for installation instructions.", err=True)
+        typer.echo(
+            "Feature not included in this build. See documentation for installation instructions.",
+            err=True,
+        )
         raise typer.Exit(1)
-        
+
     s = get_state()
     print("Achievements:", ", ".join(s["achievements"]) or "(none)")
 
@@ -66,7 +81,7 @@ def joy_kudos():
     except ImportError:
         # If joy module is not available, just show a simple message
         pass
-        
+
     msgs = [
         "You're on fire! 🔥",
         "Another brick in the wall. 🧱",

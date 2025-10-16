@@ -4,6 +4,7 @@ import typer
 
 app = typer.Typer(help="Publish service: book publishing and distribution tools.")
 
+
 @app.command("to-pdf")
 def publish_to_pdf(
     input_file: str = typer.Argument(..., help="Input markdown file to convert"),
@@ -33,7 +34,9 @@ def publish_to_epub(
 @app.command("to-web")
 def publish_to_web(
     input_file: str = typer.Argument(..., help="Input markdown file to convert"),
-    output_dir: str = typer.Option("./web", "--output", "-o", help="Output directory for web files"),
+    output_dir: str = typer.Option(
+        "./web", "--output", "-o", help="Output directory for web files"
+    ),
 ):
     """Convert a markdown book to web format (HTML)."""
     typer.echo(f"Converting {input_file} to web format...")

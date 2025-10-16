@@ -15,6 +15,12 @@ mypy>=1.0.0
 ruff>=0.1.0
 black>=23.0.0
 
+[extras]
+prompt_toolkit>=3.0.0
+watchdog>=3.0.0
+textual>=0.40.0
+prometheus-client>=0.19.0
+
 [metrics]
 prometheus-client>=0.19.0
 

@@ -1,9 +1,12 @@
 from __future__ import annotations
-import subprocess, sys, time, json
+
+import json
+import subprocess
+import time
 from pathlib import Path
-from typing import Optional, List
-import yaml
+
 import typer
+import yaml
 
 app = typer.Typer(help="Startup reader: consults startup.yml and prints what was read")
 
@@ -11,8 +14,10 @@ OPS_DIR = Path(".xsarena/ops")
 STARTUP = OPS_DIR / "startup.yml"
 POINTERS = OPS_DIR / "pointers.json"
 
+
 def _ts() -> str:
     return time.strftime("%Y-%m-%dT%H:%M:%S")
+
 
 def _read(p: Path) -> str:
     try:
@@ -20,15 +25,18 @@ def _read(p: Path) -> str:
     except Exception:
         return ""
 
+
 def _write(p: Path, s: str):
     p.parent.mkdir(parents=True, exist_ok=True)
     p.write_text(s, encoding="utf-8")
+
 
 def _load_yaml(p: Path) -> dict:
     try:
         return yaml.safe_load(_read(p)) or {}
     except Exception:
         return {}
+
 
 def _load_ptr() -> dict:
     if POINTERS.exists():
@@ -38,8 +46,10 @@ def _load_ptr() -> dict:
             return {}
     return {}
 
+
 def _save_ptr(d: dict):
     _write(POINTERS, json.dumps(d, indent=2))
+
 
 def _maybe_merge():
     sh = Path("scripts/merge_session_rules.sh")
@@ -48,6 +58,7 @@ def _maybe_merge():
             subprocess.run(["bash", str(sh)], check=False)
         except Exception:
             pass
+
 
 @app.command("read")
 def boot_read(verbose: bool = typer.Option(True, "--verbose/--quiet")):
@@ -98,6 +109,7 @@ def boot_read(verbose: bool = typer.Option(True, "--verbose/--quiet")):
         ptr["last_order"] = "directives/_rules/sources/ORDERS_LOG.md"
     _save_ptr(ptr)
 
+
 @app.command("init")
 def boot_init():
     """One-time helper: create a minimal rules baseline if merged rules and sources are missing."""
@@ -106,6 +118,9 @@ def boot_init():
     if not merged.exists() and not src_rules.exists():
         # Create minimal source then attempt merge
         Path("directives/_rules/sources").mkdir(parents=True, exist_ok=True)
-        src_rules.write_text("# CLI Agent Rules (Minimal)\n- xsarena fix run\n- xsarena quick start \"Subject\"\n", encoding="utf-8")
+        src_rules.write_text(
+            '# CLI Agent Rules (Minimal)\n- xsarena fix run\n- xsarena quick start "Subject"\n',
+            encoding="utf-8",
+        )
         _maybe_merge()
     typer.echo("[boot] init complete.")

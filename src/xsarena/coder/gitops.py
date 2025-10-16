@@ -4,6 +4,7 @@ def ensure_branch(branch_name: str) -> bool:
     print(f"[gitops] Switching to branch: {branch_name}")
     return True
 
+
 def stash_apply() -> bool:
     """Apply git stash to rollback changes."""
     # Placeholder implementation

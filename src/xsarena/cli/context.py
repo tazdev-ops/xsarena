@@ -1,9 +1,9 @@
 from __future__ import annotations
+
+import os
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Optional, Tuple
-import json
-import os
+from typing import Optional
 
 from ..core.backends import create_backend
 from ..core.config import Config
@@ -20,8 +20,14 @@ class CLIContext:
     state_path: Path
 
     @classmethod
-    def load(cls, cfg: Optional[Config] = None, state_path: Optional[str] = None) -> "CLIContext":
-        cfg = cfg or (Config.load_from_file(".xsarena/config.yml") if Path(".xsarena/config.yml").exists() else Config())
+    def load(
+        cls, cfg: Optional[Config] = None, state_path: Optional[str] = None
+    ) -> "CLIContext":
+        cfg = cfg or (
+            Config.load_from_file(".xsarena/config.yml")
+            if Path(".xsarena/config.yml").exists()
+            else Config()
+        )
         state_path = Path(state_path or "./.xsarena/session_state.json")
         state_path.parent.mkdir(parents=True, exist_ok=True)
 
@@ -33,7 +39,11 @@ class CLIContext:
             except Exception:
                 bak = state_path.with_suffix(".bak")
                 # don't overwrite existing bak
-                bak = bak if not bak.exists() else state_path.with_name(state_path.stem + ".bak1")
+                bak = (
+                    bak
+                    if not bak.exists()
+                    else state_path.with_name(state_path.stem + ".bak1")
+                )
                 try:
                     state_path.rename(bak)
                 except Exception:
@@ -66,7 +76,9 @@ class CLIContext:
 
     def rebuild_engine(self):
         # self-heal base_url shape
-        if self.config.base_url and not self.config.base_url.rstrip("/").endswith("/v1"):
+        if self.config.base_url and not self.config.base_url.rstrip("/").endswith(
+            "/v1"
+        ):
             self.config.base_url = self.config.base_url.rstrip("/") + "/v1"
 
         self.engine = Engine(
@@ -83,7 +95,6 @@ class CLIContext:
         if self.state.settings.get("redaction_enabled"):
             self.engine.set_redaction_filter(redact)
 
-
     def save(self):
         self.state.save_to_file(str(self.state_path))
 
@@ -91,7 +102,9 @@ class CLIContext:
         """Attempt self-fixes: base_url shape, backend validity, engine rebuild."""
         notes: list[str] = []
         # normalize base_url
-        if self.config.base_url and not self.config.base_url.rstrip("/").endswith("/v1"):
+        if self.config.base_url and not self.config.base_url.rstrip("/").endswith(
+            "/v1"
+        ):
             self.config.base_url = self.config.base_url.rstrip("/") + "/v1"
             notes.append("Normalized base_url to end with /v1")
 

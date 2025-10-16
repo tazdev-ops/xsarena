@@ -1,9 +1,9 @@
 from __future__ import annotations
+
 import re
-import sys
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import List, Dict, Any
+from typing import Any, Dict, List
 
 import typer
 import yaml
@@ -12,11 +12,13 @@ app = typer.Typer(help="Cleanup utilities (TTL-based sweeper for ephemeral artif
 
 HEADER_RX = re.compile(r"XSA-EPHEMERAL.*?ttl=(\d+)([dh])", re.IGNORECASE)
 
+
 def _load_policy() -> Dict[str, Any]:
     p = Path(".xsarena/cleanup.yml")
     if not p.exists():
         return {"policy": [], "ignore": []}
     return yaml.safe_load(p.read_text(encoding="utf-8")) or {"policy": [], "ignore": []}
+
 
 def _ttl_from_header(path: Path) -> int | None:
     try:
@@ -30,6 +32,7 @@ def _ttl_from_header(path: Path) -> int | None:
     except Exception:
         return None
 
+
 def _older_than(path: Path, days: int) -> bool:
     try:
         st = path.stat()
@@ -37,6 +40,7 @@ def _older_than(path: Path, days: int) -> bool:
     except Exception:
         return False
     return mtime < datetime.now() - timedelta(days=days)
+
 
 def _glob_all(globs: List[str]) -> List[Path]:
     out: List[Path] = []
@@ -51,15 +55,24 @@ def _glob_all(globs: List[str]) -> List[Path]:
             seen.add(str(p))
     return unique
 
+
 def _match_ignore(path: Path, ignore: List[str]) -> bool:
     from fnmatch import fnmatch
+
     s = str(path)
     return any(fnmatch(s, ig) for ig in ignore)
 
+
 @app.command("sweep")
-def sweep(ttl_override: int = typer.Option(None, "--ttl", help="Override TTL (days) for all matches"),
-          apply: bool = typer.Option(False, "--apply/--dry", help="Apply deletions (default dry-run)"),
-          verbose: bool = typer.Option(True, "--verbose/--quiet", help="Print actions")):
+def sweep(
+    ttl_override: int = typer.Option(
+        None, "--ttl", help="Override TTL (days) for all matches"
+    ),
+    apply: bool = typer.Option(
+        False, "--apply/--dry", help="Apply deletions (default dry-run)"
+    ),
+    verbose: bool = typer.Option(True, "--verbose/--quiet", help="Print actions"),
+):
     """
     Purge ephemeral artifacts by TTL:
     - Matches .xsarena/cleanup.yml policy globs
@@ -114,7 +127,12 @@ def sweep(ttl_override: int = typer.Option(None, "--ttl", help="Override TTL (da
                     typer.echo(f"[warn] failed to delete {p}: {e}", err=True)
 
     # Remove empty dirs in common hot spots
-    for root in [Path(".xsarena/jobs"), Path("review"), Path("snapshot_chunks"), Path(".xsarena/tmp")]:
+    for root in [
+        Path(".xsarena/jobs"),
+        Path("review"),
+        Path("snapshot_chunks"),
+        Path(".xsarena/tmp"),
+    ]:
         if not root.exists():
             continue
         for d in sorted(root.rglob("*"), key=lambda x: len(str(x)), reverse=True):
@@ -130,10 +148,15 @@ def sweep(ttl_override: int = typer.Option(None, "--ttl", help="Override TTL (da
                         except Exception:
                             pass
 
-    typer.echo(f"Checked {total} file(s). Deleted {deleted}. Mode={'APPLY' if apply else 'DRY'}.")
+    typer.echo(
+        f"Checked {total} file(s). Deleted {deleted}. Mode={'APPLY' if apply else 'DRY'}."
+    )
+
 
 @app.command("mark")
-def mark_ephemeral(path: str, ttl: str = typer.Option("3d", "--ttl", help="TTL e.g., 3d or 72h")):
+def mark_ephemeral(
+    path: str, ttl: str = typer.Option("3d", "--ttl", help="TTL e.g., 3d or 72h")
+):
     """Add an XSA-EPHEMERAL header to a helper script so the sweeper can purge it later."""
     p = Path(path)
     if not p.exists() or not p.is_file():

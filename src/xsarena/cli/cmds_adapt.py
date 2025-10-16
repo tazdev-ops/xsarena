@@ -1,49 +1,72 @@
 from __future__ import annotations
-import json, re, subprocess, sys, time
+
+import json
+import re
+import subprocess
+import time
+from json import dumps, loads
 from pathlib import Path
-from typing import Dict, List, Optional
-from json import loads, dumps
+from typing import Dict, List
 
 import typer
-from .context import CLIContext
 
 app = typer.Typer(help="Adaptive inspection and safe fixes (dry-run by default)")
 
 OPS_POINTERS = Path(".xsarena/ops/pointers.json")
+
+
 def _load_pointers() -> dict:
     if OPS_POINTERS.exists():
-        try: return loads(OPS_POINTERS.read_text(encoding="utf-8"))
-        except Exception: return {}
+        try:
+            return loads(OPS_POINTERS.read_text(encoding="utf-8"))
+        except Exception:
+            return {}
     return {}
+
+
 def _save_pointers(d: dict):
     OPS_POINTERS.parent.mkdir(parents=True, exist_ok=True)
     OPS_POINTERS.write_text(dumps(d, indent=2), encoding="utf-8")
+
+
 def _load_suppress() -> dict:
-    p = _load_pointers(); sup = p.get("suppress", {})
-    for k in CHECKS: sup.setdefault(k, [])
+    p = _load_pointers()
+    sup = p.get("suppress", {})
+    for k in CHECKS:
+        sup.setdefault(k, [])
     return sup
+
+
 def _save_suppress(sup: dict):
-    p = _load_pointers(); p["suppress"] = sup; _save_pointers(p)
+    p = _load_pointers()
+    p["suppress"] = sup
+    _save_pointers(p)
+
+
 def _apply_suppress(report: dict) -> dict:
-    sup = _load_suppress(); new = []
+    sup = _load_suppress()
+    new = []
     for item in report.get("summary", []):
         chk = item.split(":")[0].strip() if ":" in item else ""
         if chk in sup:
             pats = sup.get(chk) or []
-            if not pats: continue
-            if any(pat.lower() in item.lower() for pat in pats): continue
+            if not pats:
+                continue
+            if any(pat.lower() in item.lower() for pat in pats):
+                continue
         new.append(item)
-    report["summary"] = new; return report
+    report["summary"] = new
+    return report
 
-CHECKS = [
-    "branding", "dirs", "gitignore", "ephemeral", "helpdocs", "config", "wiring"
-]
+
+CHECKS = ["branding", "dirs", "gitignore", "ephemeral", "helpdocs", "config", "wiring"]
 GITIGNORE_LINES = [
-    "snapshot_chunks/", "xsa_min_snapshot*.txt", "review/", ".xsarena/tmp/"
+    "snapshot_chunks/",
+    "xsa_min_snapshot*.txt",
+    "review/",
+    ".xsarena/tmp/",
 ]
-CONTENT_DIRS = [
-    "books/finals", "books/outlines", "books/flashcards", "books/archive"
-]
+CONTENT_DIRS = ["books/finals", "books/outlines", "books/flashcards", "books/archive"]
 HELP_TARGETS = [
     ("xsarena --help", "docs/_help_root.txt"),
     ("xsarena service --help", "docs/_help_serve.txt"),
@@ -53,8 +76,10 @@ HELP_TARGETS = [
     ("xsarena book --help", "docs/_help_z2h.txt"),
 ]
 
+
 def _ts() -> str:
     return time.strftime("%Y%m%d-%H%M%S")
+
 
 def _read(path: Path, max_bytes: int = 400_000) -> str:
     try:
@@ -68,9 +93,11 @@ def _read(path: Path, max_bytes: int = 400_000) -> str:
     except Exception:
         return data.decode("latin-1", errors="replace")
 
+
 def _write(path: Path, text: str):
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(text, encoding="utf-8")
+
 
 def _append_gitignore(lines: List[str]) -> List[str]:
     gi = Path(".gitignore")
@@ -84,13 +111,17 @@ def _append_gitignore(lines: List[str]) -> List[str]:
         _write(gi, "\n".join(existing) + "\n")
     return added
 
+
 def _gen_help_file(cmd: str, dest: Path):
     try:
-        out = subprocess.check_output(cmd, shell=True, text=True, stderr=subprocess.STDOUT)
+        out = subprocess.check_output(
+            cmd, shell=True, text=True, stderr=subprocess.STDOUT
+        )
         _write(dest, out)
         return True, ""
     except subprocess.CalledProcessError as e:
         return False, e.output
+
 
 def _inspect() -> Dict:
     report: Dict = {"checks": {}, "summary": []}
@@ -104,7 +135,9 @@ def _inspect() -> Dict:
             branding["needs_fix"] = True
     report["checks"]["branding"] = branding
     if branding["needs_fix"]:
-        report["summary"].append("branding: userscript contains 'LMASudio' — suggest normalize to 'XSArena'")
+        report["summary"].append(
+            "branding: userscript contains 'LMASudio' — suggest normalize to 'XSArena'"
+        )
 
     # content dirs present
     missing_dirs = [d for d in CONTENT_DIRS if not Path(d).exists()]
@@ -143,7 +176,9 @@ def _inspect() -> Dict:
             help_missing.append(dest)
     report["checks"]["helpdocs"] = {"missing": help_missing}
     if help_missing:
-        report["summary"].append(f"helpdocs: missing {help_missing} — regen via scripts/gen_docs.sh")
+        report["summary"].append(
+            f"helpdocs: missing {help_missing} — regen via scripts/gen_docs.sh"
+        )
 
     # config present and sane base_url
     cfg = Path(".xsarena/config.yml")
@@ -154,7 +189,9 @@ def _inspect() -> Dict:
             conf["fixed_base_url"] = True
     report["checks"]["config"] = conf
     if not cfg.exists():
-        report["summary"].append("config: create .xsarena/config.yml (defaults; no secrets)")
+        report["summary"].append(
+            "config: create .xsarena/config.yml (defaults; no secrets)"
+        )
     elif conf["fixed_base_url"]:
         report["summary"].append("config: normalize base_url to end with /v1")
 
@@ -182,6 +219,7 @@ def _inspect() -> Dict:
 
     return report
 
+
 def _apply(report: Dict) -> Dict:
     actions = {"changed": [], "notes": []}
 
@@ -202,7 +240,9 @@ def _apply(report: Dict) -> Dict:
     if us and report["checks"]["branding"]["needs_fix"]:
         p = Path(us)
         txt = _read(p)
-        txt2 = txt.replace("LMASudio", "XSArena").replace("LMASudioBridge", "XSArenaBridge")
+        txt2 = txt.replace("LMASudio", "XSArena").replace(
+            "LMASudioBridge", "XSArenaBridge"
+        )
         if txt != txt2:
             _write(p, txt2)
             actions["changed"].append("userscript_example.js branding normalized")
@@ -210,14 +250,21 @@ def _apply(report: Dict) -> Dict:
     # Create default config if missing
     cfg = Path(".xsarena/config.yml")
     if not cfg.exists():
-        default = "backend: bridge\nbase_url: http://127.0.0.1:8080/v1\nmodel: default\n"
+        default = (
+            "backend: bridge\nbase_url: http://127.0.0.1:8080/v1\nmodel: default\n"
+        )
         _write(cfg, default)
         actions["changed"].append(".xsarena/config.yml created (defaults)")
     else:
         # normalize base_url to end with /v1 if needed
         txt = _read(cfg)
         if "base_url:" in txt and "/v1" not in txt:
-            txt2 = re.sub(r"(base_url:\s*http[^\s/]+://[^\s]+?)(\s*$)", r"\1/v1\n", txt, flags=re.MULTILINE)
+            txt2 = re.sub(
+                r"(base_url:\s*http[^\s/]+://[^\s]+?)(\s*$)",
+                r"\1/v1\n",
+                txt,
+                flags=re.MULTILINE,
+            )
             if txt2 != txt:
                 _write(cfg, txt2)
                 actions["changed"].append("config base_url normalized")
@@ -235,8 +282,11 @@ def _apply(report: Dict) -> Dict:
 
     return actions
 
+
 @app.command("inspect")
-def adapt_inspect(save: bool = typer.Option(True, "--save/--no-save", help="Write plan to review/")):
+def adapt_inspect(
+    save: bool = typer.Option(True, "--save/--no-save", help="Write plan to review/")
+):
     """Analyze repo state and write a plan (no changes)."""
     report = _inspect()
     report = _apply_suppress(report)  # NEW
@@ -246,8 +296,13 @@ def adapt_inspect(save: bool = typer.Option(True, "--save/--no-save", help="Writ
         _write(out, json.dumps(report, indent=2))
         typer.echo(f"[adapt] plan → {out}")
 
+
 @app.command("fix")
-def adapt_fix(apply: bool = typer.Option(False, "--apply/--dry", help="Apply safe fixes (default dry-run)")):
+def adapt_fix(
+    apply: bool = typer.Option(
+        False, "--apply/--dry", help="Apply safe fixes (default dry-run)"
+    )
+):
     """Apply safe, targeted fixes (no refactors)."""
     report = _inspect()
     if not apply:
@@ -265,28 +320,46 @@ def adapt_fix(apply: bool = typer.Option(False, "--apply/--dry", help="Apply saf
     except Exception:
         pass
 
+
 @app.command("plan")
 def adapt_plan():
     """Alias to inspect (compat)."""
     adapt_inspect()
 
+
 @app.command("suppress-add")
-def suppress_add(check: str = typer.Argument(...), pattern: str = typer.Option("", "--pattern")):
-    if check not in CHECKS: typer.echo(f"Unknown check. Choose: {', '.join(CHECKS)}"); raise typer.Exit(2)
+def suppress_add(
+    check: str = typer.Argument(...), pattern: str = typer.Option("", "--pattern")
+):
+    if check not in CHECKS:
+        typer.echo(f"Unknown check. Choose: {', '.join(CHECKS)}")
+        raise typer.Exit(2)
     sup = _load_suppress()
-    if pattern and pattern not in sup[check]: sup[check].append(pattern)
-    if not pattern: sup[check] = []
-    _save_suppress(sup); typer.echo(f"[adapt] suppression saved for '{check}' ({'all' if not pattern else pattern})")
+    if pattern and pattern not in sup[check]:
+        sup[check].append(pattern)
+    if not pattern:
+        sup[check] = []
+    _save_suppress(sup)
+    typer.echo(
+        f"[adapt] suppression saved for '{check}' ({'all' if not pattern else pattern})"
+    )
+
 
 @app.command("suppress-ls")
-def suppress_ls(): typer.echo(json.dumps(_load_suppress(), indent=2))
+def suppress_ls():
+    typer.echo(json.dumps(_load_suppress(), indent=2))
+
 
 @app.command("suppress-clear")
 def suppress_clear(check: str = typer.Argument("all")):
     sup = _load_suppress()
-    if check == "all": 
-        for k in CHECKS: sup[k] = []
+    if check == "all":
+        for k in CHECKS:
+            sup[k] = []
     else:
-        if check not in CHECKS: typer.echo(f"Unknown check. Choose: {', '.join(CHECKS)}"); raise typer.Exit(2)
+        if check not in CHECKS:
+            typer.echo(f"Unknown check. Choose: {', '.join(CHECKS)}")
+            raise typer.Exit(2)
         sup[check] = []
-    _save_suppress(sup); typer.echo("[adapt] suppression cleared")
+    _save_suppress(sup)
+    typer.echo("[adapt] suppression cleared")

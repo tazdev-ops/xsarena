@@ -1,7 +1,11 @@
 from __future__ import annotations
+
 from pathlib import Path
+
 import yaml
+
 from .specs import DEFAULT_PROFILES
+
 
 def load_profiles() -> dict:
     p = Path("directives/profiles/presets.yml")

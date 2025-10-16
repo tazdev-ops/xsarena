@@ -1,6 +1,7 @@
 from __future__ import annotations
+
 from dataclasses import dataclass, field
-from typing import List, Dict, Optional
+from typing import List, Optional
 
 LENGTH_PRESETS = {
     "standard": {"min": 4200, "passes": 1},
@@ -13,20 +14,34 @@ SPAN_PRESETS = {"medium": 12, "long": 24, "book": 40}
 DEFAULT_PROFILES = {
     "clinical-masters": {
         "overlays": ["narrative", "no_bs"],
-        "extra": ("Clinical focus: teach‑before‑use; define clinical terms in plain English; "
-                  "cover models of psychopathology, assessment validity, case formulation, mechanisms, "
-                  "evidence‑based practice (evidence + expertise + patient values), outcomes/effect sizes; "
-                  "neutral narrative; avoid slogans/keywords; do not disclose protected test items.")
+        "extra": (
+            "Clinical focus: teach‑before‑use; define clinical terms in plain English; "
+            "cover models of psychopathology, assessment validity, case formulation, mechanisms, "
+            "evidence‑based practice (evidence + expertise + patient values), outcomes/effect sizes; "
+            "neutral narrative; avoid slogans/keywords; do not disclose protected test items."
+        ),
     },
     "elections-focus": {
         "overlays": ["narrative", "no_bs"],
-        "extra": ("Focus: treat elections as hinge points to explain coalitions, party systems, and institutional change; "
-                  "avoid seat lists unless they explain mechanism; dense narrative; no bullet walls.")
+        "extra": (
+            "Focus: treat elections as hinge points to explain coalitions, party systems, and institutional change; "
+            "avoid seat lists unless they explain mechanism; dense narrative; no bullet walls."
+        ),
     },
-    "compressed-handbook": {"overlays": ["compressed", "no_bs"], "extra": "Compressed narrative handbook; minimal headings; no bullet walls; no slogans."},
-    "pop-explainer": {"overlays": ["no_bs"], "extra": "Accessible narrative explainer for general audiences; neutral tone; no hype."},
-    "bilingual-pairs": {"overlays": ["narrative", "no_bs", "bilingual"], "extra": "Output sections as EN/FA pairs with identical structure; translate labels only."},
+    "compressed-handbook": {
+        "overlays": ["compressed", "no_bs"],
+        "extra": "Compressed narrative handbook; minimal headings; no bullet walls; no slogans.",
+    },
+    "pop-explainer": {
+        "overlays": ["no_bs"],
+        "extra": "Accessible narrative explainer for general audiences; neutral tone; no hype.",
+    },
+    "bilingual-pairs": {
+        "overlays": ["narrative", "no_bs", "bilingual"],
+        "extra": "Output sections as EN/FA pairs with identical structure; translate labels only.",
+    },
 }
+
 
 @dataclass
 class RunSpec:

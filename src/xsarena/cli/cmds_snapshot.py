@@ -1,15 +1,26 @@
 from __future__ import annotations
-import subprocess, sys
+
+import subprocess
+import sys
 from pathlib import Path
+
 import typer
 
-app = typer.Typer(help="Snapshot (unified): writes a single-file minimal snapshot to your home directory")
+app = typer.Typer(
+    help="Snapshot (unified): writes a single-file minimal snapshot to your home directory"
+)
+
 
 def _py() -> str:
     return sys.executable
 
+
 @app.command("write")
-def snapshot_write(out: str = typer.Option("", "--out", "-o", help="Override output path (default: ~/xsa_min_snapshot.txt)")):
+def snapshot_write(
+    out: str = typer.Option(
+        "", "--out", "-o", help="Override output path (default: ~/xsa_min_snapshot.txt)"
+    )
+):
     """Write a single-file minimal snapshot to $HOME or a provided path."""
     args = [_py(), "tools/snapshot_builder.py"]
     if out:

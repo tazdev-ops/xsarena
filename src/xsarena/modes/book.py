@@ -2,15 +2,17 @@
 
 from typing import Dict, Optional
 
-from ..core.engine import Engine
+from ..core.backends.transport import BackendTransport
+from ..core.state import SessionState
 from ..core.templates import SYSTEM_PROMPTS, USER_PROMPTS
 
 
 class BookMode:
     """Handles book authoring functionality."""
 
-    def __init__(self, engine: Engine):
-        self.engine = engine
+    def __init__(self, transport: BackendTransport, state: SessionState):
+        self.transport = transport
+        self.state = state
 
     async def zero2hero(self, topic: str, outline: Optional[str] = None) -> str:
         """Create a comprehensive book from zero to hero level."""
@@ -24,13 +26,31 @@ class BookMode:
         system_prompt = SYSTEM_PROMPTS["book.zero2hero"].format(subject=topic)
 
         # Add output budget addendum if enabled
-        if self.engine.state.output_budget_snippet_on:
+        if self.state.output_budget_snippet_on:
             system_prompt = system_prompt.strip() + "\n\n" + OUTPUT_BUDGET_ADDENDUM
 
         # Set session mode for the anti-wrap logic
-        self.engine.state.session_mode = "zero2hero"
+        self.state.session_mode = "zero2hero"
 
-        return await self.engine.send_and_collect(prompt, system_prompt)
+        # Prepare the payload for the transport
+        payload = {
+            "messages": [
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": prompt}
+            ],
+            "model": getattr(self.state, 'model', 'default')  # Use default model if not set
+        }
+
+        # Send the request using the transport
+        response = await self.transport.send(payload)
+        
+        # Extract the content from the response
+        choices = response.get("choices", [])
+        if choices:
+            content = choices[0].get("message", {}).get("content", "")
+            return content
+        else:
+            return "No response from backend"
 
     async def reference(self, topic: str) -> str:
         """Create a reference-style book with detailed information."""

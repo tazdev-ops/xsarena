@@ -1,11 +1,14 @@
 from __future__ import annotations
-import os
-import sys
-import platform
-import importlib
+
 import asyncio
+import importlib
+import os
+import platform
+import sys
 from typing import Optional
+
 import typer
+
 from .context import CLIContext
 
 app = typer.Typer(help="Health checks and smoke tests")
@@ -45,19 +48,23 @@ def ping(backend: Optional[str] = typer.Option(None, "--backend")):
     if backend:
         ctx.state.backend = backend
     if ctx.state.backend == "bridge":
+
         async def _go():
             import aiohttp
+
             url = (ctx.config.base_url or "").rstrip("/") + "/health"
             try:
-                async with aiohttp.ClientSession() as s:
-                    async with s.get(url, timeout=8) as r:
-                        j = await r.json()
-                        _ok(f"Bridge health: {j}")
-                        return 0
+                async with aiohttp.ClientSession() as s, s.get(url, timeout=8) as r:
+                    j = await r.json()
+                    _ok(f"Bridge health: {j}")
+                    return 0
             except Exception as e:
                 _err(f"Bridge ping failed: {e}")
-                _warn("Start bridge: xsarena service start-bridge; userscript on; click Retry; rerun.")
+                _warn(
+                    "Start bridge: xsarena service start-bridge; userscript on; click Retry; rerun."
+                )
                 return 2
+
         raise typer.Exit(code=asyncio.run(_go()))
     else:
         if not (os.getenv("OPENROUTER_API_KEY") or ctx.config.api_key):
