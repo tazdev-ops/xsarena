@@ -2,7 +2,7 @@
 import re
 import asyncio
 from typing import Callable, Dict, List, Optional
-from .backends import Backend, Message
+from .backends import BackendTransport as Backend, Message
 from .chunking import anchor_from_text, continuation_anchor, jaccard_ngrams
 from .state import SessionState
 
@@ -25,7 +25,14 @@ class Engine:
             for msg in messages:
                 msg.content = self.redaction_filter(msg.content)
 
-        response = await self.backend.send(messages)
+        # Convert messages to the new transport format
+        payload = {
+            "messages": [{"role": msg.role, "content": msg.content} for msg in messages],
+            "model": getattr(self.state, 'model', 'gpt-4o')  # Default model
+        }
+        
+        response_data = await self.backend.send(payload)
+        response = response_data.get("choices", [{}])[0].get("message", {}).get("content", "")
         
         self.state.add_message("user", user_prompt)
         self.state.add_message("assistant", response)
