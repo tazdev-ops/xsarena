@@ -1,5 +1,0 @@
-{
-  "claude-3-opus": "anthropic/claude-3-opus",
-  "gpt-4-turbo": "openai/gpt-4-turbo",
-  "gemini-flash": "google/gemini-flash-1.5"
-}
