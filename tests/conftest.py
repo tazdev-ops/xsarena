@@ -1,10 +1,10 @@
 import pytest
 from unittest.mock import patch, AsyncMock
-from xsarena.core.backends import Backend, Message
-from typing import List
+from xsarena.core.backends.transport import BackendTransport
+from typing import List, Dict, Any
 
 
-class FakeBackend(Backend):
+class FakeBackend(BackendTransport):
     """Fake backend for testing that returns deterministic content."""
     
     def __init__(self, response_content: str = "Test response content", next_marker: str = None):
@@ -13,14 +13,24 @@ class FakeBackend(Backend):
         self.call_count = 0
         self.sent_messages = []
     
-    async def send(self, messages: List[Message], stream: bool = False) -> str:
+    async def send(self, payload: Dict[str, Any]) -> Dict[str, Any]:
         """Return deterministic content, including NEXT markers if specified."""
         self.call_count += 1
+        # Extract messages from payload for tracking
+        messages = payload.get("messages", [])
         self.sent_messages.extend(messages)
         
         if self.next_marker and self.call_count > 1:  # Add NEXT marker after first response
-            return f"{self.response_content}\n\nNEXT: [{self.next_marker}]"
-        return self.response_content
+            return {"choices": [{"message": {"content": f"{self.response_content}\n\nNEXT: [{self.next_marker}]"}}]}
+        return {"choices": [{"message": {"content": self.response_content}}]}
+    
+    async def health_check(self) -> bool:
+        """Health check for the fake backend."""
+        return True
+    
+    async def stream_events(self) -> List[Any]:
+        """Stream events for the fake backend."""
+        return []
 
 
 @pytest.fixture
