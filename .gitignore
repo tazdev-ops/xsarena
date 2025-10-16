@@ -1,4 +1,44 @@
+# Python build artifacts and caches
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.so
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# Virtual Environment
+venv/
+.venv/
+
+# Tooling Caches
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# IDE and Editor Files
+.idea/
+.vscode/
+*.swp
+*.swo
+*.bak
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+
+# User-generated content and output
+books/
+logs/
+review/
+
+# Snapshot and report artifacts
 snapshot_chunks/
 xsa_min_snapshot*.txt
-review/
-.xsarena/tmp/
+xsa_snapshot*.txt
+*.tar.gz
+
+# Local configuration (if any, secrets should never be committed)
+.env
