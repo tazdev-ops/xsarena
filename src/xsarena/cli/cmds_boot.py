@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import contextlib
 import json
 import subprocess
 import time
@@ -54,10 +55,8 @@ def _save_ptr(d: dict):
 def _maybe_merge():
     sh = Path("scripts/merge_session_rules.sh")
     if sh.exists():
-        try:
+        with contextlib.suppress(Exception):
             subprocess.run(["bash", str(sh)], check=False)
-        except Exception:
-            pass
 
 
 @app.command("read")
@@ -77,12 +76,11 @@ def boot_read(verbose: bool = typer.Option(True, "--verbose/--quiet")):
             else:
                 # if_missing flow
                 fm = item.get("if_missing", {})
-                if fm.get("run"):
-                    if "merge_session_rules.sh" in fm["run"]:
-                        _maybe_merge()
-                        if p.exists():
-                            seen.append(path)
-                            continue
+                if fm.get("run") and "merge_session_rules.sh" in fm["run"]:
+                    _maybe_merge()
+                    if p.exists():
+                        seen.append(path)
+                        continue
                 # fallbacks
                 for fb in fm.get("fallback", []) or []:
                     pf = Path(fb)
@@ -119,7 +117,7 @@ def boot_init():
         # Create minimal source then attempt merge
         Path("directives/_rules/sources").mkdir(parents=True, exist_ok=True)
         src_rules.write_text(
-            '# CLI Agent Rules (Minimal)\n- xsarena fix run\n- xsarena quick start "Subject"\n',
+            '# CLI Agent Rules (Minimal)\n- xsarena fix run\n- xsarena run book "Subject"\n',
             encoding="utf-8",
         )
         _maybe_merge()

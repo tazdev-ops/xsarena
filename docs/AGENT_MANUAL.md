@@ -32,7 +32,8 @@ Cleanup procedure (run after sessions)
    APPLY=1 bash scripts/declutter_phase2.sh
    APPLY=1 bash scripts/apply_content_fixes.sh
 3) Dedupe outlines by hash (optional; keep newest):
-   APPLY=1 bash scripts/normalize_content.sh (or the provided dedupe snippet)
+   xsarena project dedupe-by-hash --apply (preferred over shell scripts)
+   # Alternative: APPLY=1 bash scripts/normalize_content.sh (or the provided dedupe snippet)
 
 Snapshot rules
 - Minimal code snapshot for remote help:
@@ -58,7 +59,7 @@ Investigation flow (when errors occur)
 
 Runbook examples
 - Long UK elections/parties run:
-  xsarena fast start "Political History of the UK — Elections and Parties (c. 1832–present)" \
+  xsarena run book "Political History of the UK — Elections and Parties (c. 1832–present)" \
     --base zero2hero --no-bs --narrative --no-compressed \
     --max 30 --min 5800 --passes 3 \
     --out ./books/finals/political-history-of-the-uk.elections.final.md

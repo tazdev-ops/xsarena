@@ -9,8 +9,6 @@ from typing import Optional
 
 import typer
 
-from .context import CLIContext
-
 app = typer.Typer(help="Health checks and smoke tests")
 
 
@@ -30,7 +28,7 @@ def _err(m):
 def env():
     py = sys.version.split()[0]
     _ok(f"Python {py} on {platform.platform()}")
-    req = ["typer", "aiohttp", "pydantic", "yaml"]
+    req = ["typer", "aiohttp", "pydantic", "yaml", "requests", "rich"]
     miss = []
     for mod in req:
         try:
@@ -43,36 +41,49 @@ def env():
 
 
 @app.command("ping")
-def ping(backend: Optional[str] = typer.Option(None, "--backend")):
-    ctx = CLIContext.load()
+def ping(
+    ctx: typer.Context,
+    backend: Optional[str] = typer.Option(None, "--backend"),
+    retries: int = typer.Option(1, "--retries", help="Number of retry attempts"),
+    delay: float = typer.Option(
+        0.5, "--delay", help="Delay between retries in seconds"
+    ),
+    deep: bool = typer.Option(
+        False, "--deep", help="Show detailed diagnostic information"
+    ),
+):
+    cli = ctx.obj
     if backend:
-        ctx.state.backend = backend
-    if ctx.state.backend == "bridge":
+        cli.state.backend = backend
 
-        async def _go():
-            import aiohttp
+    # Rebuild engine to ensure backend matches the requested type
+    if backend:
+        from ..core.backends import create_backend
 
-            url = (ctx.config.base_url or "").rstrip("/") + "/health"
+        cli.engine.backend = create_backend(
+            cli.state.backend,
+            base_url=os.getenv("XSA_BRIDGE_URL", cli.config.base_url),
+            api_key=cli.config.api_key,
+            model=cli.state.model,
+        )
+
+    async def _go():
+        last = None
+        for i in range(retries):
             try:
-                async with aiohttp.ClientSession() as s, s.get(url, timeout=8) as r:
-                    j = await r.json()
-                    _ok(f"Bridge health: {j}")
+                ok = await cli.engine.backend.health_check()
+                if ok:
+                    _ok("Bridge health: OK")
                     return 0
+                last = "down"
             except Exception as e:
-                _err(f"Bridge ping failed: {e}")
-                _warn(
-                    "Start bridge: xsarena service start-bridge; userscript on; click Retry; rerun."
-                )
-                return 2
+                last = e
+            if i < retries - 1:
+                await asyncio.sleep(delay)
+        _err(f"Bridge health: DOWN ({last})")
+        return 2
 
-        raise typer.Exit(code=asyncio.run(_go()))
-    else:
-        if not (os.getenv("OPENROUTER_API_KEY") or ctx.config.api_key):
-            _err("OPENROUTER_API_KEY not set")
-            _warn("export OPENROUTER_API_KEY=... then rerun.")
-            raise typer.Exit(code=2)
-        _ok("OpenRouter config present.")
-        raise typer.Exit(code=0)
+    raise typer.Exit(code=asyncio.run(_go()))
 
 
 @app.command("run")
@@ -82,7 +93,18 @@ def run():
     except SystemExit as e:
         raise typer.Exit(code=e.code)
     try:
-        ping()
+        # For the run command, we need to call ping with proper context
+        # Since this is a command-line call, we'll need to create a context
+        # that contains the CLIContext object
+        import typer
+
+        from .context import CLIContext
+
+        # Create a temporary context and set the CLIContext object
+        temp_ctx = typer.Context(None)
+        cli = CLIContext.load()
+        temp_ctx.obj = cli
+        ping(temp_ctx, None, 1, 0.5, False)
     except SystemExit as e:
         raise typer.Exit(code=e.code)
     _ok("Doctor run complete.")

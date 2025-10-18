@@ -12,10 +12,10 @@ app = typer.Typer(help="Configuration management")
 
 
 @app.command("show")
-def config_show():
+def config_show(ctx: typer.Context):
     """Show current configuration."""
 
-    cli: CLIContext = CLIContext.load()
+    cli: CLIContext = ctx.obj
 
     typer.echo("Current Configuration:")
     typer.echo(f"  Backend: {cli.config.backend}")
@@ -46,6 +46,7 @@ def config_show():
 
 @app.command("set")
 def config_set(
+    ctx: typer.Context,
     backend: str = typer.Option(
         None, "--backend", help="Set backend (bridge or openrouter)"
     ),
@@ -78,10 +79,14 @@ def config_set(
         None, "--bridge-message", help="Set bridge message ID"
     ),
     coverage_hammer: bool = typer.Option(
-        None, "--coverage-hammer/--no-coverage-hammer", help="Enable or disable coverage hammer"
+        None,
+        "--coverage-hammer/--no-coverage-hammer",
+        help="Enable or disable coverage hammer",
     ),
     output_budget: bool = typer.Option(
-        None, "--output-budget/--no-output-budget", help="Enable or disable output budget addendum"
+        None,
+        "--output-budget/--no-output-budget",
+        help="Enable or disable output budget addendum",
     ),
     output_push: bool = typer.Option(
         None, "--output-push/--no-output-push", help="Enable or disable output pushing"
@@ -93,7 +98,9 @@ def config_set(
         None, "--output-push-max-passes", help="Set max extension steps per chunk"
     ),
     repetition_warn: bool = typer.Option(
-        None, "--repetition-warn/--no-repetition-warn", help="Enable or disable repetition warning"
+        None,
+        "--repetition-warn/--no-repetition-warn",
+        help="Enable or disable repetition warning",
     ),
 ):
     """Set configuration values."""
@@ -161,6 +168,7 @@ def config_set(
         typer.echo(f"Bridge IDs updated in {config_path}")
 
     # Update CLI state with new values
+    cli: CLIContext = ctx.obj  # Use the shared context to update state
     if coverage_hammer is not None:
         cli.state.coverage_hammer_on = coverage_hammer
     if output_budget is not None:
@@ -181,10 +189,10 @@ def config_set(
 
 
 @app.command("reset")
-def config_reset():
+def config_reset(ctx: typer.Context):
     """Reset configuration to defaults."""
 
-    cli: CLIContext = CLIContext.load()
+    cli: CLIContext = ctx.obj
 
     # Create a new default config
     default_config = Config()
@@ -221,3 +229,160 @@ def config_path():
     else:
         typer.echo("No configuration files found. Default config is used.")
         typer.echo("To create a config file, use: xsarena config set --backend bridge")
+
+
+@app.command("export")
+def config_export(
+    ctx: typer.Context, out: str = typer.Option(".xsarena/config.backup.yml", "--out")
+):
+    """Export current config to a file."""
+    cli: CLIContext = ctx.obj
+    cli.config.save_to_file(out)
+    typer.echo(f"✓ Exported config to {out}")
+
+
+@app.command("import")
+def config_import(
+    ctx: typer.Context, inp: str = typer.Option(".xsarena/config.backup.yml", "--in")
+):
+    """Import config from file; normalizes base_url to /v1."""
+    p = Path(inp)
+    if not p.exists():
+        typer.echo(f"Error: file not found: {inp}")
+        raise typer.Exit(1)
+    data = yaml.safe_load(p.read_text(encoding="utf-8")) or {}
+    cli: CLIContext = ctx.obj
+    for k, v in data.items():
+        if hasattr(cli.config, k):
+            setattr(cli.config, k, v)
+    if cli.config.base_url and not cli.config.base_url.rstrip("/").endswith("/v1"):
+        cli.config.base_url = cli.config.base_url.rstrip("/") + "/v1"
+    cli.save()
+    typer.echo("✓ Imported config")
+
+
+@app.command("check")
+def config_check():
+    """Validate configuration and show any issues."""
+    try:
+        # Load config with validation
+        config = Config.load_with_layered_config()
+
+        # Check for config file and validate its keys
+        config_path = Path(".xsarena/config.yml")
+        if config_path.exists():
+            with open(config_path, "r", encoding="utf-8") as f:
+                file_config = yaml.safe_load(f) or {}
+
+            # Validate the file config keys
+            unknown_keys = Config.validate_config_keys(file_config)
+            if unknown_keys:
+                typer.echo(
+                    "[yellow]Warning: Unknown config keys in .xsarena/config.yml:[/yellow]"
+                )
+                for key, suggestions in unknown_keys.items():
+                    if suggestions:
+                        typer.echo(
+                            f"  [yellow]{key}[/yellow] (did you mean: {', '.join(suggestions[:2])}?)"
+                        )
+                    else:
+                        typer.echo(f"  [yellow]{key}[/yellow]")
+
+        typer.echo("✓ Configuration is valid")
+        typer.echo(f"  Base URL normalized to: {config.base_url}")
+
+    except Exception as e:
+        typer.echo(f"[red]✗ Configuration validation failed:[/red] {e}")
+        raise typer.Exit(1)
+
+
+@app.command("capture-ids")
+def config_capture_ids():
+    """Capture bridge session and message IDs from LMArena."""
+    import time
+
+    import requests
+
+    typer.echo("To capture bridge IDs:")
+    typer.echo("1. Make sure the bridge is running (xsarena service start-bridge-v2)")
+    typer.echo("2. Open https://lmarena.ai and add '#bridge=5102' to the URL")
+    typer.echo("3. Click 'Retry' on any message to activate the tab")
+    typer.echo("4. Press ENTER here when ready...")
+
+    try:
+        input()
+    except KeyboardInterrupt:
+        raise typer.Exit(1)
+
+    # Send start capture command to bridge
+    try:
+        response = requests.post(
+            "http://127.0.0.1:5102/internal/start_id_capture", timeout=10
+        )
+        if response.status_code == 200:
+            typer.echo("✓ ID capture started. Please click 'Retry' in your browser.")
+        else:
+            typer.echo(
+                f"✗ Failed to start ID capture: {response.status_code} - {response.text}"
+            )
+            raise typer.Exit(1)
+    except requests.exceptions.RequestException as e:
+        typer.echo(f"✗ Failed to connect to bridge: {e}")
+        raise typer.Exit(1)
+
+    # Poll for captured IDs
+    timeout = 30  # seconds
+    start_time = time.time()
+
+    while time.time() - start_time < timeout:
+        try:
+            response = requests.get("http://127.0.0.1:5102/internal/config", timeout=5)
+            if response.status_code == 200:
+                data = response.json()
+                bridge_config = data.get("bridge", {})
+                session_id = bridge_config.get("session_id")
+                message_id = bridge_config.get("message_id")
+
+                if session_id and message_id:
+                    # IDs found, update config file
+                    config_path = Path(".xsarena/config.yml")
+                    config_path.parent.mkdir(parents=True, exist_ok=True)
+
+                    # Load existing config if it exists
+                    existing_config = {}
+                    if config_path.exists():
+                        with open(config_path, "r", encoding="utf-8") as f:
+                            existing_config = yaml.safe_load(f) or {}
+
+                    # Update the bridge section with the new IDs
+                    if "bridge" not in existing_config:
+                        existing_config["bridge"] = {}
+                    existing_config["bridge"]["session_id"] = session_id
+                    existing_config["bridge"]["message_id"] = message_id
+
+                    # Save the updated config
+                    with open(config_path, "w", encoding="utf-8") as f:
+                        yaml.safe_dump(
+                            existing_config,
+                            f,
+                            default_flow_style=False,
+                            sort_keys=False,
+                        )
+
+                    typer.echo("✓ Successfully captured and saved IDs:")
+                    typer.echo(f"  Session ID: {session_id}")
+                    typer.echo(f"  Message ID: {message_id}")
+                    typer.echo(f"  Config saved to: {config_path}")
+                    return
+        except requests.exceptions.RequestException:
+            pass  # Continue polling
+
+        time.sleep(1)
+
+    typer.echo("✗ Timeout: Failed to capture IDs within 30 seconds.")
+    typer.echo("Possible causes:")
+    typer.echo("  - Bridge is not running")
+    typer.echo("  - Userscript is not installed or active")
+    typer.echo("  - LMArena tab is not properly activated")
+    typer.echo("  - Cloudflare verification may be required")
+    raise typer.Exit(1)

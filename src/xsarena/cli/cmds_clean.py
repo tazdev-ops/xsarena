@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import contextlib
 import re
 from datetime import datetime, timedelta
 from pathlib import Path
@@ -7,6 +8,8 @@ from typing import Any, Dict, List
 
 import typer
 import yaml
+
+from ..utils.secrets_scanner import scan_secrets
 
 app = typer.Typer(help="Cleanup utilities (TTL-based sweeper for ephemeral artifacts)")
 
@@ -143,14 +146,31 @@ def sweep(
                     if verbose:
                         typer.echo(f"[rmdir] {d}")
                     if apply:
-                        try:
+                        with contextlib.suppress(Exception):
                             d.rmdir()
-                        except Exception:
-                            pass
 
     typer.echo(
         f"Checked {total} file(s). Deleted {deleted}. Mode={'APPLY' if apply else 'DRY'}."
     )
+
+
+@app.command("scan-secrets")
+def clean_scan_secrets(
+    path: str = typer.Option(".", "--path", help="Path to scan for secrets"),
+    no_fail: bool = typer.Option(
+        False, "--no-fail", help="Don't exit with error code on hits"
+    ),
+):
+    """Scan for secrets (API keys, passwords, etc.) in working tree."""
+    try:
+        findings, has_secrets = scan_secrets(path, fail_on_hits=not no_fail)
+        if has_secrets and not no_fail:
+            raise typer.Exit(1)
+        elif not has_secrets:
+            typer.echo("✅ No secrets found.")
+    except Exception as e:
+        typer.echo(f"Error during scan: {e}")
+        raise typer.Exit(1)
 
 
 @app.command("mark")

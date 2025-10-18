@@ -1,0 +1,99 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "title": "XSArena Recipe Schema",
+  "description": "Schema for XSArena recipe files",
+  "properties": {
+    "subject": {
+      "type": "string",
+      "description": "The subject to write about",
+      "minLength": 3
+    },
+    "task": {
+      "type": "string",
+      "description": "The task to perform, e.g., 'book.zero2hero'",
+      "default": "book.zero2hero"
+    },
+    "system_text": {
+      "type": "string",
+      "description": "The system prompt text to use"
+    },
+    "styles": {
+      "type": "array",
+      "description": "List of style overlays to apply",
+      "items": {
+        "type": "string",
+        "enum": ["no_bs", "narrative", "compressed", "bilingual", "zero2hero", "reference", "pop", "nobs"]
+      }
+    },
+    "hammer": {
+      "type": "boolean",
+      "description": "Whether to enable coverage hammer",
+      "default": false
+    },
+    "continuation": {
+      "type": "object",
+      "description": "Continuation settings",
+      "properties": {
+        "mode": {
+          "type": "string",
+          "enum": ["anchor", "strict", "off"],
+          "default": "anchor"
+        },
+        "anchorLen": {
+          "type": "integer",
+          "minimum": 100,
+          "maximum": 1000,
+          "default": 300
+        },
+        "minChars": {
+          "type": "integer",
+          "minimum": 100,
+          "default": 3500
+        },
+        "pushPasses": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 10,
+          "default": 2
+        }
+      },
+      "additionalProperties": false
+    },
+    "io": {
+      "type": "object",
+      "description": "Input/output settings",
+      "properties": {
+        "output": {
+          "type": "string",
+          "enum": ["file", "console"],
+          "default": "file"
+        },
+        "outPath": {
+          "type": "string",
+          "description": "Output file path"
+        },
+        "out": {
+          "type": "string",
+          "description": "Alternative output path (deprecated, use outPath)"
+        }
+      },
+      "additionalProperties": false
+    },
+    "max_chunks": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 100,
+      "default": 8
+    },
+    "prelude": {
+      "type": "array",
+      "description": "Preliminary content to prepend",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "required": ["subject"],
+  "additionalProperties": true
+}

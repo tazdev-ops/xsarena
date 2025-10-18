@@ -1,10 +1,5 @@
-scheduler:
-  concurrency:
-    total: 1
-    bridge: 1
-    openrouter: 2
-    ollama: 1
-  quiet_hours:
-    start: "01:00"
-    end: "06:00"
-    enabled: false
+concurrency:
+  total: 4
+  bridge: 2
+  openrouter: 1
+  quiet_hours: false

@@ -1,0 +1,12 @@
+
+ Usage: python -m xsarena checklist [OPTIONS] COMMAND [ARGS]...
+
+ Implementation checklist and verification
+
+╭─ Options ────────────────────────────────────────────────────────────────────╮
+│ --help          Show this message and exit.                                  │
+╰──────────────────────────────────────────────────────────────────────────────╯
+╭─ Commands ───────────────────────────────────────────────────────────────────╮
+│ status    Run the implementation checklist and report status.                │
+│ details   Show detailed checklist with specific verification commands.       │
+╰──────────────────────────────────────────────────────────────────────────────╯

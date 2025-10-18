@@ -1,0 +1,11 @@
+
+ Usage: python -m xsarena agent [OPTIONS] COMMAND [ARGS]...
+
+ AI coding agent with local file system access
+
+╭─ Options ────────────────────────────────────────────────────────────────────╮
+│ --help          Show this message and exit.                                  │
+╰──────────────────────────────────────────────────────────────────────────────╯
+╭─ Commands ───────────────────────────────────────────────────────────────────╮
+│ start   Start an AI agent session to accomplish a coding goal.               │
+╰──────────────────────────────────────────────────────────────────────────────╯

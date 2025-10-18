@@ -1,0 +1,14 @@
+
+ Usage: python -m xsarena bilingual [OPTIONS] COMMAND [ARGS]...
+
+ Bilingual text processing tools
+
+╭─ Options ────────────────────────────────────────────────────────────────────╮
+│ --help          Show this message and exit.                                  │
+╰──────────────────────────────────────────────────────────────────────────────╯
+╭─ Commands ───────────────────────────────────────────────────────────────────╮
+│ transform   Translate text from source language to target language.          │
+│ check       Check alignment between source and translated text.              │
+│ improve     Improve an existing translation.                                 │
+│ glossary    Build a glossary of key terms from bilingual text.               │
+╰──────────────────────────────────────────────────────────────────────────────╯

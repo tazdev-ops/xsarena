@@ -1,13 +1,16 @@
 # src/xsarena/core/config.py
 import os
 from pathlib import Path
-from typing import Optional
+from typing import Any, Dict, Optional
 
 import yaml
 from dotenv import load_dotenv
-from pydantic import BaseModel
+from pydantic import BaseModel, ValidationError, field_validator
+from rich.console import Console
 
 load_dotenv()
+
+console = Console()
 
 
 class Config(BaseModel):
@@ -16,14 +19,20 @@ class Config(BaseModel):
     window_size: int = 100
     anchor_length: int = 300
     continuation_mode: str = "anchor"
-    repetition_threshold: float = 0.8
+    repetition_threshold: float = 0.35
     max_retries: int = 3
     api_key: Optional[str] = os.getenv("OPENROUTER_API_KEY")
-    base_url: str = (
-        "http://127.0.0.1:8080/v1"  # This will be corrected by the fix command
-    )
+    base_url: str = "http://127.0.0.1:5102/v1"  # Default to v2 bridge port
     timeout: int = 300
     redaction_enabled: bool = False
+
+    @field_validator("base_url")
+    @classmethod
+    def normalize_base_url(cls, v: str) -> str:
+        """Normalize base_url to always end with /v1"""
+        if not v.endswith("/v1"):
+            v = v + "v1" if v.endswith("/") else v + "/v1"
+        return v
 
     def save_to_file(self, path: str) -> None:
         p = Path(path)
@@ -39,5 +48,101 @@ class Config(BaseModel):
         try:
             data = yaml.safe_load(p.read_text(encoding="utf-8")) or {}
             return cls(**data)
+        except ValidationError as e:
+            console.print(f"[red]Validation error in config file {path}:[/red]")
+            for error in e.errors():
+                field = ".".join(str(loc) for loc in error["loc"])
+                console.print(f"  [yellow]{field}:[/yellow] {error['msg']}")
+            raise
         except Exception:
             return cls()
+
+    @classmethod
+    def load_with_layered_config(
+        cls, config_file_path: Optional[str] = ".xsarena/config.yml"
+    ) -> "Config":
+        """Load config with layered precedence: env → CLI flags → .xsarena/config.yml"""
+        # Start with defaults
+        config_dict: Dict[str, Any] = {
+            "backend": "bridge",
+            "model": "default",
+            "window_size": 100,
+            "anchor_length": 300,
+            "continuation_mode": "anchor",
+            "repetition_threshold": 0.35,
+            "max_retries": 3,
+            "api_key": os.getenv("OPENROUTER_API_KEY"),
+            "base_url": "http://127.0.0.1:5102/v1",
+            "timeout": 300,
+            "redaction_enabled": False,
+        }
+
+        # Load from config file if it exists
+        if config_file_path:
+            config_path = Path(config_file_path)
+            if config_path.exists():
+                try:
+                    file_config = (
+                        yaml.safe_load(config_path.read_text(encoding="utf-8")) or {}
+                    )
+                    # Validate the file config keys against the model fields
+                    unknown_keys = set(file_config.keys()) - set(
+                        cls.model_fields.keys()
+                    )
+                    if unknown_keys:
+                        console.print(
+                            f"[yellow]Warning: Unknown config keys in {config_file_path}:[/yellow] {', '.join(sorted(unknown_keys))}"
+                        )
+
+                    config_dict.update(file_config)
+                except Exception as e:
+                    console.print(
+                        f"[red]Error loading config file {config_file_path}: {e}[/red]"
+                    )
+
+        # Override with environment variables
+        env_overrides = {}
+        if os.getenv("XSARENA_BACKEND"):
+            env_overrides["backend"] = os.getenv("XSARENA_BACKEND")
+        if os.getenv("XSARENA_MODEL"):
+            env_overrides["model"] = os.getenv("XSARENA_MODEL")
+        if os.getenv("XSARENA_WINDOW_SIZE"):
+            env_overrides["window_size"] = int(os.getenv("XSARENA_WINDOW_SIZE"))
+        if os.getenv("XSARENA_ANCHOR_LENGTH"):
+            env_overrides["anchor_length"] = int(os.getenv("XSARENA_ANCHOR_LENGTH"))
+        if os.getenv("XSARENA_CONTINUATION_MODE"):
+            env_overrides["continuation_mode"] = os.getenv("XSARENA_CONTINUATION_MODE")
+        if os.getenv("XSARENA_REPETITION_THRESHOLD"):
+            env_overrides["repetition_threshold"] = float(
+                os.getenv("XSARENA_REPETITION_THRESHOLD")
+            )
+        if os.getenv("XSARENA_MAX_RETRIES"):
+            env_overrides["max_retries"] = int(os.getenv("XSARENA_MAX_RETRIES"))
+        if os.getenv("OPENROUTER_API_KEY"):
+            env_overrides["api_key"] = os.getenv("OPENROUTER_API_KEY")
+        if os.getenv("XSARENA_BASE_URL"):
+            env_overrides["base_url"] = os.getenv("XSARENA_BASE_URL")
+        if os.getenv("XSARENA_TIMEOUT"):
+            env_overrides["timeout"] = int(os.getenv("XSARENA_TIMEOUT"))
+        if os.getenv("XSARENA_REDACTION_ENABLED"):
+            env_overrides["redaction_enabled"] = os.getenv(
+                "XSARENA_REDACTION_ENABLED"
+            ).lower() in ("true", "1", "yes")
+
+        config_dict.update(env_overrides)
+
+        # Create and return the validated config
+        return cls(**config_dict)
+
+    @classmethod
+    def validate_config_keys(cls, config_data: Dict[str, Any]) -> Dict[str, str]:
+        """Validate config keys and return unknown keys with suggestions"""
+        unknown_keys = {}
+        for key in config_data:
+            if key not in cls.model_fields:
+                # Simple suggestion: find closest matching field
+                suggestions = [
+                    field for field in cls.model_fields if key in field or field in key
+                ]
+                unknown_keys[key] = suggestions[:3]  # Return up to 3 suggestions
+        return unknown_keys

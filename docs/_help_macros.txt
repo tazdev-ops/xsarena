@@ -1,0 +1,13 @@
+
+ Usage: python -m xsarena macros [OPTIONS] COMMAND [ARGS]...
+
+ Macro registry
+
+╭─ Options ────────────────────────────────────────────────────────────────────╮
+│ --help          Show this message and exit.                                  │
+╰──────────────────────────────────────────────────────────────────────────────╯
+╭─ Commands ───────────────────────────────────────────────────────────────────╮
+│ add      Add or update a macro.                                              │
+│ list     List all saved macros.                                              │
+│ delete   Delete a macro.                                                     │
+╰──────────────────────────────────────────────────────────────────────────────╯

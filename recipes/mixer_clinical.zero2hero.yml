@@ -1,0 +1,14 @@
+task: book.mixer
+subject: Clinical Psychology Zero to Hero
+styles: [narrative, no_bs]
+hammer: true
+outline_first: true
+continuation:
+  mode: anchor
+  anchorLen: 300
+  minChars: 4200
+  pushPasses: 2
+io:
+  output: file
+  outPath: ./books/clinical_psychology.zero2hero.md
+max_chunks: 12

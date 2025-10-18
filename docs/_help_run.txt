@@ -1,0 +1,18 @@
+
+ Usage: python -m xsarena run [OPTIONS] COMMAND [ARGS]...
+
+ Unified runner (book/continue)
+
+╭─ Options ────────────────────────────────────────────────────────────────────╮
+│ --help          Show this message and exit.                                  │
+╰──────────────────────────────────────────────────────────────────────────────╯
+╭─ Commands ───────────────────────────────────────────────────────────────────╮
+│ book                                                                         │
+│ from-recipe   Run a job from recipe file (replaces 'jobs run').              │
+│ lint-recipe   Lint a recipe file for validity and best practices.            │
+│ from-plan     Plan from rough seeds in your editor, then run a long, dense   │
+│               book. Replaces 'plan start' command.                           │
+│ continue                                                                     │
+│ template      Run a structured directive from the library (optionally        │
+│               JSON-validated if a schema exists).                            │
+╰──────────────────────────────────────────────────────────────────────────────╯

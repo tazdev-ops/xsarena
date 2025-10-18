@@ -1,12 +1,11 @@
-                                                                                
- Usage: xsarena interactive [OPTIONS] COMMAND [ARGS]...                         
-                                                                                
- Interactive REPL (modular)                                                     
-                                                                                
+
+ Usage: python -m xsarena interactive [OPTIONS] COMMAND [ARGS]...
+
+ Interactive cockpit (REPL-lite) with live steering
+
 ╭─ Options ────────────────────────────────────────────────────────────────────╮
 │ --help          Show this message and exit.                                  │
 ╰──────────────────────────────────────────────────────────────────────────────╯
 ╭─ Commands ───────────────────────────────────────────────────────────────────╮
-│ start   Start the interactive REPL.                                          │
+│ start   Start the interactive cockpit session.                               │
 ╰──────────────────────────────────────────────────────────────────────────────╯
-

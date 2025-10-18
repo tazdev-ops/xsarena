@@ -1,0 +1,15 @@
+
+ Usage: python -m xsarena joy [OPTIONS] COMMAND [ARGS]...
+
+ Daily activities, streaks, and achievements
+
+╭─ Options ────────────────────────────────────────────────────────────────────╮
+│ --help          Show this message and exit.                                  │
+╰──────────────────────────────────────────────────────────────────────────────╯
+╭─ Commands ───────────────────────────────────────────────────────────────────╮
+│ daily          10-minute micro-plan for the day: 1 subtopic, 2 quick checks, │
+│                1 pitfall, 1 flashcard seed.                                  │
+│ streak                                                                       │
+│ achievements                                                                 │
+│ kudos                                                                        │
+╰──────────────────────────────────────────────────────────────────────────────╯

@@ -6,7 +6,6 @@ from pathlib import Path
 from unittest.mock import patch
 
 from typer.testing import CliRunner
-
 from xsarena.cli.main import app
 
 runner = CliRunner()
@@ -18,7 +17,7 @@ def test_run_book_integration(patch_create_backend):
         output_file = Path(temp_dir) / "test_output.md"
 
         # Mock the recipe creation and job running to avoid actual AI calls
-        with patch("xsarena.core.jobs2_runner.JobRunner") as mock_runner:
+        with patch("xsarena.core.jobs.model.JobManager") as mock_runner:
             # Mock the submit and run_job methods
             mock_job_instance = mock_runner.return_value
             mock_job_instance.submit.return_value = "test-job-id"
@@ -72,7 +71,7 @@ io:
 
     try:
         # Mock the job runner
-        with patch("xsarena.core.jobs2_runner.JobRunner") as mock_runner:
+        with patch("xsarena.core.jobs.model.JobManager") as mock_runner:
             mock_job_instance = mock_runner.return_value
             mock_job_instance.run_job.return_value = None
 

@@ -1,0 +1,11 @@
+
+ Usage: python -m xsarena preview [OPTIONS] COMMAND [ARGS]...
+
+ Preview prompt + style sample for recipes
+
+╭─ Options ────────────────────────────────────────────────────────────────────╮
+│ --help          Show this message and exit.                                  │
+╰──────────────────────────────────────────────────────────────────────────────╯
+╭─ Commands ───────────────────────────────────────────────────────────────────╮
+│ run   Preview a recipe before running it.                                    │
+╰──────────────────────────────────────────────────────────────────────────────╯

@@ -77,7 +77,7 @@ Quick start (Bridge)
   - xsarena backend ping
   - xsarena fix run
 - UK elections/parties run (long, dense, narrative not compressed):
-  xsarena fast start "Political History of the UK — Elections and Parties (c. 1832–present)" \
+  xsarena run book "Political History of the UK — Elections and Parties (c. 1832–present)" \
     --base zero2hero --no-bs --narrative --no-compressed \
     --max 30 --min 5800 --passes 3 \
     --out ./books/finals/political-history-of-the-uk.elections.final.md

@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 
+import contextlib
 import os
 import shutil
 import sys
@@ -54,10 +55,8 @@ print("Deprecated: TUI moved to contrib/tui/xsarena_tui.py; prefer `xsarena serv
 sys.exit(runpy.run_path("contrib/tui/xsarena_tui.py") or 0)
 """
     write_file(path, content)
-    try:
+    with contextlib.suppress(Exception):
         os.chmod(path, 0o755)
-    except Exception:
-        pass
 
 
 def stub_lma_tui():
@@ -68,10 +67,8 @@ print("Deprecated: LMA TUI moved to legacy/lma_tui.py; prefer `xsarena serve`.",
 sys.exit(runpy.run_path("legacy/lma_tui.py") or 0)
 """
     write_file(path, content)
-    try:
+    with contextlib.suppress(Exception):
         os.chmod(path, 0o755)
-    except Exception:
-        pass
 
 
 def write_deprecations():

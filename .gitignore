@@ -33,6 +33,8 @@ Thumbs.db
 books/
 logs/
 review/
+directives/_mixer/
+directives/_preview/
 
 # Snapshot and report artifacts
 snapshot_chunks/
@@ -42,3 +44,13 @@ xsa_snapshot*.txt
 
 # Local configuration (if any, secrets should never be committed)
 .env
+
+# Generated artifacts
+snapshot.txt
+# Python build artifacts and cache
+__pycache__/
+*.pyc
+*.egg-info/
+
+# Virtual environment
+venv/

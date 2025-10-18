@@ -43,12 +43,25 @@ class RunSpecV2(BaseModel):
     outline_scaffold: Optional[str] = Field(
         None, description="Outline scaffold to follow"
     )
+    generate_plan: bool = Field(False, description="Generate an outline first.")
+    window_size: Optional[int] = Field(
+        None, description="History window size for this run."
+    )
 
     # Additional fields that might be needed
     profile: Optional[str] = Field(None, description="Profile to use for the run")
     backend: Optional[str] = Field("bridge", description="Backend to use for the run")
+    model: Optional[str] = Field("default", description="Model to use for the run")
     concurrency: int = Field(1, description="Number of concurrent operations")
     timeout: int = Field(300, description="Timeout for operations in seconds")
+
+    # Bridge-specific configuration
+    bridge_session_id: Optional[str] = Field(
+        None, description="Specific session ID for bridge"
+    )
+    bridge_message_id: Optional[str] = Field(
+        None, description="Specific message ID for bridge"
+    )
 
     class Config:
         """Configuration for the model."""

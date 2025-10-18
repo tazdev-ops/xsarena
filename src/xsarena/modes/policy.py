@@ -1,9 +1,38 @@
 """Policy analysis modes for XSArena."""
 
+from pathlib import Path
 from typing import List
 
 from ..core.engine import Engine
-from ..core.templates import SYSTEM_PROMPTS
+
+
+# Load templates directly from directive files
+def _load_directive_content(file_path: str) -> str:
+    """Load content from a directive file."""
+    # First try relative to current working directory
+    if Path(file_path).exists():
+        return Path(file_path).read_text(encoding="utf-8").strip()
+
+    # Try relative to project root (relative to this file)
+    project_root = Path(__file__).parent.parent.parent.parent
+    full_path = project_root / file_path
+    if full_path.exists():
+        return full_path.read_text(encoding="utf-8").strip()
+
+    # Return empty string if not found
+    return ""
+
+
+# Load system prompts from directive files
+SYSTEM_PROMPTS = {
+    "policy": _load_directive_content("directives/roles/policy.md"),
+}
+
+# Fallback hardcoded value if directive file is not available
+if not SYSTEM_PROMPTS["policy"]:
+    SYSTEM_PROMPTS[
+        "policy"
+    ] = "You are a policy analysis assistant. Generate comprehensive policy documents with implementation strategies."
 
 
 class PolicyMode:

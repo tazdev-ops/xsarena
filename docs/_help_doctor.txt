@@ -1,8 +1,8 @@
-                                                                                
- Usage: xsarena doctor [OPTIONS] COMMAND [ARGS]...                              
-                                                                                
- Health checks and smoke tests                                                  
-                                                                                
+
+ Usage: python -m xsarena doctor [OPTIONS] COMMAND [ARGS]...
+
+ Health checks and smoke tests
+
 ╭─ Options ────────────────────────────────────────────────────────────────────╮
 │ --help          Show this message and exit.                                  │
 ╰──────────────────────────────────────────────────────────────────────────────╯
@@ -11,4 +11,3 @@
 │ ping                                                                         │
 │ run                                                                          │
 ╰──────────────────────────────────────────────────────────────────────────────╯
-

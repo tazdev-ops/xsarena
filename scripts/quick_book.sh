@@ -55,7 +55,7 @@ EOF
 read -r _
 
 # 4) Run a long, dense narrative (no compressed) at max per-message
-XSA_BACKEND="$BACKEND" xsarena fast start "$SUBJECT" \
+XSA_BACKEND="$BACKEND" xsarena run book "$SUBJECT" \
   --base zero2hero \
   --no-bs \
   --narrative \

@@ -3,7 +3,6 @@
 from unittest.mock import AsyncMock, patch
 
 import pytest
-
 from xsarena.core.backends.bridge_v2 import BridgeV2Transport, OpenRouterTransport
 
 
@@ -24,16 +23,17 @@ async def test_bridge_backend_payload():
         mock_session = AsyncMock()
         mock_session_class.return_value.__aenter__.return_value = mock_session
 
-        mock_post = AsyncMock()
-        mock_post.__aenter__.return_value.__aexit__.return_value = None
-        mock_session.post.return_value.__aenter__.return_value = mock_post
-
-        mock_post.status = 200
-        mock_post.json.return_value = {
+        mock_response = AsyncMock()
+        mock_response.status = 200
+        mock_response.json.return_value = {
             "choices": [{"message": {"content": "Response"}}]
         }
 
-        result = await transport.send(payload)
+        mock_post_context_manager = AsyncMock()
+        mock_post_context_manager.__aenter__.return_value = mock_response
+        mock_session.post.return_value = mock_post_context_manager
+
+        await transport.send(payload)
 
         # Verify the payload structure
         mock_session.post.assert_called_once()
@@ -60,12 +60,13 @@ async def test_bridge_backend_error_handling():
         mock_session = AsyncMock()
         mock_session_class.return_value.__aenter__.return_value = mock_session
 
-        mock_post = AsyncMock()
-        mock_post.__aenter__.return_value.__aexit__.return_value = None
-        mock_session.post.return_value.__aenter__.return_value = mock_post
+        mock_response = AsyncMock()
+        mock_response.status = 500
+        mock_response.text.return_value = "Internal Server Error"
 
-        mock_post.status = 500
-        mock_post.text.return_value = "Internal Server Error"
+        mock_post_context_manager = AsyncMock()
+        mock_post_context_manager.__aenter__.return_value = mock_response
+        mock_session.post.return_value = mock_post_context_manager
 
         with pytest.raises(RuntimeError) as exc_info:
             await transport.send(payload)
@@ -85,15 +86,17 @@ async def test_openrouter_backend_payload():
         mock_session = AsyncMock()
         mock_session_class.return_value.__aenter__.return_value = mock_session
 
-        mock_context = AsyncMock()
-        mock_session.post.return_value.__aenter__.return_value = mock_context
-
-        mock_context.status = 200
-        mock_context.json.return_value = {
+        mock_response = AsyncMock()
+        mock_response.status = 200
+        mock_response.json.return_value = {
             "choices": [{"message": {"content": "Response"}}]
         }
 
-        result = await transport.send(payload)
+        mock_post_context_manager = AsyncMock()
+        mock_post_context_manager.__aenter__.return_value = mock_response
+        mock_session.post.return_value = mock_post_context_manager
+
+        await transport.send(payload)
 
         # Verify the payload structure
         mock_session.post.assert_called_once()

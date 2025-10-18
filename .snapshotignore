@@ -1,0 +1,29 @@
+# --- .snapshotignore ---
+# Blacklist of files/directories to ALWAYS exclude from snapshots.
+# Globs are supported.
+
+# Generated content and user data
+books/
+review/
+logs/
+recipes/ # Often large and user-specific, not core logic
+
+# Python virtual environments and caches
+.venv/
+venv/
+__pycache__/
+*.pyc
+.ruff_cache/
+.pytest_cache/
+
+# Secrets and local state
+.env
+secrets.yml
+*.bak
+*.tmp
+
+# The snapshot output itself
+xsa_min_snapshot.txt
+
+# Temporary files from the snapshot builder
+.snapshot_file_list.tmp

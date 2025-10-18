@@ -1,15 +1,22 @@
-# src/xsarena/cli/cmds_interactive.py
+"""Interactive CLI commands for XSArena."""
+
+from __future__ import annotations
+
+import asyncio
+
 import typer
 
-app = typer.Typer(help="Interactive REPL (modular)")
+from .interactive_session import start_interactive_session
+
+app = typer.Typer(
+    help="Interactive cockpit (REPL-lite) with live steering and job control"
+)
 
 
 @app.command("start")
-def start():
-    """Start the interactive REPL."""
-    typer.echo(
-        "ℹ️  Interactive REPL is deprecated. Use 'xsarena run book' for canonical runs."
-    )
-    typer.echo("For project management, use 'xsarena project ...' commands.")
-    typer.echo("For continued writing, use 'xsarena continue start ...'.")
-    typer.echo("See documentation for the recommended workflow.")
+def interactive_start(ctx: typer.Context):
+    """Start the interactive cockpit session."""
+    cli = ctx.obj
+
+    # Run the async function
+    asyncio.run(start_interactive_session(cli))

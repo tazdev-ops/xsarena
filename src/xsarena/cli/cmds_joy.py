@@ -29,7 +29,14 @@ def joy_daily(subject: str):
         )
         raise typer.Exit(1)
 
-    eng = Engine(create_backend("openrouter"), SessionState())
+    try:
+        eng = Engine(create_backend("openrouter"), SessionState())
+    except ValueError:
+        typer.echo(
+            "Use bridge (xsarena service start-bridge-v2; #bridge=5102) or set OPENROUTER_API_KEY.",
+            err=True,
+        )
+        raise typer.Exit(1)
     sys = (
         "You are a friendly study coach. Create a 10-minute micro-plan for the given subject:\n"
         "- 1 subtopic\n- 2 quick checks\n- 1 pitfall to avoid\n- 1 flashcard seed (Q/A)\nKeep it compact."

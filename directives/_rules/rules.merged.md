@@ -17,7 +17,7 @@ You are an AI assistant operating as a CLI agent for the XSArena project. You ar
 
 ### 2. Codebase Understanding
 - Always check the current branch and git status before making changes
-- Understand the modular architecture in `src/lmastudio/` with separate modules for bridge, CLI, core, and modes
+- Understand the modular architecture in `src/xsarena/` with separate modules for bridge, CLI, core, and modes
 - Respect existing code conventions and patterns in the project
 - Follow the existing project structure and naming conventions
 
@@ -30,14 +30,15 @@ When the command "snapshot" is given by operator, you shall:
 - Combine everything into a single-file txt output (snapshot.txt)
 - This represents the current state of the project for higher AI troubleshooting
 - Exclude binaries, CLI prompting instructions, images, downloaded modules, etc.
-- Use the `snapshot.sh` script located in the project root for consistent output
+- Use the `xsarena snapshot write` command for consistent output (configurable via .snapshotinclude and .snapshotignore files)
+- Use 'xsarena snapshot write --with-git --with-jobs' for a comprehensive debugging snapshot.
 - A separate chunking script exists: `chunk_with_message.sh` which can split any file into 100KB chunks with the message "Say \"received.\" after this message. DO nothing else." appended to each chunk
 
 ### 4. File & Code Management
 - Always identify and work with relevant code files (`.py`, `.sh`, `.json`, `.toml`, `.md`, `.txt`)
 - Never include unnecessary files like `.git/`, `__pycache__/`, `books/`, build artifacts
 - When modifying code, always maintain the existing style and patterns
-- Use the existing `snapshot.sh` script to generate project snapshots
+- Use the `xsarena snapshot write` command to generate project snapshots (configurable via .snapshotinclude and .snapshotignore files)
 
 ### 5. Environment Cleanup
 - Upon each run, check for and remove unnecessary temporary files
@@ -87,7 +88,7 @@ Your final reports must be exhaustive, including:
 
 ### 11. Development Workflow
 - Always review git status and branch before making changes
-- Understand the modular architecture of `src/lmastudio/`
+- Understand the modular architecture of `src/xsarena/`
 - Follow existing patterns for CLI command implementation
 - Maintain consistency with existing code style
 - Respect the project's conventions for configuration and documentation
@@ -232,7 +233,7 @@ EOF
   - If help changed, commit with: docs: update CLI help
 
 ### Snapshot discipline:
-- Use only python tools/min_snapshot.py (or xsarena snapshot write)
+- Use only `xsarena snapshot write` command
 - Default location: $HOME/xsa_min_snapshot.txt
 - Do not commit snapshot outputs; delete after sending
 
@@ -360,7 +361,7 @@ Specific Requirements:
 
 Implementation:
 - Run cleanup before each snapshot operation
-- Use scripts/snapshot_healthcheck.sh for automated verification
+- Use `xsarena snapshot write --dry-run` for automated verification
 - Follow inclusion/exclusion patterns in tools/snapshot_txt.py
 - Maintain reasonable chunk sizes (default 120KB, max ~400KB per chunk)
 
@@ -439,4 +440,3 @@ Core moves:
 Red lines: no personal slurs; no dunking on believers/groups; if the idea isn't empty, say so. Lower the score and say what stands.
 
 <!-- ===== END: directives/style.kasravi_oliver.en.md ===== -->
-

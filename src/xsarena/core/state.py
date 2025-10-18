@@ -30,8 +30,16 @@ class SessionState:
     coverage_hammer_on: bool = True
     output_budget_snippet_on: bool = True
     output_push_on: bool = True
-    output_min_chars: int = 4500
+    output_min_chars: int = 3000
     output_push_max_passes: int = 3
+    # New persisted toggles
+    smart_min_enabled: bool = False
+    outline_first_enabled: bool = False
+    semantic_anchor_enabled: bool = False
+    reading_overlay_on: bool = False
+    # Prompt configuration (make defaults explicit and persisted)
+    active_profile: Optional[str] = None
+    overlays_active: List[str] = field(default_factory=list)
 
     def add_message(self, role: str, content: str):
         self.history.append(Message(role=role, content=content))
@@ -40,15 +48,23 @@ class SessionState:
         self.anchors.append(text[-self.anchor_length :])
 
     def to_dict(self) -> dict:
+        history_data = []
+        for m in self.history:
+            if isinstance(m, Message):
+                # It's a Message object
+                history_data.append(
+                    {
+                        "role": m.role,
+                        "content": m.content,
+                        "timestamp": m.timestamp.isoformat(),
+                    }
+                )
+            elif isinstance(m, dict):
+                # It's already a dict, use it as-is
+                history_data.append(m)
+
         return {
-            "history": [
-                {
-                    "role": m.role,
-                    "content": m.content,
-                    "timestamp": m.timestamp.isoformat(),
-                }
-                for m in self.history
-            ],
+            "history": history_data,
             "anchors": self.anchors,
             "continuation_mode": self.continuation_mode,
             "anchor_length": self.anchor_length,
@@ -65,6 +81,11 @@ class SessionState:
             "output_push_on": self.output_push_on,
             "output_min_chars": self.output_min_chars,
             "output_push_max_passes": self.output_push_max_passes,
+            "smart_min_enabled": self.smart_min_enabled,
+            "outline_first_enabled": self.outline_first_enabled,
+            "semantic_anchor_enabled": self.semantic_anchor_enabled,
+            "active_profile": self.active_profile,
+            "overlays_active": self.overlays_active,
         }
 
     def save_to_file(self, filepath: str):
@@ -78,14 +99,19 @@ class SessionState:
         with open(filepath, "r") as f:
             state_dict = json.load(f)
 
-        history = [
-            Message(
-                role=m["role"],
-                content=m["content"],
-                timestamp=datetime.fromisoformat(m["timestamp"]),
+        history = []
+        for m in state_dict.get("history", []):
+            if "timestamp" in m:
+                timestamp = datetime.fromisoformat(m["timestamp"])
+            else:
+                timestamp = datetime.now()  # Default to now if no timestamp
+            history.append(
+                Message(
+                    role=m["role"],
+                    content=m["content"],
+                    timestamp=timestamp,
+                )
             )
-            for m in state_dict.get("history", [])
-        ]
         state_dict["history"] = history
 
         # Filter out keys that are not in the dataclass definition

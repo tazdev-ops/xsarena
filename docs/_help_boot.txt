@@ -1,0 +1,14 @@
+
+ Usage: python -m xsarena boot [OPTIONS] COMMAND [ARGS]...
+
+ Startup reader (startup.yml)
+
+╭─ Options ────────────────────────────────────────────────────────────────────╮
+│ --help          Show this message and exit.                                  │
+╰──────────────────────────────────────────────────────────────────────────────╯
+╭─ Commands ───────────────────────────────────────────────────────────────────╮
+│ read   Read startup plan; attempt merge; print sources found. Does not       │
+│        modify code.                                                          │
+│ init   One-time helper: create a minimal rules baseline if merged rules and  │
+│        sources are missing.                                                  │
+╰──────────────────────────────────────────────────────────────────────────────╯

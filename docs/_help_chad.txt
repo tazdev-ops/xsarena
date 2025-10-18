@@ -1,0 +1,16 @@
+
+ Usage: python -m xsarena chad [OPTIONS] COMMAND [ARGS]...
+
+ Direct, evidence-based Q&A
+
+╭─ Options ────────────────────────────────────────────────────────────────────╮
+│ --help          Show this message and exit.                                  │
+╰──────────────────────────────────────────────────────────────────────────────╯
+╭─ Commands ───────────────────────────────────────────────────────────────────╮
+│ ask          Answer a question based on evidence and context.                │
+│ batch        Process a batch of questions from a file and save answers.      │
+│ check        Check a claim against provided evidence.                        │
+│ sources      Analyze multiple sources to answer a question.                  │
+│ fact-check   Fact-check a given statement.                                   │
+│ summarize    Summarize a list of evidence points.                            │
+╰──────────────────────────────────────────────────────────────────────────────╯

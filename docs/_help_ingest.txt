@@ -1,0 +1,11 @@
+
+ Usage: python -m xsarena ingest [OPTIONS] COMMAND [ARGS]...
+
+ Ingest and synthesize large documents
+
+╭─ Options ────────────────────────────────────────────────────────────────────╮
+│ --help          Show this message and exit.                                  │
+╰──────────────────────────────────────────────────────────────────────────────╯
+╭─ Commands ───────────────────────────────────────────────────────────────────╮
+│ run   Ingest a large document and create a dense synthesis.                  │
+╰──────────────────────────────────────────────────────────────────────────────╯

@@ -1,0 +1,17 @@
+
+ Usage: python -m xsarena clean [OPTIONS] COMMAND [ARGS]...
+
+ Cleanup (TTL-based sweeper)
+
+╭─ Options ────────────────────────────────────────────────────────────────────╮
+│ --help          Show this message and exit.                                  │
+╰──────────────────────────────────────────────────────────────────────────────╯
+╭─ Commands ───────────────────────────────────────────────────────────────────╮
+│ sweep          Purge ephemeral artifacts by TTL: - Matches                   │
+│                .xsarena/cleanup.yml policy globs - Honors XSA-EPHEMERAL ttl  │
+│                header which overrides policy TTL - Removes empty directories │
+│                after file deletions                                          │
+│ scan-secrets   Scan for secrets (API keys, passwords, etc.) in working tree. │
+│ mark           Add an XSA-EPHEMERAL header to a helper script so the sweeper │
+│                can purge it later.                                           │
+╰──────────────────────────────────────────────────────────────────────────────╯

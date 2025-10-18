@@ -105,7 +105,7 @@ def analyze_project():
     # Calculate total size
     total_size = 0
     all_files = []
-    for category, files in important_categories.items():
+    for _category, files in important_categories.items():
         for file_path in files:
             try:
                 size = Path(file_path).stat().st_size

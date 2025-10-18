@@ -1,0 +1,37 @@
+{
+  "id": "350e8776-0874-4cae-b6c6-738e2571c0fa",
+  "name": "Test Submit",
+  "run_spec": {
+    "subject": "Test Submit",
+    "length": "long",
+    "span": "book",
+    "overlays": [
+      "narrative",
+      "no_bs"
+    ],
+    "extra_note": "",
+    "extra_files": [],
+    "out_path": "./test_output.md",
+    "outline_scaffold": null,
+    "generate_plan": false,
+    "window_size": null,
+    "profile": null,
+    "backend": "bridge",
+    "model": "default",
+    "concurrency": 1,
+    "timeout": 300,
+    "bridge_session_id": null,
+    "bridge_message_id": null
+  },
+  "backend": "bridge",
+  "state": "PENDING",
+  "retries": 0,
+  "created_at": "2025-10-17T07:08:39.566426",
+  "updated_at": "2025-10-18T03:58:02",
+  "artifacts": {},
+  "meta": {
+    "system_text": "test system text",
+    "session_state": {}
+  },
+  "progress": {}
+}

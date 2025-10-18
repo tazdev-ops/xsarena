@@ -39,7 +39,7 @@ Specific Requirements:
 
 Implementation:
 - Run cleanup before each snapshot operation
-- Use scripts/snapshot_healthcheck.sh for automated verification
+- Use `xsarena snapshot write --dry-run` for automated verification
 - Follow inclusion/exclusion patterns in tools/snapshot_txt.py
 - Maintain reasonable chunk sizes (default 120KB, max ~400KB per chunk)
 
@@ -48,3 +48,9 @@ Rationale:
 - Keeps snapshots focused on project state rather than generated content
 - Ensures snapshot utility reliability and consistency
 - Maintains appropriate snapshot sizes for processing and sharing
+
+# ONE ORDER — Cockpit Prompt Commands
+- Add /prompt.show, /prompt.style <on|off> <name>, /prompt.profile <name>, /prompt.list, /prompt.preview <recipe>.
+- Runs must honor selected overlays and profile (compose overlays + extra into system_text).
+- Persist overlays_active and active_profile in .xsarena/session_state.json settings.
+- Default overlays: narrative + no_bs when none are set.

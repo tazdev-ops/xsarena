@@ -1,0 +1,14 @@
+task: book.mixer
+subject: History of Elections and Political Power in Britain (1832-Present)
+styles: [compressed, narrative]
+hammer: true
+outline_first: true
+continuation:
+  mode: anchor
+  anchorLen: 320
+  minChars: 4500
+  pushPasses: 3
+io:
+  output: file
+  outPath: ./books/britain_elections_history.manual.md
+max_chunks: 15

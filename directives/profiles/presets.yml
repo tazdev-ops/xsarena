@@ -1,0 +1,41 @@
+profiles:
+  criminology-handbook:
+    overlays: [narrative, no_bs]
+    extra: |
+      Criminology handbook: classical/positivist/critical lenses; measurement (UCR/NCVS/self-report); life-course; opportunity/routine activity; deterrence/incapacitation/rehab; program evaluation basics; common pitfalls.
+  socio-legal-brief:
+    overlays: [compressed, no_bs]
+    extra: |
+      Socio‑legal brief (educational): issue → doctrine (plain) → empirical evidence → institutions/actors → likely impacts → limits/unknowns → monitoring metrics. No legal advice; define terms on first use.
+  sentencing-analysis:
+    overlays: [compressed, no_bs]
+    extra: |
+      Sentencing factors memo (educational): offense factors; offender history; statutory ranges; guidelines (generic); aggravators/mitigators; proportionality and parity; evidence ladder; risks; monitoring.
+  policing-ops:
+    overlays: [narrative, no_bs]
+    extra: |
+      Policing ops (educational): call triage; deployment; use‑of‑force reporting; supervision; early warning indicators; transparency; data hygiene; risk controls; community feedback loops.
+  courts-procedure:
+    overlays: [narrative, no_bs]
+    extra: |
+      Courts & procedure (educational): case lifecycle; due process landmarks (plain); timelines; bottlenecks; backlog mitigation; hearing quality indicators; open courts/accessibility.
+  prison-reentry:
+    overlays: [narrative, no_bs]
+    extra: |
+      Reentry playbook: risks/needs/responsivity; housing/employment/ID; supervision structures; warm handoffs; relapse/violation responses; M&E of outcomes; trauma‑informed notes.
+  juvenile-justice:
+    overlays: [narrative, no_bs]
+    extra: |
+      Juvenile justice (educational): development science basics; diversion first; school discipline interfaces; safeguards; family engagement; least restrictive alternatives; equity checks.
+  comparative-criminal-justice:
+    overlays: [compressed, no_bs]
+    extra: |
+      Comparative CJ: inquisitorial/adversarial; policing models; prosecution independence; prison regimes; restorative models; metrics; trade‑offs; cautions on cross‑country inference.
+  legal-empirics:
+    overlays: [compressed, no_bs]
+    extra: |
+      Legal empirics: construct definition; observational vs causal designs; identification; measurement error; robustness and sensitivity; preregistration; data ethics.
+  forensics-basics:
+    overlays: [narrative, no_bs]
+    extra: |
+      Forensics basics (educational): evidence handling; lab processes; strengths/limits; error sources; reliability standards; reporting; cross‑discipline collaboration.

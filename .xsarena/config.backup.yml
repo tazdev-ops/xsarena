@@ -1,0 +1,11 @@
+backend: bridge
+model: default
+window_size: 100
+anchor_length: 300
+continuation_mode: anchor
+repetition_threshold: 0.8
+max_retries: 3
+api_key: null
+base_url: http://127.0.0.1:5102/v1
+timeout: 300
+redaction_enabled: false

@@ -1,0 +1,9 @@
+# Recipe to generate a short technical manual
+subject: "Introduction to Technical Writing"
+base: zero2hero
+overlays:
+  - technical_manual
+  - no_bs
+length: standard
+span: medium
+out_path: "books/finals/technical_writing_primer.md"

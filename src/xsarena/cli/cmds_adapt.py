@@ -127,7 +127,7 @@ def _inspect() -> Dict:
     report: Dict = {"checks": {}, "summary": []}
 
     # branding drift in userscript
-    us = Path("src/xsarena/bridge/userscript_example.js")
+    us = Path("xsarena_bridge.user.js")
     branding = {"file": str(us), "needs_fix": False}
     if us.exists():
         txt = _read(us)
@@ -171,7 +171,7 @@ def _inspect() -> Dict:
 
     # help docs drift (presence only)
     help_missing = []
-    for cmd, dest in HELP_TARGETS:
+    for _cmd, dest in HELP_TARGETS:
         if not Path(dest).exists():
             help_missing.append(dest)
     report["checks"]["helpdocs"] = {"missing": help_missing}
@@ -195,23 +195,17 @@ def _inspect() -> Dict:
     elif conf["fixed_base_url"]:
         report["summary"].append("config: normalize base_url to end with /v1")
 
-    # wiring (presence-only) — verify main registers new apps if they exist
+    # wiring (dynamic discovery): warn if cmds_*.py likely not registered in main.py
     main = Path("src/xsarena/cli/main.py")
     wiring = {"main_exists": main.exists(), "warn": []}
-    # Soft checks: if module exists but not referenced in main, warn (do not auto-patch)
-    modules = {
-        "cmds_quick.py": "quick",
-        "cmds_continue.py": "continue",
-        "cmds_run.py": "run",
-        "cmds_plan.py": "plan",
-        "cmds_report.py": "report",
-        "cmds_clean.py": "clean",
-        "cmds_ops.py": "ops",
-    }
     if main.exists():
         mtxt = _read(main)
-        for fname, name in modules.items():
-            if Path(f"src/xsarena/cli/{fname}").exists() and name not in mtxt:
+        # map cmds_foo.py → 'foo' (default convention)
+        for p in Path("src/xsarena/cli").glob("cmds_*.py"):
+            name = p.stem.replace("cmds_", "").replace("_", "-")
+            # known aliases mapping (control-jobs vs control)
+            expected = "control-jobs" if name == "control" else name
+            if expected not in mtxt and name not in mtxt:
                 wiring["warn"].append(f"main.py: '{name}' likely not registered")
     if wiring["warn"]:
         report["summary"].append("wiring: " + "; ".join(wiring["warn"]))
@@ -245,13 +239,13 @@ def _apply(report: Dict) -> Dict:
         )
         if txt != txt2:
             _write(p, txt2)
-            actions["changed"].append("userscript_example.js branding normalized")
+            actions["changed"].append("xsarena_bridge.user.js branding normalized")
 
     # Create default config if missing
     cfg = Path(".xsarena/config.yml")
     if not cfg.exists():
         default = (
-            "backend: bridge\nbase_url: http://127.0.0.1:8080/v1\nmodel: default\n"
+            "backend: bridge\nbase_url: http://127.0.0.1:5102/v1\nmodel: default\n"
         )
         _write(cfg, default)
         actions["changed"].append(".xsarena/config.yml created (defaults)")
@@ -341,7 +335,7 @@ def suppress_add(
         sup[check] = []
     _save_suppress(sup)
     typer.echo(
-        f"[adapt] suppression saved for '{check}' ({'all' if not pattern else pattern})"
+        f"[adapt] suppression saved for '{check}' ({pattern if pattern else 'all'})"
     )
 
 

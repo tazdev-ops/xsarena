@@ -1,0 +1,14 @@
+
+ Usage: python -m xsarena json [OPTIONS] COMMAND [ARGS]...
+
+ JSON validation and processing tools
+
+╭─ Options ────────────────────────────────────────────────────────────────────╮
+│ --help          Show this message and exit.                                  │
+╰──────────────────────────────────────────────────────────────────────────────╯
+╭─ Commands ───────────────────────────────────────────────────────────────────╮
+│ validate        Validate JSON file against a schema.                         │
+│ lint-template   Lint a prompt template file for JSON schema compliance.      │
+│ run             Run a prompt and optionally validate JSON output against a   │
+│                 schema.                                                      │
+╰──────────────────────────────────────────────────────────────────────────────╯

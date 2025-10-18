@@ -1,4 +1,0 @@
-{"ts": "2025-10-16T02:04:01", "type": "job_submitted", "job_id": "e950494e-ac6f-4527-90c3-fce29c4ab582"}
-{"type": "job_started", "job_id": "e950494e-ac6f-4527-90c3-fce29c4ab582", "ts": "2025-10-16T02:04:01"}
-{"type": "job_failed", "job_id": "e950494e-ac6f-4527-90c3-fce29c4ab582", "error": "Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]", "ts": "2025-10-16T02:04:02"}
-{"type": "job_ended", "job_id": "e950494e-ac6f-4527-90c3-fce29c4ab582", "state": "FAILED", "ts": "2025-10-16T02:04:02"}

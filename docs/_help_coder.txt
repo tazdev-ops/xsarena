@@ -1,0 +1,21 @@
+
+ Usage: python -m xsarena coder [OPTIONS] COMMAND [ARGS]...
+
+ Advanced coding session with tickets, patches, and git integration
+
+╭─ Options ────────────────────────────────────────────────────────────────────╮
+│ --help          Show this message and exit.                                  │
+╰──────────────────────────────────────────────────────────────────────────────╯
+╭─ Commands ───────────────────────────────────────────────────────────────────╮
+│ start           Start a new coding session.                                  │
+│ ticket          Create a new coding ticket.                                  │
+│ next            Get next pending ticket.                                     │
+│ patch           Apply patches with dry-run option.                           │
+│ test            Run tests with pytest.                                       │
+│ diff            Show file diff.                                              │
+│ branch          Create or switch to a git branch for this ticket.            │
+│ search          Search for pattern and create tickets.                       │
+│ test-skeleton   Create a test skeleton for a module.                         │
+│ rollback        Rollback last changes using git.                             │
+│ import-ruff     Convert .lint/tickets to coder tickets.                      │
+╰──────────────────────────────────────────────────────────────────────────────╯

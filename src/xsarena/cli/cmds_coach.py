@@ -20,14 +20,15 @@ def _ask_q(eng: Engine, subject: str):
 
 @app.command("start")
 def coach_start(subject: str, minutes: int = 10):
-    """Timed coach drill with immediate feedback."""
     try:
-        from ..core.joy import add_achievement, log_event
-    except ImportError:
-        # Joy module is optional, skip achievements
-        add_achievement = log_event = lambda *args, **kwargs: None
+        eng = Engine(create_backend("openrouter"), SessionState())
+    except ValueError:
+        typer.echo(
+            "Error: OpenRouter backend requires OPENROUTER_API_KEY environment variable to be set.",
+            err=True,
+        )
+        raise typer.Exit(1)
 
-    eng = Engine(create_backend("openrouter"), SessionState())
     end = time.time() + minutes * 60
     score = 0
     asked = 0
@@ -60,11 +61,20 @@ def coach_quiz(subject: str, n: int = 10):
         from ..core.joy import add_achievement, log_event
     except ImportError:
         # Joy module is optional, skip achievements
-        add_achievement = log_event = lambda *args, **kwargs: None
+        def log_event(*args, **kwargs):
+            return None
 
-    eng = Engine(create_backend("openrouter"), SessionState())
+    try:
+        eng = Engine(create_backend("openrouter"), SessionState())
+    except ValueError:
+        typer.echo(
+            "Error: OpenRouter backend requires OPENROUTER_API_KEY environment variable to be set.",
+            err=True,
+        )
+        raise typer.Exit(1)
+
     score = 0
-    for i in range(n):
+    for _i in range(n):
         q = _ask_q(eng, subject)
         print("\n" + q)
         ans = input("Your answer (A-D): ").strip().upper()
@@ -90,7 +100,15 @@ def boss_start(subject: str, n: int = 20, minutes: int = 25):
         # Joy module is optional, skip achievements
         add_achievement = log_event = lambda *args, **kwargs: None
 
-    eng = Engine(create_backend("openrouter"), SessionState())
+    try:
+        eng = Engine(create_backend("openrouter"), SessionState())
+    except ValueError:
+        typer.echo(
+            "Error: OpenRouter backend requires OPENROUTER_API_KEY environment variable to be set.",
+            err=True,
+        )
+        raise typer.Exit(1)
+
     end = time.time() + minutes * 60
     score = 0
     asked = 0

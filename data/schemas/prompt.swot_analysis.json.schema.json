@@ -1,0 +1,22 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "SWOT Analysis",
+  "type": "object",
+  "required": ["subject", "analysis"],
+  "properties": {
+    "subject": {
+      "type": "string",
+      "description": "The subject of the analysis."
+    },
+    "analysis": {
+      "type": "object",
+      "required": ["strengths", "weaknesses", "opportunities", "threats"],
+      "properties": {
+        "strengths": { "type": "array", "items": { "type": "string" } },
+        "weaknesses": { "type": "array", "items": { "type": "string" } },
+        "opportunities": { "type": "array", "items": { "type": "string" } },
+        "threats": { "type": "array", "items": { "type": "string" } }
+      }
+    }
+  }
+}

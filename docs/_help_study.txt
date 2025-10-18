@@ -1,0 +1,14 @@
+
+ Usage: python -m xsarena study [OPTIONS] COMMAND [ARGS]...
+
+ Study and learning tools
+
+╭─ Options ────────────────────────────────────────────────────────────────────╮
+│ --help          Show this message and exit.                                  │
+╰──────────────────────────────────────────────────────────────────────────────╯
+╭─ Commands ───────────────────────────────────────────────────────────────────╮
+│ flashcards   Generate flashcards from a content file.                        │
+│ quiz         Generate a quiz from a content file.                            │
+│ glossary     Create a glossary from a content file.                          │
+│ index        Generate an index from a content file.                          │
+╰──────────────────────────────────────────────────────────────────────────────╯

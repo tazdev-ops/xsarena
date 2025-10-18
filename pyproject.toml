@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "xsarena"
-version = "0.1.0"
+version = "0.2.0"
 description = "AI-powered writing and coding studio"
 readme = "README.md"
 requires-python = ">=3.9"
@@ -22,13 +22,12 @@ dependencies = [
     "fastapi>=0.100.0",
     "uvicorn[standard]>=0.23.0",
     "websockets>=11.0",
-    "requests>=2.31.0"
+    "requests>=2.31.0",
+    "jsonschema>=4.18.0"
 ]
 
 [project.optional-dependencies]
-tui = [
-    "textual>=0.40.0"
-]
+
 dev = [
     "pytest>=7.0.0",
     "pytest-asyncio>=0.21.0",
@@ -46,11 +45,11 @@ metrics = [
 
 [project.scripts]
 xsarena = "xsarena.cli.main:run"
-# xsarena-tui = "xsarena_tui:main"   # drop for now; add back when TUI exists
-xsarena-bridge = "xsarena.bridge.server:main"
+# xsarena-tui = "xsarena_tui:main"   # moved to contrib/; no longer maintained as core feature
+xsarena-bridge = "xsarena.bridge_v2.api_server:run_server"
 # compatibility for one release cycle:
 lmastudio = "xsarena.cli.main:run"
-lmastudio-bridge = "xsarena.bridge.server:main"
+lmastudio-bridge = "xsarena.bridge_v2.api_server:run_server"
 
 [project.urls]
 Homepage = "https://github.com/your-username/xsarena"

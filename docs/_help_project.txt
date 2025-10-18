@@ -1,0 +1,23 @@
+
+ Usage: python -m xsarena project [OPTIONS] COMMAND [ARGS]...
+
+ Project management commands
+
+╭─ Options ────────────────────────────────────────────────────────────────────╮
+│ --help          Show this message and exit.                                  │
+╰──────────────────────────────────────────────────────────────────────────────╯
+╭─ Commands ───────────────────────────────────────────────────────────────────╮
+│ config-migrate         Migrate from                                          │
+│                        config.jsonc/models.json/model_endpoint_map.json to   │
+│                        .xsarena/config.yml.                                  │
+│ bridge-ids             Manage bridge session and message IDs.                │
+│ normalize              Apply content fixes and cleanup (normalize,           │
+│                        declutter).                                           │
+│ directives-merge       Merge session rules from directives/_rules into       │
+│                        directives/_rules/rules.merged.md.                    │
+│ docs-regen             Regenerate documentation (help files, etc.).          │
+│ snapshot-healthcheck   Run snapshot health check.                            │
+│ declutter-phase1       Run declutter phase 1 (move legacy files, create      │
+│                        deprecation stubs).                                   │
+│ dedupe-by-hash         Remove duplicate files by hash (dry-run by default).  │
+╰──────────────────────────────────────────────────────────────────────────────╯

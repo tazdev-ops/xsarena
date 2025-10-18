@@ -1,7 +1,7 @@
 import pathlib
+import re
 
 import typer
-
 
 from .context import CLIContext
 
@@ -17,6 +17,7 @@ def _ppaths(subject: str):
 
 @app.command("run")
 def preview_run(
+    ctx: typer.Context,
     file: str = typer.Argument(...),
     edit: bool = typer.Option(True, "--edit/--no-edit"),
     autorun: bool = typer.Option(False, "--autorun/--no-autorun"),
@@ -34,10 +35,9 @@ def preview_run(
     # Load the recipe file
     try:
         with open(file, "r", encoding="utf-8") as f:
-            if file.endswith((".yml", ".yaml")):
-                data = yaml.safe_load(f)
-            else:
-                data = json.load(f)
+            data = (
+                yaml.safe_load(f) if file.endswith((".yml", ".yaml")) else json.load(f)
+            )
     except Exception as e:
         typer.echo(f"Failed to load recipe file: {e}", err=True)
         raise typer.Exit(2)
@@ -62,7 +62,7 @@ def preview_run(
 
     # Generate a real sample if requested
     if sample:
-        cli: CLIContext = typer.get_current_context().obj
+        cli: CLIContext = ctx.obj
         import asyncio
 
         # Generate a sample using the current engine
@@ -87,40 +87,37 @@ def preview_run(
         typer.echo(f"[preview] Sample → {p_sample}")
 
     if autorun:
-        # Run the job using JobRunner
-        task = data.get("task", "book.zero2hero")
-        io = data.get("io", {})
-        out_path = io.get("outPath") or io.get("out")
-        cont = data.get("continuation", {})
-        max_chunks = int(data.get("max_chunks", 8))
+        # Use the new orchestrator system
+        import asyncio
 
-        playbook = {
-            "name": f"CLI recipe: {subject}",
-            "subject": subject,
-            "task": task,
-            "system_text": system_text,
-            "hammer": True,
-            "outline_first": True,
-            "failover": {
-                "watchdog_secs": 90,
-                "max_retries": 3,
-                "fallback_backend": "openrouter",
-            },
-        }
+        from ..core.v2_orchestrator.orchestrator import Orchestrator
+        from ..core.v2_orchestrator.specs import LengthPreset, RunSpecV2, SpanPreset
 
-        params = {
-            "max_chunks": max_chunks,
-            "continuation": {
-                "mode": cont.get("mode", "anchor"),
-                "minChars": int(cont.get("minChars", 3000)),
-                "pushPasses": int(cont.get("pushPasses", 1)),
-                "repeatWarn": bool(cont.get("repeatWarn", True)),
-            },
-            "io": {"outPath": out_path} if out_path else {},
-        }
+        # Compute a sane slug for the subject
+        slug = re.sub(r"[^\w\s-]", "", subject.lower()).strip()
+        slug = re.sub(r"[-\s]+", "_", slug)
+        if not slug:
+            slug = "book"
 
-        runner = JobRunner({})
-        job_id = runner.submit(playbook, params)
-        typer.echo(f"[jobs] submitted: {job_id}")
-        runner.run_job(job_id)
-        typer.echo(f"[jobs] done: {job_id}")
+        default_out = f"./books/{slug}.final.md"
+        run_spec = RunSpecV2(
+            subject=subject,
+            length=LengthPreset.LONG,
+            span=SpanPreset.BOOK,
+            overlays=["narrative", "no_bs"],
+            extra_note="",
+            extra_files=[],
+            out_path=default_out,
+            profile="",
+        )
+
+        orchestrator = Orchestrator()
+        job_id = asyncio.run(orchestrator.run_spec(run_spec, backend_type="bridge"))
+
+        # Use a single variable for echoes to avoid nested f-strings/quoting issues
+        echo_message = (
+            f"[run] submitted: {job_id}\n"
+            f"[run] done: {job_id}\n"
+            f"[run] final → {default_out}"
+        )
+        typer.echo(echo_message)

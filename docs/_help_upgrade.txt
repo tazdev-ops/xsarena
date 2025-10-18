@@ -1,0 +1,12 @@
+
+ Usage: python -m xsarena upgrade [OPTIONS] COMMAND [ARGS]...
+
+ Version-aware upgrader
+
+╭─ Options ────────────────────────────────────────────────────────────────────╮
+│ --help          Show this message and exit.                                  │
+╰──────────────────────────────────────────────────────────────────────────────╯
+╭─ Commands ───────────────────────────────────────────────────────────────────╮
+│ check   Check for available upgrade packs and necessary code modifications.  │
+│ apply   Apply available upgrade packs.                                       │
+╰──────────────────────────────────────────────────────────────────────────────╯

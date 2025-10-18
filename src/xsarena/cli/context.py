@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+import contextlib
 import os
+import time
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Optional
@@ -23,56 +25,96 @@ class CLIContext:
     def load(
         cls, cfg: Optional[Config] = None, state_path: Optional[str] = None
     ) -> "CLIContext":
-        cfg = cfg or (
-            Config.load_from_file(".xsarena/config.yml")
-            if Path(".xsarena/config.yml").exists()
-            else Config()
-        )
+        """
+        Load CLI context with clear order of precedence:
+        1. Start with hardcoded SessionState() defaults
+        2. Load .xsarena/session_state.json (user's last-used interactive settings)
+        3. Load .xsarena/config.yml (project-level defaults)
+        4. Apply CLI flags from cfg object (explicit, one-time overrides)
+        """
+        # Start with hardcoded defaults
+        session_state = SessionState()
+
+        # Set up state path
         state_path = Path(state_path or "./.xsarena/session_state.json")
         state_path.parent.mkdir(parents=True, exist_ok=True)
 
-        # self-heal: if state file is corrupt, move aside and start fresh
-        state = SessionState()
+        # Load configuration with layered precedence
+        base_cfg = Config.load_from_file(".xsarena/config.yml")
+
+        # 2. Load .xsarena/session_state.json (user's last-used interactive settings)
+        # This file represents the user's last-used interactive settings and should have high priority
         if state_path.exists():
             try:
-                state = SessionState.load_from_file(str(state_path))
+                file_session_state = SessionState.load_from_file(str(state_path))
+                # Apply values from session_state.json, overriding defaults
+                for field_name in file_session_state.__dict__:
+                    if hasattr(session_state, field_name):
+                        setattr(
+                            session_state,
+                            field_name,
+                            getattr(file_session_state, field_name),
+                        )
             except Exception:
-                bak = state_path.with_suffix(".bak")
-                # don't overwrite existing bak
-                bak = (
-                    bak
-                    if not bak.exists()
-                    else state_path.with_name(state_path.stem + ".bak1")
-                )
-                try:
+                # Create backup and continue with defaults if session file is corrupted
+                bak = state_path.with_suffix(f".{int(time.time())}.bak")
+                with contextlib.suppress(Exception):
                     state_path.rename(bak)
-                except Exception:
-                    pass
-                state = SessionState()
+                # Continue with defaults if session file is corrupted
 
-        # ensure backend + model from cfg override
-        state.backend = cfg.backend or state.backend
-        state.model = cfg.model or state.model
-        state.window_size = cfg.window_size or state.window_size
+        # 3. Load .xsarena/config.yml (project-level defaults)
+        # This represents project-level defaults
+        config_path = Path(".xsarena/config.yml")
+        if config_path.exists():
+            import yaml
 
-        # ensure base_url ends with /v1
-        if cfg.base_url and not cfg.base_url.rstrip("/").endswith("/v1"):
-            cfg.base_url = cfg.base_url.rstrip("/") + "/v1"
+            try:
+                with open(config_path, "r", encoding="utf-8") as f:
+                    config_content = yaml.safe_load(f) or {}
+                persisted_settings = config_content.get("settings", {})
 
-        # build engine
+                # Apply config.yml settings, overriding session state
+                for key, value in persisted_settings.items():
+                    if hasattr(session_state, key):
+                        setattr(session_state, key, value)
+            except Exception:
+                pass  # If config can't be read, continue with current state
+
+        # 4. Apply CLI flags from cfg object (explicit, one-time overrides)
+        # This is the highest priority - CLI flags override everything else
+        if cfg is not None:
+            # Only apply non-default values from CLI to avoid overriding user choices with defaults
+            if cfg.backend != "bridge":
+                session_state.backend = cfg.backend
+            if cfg.model != "default":
+                session_state.model = cfg.model
+            if cfg.window_size != 100:
+                session_state.window_size = cfg.window_size
+            if cfg.continuation_mode != "anchor":
+                session_state.continuation_mode = cfg.continuation_mode
+            if cfg.anchor_length != 300:
+                session_state.anchor_length = cfg.anchor_length
+            if cfg.repetition_threshold != 0.35:
+                session_state.repetition_threshold = cfg.repetition_threshold
+
+        # Normalize base URL shape
+        final_base_url = base_cfg.base_url
+        if final_base_url and not final_base_url.rstrip("/").endswith("/v1"):
+            base_cfg.base_url = final_base_url.rstrip("/") + "/v1"
+
+        # Build engine using the final state
         backend = create_backend(
-            state.backend,
-            base_url=os.getenv("XSA_BRIDGE_URL", cfg.base_url),
-            api_key=cfg.api_key,
-            model=state.model,
+            session_state.backend,
+            base_url=os.getenv("XSA_BRIDGE_URL", base_cfg.base_url),
+            api_key=base_cfg.api_key,
+            model=session_state.model,
         )
-        eng = Engine(backend, state)
-
-        # Reapply redaction filter if enabled
-        if state.settings.get("redaction_enabled"):
+        eng = Engine(backend, session_state)
+        if session_state.settings.get("redaction_enabled"):
             eng.set_redaction_filter(redact)
-
-        return cls(config=cfg, state=state, engine=eng, state_path=state_path)
+        return cls(
+            config=base_cfg, state=session_state, engine=eng, state_path=state_path
+        )
 
     def rebuild_engine(self):
         # self-heal base_url shape
@@ -115,8 +157,8 @@ class CLIContext:
 
         # default base_url if empty
         if not self.config.base_url:
-            self.config.base_url = "http://127.0.0.1:8080/v1"
-            notes.append("Set default bridge base_url http://127.0.0.1:8080/v1")
+            self.config.base_url = "http://127.0.0.1:5102/v1"
+            notes.append("Set default bridge base_url http://127.0.0.1:5102/v1")
 
         self.rebuild_engine()
         self.save()

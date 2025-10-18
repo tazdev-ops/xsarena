@@ -1,0 +1,8 @@
+{
+  "goal": "Create a system prompt for writing haikus.",
+  "status": "pending_questions",
+  "questions": [
+    "What is the target audience?",
+    "What is the desired output format?"
+  ]
+}

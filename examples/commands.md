@@ -1,4 +1,4 @@
-# LMASudio Example Commands
+# XSArena Example Commands
 
 This file contains ready-to-use command examples for different workflows.
 
@@ -7,25 +7,25 @@ This file contains ready-to-use command examples for different workflows.
 ### Nietzsche Study
 ```bash
 # Create a detailed outline
-lmastudio book outline "The philosophy of Friedrich Nietzsche"
+xsarena run book outline "The philosophy of Friedrich Nietzsche"
 
 # Write a no-bullshit manual about Nietzsche
-lmastudio book nobs "Friedrich Nietzsche's philosophical works"
+xsarena run book nobs "Friedrich Nietzsche's philosophical works"
 
 # Polish a draft chapter
-lmastudio book polish "Your Nietzsche chapter text here..."
+xsarena run book polish "Your Nietzsche chapter text here..."
 ```
 
 ### Marx Study
 ```bash
 # Create a comprehensive reference book
-lmastudio book reference "Karl Marx's economic theories"
+xsarena run book reference "Karl Marx's economic theories"
 
 # Generate a zero-to-hero book on Marxism
-lmastudio book zero2hero "Marxism and its impact on modern economics"
+xsarena run book zero2hero "Marxism and its impact on modern economics"
 
 # Create a popular science book about Marx
-lmastudio book pop "Karl Marx for beginners"
+xsarena run book pop "Karl Marx for beginners"
 ```
 
 ## Lossless Processing
@@ -33,13 +33,13 @@ lmastudio book pop "Karl Marx for beginners"
 ### Text Improvement
 ```bash
 # Rewrite text while preserving meaning
-lmastudio lossless rewrite "Your text to improve..."
+xsarena lossless rewrite "Your text to improve..."
 
 # Run comprehensive lossless processing
-lmastudio lossless run "Your text to process..."
+xsarena lossless run "Your text to process..."
 
 # Improve flow of a document
-lmastudio lossless improve-flow "Your document text..."
+xsarena lossless improve-flow "Your document text..."
 ```
 
 ## Bilingual Processing
@@ -47,10 +47,10 @@ lmastudio lossless improve-flow "Your document text..."
 ### Translation and Alignment
 ```bash
 # Transform text between languages
-lmastudio bilingual transform --source-lang "English" --target-lang "Spanish" "Your text here..."
+xsarena bilingual transform --source-lang "English" --target-lang "Spanish" "Your text here..."
 
 # Check translation alignment
-lmastudio mode alignment-check --source-text "Original" --translated-text "Translation" --source-lang "English" --target-lang "French"
+xsarena mode alignment-check --source-text "Original" --translated-text "Translation" --source-lang "English" --target-lang "French"
 ```
 
 ## Policy Analysis
@@ -58,10 +58,10 @@ lmastudio mode alignment-check --source-text "Original" --translated-text "Trans
 ### Document Generation and Analysis
 ```bash
 # Generate a policy document
-lmastudio policy generate-from-topic "Climate change mitigation" --requirements "Include economic impact and implementation timeline"
+xsarena policy generate-from-topic "Climate change mitigation" --requirements "Include economic impact and implementation timeline"
 
 # Analyze policy compliance
-lmastudio policy analyze-compliance --policy "Your policy text" --evidence-files "evidence1.txt,evidence2.txt"
+xsarena policy analyze-compliance --policy "Your policy text" --evidence-files "evidence1.txt,evidence2.txt"
 ```
 
 ## Study Tools
@@ -69,13 +69,13 @@ lmastudio policy analyze-compliance --policy "Your policy text" --evidence-files
 ### Flashcards and Quizzes
 ```bash
 # Generate flashcards from content
-lmastudio study flashcards --content "Your study material..." --num-cards 15
+xsarena study flashcards --content "Your study material..." --num-cards 15
 
 # Create a quiz
-lmastudio study quiz --content "Your content..." --num-questions 10 --question-type "mixed"
+xsarena study quiz --content "Your content..." --num-questions 10 --question-type "mixed"
 
 # Create a glossary
-lmastudio study glossary --content "Your content..."
+xsarena study glossary --content "Your content..."
 ```
 
 ## Chad Mode (Evidence-Based Q&A)
@@ -83,10 +83,10 @@ lmastudio study glossary --content "Your content..."
 ### Direct Questions
 ```bash
 # Answer a specific question
-lmastudio chad answer-question --question "What are the main tenets of behavioral economics?"
+xsarena chad answer-question --question "What are the main tenets of behavioral economics?"
 
 # Fact-check a statement
-lmastudio chad fact-check --statement "Climate change is primarily caused by human activities"
+xsarena chad fact-check --statement "Climate change is primarily caused by human activities"
 ```
 
 ## Coding
@@ -94,13 +94,13 @@ lmastudio chad fact-check --statement "Climate change is primarily caused by hum
 ### Code Generation
 ```bash
 # Generate a complete project
-lmastudio coder code-project --requirements "Create a Python web scraper for news articles" --language "python"
+xsarena coder code-project --requirements "Create a Python web scraper for news articles" --language "python"
 
 # Fix code issues
-lmastudio coder fix-code --code "Your buggy code..." --issue "Function not returning expected values"
+xsarena coder fix-code --code "Your buggy code..." --issue "Function not returning expected values"
 
 # Review code
-lmastudio coder review-code --code "Your code to review..." --language "javascript"
+xsarena coder review-code --code "Your code to review..." --language "javascript"
 ```
 
 ## Backend Configuration
@@ -108,13 +108,13 @@ lmastudio coder review-code --code "Your code to review..." --language "javascri
 ### Switching Backends
 ```bash
 # Set to bridge backend (default)
-lmastudio backend set bridge
+xsarena backend set bridge
 
 # Set to OpenRouter with specific model
-lmastudio backend set openrouter --api-key "your-api-key" --model "openai/gpt-4o"
+xsarena backend set openrouter --api-key "your-api-key" --model "openai/gpt-4o"
 
 # Test current backend
-lmastudio backend test
+xsarena backend test
 ```
 
 ## Mode Toggles
@@ -122,16 +122,16 @@ lmastudio backend test
 ### Conversation Modes
 ```bash
 # Set to battle mode
-lmastudio mode mode battle
+xsarena mode mode battle
 
 # Set battle target to A
-lmastudio mode battle-target A
+xsarena mode battle-target A
 
 # Enable tavern mode (merge system messages)
-lmastudio mode tavern true
+xsarena mode tavern true
 
 # Enable bypass mode
-lmastudio mode bypass true
+xsarena mode bypass true
 ```
 
 ## Debugging and State Management
@@ -139,14 +139,37 @@ lmastudio mode bypass true
 ### Session Management
 ```bash
 # Show current session state
-lmastudio debug state
+xsarena debug state
 
 # Show current configuration
-lmastudio debug config
+xsarena debug config
 
 # Save current session
-lmastudio debug save-state ./session_backup.json
+xsarena debug save-state ./session_backup.json
 
 # Load a saved session
-lmastudio debug load-state ./session_backup.json
+xsarena debug load-state ./session_backup.json
+```
+
+## Job Control
+
+### Live Steering (Pause/Resume/Next/Cancel)
+```bash
+# Pause a running job
+xsarena control pause <job_id>
+
+# Resume a paused job
+xsarena control resume <job_id>
+
+# Send a hint to the next chunk of a job
+xsarena control next <job_id> "hint text"
+
+# Cancel a running job
+xsarena control cancel <job_id>
+
+# List all jobs
+xsarena jobs list
+
+# Show job status
+xsarena jobs show <job_id>
 ```

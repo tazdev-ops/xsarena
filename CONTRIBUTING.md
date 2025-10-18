@@ -44,10 +44,10 @@ pre-commit install
 
 When adding features, follow the existing architecture:
 
-- Core functionality in `src/lmastudio/core/`
-- Modes in `src/lmastudio/modes/`
-- CLI commands in `src/lmastudio/cli/`
-- Backend implementations in `src/lmastudio/core/backends.py`
+- Core functionality in `src/xsarena/core/`
+- Modes in `src/xsarena/modes/`
+- CLI commands in `src/xsarena/cli/`
+- Backend implementations in `src/xsarena/core/backends.py`
 
 ## Reporting Issues
 

@@ -14,6 +14,11 @@
   "coverage_hammer_on": true,
   "output_budget_snippet_on": true,
   "output_push_on": true,
-  "output_min_chars": 4500,
-  "output_push_max_passes": 3
+  "output_min_chars": 3000,
+  "output_push_max_passes": 3,
+  "smart_min_enabled": false,
+  "outline_first_enabled": false,
+  "semantic_anchor_enabled": false,
+  "active_profile": null,
+  "overlays_active": []
 }

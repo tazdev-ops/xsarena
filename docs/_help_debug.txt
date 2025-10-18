@@ -1,0 +1,17 @@
+
+ Usage: python -m xsarena debug [OPTIONS] COMMAND [ARGS]...
+
+ Debugging commands
+
+╭─ Options ────────────────────────────────────────────────────────────────────╮
+│ --help          Show this message and exit.                                  │
+╰──────────────────────────────────────────────────────────────────────────────╯
+╭─ Commands ───────────────────────────────────────────────────────────────────╮
+│ state              Show current session state.                               │
+│ clear-history      Clear the conversation history.                           │
+│ clear-anchors      Clear the anchors.                                        │
+│ config             Show current configuration.                               │
+│ save-state         Save current state to a file.                             │
+│ load-state         Load state from a file.                                   │
+│ toggle-redaction   Toggle the redaction filter.                              │
+╰──────────────────────────────────────────────────────────────────────────────╯

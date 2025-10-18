@@ -1,0 +1,13 @@
+
+ Usage: python -m xsarena style [OPTIONS] COMMAND [ARGS]...
+
+ Apply style and pedagogy overlays
+
+╭─ Options ────────────────────────────────────────────────────────────────────╮
+│ --help          Show this message and exit.                                  │
+╰──────────────────────────────────────────────────────────────────────────────╯
+╭─ Commands ───────────────────────────────────────────────────────────────────╮
+│ narrative   Enable or disable the narrative/pedagogy overlay for the         │
+│             session.                                                         │
+│ nobs        Enable or disable the no-bullshit (no-bs) language overlay.      │
+╰──────────────────────────────────────────────────────────────────────────────╯

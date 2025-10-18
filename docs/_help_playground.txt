@@ -1,0 +1,11 @@
+
+ Usage: python -m xsarena playground [OPTIONS] COMMAND [ARGS]...
+
+ Prompt composition and sampling
+
+╭─ Options ────────────────────────────────────────────────────────────────────╮
+│ --help          Show this message and exit.                                  │
+╰──────────────────────────────────────────────────────────────────────────────╯
+╭─ Commands ───────────────────────────────────────────────────────────────────╮
+│ run   Run a prompt against a subject in the playground.                      │
+╰──────────────────────────────────────────────────────────────────────────────╯

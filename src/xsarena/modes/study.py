@@ -1,9 +1,38 @@
 """Study and learning modes for XSArena."""
 
+from pathlib import Path
 from typing import Any, Dict, List
 
 from ..core.engine import Engine
-from ..core.templates import SYSTEM_PROMPTS
+
+
+# Load templates directly from directive files
+def _load_directive_content(file_path: str) -> str:
+    """Load content from a directive file."""
+    # First try relative to current working directory
+    if Path(file_path).exists():
+        return Path(file_path).read_text(encoding="utf-8").strip()
+
+    # Try relative to project root (relative to this file)
+    project_root = Path(__file__).parent.parent.parent.parent
+    full_path = project_root / file_path
+    if full_path.exists():
+        return full_path.read_text(encoding="utf-8").strip()
+
+    # Return empty string if not found
+    return ""
+
+
+# Load system prompts from directive files
+SYSTEM_PROMPTS = {
+    "book": _load_directive_content("directives/roles/book.md"),
+}
+
+# Fallback hardcoded value if directive file is not available
+if not SYSTEM_PROMPTS["book"]:
+    SYSTEM_PROMPTS[
+        "book"
+    ] = "You are an educational assistant. Create study materials, flashcards, and learning aids."
 
 
 class StudyMode:

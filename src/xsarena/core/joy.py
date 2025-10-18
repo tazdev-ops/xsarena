@@ -1,36 +1,89 @@
-"""Joy module - stub implementation."""
+"""Joy module stubs with file persistence."""
 
-import asyncio
-from typing import Any, Dict, List
-
-
-def joy_start() -> str:
-    """Start joy functionality - stub implementation."""
-    return "Joy module is not available in this build. Feature not included."
+import json
+from datetime import datetime
+from pathlib import Path
+from typing import Any, Dict
 
 
-def joy_interact(input_text: str) -> str:
-    """Interact with joy module - stub implementation."""
-    return f"Joy interaction not available. Input: {input_text}"
+def _get_state_file() -> Path:
+    """Get the path to the joy state file."""
+    state_dir = Path(".xsarena/joy")
+    state_dir.mkdir(parents=True, exist_ok=True)
+    return state_dir / "state.json"
 
 
-def joy_analyze(text: str) -> Dict[str, Any]:
-    """Analyze text for joy content - stub implementation."""
-    return {
-        "joy_score": 0.0,
-        "features": [],
-        "analysis": "Joy analysis not available in this build.",
-    }
+def get_state() -> Dict[str, Any]:
+    """Get the current joy state."""
+    state_file = _get_state_file()
+    if state_file.exists():
+        try:
+            with open(state_file, "r", encoding="utf-8") as f:
+                return json.load(f)
+        except Exception:
+            pass  # If file is corrupted, return default state
+
+    # Return default state
+    return {"streak": 0, "last_day": None, "achievements": [], "events": []}
 
 
-async def joy_async_process(data: List[str]) -> List[str]:
-    """Async processing for joy - stub implementation."""
-    await asyncio.sleep(0.1)  # Simulate async operation
-    return [f"Processed: {item}" for item in data]
+def _save_state(state: Dict[str, Any]) -> None:
+    """Save the joy state to file."""
+    state_file = _get_state_file()
+    with open(state_file, "w", encoding="utf-8") as f:
+        json.dump(state, f, indent=2)
 
 
-def joy_not_implemented(*args, **kwargs) -> None:
-    """Raise NotImplementedError for heavy functions."""
-    raise NotImplementedError(
-        "Joy module functionality not available in this build. See documentation for installation instructions."
-    )
+def bump_streak() -> int:
+    """Increment the streak counter."""
+    state = get_state()
+
+    # Check if it's a new day
+    today = datetime.now().strftime("%Y-%m-%d")
+    if state.get("last_day") != today:
+        state["streak"] += 1
+        state["last_day"] = today
+    else:
+        # If it's the same day, don't increment but return current streak
+        pass
+
+    _save_state(state)
+    return state["streak"]
+
+
+def add_achievement(title: str) -> None:
+    """Add an achievement to the state."""
+    state = get_state()
+
+    if title not in state["achievements"]:
+        state["achievements"].append(title)
+        _save_state(state)
+
+
+def log_event(event_type: str, data: Dict[str, Any]) -> None:
+    """Log an event."""
+    state = get_state()
+
+    event = {"type": event_type, "data": data, "timestamp": datetime.now().isoformat()}
+
+    state["events"].append(event)
+
+    # Keep only the last 100 events to prevent the file from growing too large
+    if len(state["events"]) > 100:
+        state["events"] = state["events"][-100:]
+
+    _save_state(state)
+
+
+def sparkline(days: int = 7) -> str:
+    """Generate a simple sparkline for the last N days."""
+    # For the stub, we'll just return a simple representation
+    # In a real implementation, this would track daily activity
+    state = get_state()
+    streak = state.get("streak", 0)
+
+    # Simple representation: filled circles for streak days, empty for others
+    filled = min(streak, days)
+    empty = max(0, days - filled)
+
+    return "●" * filled + "○" * empty

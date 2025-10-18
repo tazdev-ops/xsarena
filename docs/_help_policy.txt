@@ -1,0 +1,15 @@
+
+ Usage: python -m xsarena policy [OPTIONS] COMMAND [ARGS]...
+
+ Policy analysis and generation tools
+
+╭─ Options ────────────────────────────────────────────────────────────────────╮
+│ --help          Show this message and exit.                                  │
+╰──────────────────────────────────────────────────────────────────────────────╯
+╭─ Commands ───────────────────────────────────────────────────────────────────╮
+│ generate    Generate a policy document from a topic and requirements.        │
+│ analyze     Analyze policy compliance against evidence files.                │
+│ score       Score policy compliance against evidence files.                  │
+│ gaps        Analyze gaps between policy and requirements.                    │
+│ checklist   Generate an implementation checklist for the policy.             │
+╰──────────────────────────────────────────────────────────────────────────────╯

@@ -1,0 +1,31 @@
+# --- .snapshotinclude ---
+# Whitelist of files and directories for the minimal snapshot.
+# Globs are supported.
+
+# Core project definition
+pyproject.toml
+README.md
+.gitignore
+
+# Core application logic
+src/xsarena/__init__.py
+src/xsarena/__main__.py
+src/xsarena/cli/main.py
+src/xsarena/cli/cmds_snapshot.py
+src/xsarena/core/config.py
+src/xsarena/core/redact.py
+
+# Essential directives only
+directives/_rules/sources/CLI_AGENT_RULES.md
+directives/agent_quickref.md
+
+# Tests for core functionality
+tests/test_cli_help_smoke.py
+tests/conftest.py
+
+# Scripts and Tools
+scripts/gen_docs.sh
+scripts/prepush_check.sh
+
+# Configuration
+.xsarena/config.yml

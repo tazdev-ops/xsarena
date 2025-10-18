@@ -1,0 +1,17 @@
+
+ Usage: python -m xsarena lossless [OPTIONS] COMMAND [ARGS]...
+
+ Lossless text processing commands
+
+╭─ Options ────────────────────────────────────────────────────────────────────╮
+│ --help          Show this message and exit.                                  │
+╰──────────────────────────────────────────────────────────────────────────────╯
+╭─ Commands ───────────────────────────────────────────────────────────────────╮
+│ ingest              Ingest and synthesize information from text.             │
+│ rewrite             Rewrite text while preserving all meaning.               │
+│ run                 Perform a comprehensive lossless processing run.         │
+│ improve-flow        Improve the flow and transitions in text.                │
+│ break-paragraphs    Break dense paragraphs into more readable chunks.        │
+│ enhance-structure   Enhance text structure with appropriate headings and     │
+│                     formatting.                                              │
+╰──────────────────────────────────────────────────────────────────────────────╯

@@ -1,0 +1,6 @@
+{
+  "syl": "xsarena prompt run -s directives/prompt.syllabus_6week.json.md -t \"$1\" > review/syllabus.$(date +%s).json",
+  "imatrix": "xsarena prompt run -s directives/prompt.idea_matrix.json.md -t \"$1\" > review/ideamatrix.$(date +%s).json",
+  "sbeats": "xsarena prompt run -s directives/prompt.story_beats.json.md -t \"$1\" > review/beats.$(date +%s).json",
+  "ndigest": "xsarena prompt run -s directives/prompt.note_digest.json.md -t \"$1\" > review/digest.$(date +%s).json"
+}

@@ -1,0 +1,1449 @@
+roles:
+- name: glossary_surgeon
+  path: directives/roles/role.glossary_surgeon.md
+  summary: You are a Glossary Surgeon.
+- name: narrative_editor
+  path: directives/roles/role.narrative_editor.md
+  summary: "Narrative Flow Editor (Lossless \u2192 Pedagogy)"
+- name: policy_drafter
+  path: directives/roles/role.policy_drafter.md
+  summary: Policy Drafter (Plain English)
+- name: red_team
+  path: directives/roles/role.red_team.md
+  summary: Red-Team (Defensive)
+- name: risk_officer
+  path: directives/roles/role.risk_officer.md
+  summary: Risk Officer (Five Whys + Failure Modes)
+- name: socratic
+  path: directives/roles/role.socratic.md
+  summary: Socratic Cross-Examiner
+- name: steelman
+  path: directives/roles/role.steelman.md
+  summary: Steelman + Synthesis Mediator
+- name: socratic_coach
+  path: directives/roles/role.socratic_coach.md
+  summary: You are a Socratic Coach. You teach by asking minimal, incisive questions
+    and then summarizing what has been learned before proceeding.
+- name: story_architect
+  path: directives/roles/role.story_architect.md
+  summary: You are a Story Architect for nonfiction. You design narrative scaffolds
+    (beats) that make complex topics stick.
+- name: brutal_editor
+  path: directives/roles/role.brutal_editor.md
+  summary: 'You are a Brutal Editor. Your job: remove fluff, redundancy, hedging,
+    and throat-clearing; tighten to the core without losing substance.'
+- name: checklist_chief
+  path: directives/roles/role.checklist_chief.md
+  summary: You are the Checklist Chief. Convert process-heavy text into checklists
+    and read-and-do flows.
+- name: field_guide_maker
+  path: directives/roles/role.field_guide_maker.md
+  summary: "You produce field guides: situation \u2192 defaults \u2192 procedures\
+    \ \u2192 pitfalls \u2192 examples."
+- name: examiner
+  path: directives/roles/role.examiner.md
+  summary: You are an Examiner. Create a short, fair test of true understanding.
+- name: product_spec_writer
+  path: directives/roles/role.product_spec_writer.md
+  summary: You are a Product Spec Writer.
+- name: skeptic_auditor
+  path: directives/roles/role.skeptic_auditor.md
+  summary: You are a Skeptic Auditor. Your job is to interrogate arguments, surface
+    assumptions, and propose better tests.
+- name: policy_brief_writer
+  path: directives/roles/role.policy_brief_writer.md
+  summary: 'You write policy briefs that move decisions. Output sections:'
+- name: debate_steelman
+  path: directives/roles/role.debate_steelman.md
+  summary: 'You are a Steelman Debater: maximize opponent''s strongest version before
+    critique.'
+- name: cross_examiner
+  path: directives/roles/role.cross_examiner.md
+  summary: "You conduct cross\u2011examination to test claims."
+- name: bilingual_pairs
+  path: directives/roles/role.bilingual_pairs.md
+  summary: 'You output bilingual pairs with identical structure:'
+- name: peer_reviewer
+  path: directives/roles/role.peer_reviewer.md
+  summary: You provide structured peer review.
+- name: bilingual_alignment_fixer
+  path: directives/roles/role.bilingual_alignment_fixer.md
+  summary: 'Given SOURCE and TARGET blocks, realign semantically: split/merge minimally,
+    preserve order and meaning; return aligned pairs as a 2-column TSV (no commentary).'
+- name: ethnographic_mentor
+  path: directives/roles/role.ethnographic_mentor.md
+  summary: 'You mentor fieldwork writing. Output sections:'
+- name: methods_statistician
+  path: directives/roles/role.methods_statistician.md
+  summary: You are a causal inference statistician.
+- name: evidence_synthesizer
+  path: directives/roles/role.evidence_synthesizer.md
+  summary: You synthesize heterogeneous evidence (quant + qual).
+- name: rhetorician
+  path: directives/roles/role.rhetorician.md
+  summary: You shape arguments with rhetoric, rigor intact.
+- name: bilingual_abstracts
+  path: directives/roles/role.bilingual_abstracts.md
+  summary: 'You output abstracts as EN/FA (or EN/ES) pairs with identical structure:'
+- name: debate_chair
+  path: directives/roles/role.debate_chair.md
+  summary: You are a Debate Chair. You enforce structure, time, and fairness.
+- name: debate_prep_coach
+  path: directives/roles/role.debate_prep_coach.md
+  summary: You are a Debate Prep Coach.
+- name: campaign_field_director
+  path: directives/roles/role.campaign_field_director.md
+  summary: You are a Campaign Field Director (educational, non-partisan).
+- name: polling_auditor
+  path: directives/roles/role.polling_auditor.md
+  summary: You audit polls and trackers.
+- name: manifesto_coder
+  path: directives/roles/role.manifesto_coder.md
+  summary: You code party manifestos into an issue grid.
+- name: redistricting_analyst
+  path: directives/roles/role.redistricting_analyst.md
+  summary: You analyze districting plans (educational).
+- name: coalition_broker
+  path: directives/roles/role.coalition_broker.md
+  summary: You construct viable coalitions (educational).
+- name: turnout_strategist
+  path: directives/roles/role.turnout_strategist.md
+  summary: You draft generic turnout plans (educational).
+- name: media_monitor
+  path: directives/roles/role.media_monitor.md
+  summary: You monitor media framing.
+- name: election_law_observer
+  path: directives/roles/role.election_law_observer.md
+  summary: You are an Election Law Observer (educational; not legal advice).
+- name: bilingual_manifesto_pairs
+  path: directives/roles/role.bilingual_manifesto_pairs.md
+  summary: You produce manifesto pairs as EN/FA (or EN/ES) with identical structure.
+- name: implementation_manager
+  path: directives/roles/role.implementation_manager.md
+  summary: You are an Implementation Manager. Produce a tight, auditable plan.
+- name: budget_analyst
+  path: directives/roles/role.budget_analyst.md
+  summary: You are a Budget Analyst. Build the case without hype.
+- name: me_specialist
+  path: directives/roles/role.me_specialist.md
+  summary: You are an M&E Specialist. Create a usable plan.
+- name: procurement_adviser
+  path: directives/roles/role.procurement_adviser.md
+  summary: You are a Procurement Adviser (educational; not legal advice).
+- name: risk_officer_ops
+  path: directives/roles/role.risk_officer_ops.md
+  summary: You are an Operational Risk Officer.
+- name: process_improvement_coach
+  path: directives/roles/role.process_improvement_coach.md
+  summary: You are a Process Improvement Coach (Lean-ish, pragmatic).
+- name: ria_drafter
+  path: directives/roles/role.ria_drafter.md
+  summary: You draft a Regulatory Impact Analysis (educational).
+- name: service_blueprinter
+  path: directives/roles/role.service_blueprinter.md
+  summary: You blueprint public services.
+- name: bilingual_exec_summary_pairs
+  path: directives/roles/role.bilingual_exec_summary_pairs.md
+  summary: 'You produce short executive summaries as EN/FA (or EN/ES) pairs with identical
+    structure:'
+- name: sociolegal_analyst
+  path: directives/roles/role.sociolegal_analyst.md
+  summary: Socio-Legal Analyst
+- name: criminology_synthesizer
+  path: directives/roles/role.criminology_synthesizer.md
+  summary: Criminology Synthesizer
+- name: sentencing_memo
+  path: directives/roles/role.sentencing_memo.md
+  summary: Sentencing Memo
+- name: procedural_justice_coach
+  path: directives/roles/role.procedural_justice_coach.md
+  summary: Procedural Justice Coach
+- name: reentry_coordinator
+  path: directives/roles/role.reentry_coordinator.md
+  summary: Reentry Coordinator
+- name: court_observer
+  path: directives/roles/role.court_observer.md
+  summary: Court Observer
+- name: bilingual_case_abstract_pairs
+  path: directives/roles/role.bilingual_case_abstract_pairs.md
+  summary: Bilingual Case Abstract Pairs
+- name: rubber_duck_architect
+  path: directives/roles/role.rubber_duck_architect.md
+  summary: "You are a Rubber\u2011Duck Architect. You ask 3\u20135 tiny questions,\
+    \ then propose a simple, testable design."
+- name: brainstorm_facilitator
+  path: directives/roles/role.brainstorm_facilitator.md
+  summary: You facilitate idea generation like a pro.
+- name: analogy_engineer
+  path: directives/roles/role.analogy_engineer.md
+  summary: "Analogy \u2192 mapping \u2192 where it breaks."
+- name: story_vignette_smith
+  path: directives/roles/role.story_vignette_smith.md
+  summary: "Short teaching vignettes (120\u2013180 words) that reveal a concept in\
+    \ action."
+- name: regex_explainer
+  path: directives/roles/role.regex_explainer.md
+  summary: You explain regexps and generate tests.
+- name: commit_poet
+  path: directives/roles/role.commit_poet.md
+  summary: "You write crystal\u2011clear commit messages (Conventional Commits)."
+- name: spock_logic
+  path: directives/roles/role.spock_logic.md
+  summary: 'You are Spock Logic: perfectly calm, strictly logical, and emotionally
+    neutral.'
+- name: cold_operator
+  path: directives/roles/role.cold_operator.md
+  summary: 'You are the Cold Operator: outcome > feelings.'
+- name: deadpan_mentor
+  path: directives/roles/role.deadpan_mentor.md
+  summary: 'You are a Deadpan Mentor: terse, pragmatic, almost bored.'
+- name: socratic_cross_examiner
+  path: directives/roles/role.socratic_cross_examiner.md
+  summary: 'You are a Socratic Cross-Examiner: short, closed questions that isolate
+    claims.'
+- name: rationalist_summarizer
+  path: directives/roles/role.rationalist_summarizer.md
+  summary: You are the Rationalist Summarizer.
+- name: merciless_editor
+  path: directives/roles/role.merciless_editor.md
+  summary: You are a Merciless Editor. Delete anything that doesn't change a decision.
+- name: one_page_brutalist
+  path: directives/roles/role.one_page_brutalist.md
+  summary: You are a One-Page Brutalist.
+- name: haiku_tech_lead
+  path: directives/roles/role.haiku_tech_lead.md
+  summary: You are the Haiku Tech Lead.
+- name: no_adverbs_rewriter
+  path: directives/roles/role.no_adverbs_rewriter.md
+  summary: You are the No-Adverbs Rewriter.
+- name: scaffold_then_expand
+  path: directives/roles/role.scaffold_then_expand.md
+  summary: "You are Scaffold \u2192 Expand."
+- name: backwards_planner
+  path: directives/roles/role.backwards_planner.md
+  summary: You are a Backwards Planner.
+- name: numbers_or_silence
+  path: directives/roles/role.numbers_or_silence.md
+  summary: 'You are Numbers-or-Silence: produce estimates or say "insufficient evidence".'
+- name: two_sided_memoist
+  path: directives/roles/role.two_sided_memoist.md
+  summary: You write a two-sided memo.
+- name: regret_minimizer
+  path: directives/roles/role.regret_minimizer.md
+  summary: You optimize for "minimize maximum regret."
+- name: risk_register_curator
+  path: directives/roles/role.risk_register_curator.md
+  summary: You curate crisp risk registers.
+- name: skeptic_auditor_plus
+  path: directives/roles/role.skeptic_auditor_plus.md
+  summary: You are a Skeptic Auditor.
+- name: red_team_probe
+  path: directives/roles/role.red_team_probe.md
+  summary: You do quick red teams (safe/educational).
+- name: spec_breaker
+  path: directives/roles/role.spec_breaker.md
+  summary: You are a Spec Breaker (requirements).
+- name: table_tester
+  path: directives/roles/role.table_tester.md
+  summary: You turn prose into tables with typed columns, then test them.
+- name: edge_case_hunter
+  path: directives/roles/role.edge_case_hunter.md
+  summary: You hunt edge cases.
+- name: principle_then_playbook
+  path: directives/roles/role.principle_then_playbook.md
+  summary: "You output principle \u2192 playbook."
+- name: two_pass_writer
+  path: directives/roles/role.two_pass_writer.md
+  summary: 'Two-pass: rough, then tighten.'
+- name: rhetoric_rigour_balancer
+  path: directives/roles/role.rhetoric_rigour_balancer.md
+  summary: You balance rhetoric and rigor.
+- name: benchmark_referee
+  path: directives/roles/role.benchmark_referee.md
+  summary: You are a Benchmark Referee. You adjudicate conflicting claims.
+- name: devils_advocate_max
+  path: directives/roles/role.devils_advocate_max.md
+  summary: You are Devil's Advocate MAX. Your job is to steelman the opposition then
+    break the current thesis.
+- name: brutal_outline_polisher
+  path: directives/roles/role.brutal_outline_polisher.md
+  summary: You are a Brutal Outline Polisher.
+- name: bottom_line_only
+  path: directives/roles/role.bottom_line_only.md
+  summary: You write BLUF (Bottom Line Up Front).
+- name: constraint_solver
+  path: directives/roles/role.constraint_solver.md
+  summary: You are a Constraint Solver.
+- name: ladder_of_abstraction
+  path: directives/roles/role.ladder_of_abstraction.md
+  summary: You run the Ladder of Abstraction.
+- name: myth_buster
+  path: directives/roles/role.myth_buster.md
+  summary: You are a Myth Buster.
+- name: micro_tutor
+  path: directives/roles/role.micro_tutor.md
+  summary: "You are a Micro\u2011Tutor for a single concept."
+- name: code_commentator
+  path: directives/roles/role.code_commentator.md
+  summary: You comment code precisely.
+- name: continuity_checker
+  path: directives/roles/role.continuity_checker.md
+  summary: You are a Continuity Checker for long-form text.
+- name: gap_finder
+  path: directives/roles/role.gap_finder.md
+  summary: You are a Gap Finder.
+- name: redline_editor
+  path: directives/roles/role.redline_editor.md
+  summary: You are a Redline Editor (no fluff).
+- name: bibliography_builder
+  path: directives/roles/role.bibliography_builder.md
+  summary: You draft a mini bibliography (educational, illustrative).
+- name: tldr_then_deep_dive
+  path: directives/roles/role.tldr_then_deep_dive.md
+  summary: You do TL;DR then deep dive.
+- name: idea_jam_host
+  path: directives/roles/role.idea_jam_host.md
+  summary: You are an Idea Jam Host. Your job is to produce a lot of good ideas fast,
+    then converge.
+- name: concept_cartographer
+  path: directives/roles/role.concept_cartographer.md
+  summary: You are a Concept Cartographer. You map ideas and connections.
+- name: smash_cut_writer
+  path: directives/roles/role.smash_cut_writer.md
+  summary: "You are a Smash\u2011Cut Writer. Teach via 6 quick scene beats."
+- name: micro_coach_timer
+  path: directives/roles/role.micro_coach_timer.md
+  summary: "You are a Micro\u2011Coach Timer. Turn goals into short sprints."
+- name: prompt_refiner
+  path: directives/roles/role.prompt_refiner.md
+  summary: "You refine messy prompts into high\u2011signal instructions."
+- name: title_surgeon
+  path: directives/roles/role.title_surgeon.md
+  summary: You are a Title Surgeon. Create strong, informative titles.
+- name: storyboard_planner
+  path: directives/roles/role.storyboard_planner.md
+  summary: You plan a presentation/storyboard.
+- name: gist_then_questions
+  path: directives/roles/role.gist_then_questions.md
+  summary: "You do Gist \u2192 Questions \u2192 Next."
+- name: table_cleaner
+  path: directives/roles/role.table_cleaner.md
+  summary: You normalize messy lists into tables.
+- name: refactor_to_checklist
+  path: directives/roles/role.refactor_to_checklist.md
+  summary: "You refactor prose into \"read\u2011and\u2011do\" checklists."
+- name: data_storyteller_narrator
+  path: directives/roles/role.data_storyteller_narrator.md
+  summary: You are a Data Storyteller. You turn numbers into narrative.
+- name: chart_to_words
+  path: directives/roles/role.chart_to_words.md
+  summary: You translate charts to words precisely.
+- name: reader_contract_editor
+  path: directives/roles/role.reader_contract_editor.md
+  summary: You enforce a reader contract.
+- name: socratic_outline_20min
+  path: directives/roles/role.socratic_outline_20min.md
+  summary: You build an outline in 20 minutes.
+- name: history_case_weaver
+  path: directives/roles/role.history_case_weaver.md
+  summary: You weave a history case (educational).
+- name: psych_methods_coach
+  path: directives/roles/role.psych_methods_coach.md
+  summary: You coach research design (educational).
+- name: politics_mechanism_mapper
+  path: directives/roles/role.politics_mechanism_mapper.md
+  summary: "You map political mechanisms (educational, non\u2011partisan)."
+- name: philosophy_argument_midwife
+  path: directives/roles/role.philosophy_argument_midwife.md
+  summary: You midwife arguments.
+- name: chapter_pacer
+  path: directives/roles/role.chapter_pacer.md
+  summary: You pace chapters.
+- name: scene_rewriter_show_dont_tell
+  path: directives/roles/role.scene_rewriter_show_dont_tell.md
+  summary: You rewrite a scene to show, not tell.
+- name: slide_deck_architect
+  path: directives/roles/role.slide_deck_architect.md
+  summary: You are a Slide Deck Architect. You turn outlines into a usable deck plan.
+- name: meeting_distiller
+  path: directives/roles/role.meeting_distiller.md
+  summary: You are a Meeting Distiller. Turn messy notes into decisions and actions.
+- name: email_triage_reply
+  path: directives/roles/role.email_triage_reply.md
+  summary: You are an Email Triage & Reply Planner.
+- name: prd_onepager_lead
+  path: directives/roles/role.prd_onepager_lead.md
+  summary: "You are a PRD One\u2011Pager Lead."
+- name: research_question_tuner
+  path: directives/roles/role.research_question_tuner.md
+  summary: You are a Research Question Tuner.
+- name: resume_bullet_surgeon
+  path: directives/roles/role.resume_bullet_surgeon.md
+  summary: "You are a R\xE9sum\xE9 Bullet Surgeon."
+- name: study_micro_tutor
+  path: directives/roles/role.study_micro_tutor.md
+  summary: "You are a Study Micro\u2011Tutor."
+- name: tefl_lesson_planner
+  path: directives/roles/role.tefl_lesson_planner.md
+  summary: You are a TEFL Lesson Planner. Design a lesson that is practical, classroom-ready,
+    and aligned to CEFR.
+- name: celta_trainer
+  path: directives/roles/role.celta_trainer.md
+  summary: You are a CELTA-style Trainer. Improve a draft lesson plan for clarity,
+    staging, and learner outcomes.
+- name: tblt_designer
+  path: directives/roles/role.tblt_designer.md
+  summary: You are a TBLT (Task-Based Language Teaching) Designer.
+- name: eap_writing_coach
+  path: directives/roles/role.eap_writing_coach.md
+  summary: You are an EAP Writing Coach (educational).
+- name: ielts_speaking_sim
+  path: directives/roles/role.ielts_speaking_sim.md
+  summary: You are an IELTS Speaking Simulator (educational, unofficial).
+- name: pronunciation_coach
+  path: directives/roles/role.pronunciation_coach.md
+  summary: You are a Pronunciation Coach.
+- name: classroom_manager
+  path: directives/roles/role.classroom_manager.md
+  summary: You are a Classroom Management Coach.
+- name: error_correction_coach
+  path: directives/roles/role.error_correction_coach.md
+  summary: You are an Error Correction Coach.
+- name: worksheet_generator
+  path: directives/roles/role.worksheet_generator.md
+  summary: You are a Worksheet Generator.
+- name: source_critic
+  path: directives/roles/role.source_critic.md
+  summary: You are a Source Critic (historian's lens).
+- name: historiography_mapper
+  path: directives/roles/role.historiography_mapper.md
+  summary: You map the historiography of a topic.
+- name: timeline_architect
+  path: directives/roles/role.timeline_architect.md
+  summary: You build an analytic timeline.
+- name: causation_weaver
+  path: directives/roles/role.causation_weaver.md
+  summary: You trace causal chains and mechanisms.
+- name: comparative_case_maker
+  path: directives/roles/role.comparative_case_maker.md
+  summary: You do a comparative case.
+- name: dbq_trainer
+  path: directives/roles/role.dbq_trainer.md
+  summary: You are a DBQ Trainer (educational).
+- name: oral_history_interviewer
+  path: directives/roles/role.oral_history_interviewer.md
+  summary: You draft an oral history interview guide.
+- name: exhibit_panel_curator
+  path: directives/roles/role.exhibit_panel_curator.md
+  summary: You draft a museum exhibit panel.
+- name: map_caption_writer
+  path: directives/roles/role.map_caption_writer.md
+  summary: You write precise map captions.
+- name: quant_history_brief
+  path: directives/roles/role.quant_history_brief.md
+  summary: You do a cliometric brief (numbers-first).
+- name: workshop_architect
+  path: directives/roles/role.workshop_architect.md
+  summary: You are a Workshop Architect. Design a practical, engaging session that
+    achieves a concrete outcome.
+- name: facilitator_script_writer
+  path: directives/roles/role.facilitator_script_writer.md
+  summary: You write a facilitator's script (what to say/do).
+- name: icebreaker_curator
+  path: directives/roles/role.icebreaker_curator.md
+  summary: You curate icebreakers (purpose-first).
+- name: decision_moderator
+  path: directives/roles/role.decision_moderator.md
+  summary: You moderate decision sessions.
+- name: retrospective_guide
+  path: directives/roles/role.retrospective_guide.md
+  summary: You run a retrospective.
+- name: timebox_conductor
+  path: directives/roles/role.timebox_conductor.md
+  summary: You enforce timeboxes gently.
+- name: clarity_surgeon
+  path: directives/roles/role.clarity_surgeon.md
+  summary: You are a Clarity Surgeon. Rewrite for precision and brevity.
+- name: tone_aligner
+  path: directives/roles/role.tone_aligner.md
+  summary: You adjust tone without changing meaning.
+- name: narrative_arc_planner
+  path: directives/roles/role.narrative_arc_planner.md
+  summary: You design a narrative arc for an article/chapter.
+- name: hook_crafter
+  path: directives/roles/role.hook_crafter.md
+  summary: You craft strong, honest hooks.
+- name: outline_doctor
+  path: directives/roles/role.outline_doctor.md
+  summary: You fix outlines for parallel structure and coverage.
+- name: definition_first_editor
+  path: directives/roles/role.definition_first_editor.md
+  summary: "You enforce definitions\u2011first."
+- name: survey_designer
+  path: directives/roles/role.survey_designer.md
+  summary: You are a Survey Designer. Produce a practical, defensible survey plan.
+- name: questionnaire_architect
+  path: directives/roles/role.questionnaire_architect.md
+  summary: You are a Questionnaire Architect.
+- name: sampling_statistician
+  path: directives/roles/role.sampling_statistician.md
+  summary: You design sampling plans.
+- name: weighting_benchmarker
+  path: directives/roles/role.weighting_benchmarker.md
+  summary: You write a weighting & benchmarking plan.
+- name: panel_ops_manager
+  path: directives/roles/role.panel_ops_manager.md
+  summary: You manage panels.
+- name: mode_effects_analyst
+  path: directives/roles/role.mode_effects_analyst.md
+  summary: You analyze mode effects.
+- name: cognitive_interviewer
+  path: directives/roles/role.cognitive_interviewer.md
+  summary: You create a cognitive interview guide.
+- name: survey_experiment_lead
+  path: directives/roles/role.survey_experiment_lead.md
+  summary: You design a survey experiment.
+- name: nonresponse_strategist
+  path: directives/roles/role.nonresponse_strategist.md
+  summary: You reduce nonresponse bias.
+- name: logical_fact_finder
+  path: directives/roles/role.logical_fact_finder.md
+  summary: You are a Logical Fact Finder. You evaluate claims neutrally using definitions,
+    logic, and evidence.
+- name: debate_referee_logic
+  path: directives/roles/role.debate_referee_logic.md
+  summary: You are a Debate Referee (logic-first).
+- name: bayesian_reasoner
+  path: directives/roles/role.bayesian_reasoner.md
+  summary: You are a Bayesian Reasoner (educational).
+- name: poet_maker
+  path: directives/roles/role.poet_maker.md
+  summary: You are a Poet-Maker. Compose an original poem faithful to the requested
+    form, meter, rhyme, tone, and imagery.
+- name: poem_translator
+  path: directives/roles/role.poem_translator.md
+  summary: 'You are a Poem Translator. Produce two versions from the source poem:'
+- name: scansion_analyst
+  path: directives/roles/role.scansion_analyst.md
+  summary: You are a Scansion Analyst. Analyze meter, rhyme, and sound devices.
+- name: poem_explainer
+  path: directives/roles/role.poem_explainer.md
+  summary: You are a Poem Explainer (reader-friendly).
+- name: socratic_tutor
+  path: directives/roles/role.socratic_tutor.md
+  summary: 'Role: Socratic Tutor'
+prompts:
+- name: arche_professor.json
+  path: directives/arche_professor.json.md
+  schema: null
+- name: source_critique.json
+  path: directives/prompt/source_critique.json.md
+  schema: null
+- name: timeline_analytic.json
+  path: directives/prompt/timeline_analytic.json.md
+  schema: null
+- name: causation_graph.json
+  path: directives/prompt/causation_graph.json.md
+  schema: null
+- name: historiography_map.json
+  path: directives/prompt/historiography_map.json.md
+  schema: null
+- name: comparative_matrix.json
+  path: directives/prompt/comparative_matrix.json.md
+  schema: null
+- name: dbq_packet.json
+  path: directives/prompt/dbq_packet.json.md
+  schema: null
+- name: oral_history_guide.json
+  path: directives/prompt/oral_history_guide.json.md
+  schema: null
+- name: exhibit_panel.json
+  path: directives/prompt/exhibit_panel.json.md
+  schema: null
+- name: map_caption_brief.json
+  path: directives/prompt/map_caption_brief.json.md
+  schema: null
+- name: actor_network.json
+  path: directives/prompt/actor_network.json.md
+  schema: null
+- name: periodization_scheme.json
+  path: directives/prompt/periodization_scheme.json.md
+  schema: null
+- name: reading_seminar_plan.json
+  path: directives/prompt/reading_seminar_plan.json.md
+  schema: null
+- name: prompt.workshop_agenda.json
+  path: directives/prompt/prompt.workshop_agenda.json.md
+  schema: null
+- name: prompt.exercise_bank.json
+  path: directives/prompt/prompt.exercise_bank.json.md
+  schema: null
+- name: prompt.icebreaker_set.json
+  path: directives/prompt/prompt.icebreaker_set.json.md
+  schema: null
+- name: prompt.decision_record.json
+  path: directives/prompt/prompt.decision_record.json.md
+  schema: null
+- name: prompt.facilitator_script.json
+  path: directives/prompt/prompt.facilitator_script.json.md
+  schema: null
+- name: prompt.meeting_minutes.json
+  path: directives/prompt/prompt.meeting_minutes.json.md
+  schema: null
+- name: prompt.outline_diagnosis.json
+  path: directives/prompt/prompt.outline_diagnosis.json.md
+  schema: null
+- name: prompt.paragraph_rewrite.json
+  path: directives/prompt/prompt.paragraph_rewrite.json.md
+  schema: null
+- name: prompt.style_check.json
+  path: directives/prompt/prompt.style_check.json.md
+  schema: null
+- name: prompt.glossary_make.json
+  path: directives/prompt/prompt.glossary_make.json.md
+  schema: null
+- name: prompt.examples_bank.json
+  path: directives/prompt/prompt.examples_bank.json.md
+  schema: null
+- name: prompt.citation_stub_list.json
+  path: directives/prompt/prompt.citation_stub_list.json.md
+  schema: null
+- name: claim_definition.json
+  path: directives/prompt/claim_definition.json.md
+  schema: null
+- name: argument_catalog.json
+  path: directives/prompt/argument_catalog.json.md
+  schema: null
+- name: argument_evaluation.json
+  path: directives/prompt/argument_evaluation.json.md
+  schema: null
+- name: evidence_registry.json
+  path: directives/prompt/evidence_registry.json.md
+  schema: null
+- name: bayesian_update_sheet.json
+  path: directives/prompt/bayesian_update_sheet.json.md
+  schema: null
+- name: falsifiability_matrix.json
+  path: directives/prompt/falsifiability_matrix.json.md
+  schema: null
+- name: reasoned_brief.json
+  path: directives/prompt/reasoned_brief.json.md
+  schema: null
+- name: poem_brief.json
+  path: directives/prompt/poem_brief.json.md
+  schema: null
+- name: poem_output.json
+  path: directives/prompt/poem_output.json.md
+  schema: null
+- name: poem_translation_plan.json
+  path: directives/prompt/poem_translation_plan.json.md
+  schema: null
+- name: poem_translation_pairs.json
+  path: directives/prompt/poem_translation_pairs.json.md
+  schema: null
+- name: scansion_report.json
+  path: directives/prompt/scansion_report.json.md
+  schema: null
+- name: poem_alignment.json
+  path: directives/prompt/poem_alignment.json.md
+  schema: null
+- name: poetic_glossary.json
+  path: directives/prompt/poetic_glossary.json.md
+  schema: null
+- name: rhythm_options.json
+  path: directives/prompt/rhythm_options.json.md
+  schema: null
+- name: prompt.strip.json
+  path: directives/prompt/prompt.strip.json.md
+  schema: null
+- name: prompt.lesson_plan.json
+  path: directives/prompt/prompt.lesson_plan.json.md
+  schema: null
+- name: prompt.flashcards.json
+  path: directives/prompt/prompt.flashcards.json.md
+  schema: null
+- name: prompt.faq.json
+  path: directives/prompt/prompt.faq.json.md
+  schema: null
+- name: prompt.checklist.json
+  path: directives/prompt/prompt.checklist.json.md
+  schema: null
+- name: prompt.rubric.json
+  path: directives/prompt/prompt.rubric.json.md
+  schema: null
+- name: prompt.policy_options.json
+  path: directives/prompt/prompt.policy_options.json.md
+  schema: null
+- name: prompt.peer_review.json
+  path: directives/prompt/prompt.peer_review.json.md
+  schema: null
+- name: prompt.rct_protocol.json
+  path: directives/prompt/prompt.rct_protocol.json.md
+  schema: null
+- name: prompt.debate_round.json
+  path: directives/prompt/prompt.debate_round.json.md
+  schema: null
+- name: prompt.theory_map.json
+  path: directives/prompt/prompt.theory_map.json.md
+  schema: null
+- name: prompt.qual_codebook.json
+  path: directives/prompt/prompt.qual_codebook.json.md
+  schema: null
+- name: prompt.survey_design.json
+  path: directives/prompt/prompt.survey_design.json.md
+  schema: null
+- name: prompt.case_study.json
+  path: directives/prompt/prompt.case_study.json.md
+  schema: null
+- name: prompt.seat_projection.json
+  path: directives/prompt/prompt.seat_projection.json.md
+  schema: null
+- name: prompt.coalition_builder.json
+  path: directives/prompt/prompt.coalition_builder.json.md
+  schema: null
+- name: prompt.debate_prep_grid.json
+  path: directives/prompt/prompt.debate_prep_grid.json.md
+  schema: null
+- name: prompt.turnout_plan.json
+  path: directives/prompt/prompt.turnout_plan.json.md
+  schema: null
+- name: prompt.poll_audit.json
+  path: directives/prompt/prompt.poll_audit.json.md
+  schema: null
+- name: prompt.survey_experiment_design.json
+  path: directives/prompt/prompt.survey_experiment_design.json.md
+  schema: null
+- name: prompt.district_fairness.json
+  path: directives/prompt/prompt.district_fairness.json.md
+  schema: null
+- name: prompt.message_map.json
+  path: directives/prompt/prompt.message_map.json.md
+  schema: null
+- name: prompt.manifesto_grid.json
+  path: directives/prompt/prompt.manifesto_grid.json.md
+  schema: null
+- name: prompt.comparative_systems_brief.json
+  path: directives/prompt/prompt.comparative_systems_brief.json.md
+  schema: null
+- name: prompt.implementation_plan.json
+  path: directives/prompt/prompt.implementation_plan.json.md
+  schema: null
+- name: prompt.logic_model.json
+  path: directives/prompt/prompt.logic_model.json.md
+  schema: null
+- name: prompt.kpi_dashboard.json
+  path: directives/prompt/prompt.kpi_dashboard.json.md
+  schema: null
+- name: prompt.risk_register.json
+  path: directives/prompt/prompt.risk_register.json.md
+  schema: null
+- name: prompt.stakeholder_map.json
+  path: directives/prompt/prompt.stakeholder_map.json.md
+  schema: null
+- name: prompt.raci_matrix.json
+  path: directives/prompt/prompt.raci_matrix.json.md
+  schema: null
+- name: prompt.service_blueprint.json
+  path: directives/prompt/prompt.service_blueprint.json.md
+  schema: null
+- name: prompt.procurement_checklist.json
+  path: directives/prompt/prompt.procurement_checklist.json.md
+  schema: null
+- name: prompt.change_management.json
+  path: directives/prompt/prompt.change_management.json.md
+  schema: null
+- name: prompt.ria_brief.json
+  path: directives/prompt/prompt.ria_brief.json.md
+  schema: null
+- name: prompt.case_brief.json
+  path: directives/prompt/prompt.case_brief.json.md
+  schema: null
+- name: prompt.sentencing_factors.json
+  path: directives/prompt/prompt.sentencing_factors.json.md
+  schema: null
+- name: prompt.crime_trends_brief.json
+  path: directives/prompt/prompt.crime_trends_brief.json.md
+  schema: null
+- name: prompt.procedural_justice_index.json
+  path: directives/prompt/prompt.procedural_justice_index.json.md
+  schema: null
+- name: prompt.reentry_plan.json
+  path: directives/prompt/prompt.reentry_plan.json.md
+  schema: null
+- name: prompt.police_policy_audit.json
+  path: directives/prompt/prompt.police_policy_audit.json.md
+  schema: null
+- name: prompt.court_backlog_model.json
+  path: directives/prompt/prompt.court_backlog_model.json.md
+  schema: null
+- name: prompt.diversion_program_design.json
+  path: directives/prompt/prompt.diversion_program_design.json.md
+  schema: null
+- name: prompt.okr_planner.json
+  path: directives/prompt/prompt.okr_planner.json.md
+  schema: null
+- name: prompt.retro_spective.json
+  path: directives/prompt/prompt.retro_spective.json.md
+  schema: null
+- name: prompt.experiment_1pager.json
+  path: directives/prompt/prompt.experiment_1pager.json.md
+  schema: null
+- name: prompt.design_brief.json
+  path: directives/prompt/prompt.design_brief.json.md
+  schema: null
+- name: prompt.two_sided_memo.json
+  path: directives/prompt/prompt.two_sided_memo.json.md
+  schema: null
+- name: prompt.table_maker.json
+  path: directives/prompt/prompt.table_maker.json.md
+  schema: null
+- name: prompt.metaphor_bank.json
+  path: directives/prompt/prompt.metaphor_bank.json.md
+  schema: null
+- name: prompt.flashcards_cloze.json
+  path: directives/prompt/prompt.flashcards_cloze.json.md
+  schema: null
+- name: prompt.argument_map.json
+  path: directives/prompt/prompt.argument_map.json.md
+  schema: null
+- name: prompt.decision_table.json
+  path: directives/prompt/prompt.decision_table.json.md
+  schema: null
+- name: prompt.micro_outline.json
+  path: directives/prompt/prompt.micro_outline.json.md
+  schema: null
+- name: prompt.continuity_notes.json
+  path: directives/prompt/prompt.continuity_notes.json.md
+  schema: null
+- name: prompt.style_violations.json
+  path: directives/prompt/prompt.style_violations.json.md
+  schema: null
+- name: prompt.fact_check_queue.json
+  path: directives/prompt/prompt.fact_check_queue.json.md
+  schema: null
+- name: prompt.syllabus_6week.json
+  path: directives/prompt/prompt.syllabus_6week.json.md
+  schema: null
+- name: prompt.reading_plan.json
+  path: directives/prompt/prompt.reading_plan.json.md
+  schema: null
+- name: prompt.argument_scorecard.json
+  path: directives/prompt/prompt.argument_scorecard.json.md
+  schema: null
+- name: prompt.idea_matrix.json
+  path: directives/prompt/prompt.idea_matrix.json.md
+  schema: null
+- name: prompt.story_beats.json
+  path: directives/prompt/prompt.story_beats.json.md
+  schema: null
+- name: prompt.question_bank.json
+  path: directives/prompt/prompt.question_bank.json.md
+  schema: null
+- name: prompt.note_digest.json
+  path: directives/prompt/prompt.note_digest.json.md
+  schema: null
+- name: prompt.feature_brief.json
+  path: directives/prompt/prompt.feature_brief.json.md
+  schema: null
+- name: prompt.interview_guide.json
+  path: directives/prompt/prompt.interview_guide.json.md
+  schema: null
+- name: prompt.data_story_brief.json
+  path: directives/prompt/prompt.data_story_brief.json.md
+  schema: null
+- name: prompt.figure_brief.json
+  path: directives/prompt/prompt.figure_brief.json.md
+  schema: null
+- name: prompt.issue_tree.json
+  path: directives/prompt/prompt.issue_tree.json.md
+  schema: null
+- name: prompt.argument_map_plus.json
+  path: directives/prompt/prompt.argument_map_plus.json.md
+  schema: null
+- name: prompt.curriculum_map.json
+  path: directives/prompt/prompt.curriculum_map.json.md
+  schema: null
+- name: prompt.source_audit.json
+  path: directives/prompt/prompt.source_audit.json.md
+  schema: null
+- name: prompt.book_map.json
+  path: directives/prompt/prompt.book_map.json.md
+  schema: null
+- name: prompt.scene_sheet.json
+  path: directives/prompt/prompt.scene_sheet.json.md
+  schema: null
+- name: prompt.slide_deck.json
+  path: directives/prompt/prompt.slide_deck.json.md
+  schema: null
+- name: prompt.email_reply.json
+  path: directives/prompt/prompt.email_reply.json.md
+  schema: null
+- name: prompt.meeting_digest.json
+  path: directives/prompt/prompt.meeting_digest.json.md
+  schema: null
+- name: prompt.prd_onepager.json
+  path: directives/prompt/prompt.prd_onepager.json.md
+  schema: null
+- name: prompt.research_plan_2week.json
+  path: directives/prompt/prompt.research_plan_2week.json.md
+  schema: null
+- name: prompt.resume_bullets.json
+  path: directives/prompt/prompt.resume_bullets.json.md
+  schema: null
+- name: prompt.daily_focus.json
+  path: directives/prompt/prompt.daily_focus.json.md
+  schema: null
+- name: prompt.study_checklist.json
+  path: directives/prompt/prompt.study_checklist.json.md
+  schema: null
+- name: prompt.tefl_lesson_plan.json
+  path: directives/prompt/prompt.tefl_lesson_plan.json.md
+  schema: null
+- name: prompt.tefl_activity_bank.json
+  path: directives/prompt/prompt.tefl_activity_bank.json.md
+  schema: null
+- name: prompt.cefr_objectives.json
+  path: directives/prompt/prompt.cefr_objectives.json.md
+  schema: null
+- name: prompt.vocab_set.json
+  path: directives/prompt/prompt.vocab_set.json.md
+  schema: null
+- name: prompt.grammar_target.json
+  path: directives/prompt/prompt.grammar_target.json.md
+  schema: null
+- name: prompt.pron_drills.json
+  path: directives/prompt/prompt.pron_drills.json.md
+  schema: null
+- name: prompt.speaking_task.json
+  path: directives/prompt/prompt.speaking_task.json.md
+  schema: null
+- name: prompt.writing_rubric.json
+  path: directives/prompt/prompt.writing_rubric.json.md
+  schema: null
+- name: prompt.observation_checklist.json
+  path: directives/prompt/prompt.observation_checklist.json.md
+  schema: null
+- name: prompt.homework_plan.json
+  path: directives/prompt/prompt.homework_plan.json.md
+  schema: null
+- name: prompt.question_bank_survey.json
+  path: directives/prompt/prompt.question_bank_survey.json.md
+  schema: null
+- name: prompt.survey_instrument.json
+  path: directives/prompt/prompt.survey_instrument.json.md
+  schema: null
+- name: prompt.sampling_plan.json
+  path: directives/prompt/prompt.sampling_plan.json.md
+  schema: null
+- name: prompt.weighting_plan.json
+  path: directives/prompt/prompt.weighting_plan.json.md
+  schema: null
+- name: prompt.benchmark_audit.json
+  path: directives/prompt/prompt.benchmark_audit.json.md
+  schema: null
+- name: prompt.response_rate_report.json
+  path: directives/prompt/prompt.response_rate_report.json.md
+  schema: null
+- name: prompt.panel_health.json
+  path: directives/prompt/prompt.panel_health.json.md
+  schema: null
+- name: prompt.cognitive_interview_script.json
+  path: directives/prompt/prompt.cognitive_interview_script.json.md
+  schema: null
+- name: prompt.randomized_experiment_survey.json
+  path: directives/prompt/prompt.randomized_experiment_survey.json.md
+  schema: null
+- name: prompt.cleaning_rules.json
+  path: directives/prompt/prompt.cleaning_rules.json.md
+  schema: null
+- name: prompt.codebook.json
+  path: directives/prompt/prompt.codebook.json.md
+  schema: null
+- name: prompt.crosstab_spec.json
+  path: directives/prompt/prompt.crosstab_spec.json.md
+  schema: null
+- name: prompt.swot_analysis.json
+  path: directives/prompt/prompt.swot_analysis.json.md
+  schema: data/schemas/prompt.swot_analysis.json.schema.json
+- name: prompt.workshop_agenda.json
+  path: directives/prompt/prompt.workshop_agenda.json.md
+  schema: null
+- name: prompt.exercise_bank.json
+  path: directives/prompt/prompt.exercise_bank.json.md
+  schema: null
+- name: prompt.icebreaker_set.json
+  path: directives/prompt/prompt.icebreaker_set.json.md
+  schema: null
+- name: prompt.decision_record.json
+  path: directives/prompt/prompt.decision_record.json.md
+  schema: null
+- name: prompt.facilitator_script.json
+  path: directives/prompt/prompt.facilitator_script.json.md
+  schema: null
+- name: prompt.meeting_minutes.json
+  path: directives/prompt/prompt.meeting_minutes.json.md
+  schema: null
+- name: prompt.outline_diagnosis.json
+  path: directives/prompt/prompt.outline_diagnosis.json.md
+  schema: null
+- name: prompt.paragraph_rewrite.json
+  path: directives/prompt/prompt.paragraph_rewrite.json.md
+  schema: null
+- name: prompt.style_check.json
+  path: directives/prompt/prompt.style_check.json.md
+  schema: null
+- name: prompt.glossary_make.json
+  path: directives/prompt/prompt.glossary_make.json.md
+  schema: null
+- name: prompt.examples_bank.json
+  path: directives/prompt/prompt.examples_bank.json.md
+  schema: null
+- name: prompt.citation_stub_list.json
+  path: directives/prompt/prompt.citation_stub_list.json.md
+  schema: null
+- name: prompt.strip.json
+  path: directives/prompt/prompt.strip.json.md
+  schema: null
+- name: prompt.lesson_plan.json
+  path: directives/prompt/prompt.lesson_plan.json.md
+  schema: null
+- name: prompt.flashcards.json
+  path: directives/prompt/prompt.flashcards.json.md
+  schema: null
+- name: prompt.faq.json
+  path: directives/prompt/prompt.faq.json.md
+  schema: null
+- name: prompt.checklist.json
+  path: directives/prompt/prompt.checklist.json.md
+  schema: null
+- name: prompt.rubric.json
+  path: directives/prompt/prompt.rubric.json.md
+  schema: null
+- name: prompt.policy_options.json
+  path: directives/prompt/prompt.policy_options.json.md
+  schema: null
+- name: prompt.peer_review.json
+  path: directives/prompt/prompt.peer_review.json.md
+  schema: null
+- name: prompt.rct_protocol.json
+  path: directives/prompt/prompt.rct_protocol.json.md
+  schema: null
+- name: prompt.debate_round.json
+  path: directives/prompt/prompt.debate_round.json.md
+  schema: null
+- name: prompt.theory_map.json
+  path: directives/prompt/prompt.theory_map.json.md
+  schema: null
+- name: prompt.qual_codebook.json
+  path: directives/prompt/prompt.qual_codebook.json.md
+  schema: null
+- name: prompt.survey_design.json
+  path: directives/prompt/prompt.survey_design.json.md
+  schema: null
+- name: prompt.case_study.json
+  path: directives/prompt/prompt.case_study.json.md
+  schema: null
+- name: prompt.seat_projection.json
+  path: directives/prompt/prompt.seat_projection.json.md
+  schema: null
+- name: prompt.coalition_builder.json
+  path: directives/prompt/prompt.coalition_builder.json.md
+  schema: null
+- name: prompt.debate_prep_grid.json
+  path: directives/prompt/prompt.debate_prep_grid.json.md
+  schema: null
+- name: prompt.turnout_plan.json
+  path: directives/prompt/prompt.turnout_plan.json.md
+  schema: null
+- name: prompt.poll_audit.json
+  path: directives/prompt/prompt.poll_audit.json.md
+  schema: null
+- name: prompt.survey_experiment_design.json
+  path: directives/prompt/prompt.survey_experiment_design.json.md
+  schema: null
+- name: prompt.district_fairness.json
+  path: directives/prompt/prompt.district_fairness.json.md
+  schema: null
+- name: prompt.message_map.json
+  path: directives/prompt/prompt.message_map.json.md
+  schema: null
+- name: prompt.manifesto_grid.json
+  path: directives/prompt/prompt.manifesto_grid.json.md
+  schema: null
+- name: prompt.comparative_systems_brief.json
+  path: directives/prompt/prompt.comparative_systems_brief.json.md
+  schema: null
+- name: prompt.implementation_plan.json
+  path: directives/prompt/prompt.implementation_plan.json.md
+  schema: null
+- name: prompt.logic_model.json
+  path: directives/prompt/prompt.logic_model.json.md
+  schema: null
+- name: prompt.kpi_dashboard.json
+  path: directives/prompt/prompt.kpi_dashboard.json.md
+  schema: null
+- name: prompt.risk_register.json
+  path: directives/prompt/prompt.risk_register.json.md
+  schema: null
+- name: prompt.stakeholder_map.json
+  path: directives/prompt/prompt.stakeholder_map.json.md
+  schema: null
+- name: prompt.raci_matrix.json
+  path: directives/prompt/prompt.raci_matrix.json.md
+  schema: null
+- name: prompt.service_blueprint.json
+  path: directives/prompt/prompt.service_blueprint.json.md
+  schema: null
+- name: prompt.procurement_checklist.json
+  path: directives/prompt/prompt.procurement_checklist.json.md
+  schema: null
+- name: prompt.change_management.json
+  path: directives/prompt/prompt.change_management.json.md
+  schema: null
+- name: prompt.ria_brief.json
+  path: directives/prompt/prompt.ria_brief.json.md
+  schema: null
+- name: prompt.case_brief.json
+  path: directives/prompt/prompt.case_brief.json.md
+  schema: null
+- name: prompt.sentencing_factors.json
+  path: directives/prompt/prompt.sentencing_factors.json.md
+  schema: null
+- name: prompt.crime_trends_brief.json
+  path: directives/prompt/prompt.crime_trends_brief.json.md
+  schema: null
+- name: prompt.procedural_justice_index.json
+  path: directives/prompt/prompt.procedural_justice_index.json.md
+  schema: null
+- name: prompt.reentry_plan.json
+  path: directives/prompt/prompt.reentry_plan.json.md
+  schema: null
+- name: prompt.police_policy_audit.json
+  path: directives/prompt/prompt.police_policy_audit.json.md
+  schema: null
+- name: prompt.court_backlog_model.json
+  path: directives/prompt/prompt.court_backlog_model.json.md
+  schema: null
+- name: prompt.diversion_program_design.json
+  path: directives/prompt/prompt.diversion_program_design.json.md
+  schema: null
+- name: prompt.okr_planner.json
+  path: directives/prompt/prompt.okr_planner.json.md
+  schema: null
+- name: prompt.retro_spective.json
+  path: directives/prompt/prompt.retro_spective.json.md
+  schema: null
+- name: prompt.experiment_1pager.json
+  path: directives/prompt/prompt.experiment_1pager.json.md
+  schema: null
+- name: prompt.design_brief.json
+  path: directives/prompt/prompt.design_brief.json.md
+  schema: null
+- name: prompt.two_sided_memo.json
+  path: directives/prompt/prompt.two_sided_memo.json.md
+  schema: null
+- name: prompt.table_maker.json
+  path: directives/prompt/prompt.table_maker.json.md
+  schema: null
+- name: prompt.metaphor_bank.json
+  path: directives/prompt/prompt.metaphor_bank.json.md
+  schema: null
+- name: prompt.flashcards_cloze.json
+  path: directives/prompt/prompt.flashcards_cloze.json.md
+  schema: null
+- name: prompt.argument_map.json
+  path: directives/prompt/prompt.argument_map.json.md
+  schema: null
+- name: prompt.decision_table.json
+  path: directives/prompt/prompt.decision_table.json.md
+  schema: null
+- name: prompt.micro_outline.json
+  path: directives/prompt/prompt.micro_outline.json.md
+  schema: null
+- name: prompt.continuity_notes.json
+  path: directives/prompt/prompt.continuity_notes.json.md
+  schema: null
+- name: prompt.style_violations.json
+  path: directives/prompt/prompt.style_violations.json.md
+  schema: null
+- name: prompt.fact_check_queue.json
+  path: directives/prompt/prompt.fact_check_queue.json.md
+  schema: null
+- name: prompt.syllabus_6week.json
+  path: directives/prompt/prompt.syllabus_6week.json.md
+  schema: null
+- name: prompt.reading_plan.json
+  path: directives/prompt/prompt.reading_plan.json.md
+  schema: null
+- name: prompt.argument_scorecard.json
+  path: directives/prompt/prompt.argument_scorecard.json.md
+  schema: null
+- name: prompt.idea_matrix.json
+  path: directives/prompt/prompt.idea_matrix.json.md
+  schema: null
+- name: prompt.story_beats.json
+  path: directives/prompt/prompt.story_beats.json.md
+  schema: null
+- name: prompt.question_bank.json
+  path: directives/prompt/prompt.question_bank.json.md
+  schema: null
+- name: prompt.note_digest.json
+  path: directives/prompt/prompt.note_digest.json.md
+  schema: null
+- name: prompt.feature_brief.json
+  path: directives/prompt/prompt.feature_brief.json.md
+  schema: null
+- name: prompt.interview_guide.json
+  path: directives/prompt/prompt.interview_guide.json.md
+  schema: null
+- name: prompt.data_story_brief.json
+  path: directives/prompt/prompt.data_story_brief.json.md
+  schema: null
+- name: prompt.figure_brief.json
+  path: directives/prompt/prompt.figure_brief.json.md
+  schema: null
+- name: prompt.issue_tree.json
+  path: directives/prompt/prompt.issue_tree.json.md
+  schema: null
+- name: prompt.argument_map_plus.json
+  path: directives/prompt/prompt.argument_map_plus.json.md
+  schema: null
+- name: prompt.curriculum_map.json
+  path: directives/prompt/prompt.curriculum_map.json.md
+  schema: null
+- name: prompt.source_audit.json
+  path: directives/prompt/prompt.source_audit.json.md
+  schema: null
+- name: prompt.book_map.json
+  path: directives/prompt/prompt.book_map.json.md
+  schema: null
+- name: prompt.scene_sheet.json
+  path: directives/prompt/prompt.scene_sheet.json.md
+  schema: null
+- name: prompt.slide_deck.json
+  path: directives/prompt/prompt.slide_deck.json.md
+  schema: null
+- name: prompt.email_reply.json
+  path: directives/prompt/prompt.email_reply.json.md
+  schema: null
+- name: prompt.meeting_digest.json
+  path: directives/prompt/prompt.meeting_digest.json.md
+  schema: null
+- name: prompt.prd_onepager.json
+  path: directives/prompt/prompt.prd_onepager.json.md
+  schema: null
+- name: prompt.research_plan_2week.json
+  path: directives/prompt/prompt.research_plan_2week.json.md
+  schema: null
+- name: prompt.resume_bullets.json
+  path: directives/prompt/prompt.resume_bullets.json.md
+  schema: null
+- name: prompt.daily_focus.json
+  path: directives/prompt/prompt.daily_focus.json.md
+  schema: null
+- name: prompt.study_checklist.json
+  path: directives/prompt/prompt.study_checklist.json.md
+  schema: null
+- name: prompt.tefl_lesson_plan.json
+  path: directives/prompt/prompt.tefl_lesson_plan.json.md
+  schema: null
+- name: prompt.tefl_activity_bank.json
+  path: directives/prompt/prompt.tefl_activity_bank.json.md
+  schema: null
+- name: prompt.cefr_objectives.json
+  path: directives/prompt/prompt.cefr_objectives.json.md
+  schema: null
+- name: prompt.vocab_set.json
+  path: directives/prompt/prompt.vocab_set.json.md
+  schema: null
+- name: prompt.grammar_target.json
+  path: directives/prompt/prompt.grammar_target.json.md
+  schema: null
+- name: prompt.pron_drills.json
+  path: directives/prompt/prompt.pron_drills.json.md
+  schema: null
+- name: prompt.speaking_task.json
+  path: directives/prompt/prompt.speaking_task.json.md
+  schema: null
+- name: prompt.writing_rubric.json
+  path: directives/prompt/prompt.writing_rubric.json.md
+  schema: null
+- name: prompt.observation_checklist.json
+  path: directives/prompt/prompt.observation_checklist.json.md
+  schema: null
+- name: prompt.homework_plan.json
+  path: directives/prompt/prompt.homework_plan.json.md
+  schema: null
+- name: prompt.question_bank_survey.json
+  path: directives/prompt/prompt.question_bank_survey.json.md
+  schema: null
+- name: prompt.survey_instrument.json
+  path: directives/prompt/prompt.survey_instrument.json.md
+  schema: null
+- name: prompt.sampling_plan.json
+  path: directives/prompt/prompt.sampling_plan.json.md
+  schema: null
+- name: prompt.weighting_plan.json
+  path: directives/prompt/prompt.weighting_plan.json.md
+  schema: null
+- name: prompt.benchmark_audit.json
+  path: directives/prompt/prompt.benchmark_audit.json.md
+  schema: null
+- name: prompt.response_rate_report.json
+  path: directives/prompt/prompt.response_rate_report.json.md
+  schema: null
+- name: prompt.panel_health.json
+  path: directives/prompt/prompt.panel_health.json.md
+  schema: null
+- name: prompt.cognitive_interview_script.json
+  path: directives/prompt/prompt.cognitive_interview_script.json.md
+  schema: null
+- name: prompt.randomized_experiment_survey.json
+  path: directives/prompt/prompt.randomized_experiment_survey.json.md
+  schema: null
+- name: prompt.cleaning_rules.json
+  path: directives/prompt/prompt.cleaning_rules.json.md
+  schema: null
+- name: prompt.codebook.json
+  path: directives/prompt/prompt.codebook.json.md
+  schema: null
+- name: prompt.crosstab_spec.json
+  path: directives/prompt/prompt.crosstab_spec.json.md
+  schema: null
+- name: prompt.swot_analysis.json
+  path: directives/prompt/prompt.swot_analysis.json.md
+  schema: data/schemas/prompt.swot_analysis.json.schema.json
+overlays:
+- name: style.overlays.md
+  path: directives/style.overlays.md
+  headers:
+  - checklist-first
+  - vignette-start
+  - algorithmic
+- name: style.social_science_overlays.md
+  path: directives/style.social_science_overlays.md
+  headers:
+  - steelman
+  - claim-evidence-reasoning
+  - cross-examination
+  - op-ed
+  - policy-memo
+  - public-choice
+  - causal-inference-check
+  - ethnographic-tone
+- name: style.elections_overlays.md
+  path: directives/style.elections_overlays.md
+  headers:
+  - election-methods
+  - duverger-lens
+  - data-hygiene
+  - fairness-guardrails
+- name: style.public_admin_overlays.md
+  path: directives/style.public_admin_overlays.md
+  headers:
+  - lean-government
+  - audit-ready
+  - equity-lens
+  - transparency
+- name: style.sociolegal_overlays.md
+  path: directives/style.sociolegal_overlays.md
+  headers:
+  - procedural-justice
+  - evidence-hierarchy
+  - trauma-informed
+  - proportionality
+  - civil-liberties
+  - data-ethics
+- name: style.fun_overlays.md
+  path: directives/style.fun_overlays.md
+  headers:
+  - examples-everywhere
+  - pitfall-scan
+  - scaffold-first
+  - explain-decisions
+  - "haiku\u2011mode (fun)"
+- name: style.modes_overlays.md
+  path: directives/style.modes_overlays.md
+  headers:
+  - no-small-talk
+  - ask-first
+  - timebox-90s
+  - examples-everywhere
+  - pitfall-scan
+  - e-prime
+  - no-hedging
+  - outline-first
+- name: style.modes_overlays2.md
+  path: directives/style.modes_overlays2.md
+  headers:
+  - outline-consistency
+  - bluf-first
+  - numbers-over-words
+  - ask-two-then-answer
+  - fact-check-brackets
+  - style-guard
+- name: style.fun_overlays3.md
+  path: directives/style.fun_overlays3.md
+  headers:
+  - yes-and
+  - three-examples
+  - show-dont-tell
+  - tempo-fast
+  - curiosity-hooks
+  - teach-back
+  - ladder-shift
+  - crisp-metrics
+- name: style.story_data_overlays.md
+  path: directives/style.story_data_overlays.md
+  headers:
+  - numbers-to-stakes
+  - show-dont-tell
+  - motif-echo
+  - foreshadow-light
+  - cadence-quick
+  - ruthless-trim-80
+- name: style.communication_overlays.md
+  path: directives/style.communication_overlays.md
+  headers:
+  - bluf
+  - tone-professional
+  - tone-friendly
+  - action-only
+  - numbers-first
+  - show-dont-tell
+- name: style.tefl_overlays.md
+  path: directives/style.tefl_overlays.md
+  headers:
+  - cefr-target
+  - ppp
+  - tblt
+  - icq-ccq
+  - stt-optimise
+  - differentiation
+  - board-plan
+  - pron-focus
+  - emergent-language
+  - micro-task-cycle
+- name: style.history_overlays.md
+  path: directives/style.history_overlays.md
+  headers:
+  - evidence-ladder-hist
+  - bias-lens
+  - periodization
+  - counterfactual-guard
+  - footnote-discipline
+  - map-lens
+  - prosopography
+  - quant-lens
+  - material-culture
+- name: style.survey_overlays.md
+  path: directives/style.survey_overlays.md
+  headers:
+  - measurement-error-lens
+  - mode-effects-guard
+  - social-desirability-shield
+  - randomization-integrity
+  - benchmark-first
+  - preregister
+  - privacy-minimums
+  - field-control

@@ -38,32 +38,80 @@ class PromptCompositionLayer:
         self._load_extended_templates()
 
     def _load_extended_templates(self):
-        """Load richer templates from various sources."""
-        # Try to load from core templates first
-        try:
-            from .templates import COMPRESSED_OVERLAY, NARRATIVE_OVERLAY, NO_BS_ADDENDUM
+        """Load richer templates from directive files directly."""
+        from pathlib import Path
 
-            if NARRATIVE_OVERLAY:
-                self.OVERLAYS["narrative"] = NARRATIVE_OVERLAY.strip()
-            if COMPRESSED_OVERLAY:
-                self.OVERLAYS["compressed"] = COMPRESSED_OVERLAY.strip()
-            if NO_BS_ADDENDUM:
-                self.OVERLAYS["no_bs"] = NO_BS_ADDENDUM.strip()
-        except ImportError:
-            pass
+        # Load narrative overlay from directive
+        narrative_path = (
+            Path(__file__).parent.parent.parent.parent
+            / "directives"
+            / "style"
+            / "narrative.md"
+        )
+        if narrative_path.exists():
+            try:
+                with open(narrative_path, "r", encoding="utf-8") as f:
+                    narrative_content = f.read().strip()
+                    if narrative_content:
+                        self.OVERLAYS["narrative"] = narrative_content
+            except Exception:
+                # Fallback to description if file reading fails
+                self.OVERLAYS[
+                    "narrative"
+                ] = "Teach-before-use narrative. Define terms at first mention."
+        else:
+            # Fallback to description if file doesn't exist
+            self.OVERLAYS[
+                "narrative"
+            ] = "Teach-before-use narrative. Define terms at first mention."
 
-        # Try legacy templates as fallback
-        try:
-            import lma_templates as legacy
+        # Load compressed overlay from directive
+        compressed_path = (
+            Path(__file__).parent.parent.parent.parent
+            / "directives"
+            / "style"
+            / "compressed.md"
+        )
+        if compressed_path.exists():
+            try:
+                with open(compressed_path, "r", encoding="utf-8") as f:
+                    compressed_content = f.read().strip()
+                    if compressed_content:
+                        self.OVERLAYS["compressed"] = compressed_content
+            except Exception:
+                # Fallback to description if file reading fails
+                self.OVERLAYS[
+                    "compressed"
+                ] = "Compressed narrative. Minimal headings; dense flow."
+        else:
+            # Fallback to description if file doesn't exist
+            self.OVERLAYS[
+                "compressed"
+            ] = "Compressed narrative. Minimal headings; dense flow."
 
-            if hasattr(legacy, "NARRATIVE_OVERLAY") and legacy.NARRATIVE_OVERLAY:
-                self.OVERLAYS["narrative"] = legacy.NARRATIVE_OVERLAY.strip()
-            if hasattr(legacy, "COMPRESSED_OVERLAY") and legacy.COMPRESSED_OVERLAY:
-                self.OVERLAYS["compressed"] = legacy.COMPRESSED_OVERLAY.strip()
-            if hasattr(legacy, "NO_BS_ADDENDUM") and legacy.NO_BS_ADDENDUM:
-                self.OVERLAYS["no_bs"] = legacy.NO_BS_ADDENDUM.strip()
-        except ImportError:
-            pass
+        # Load no_bs overlay from directive
+        no_bs_path = (
+            Path(__file__).parent.parent.parent.parent
+            / "directives"
+            / "style"
+            / "no_bs.md"
+        )
+        if no_bs_path.exists():
+            try:
+                with open(no_bs_path, "r", encoding="utf-8") as f:
+                    no_bs_content = f.read().strip()
+                    if no_bs_content:
+                        self.OVERLAYS["no_bs"] = no_bs_content
+            except Exception:
+                # Fallback to description if file reading fails
+                self.OVERLAYS[
+                    "no_bs"
+                ] = "Plain language. No fluff. Concrete nouns; tight sentences."
+        else:
+            # Fallback to description if file doesn't exist
+            self.OVERLAYS[
+                "no_bs"
+            ] = "Plain language. No fluff. Concrete nouns; tight sentences."
 
     def compose(
         self,
@@ -109,9 +157,38 @@ class PromptCompositionLayer:
 
         # Base intent
         if base == "zero2hero":
-            parts.append(
-                "Goal: pedagogical manual from foundations to practice with steady depth; no early wrap-ups."
-            )
+            # Load the zero2hero template from directive file
+            from pathlib import Path
+
+            zero2hero_path = Path("directives/base/zero2hero.md")
+            if not zero2hero_path.exists():
+                # Try the full path relative to the project root
+                zero2hero_path = (
+                    Path(__file__).parent.parent.parent.parent
+                    / "directives"
+                    / "base"
+                    / "zero2hero.md"
+                )
+
+            if zero2hero_path.exists():
+                try:
+                    with open(zero2hero_path, "r", encoding="utf-8") as f:
+                        zero2hero_content = f.read().strip()
+                        # Replace {subject} placeholder with actual subject
+                        zero2hero_content = zero2hero_content.replace(
+                            "{subject}", subject
+                        )
+                        parts.append(zero2hero_content)
+                except Exception:
+                    # Fallback to hardcoded content if file reading fails
+                    parts.append(
+                        "Goal: pedagogical manual from foundations to practice with steady depth; no early wrap-ups."
+                    )
+            else:
+                # Fallback to hardcoded content if file doesn't exist
+                parts.append(
+                    "Goal: pedagogical manual from foundations to practice with steady depth; no early wrap-ups."
+                )
         elif base == "reference":
             parts.append(
                 "Goal: tight reference handbook; definitions first; terse, unambiguous rules and examples."
@@ -203,14 +280,56 @@ def compose_prompt(
     min_chars: int = 4200,
     passes: int = 1,
     max_chunks: int = 12,
+    use_cache: bool = True,  # New parameter to control caching
+    outline_first: bool = False,  # New parameter for outline-first functionality
+    apply_reading_overlay: bool = False,  # New parameter to control reading overlay
 ) -> PromptComposition:
     """Convenience function to compose a prompt using the global PCL instance."""
-    return pcl.compose(
-        subject=subject,
-        base=base,
-        overlays=overlays,
-        extra_notes=extra_notes,
-        min_chars=min_chars,
-        passes=passes,
-        max_chunks=max_chunks,
-    )
+    if use_cache:
+        from ..utils.prompt_cache import get_cached_composition
+
+        result = get_cached_composition(
+            subject=subject,
+            base=base,
+            overlays=overlays,
+            extra_notes=extra_notes,
+            min_chars=min_chars,
+            passes=passes,
+            max_chunks=max_chunks,
+        )
+    else:
+        result = pcl.compose(
+            subject=subject,
+            base=base,
+            overlays=overlays,
+            extra_notes=extra_notes,
+            min_chars=min_chars,
+            passes=passes,
+            max_chunks=max_chunks,
+        )
+
+    # If outline_first is enabled, modify the system text to include outline-first instructions
+    if outline_first:
+        outline_instruction = (
+            "\n\nOUTLINE-FIRST SCAFFOLD\n"
+            "- First chunk: produce a chapter-by-chapter outline consistent with the subject; end with NEXT: [Begin Chapter 1].\n"
+            "- Subsequent chunks: follow the outline; narrative prose; define terms once; no bullet walls."
+        )
+        result.system_text += outline_instruction
+        # Update applied metadata to reflect the outline-first mode
+        if "outline_first" not in result.applied:
+            result.applied["outline_first"] = True
+
+    # If reading overlay is enabled, add the reading overlay instruction
+    if apply_reading_overlay:
+        reading_instruction = (
+            "\n\nDOMAIN-AWARE FURTHER READING\n"
+            "- At the end of major sections, include a 'Further Reading' box with 2-3 curated references.\n"
+            "- Use domain-specific resources from data/resource_map.en.json if available.\n"
+            "- Format: 'Further Reading: [Resource 1]; [Resource 2]; [Resource 3]'\n"
+        )
+        result.system_text += reading_instruction
+        # Update applied metadata to reflect the reading overlay
+        result.applied["reading_overlay"] = True
+
+    return result

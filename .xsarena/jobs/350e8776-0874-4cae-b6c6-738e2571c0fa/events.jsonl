@@ -1,0 +1,58 @@
+{"ts": "2025-10-17T07:08:39", "type": "job_submitted", "job_id": "350e8776-0874-4cae-b6c6-738e2571c0fa", "spec": {"subject": "Test Submit", "length": "long", "span": "book", "overlays": ["narrative", "no_bs"], "extra_note": "", "extra_files": [], "out_path": "./test_output.md", "outline_scaffold": null, "generate_plan": false, "window_size": null, "profile": null, "backend": "bridge", "model": "default", "concurrency": 1, "timeout": 300}}
+{"ts": "2025-10-17T07:08:39", "type": "job_prepared_for_resume", "job_id": "350e8776-0874-4cae-b6c6-738e2571c0fa"}
+{"ts": "2025-10-17T07:16:48", "type": "job_resumed_from_chunk", "job_id": "350e8776-0874-4cae-b6c6-738e2571c0fa", "last_completed_chunk": 0, "resuming_from_chunk": 1}
+{"ts": "2025-10-17T07:16:48", "type": "control_pause", "job_id": "350e8776-0874-4cae-b6c6-738e2571c0fa", "command": "pause", "text": null}
+{"ts": "2025-10-17T07:16:48", "type": "control_resume", "job_id": "350e8776-0874-4cae-b6c6-738e2571c0fa", "command": "resume", "text": "Test hint"}
+{"ts": "2025-10-17T07:20:51", "type": "job_resumed_from_chunk", "job_id": "350e8776-0874-4cae-b6c6-738e2571c0fa", "last_completed_chunk": 0, "resuming_from_chunk": 1}
+{"ts": "2025-10-17T07:20:51", "type": "control_pause", "job_id": "350e8776-0874-4cae-b6c6-738e2571c0fa", "command": "pause", "text": null}
+{"ts": "2025-10-17T07:20:51", "type": "control_resume", "job_id": "350e8776-0874-4cae-b6c6-738e2571c0fa", "command": "resume", "text": "Test hint"}
+{"ts": "2025-10-17T07:23:19", "type": "job_resumed_from_chunk", "job_id": "350e8776-0874-4cae-b6c6-738e2571c0fa", "last_completed_chunk": 0, "resuming_from_chunk": 1}
+{"ts": "2025-10-17T07:23:19", "type": "control_pause", "job_id": "350e8776-0874-4cae-b6c6-738e2571c0fa", "command": "pause", "text": null}
+{"ts": "2025-10-17T07:23:19", "type": "control_resume", "job_id": "350e8776-0874-4cae-b6c6-738e2571c0fa", "command": "resume", "text": "Test hint"}
+{"ts": "2025-10-17T07:23:27", "type": "job_resumed_from_chunk", "job_id": "350e8776-0874-4cae-b6c6-738e2571c0fa", "last_completed_chunk": 0, "resuming_from_chunk": 1}
+{"ts": "2025-10-17T07:23:27", "type": "control_pause", "job_id": "350e8776-0874-4cae-b6c6-738e2571c0fa", "command": "pause", "text": null}
+{"ts": "2025-10-17T07:23:27", "type": "control_resume", "job_id": "350e8776-0874-4cae-b6c6-738e2571c0fa", "command": "resume", "text": "Test hint"}
+{"ts": "2025-10-17T07:28:50", "type": "job_resumed_from_chunk", "job_id": "350e8776-0874-4cae-b6c6-738e2571c0fa", "last_completed_chunk": 0, "resuming_from_chunk": 1}
+{"ts": "2025-10-17T07:28:50", "type": "control_pause", "job_id": "350e8776-0874-4cae-b6c6-738e2571c0fa", "command": "pause", "text": null}
+{"ts": "2025-10-17T07:28:50", "type": "control_resume", "job_id": "350e8776-0874-4cae-b6c6-738e2571c0fa", "command": "resume", "text": "Test hint"}
+{"ts": "2025-10-17T07:31:43", "type": "job_resumed_from_chunk", "job_id": "350e8776-0874-4cae-b6c6-738e2571c0fa", "last_completed_chunk": 0, "resuming_from_chunk": 1}
+{"ts": "2025-10-17T07:31:43", "type": "control_pause", "job_id": "350e8776-0874-4cae-b6c6-738e2571c0fa", "command": "pause", "text": null}
+{"ts": "2025-10-17T07:31:43", "type": "control_resume", "job_id": "350e8776-0874-4cae-b6c6-738e2571c0fa", "command": "resume", "text": "Test hint"}
+{"ts": "2025-10-17T07:32:56", "type": "job_resumed_from_chunk", "job_id": "350e8776-0874-4cae-b6c6-738e2571c0fa", "last_completed_chunk": 0, "resuming_from_chunk": 1}
+{"ts": "2025-10-17T07:32:56", "type": "control_pause", "job_id": "350e8776-0874-4cae-b6c6-738e2571c0fa", "command": "pause", "text": null}
+{"ts": "2025-10-17T07:32:56", "type": "control_resume", "job_id": "350e8776-0874-4cae-b6c6-738e2571c0fa", "command": "resume", "text": "Test hint"}
+{"ts": "2025-10-17T07:36:53", "type": "job_resumed_from_chunk", "job_id": "350e8776-0874-4cae-b6c6-738e2571c0fa", "last_completed_chunk": 0, "resuming_from_chunk": 1}
+{"ts": "2025-10-17T07:36:53", "type": "control_pause", "job_id": "350e8776-0874-4cae-b6c6-738e2571c0fa", "command": "pause", "text": null}
+{"ts": "2025-10-17T07:36:53", "type": "control_resume", "job_id": "350e8776-0874-4cae-b6c6-738e2571c0fa", "command": "resume", "text": "Test hint"}
+{"ts": "2025-10-17T07:45:43", "type": "job_resumed_from_chunk", "job_id": "350e8776-0874-4cae-b6c6-738e2571c0fa", "last_completed_chunk": 0, "resuming_from_chunk": 1}
+{"ts": "2025-10-17T07:45:43", "type": "control_pause", "job_id": "350e8776-0874-4cae-b6c6-738e2571c0fa", "command": "pause", "text": null}
+{"ts": "2025-10-17T07:45:43", "type": "control_resume", "job_id": "350e8776-0874-4cae-b6c6-738e2571c0fa", "command": "resume", "text": "Test hint"}
+{"ts": "2025-10-17T07:48:52", "type": "job_resumed_from_chunk", "job_id": "350e8776-0874-4cae-b6c6-738e2571c0fa", "last_completed_chunk": 0, "resuming_from_chunk": 1}
+{"ts": "2025-10-17T07:48:52", "type": "control_pause", "job_id": "350e8776-0874-4cae-b6c6-738e2571c0fa", "command": "pause", "text": null}
+{"ts": "2025-10-17T07:48:52", "type": "control_resume", "job_id": "350e8776-0874-4cae-b6c6-738e2571c0fa", "command": "resume", "text": "Test hint"}
+{"ts": "2025-10-17T07:55:51", "type": "job_resumed_from_chunk", "job_id": "350e8776-0874-4cae-b6c6-738e2571c0fa", "last_completed_chunk": 0, "resuming_from_chunk": 1}
+{"ts": "2025-10-17T07:55:51", "type": "control_pause", "job_id": "350e8776-0874-4cae-b6c6-738e2571c0fa", "command": "pause", "text": null}
+{"ts": "2025-10-17T07:55:51", "type": "control_resume", "job_id": "350e8776-0874-4cae-b6c6-738e2571c0fa", "command": "resume", "text": "Test hint"}
+{"ts": "2025-10-17T07:57:22", "type": "job_resumed_from_chunk", "job_id": "350e8776-0874-4cae-b6c6-738e2571c0fa", "last_completed_chunk": 0, "resuming_from_chunk": 1}
+{"ts": "2025-10-17T07:57:22", "type": "control_pause", "job_id": "350e8776-0874-4cae-b6c6-738e2571c0fa", "command": "pause", "text": null}
+{"ts": "2025-10-17T07:57:22", "type": "control_resume", "job_id": "350e8776-0874-4cae-b6c6-738e2571c0fa", "command": "resume", "text": "Test hint"}
+{"ts": "2025-10-17T08:03:04", "type": "job_resumed_from_chunk", "job_id": "350e8776-0874-4cae-b6c6-738e2571c0fa", "last_completed_chunk": 0, "resuming_from_chunk": 1}
+{"ts": "2025-10-17T08:03:04", "type": "control_pause", "job_id": "350e8776-0874-4cae-b6c6-738e2571c0fa", "command": "pause", "text": null}
+{"ts": "2025-10-17T08:03:04", "type": "control_resume", "job_id": "350e8776-0874-4cae-b6c6-738e2571c0fa", "command": "resume", "text": "Test hint"}
+{"ts": "2025-10-17T08:09:38", "type": "job_resumed_from_chunk", "job_id": "350e8776-0874-4cae-b6c6-738e2571c0fa", "last_completed_chunk": 0, "resuming_from_chunk": 1}
+{"ts": "2025-10-17T08:09:38", "type": "control_pause", "job_id": "350e8776-0874-4cae-b6c6-738e2571c0fa", "command": "pause", "text": null}
+{"ts": "2025-10-17T08:09:38", "type": "control_resume", "job_id": "350e8776-0874-4cae-b6c6-738e2571c0fa", "command": "resume", "text": "Test hint"}
+{"ts": "2025-10-17T08:18:09", "type": "job_resumed_from_chunk", "job_id": "350e8776-0874-4cae-b6c6-738e2571c0fa", "last_completed_chunk": 0, "resuming_from_chunk": 1}
+{"ts": "2025-10-17T08:18:09", "type": "control_pause", "job_id": "350e8776-0874-4cae-b6c6-738e2571c0fa", "command": "pause", "text": null}
+{"ts": "2025-10-17T08:18:09", "type": "control_resume", "job_id": "350e8776-0874-4cae-b6c6-738e2571c0fa", "command": "resume", "text": "Test hint"}
+{"ts": "2025-10-17T23:39:12", "type": "job_resumed_from_chunk", "job_id": "350e8776-0874-4cae-b6c6-738e2571c0fa", "last_completed_chunk": 0, "resuming_from_chunk": 1}
+{"ts": "2025-10-17T23:39:12", "type": "control_pause", "job_id": "350e8776-0874-4cae-b6c6-738e2571c0fa", "command": "pause", "text": null}
+{"ts": "2025-10-17T23:39:12", "type": "control_resume", "job_id": "350e8776-0874-4cae-b6c6-738e2571c0fa", "command": "resume", "text": "Test hint"}
+{"ts": "2025-10-17T23:42:47", "type": "job_resumed_from_chunk", "job_id": "350e8776-0874-4cae-b6c6-738e2571c0fa", "last_completed_chunk": 0, "resuming_from_chunk": 1}
+{"ts": "2025-10-17T23:42:47", "type": "control_pause", "job_id": "350e8776-0874-4cae-b6c6-738e2571c0fa", "command": "pause", "text": null}
+{"ts": "2025-10-17T23:42:47", "type": "control_resume", "job_id": "350e8776-0874-4cae-b6c6-738e2571c0fa", "command": "resume", "text": "Test hint"}
+{"ts": "2025-10-17T23:45:11", "type": "job_resumed_from_chunk", "job_id": "350e8776-0874-4cae-b6c6-738e2571c0fa", "last_completed_chunk": 0, "resuming_from_chunk": 1}
+{"ts": "2025-10-17T23:45:11", "type": "control_pause", "job_id": "350e8776-0874-4cae-b6c6-738e2571c0fa", "command": "pause", "text": null}
+{"ts": "2025-10-17T23:45:11", "type": "control_resume", "job_id": "350e8776-0874-4cae-b6c6-738e2571c0fa", "command": "resume", "text": "Test hint"}
+{"ts": "2025-10-18T03:58:02", "type": "job_resumed_from_chunk", "job_id": "350e8776-0874-4cae-b6c6-738e2571c0fa", "last_completed_chunk": 0, "resuming_from_chunk": 1}
+{"ts": "2025-10-18T03:58:02", "type": "control_pause", "job_id": "350e8776-0874-4cae-b6c6-738e2571c0fa", "command": "pause", "text": null}

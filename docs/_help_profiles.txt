@@ -1,0 +1,15 @@
+
+ Usage: python -m xsarena profiles [OPTIONS] COMMAND [ARGS]...
+
+ Inspect prompt profiles
+
+╭─ Options ────────────────────────────────────────────────────────────────────╮
+│ --help          Show this message and exit.                                  │
+╰──────────────────────────────────────────────────────────────────────────────╯
+╭─ Commands ───────────────────────────────────────────────────────────────────╮
+│ list           List all available prompt profiles.                           │
+│ show           Show the details and system prompt addendum for a specific    │
+│                profile.                                                      │
+│ set-default    Set a profile as the default profile.                         │
+│ show-default   Show the current default profile.                             │
+╰──────────────────────────────────────────────────────────────────────────────╯

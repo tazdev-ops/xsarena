@@ -9,9 +9,9 @@ app = typer.Typer()
 
 
 @app.command("state")
-def show_state():
+def show_state(ctx: typer.Context):
     """Show current session state."""
-    cli: CLIContext = typer.get_current_context().obj
+    cli: CLIContext = ctx.obj
     state = cli.state
 
     typer.echo("Session State:")
@@ -29,27 +29,27 @@ def show_state():
 
 
 @app.command("clear-history")
-def clear_history():
+def clear_history(ctx: typer.Context):
     """Clear the conversation history."""
-    cli: CLIContext = typer.get_current_context().obj
+    cli: CLIContext = ctx.obj
     cli.state.history.clear()
     cli.save()
     typer.echo("Conversation history cleared")
 
 
 @app.command("clear-anchors")
-def clear_anchors():
+def clear_anchors(ctx: typer.Context):
     """Clear the anchors."""
-    cli: CLIContext = typer.get_current_context().obj
+    cli: CLIContext = ctx.obj
     cli.state.anchors.clear()
     cli.save()
     typer.echo("Anchors cleared")
 
 
 @app.command("config")
-def show_config():
+def show_config(ctx: typer.Context):
     """Show current configuration."""
-    cli: CLIContext = typer.get_current_context().obj
+    cli: CLIContext = ctx.obj
     config = cli.config
 
     typer.echo("Current Configuration:")
@@ -68,24 +68,26 @@ def show_config():
 
 @app.command("save-state")
 def save_state(
+    ctx: typer.Context,
     filepath: str = typer.Argument(
         "./.xsarena/session_state.json", help="Path to save state file"
-    )
+    ),
 ):
     """Save current state to a file."""
-    cli: CLIContext = typer.get_current_context().obj
+    cli: CLIContext = ctx.obj
     cli.state.save_to_file(filepath)
     typer.echo(f"State saved to {filepath}")
 
 
 @app.command("load-state")
 def load_state(
+    ctx: typer.Context,
     filepath: str = typer.Argument(
         "./.xsarena/session_state.json", help="Path to load state file"
-    )
+    ),
 ):
     """Load state from a file."""
-    cli: CLIContext = typer.get_current_context().obj
+    cli: CLIContext = ctx.obj
     cli.state = SessionState.load_from_file(filepath)
     # In a real implementation, we would update the active session with this state
     typer.echo(f"State loaded from {filepath}")
@@ -94,10 +96,11 @@ def load_state(
 
 @app.command("toggle-redaction")
 def toggle_redaction(
-    enabled: bool = typer.Argument(..., help="Enable or disable redaction filter")
+    ctx: typer.Context,
+    enabled: bool = typer.Argument(..., help="Enable or disable redaction filter"),
 ):
     """Toggle the redaction filter."""
-    cli: CLIContext = typer.get_current_context().obj
+    cli: CLIContext = ctx.obj
 
     # Set the redaction setting in the state
     cli.state.settings["redaction_enabled"] = enabled
