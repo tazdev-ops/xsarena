@@ -13,7 +13,9 @@ class ChadMode:
     def __init__(self, engine: Engine):
         self.engine = engine
 
-    async def answer_question(self, question: str, context: str = "", extra_notes: Optional[str] = None) -> str:
+    async def answer_question(
+        self, question: str, context: str = "", extra_notes: Optional[str] = None
+    ) -> str:
         """Answer a question based on evidence and context."""
         prompt = f"""Provide a direct, evidence-based answer to this question:
 
@@ -26,10 +28,14 @@ Be concise but thorough. Support your answer with evidence when available. If un
 
         # Build system prompt using PCL with chad role directive
         role_content = self._load_role_directive("chad")
-        system_prompt = self._build_system_prompt("evidence-based Q&A", extra_notes, role_content)
+        system_prompt = self._build_system_prompt(
+            "evidence-based Q&A", extra_notes, role_content
+        )
         return await self.engine.send_and_collect(prompt, system_prompt)
 
-    async def batch_questions(self, questions_file: str, answers_file: str, extra_notes: Optional[str] = None) -> str:
+    async def batch_questions(
+        self, questions_file: str, answers_file: str, extra_notes: Optional[str] = None
+    ) -> str:
         """Process a batch of questions from a file and save answers."""
         # Read the questions file
         from ..core.tools import read_file
@@ -44,7 +50,9 @@ Be concise but thorough. Support your answer with evidence when available. If un
 
         for question in questions:
             if question.strip():
-                answer = await self.answer_question(question.strip(), extra_notes=extra_notes)
+                answer = await self.answer_question(
+                    question.strip(), extra_notes=extra_notes
+                )
                 answers.append(f"Q: {question.strip()}\nA: {answer}\n")
 
         # Write answers to the answers file
@@ -55,7 +63,9 @@ Be concise but thorough. Support your answer with evidence when available. If un
 
         return f"Processed {len(questions)} questions, answers saved to {answers_file}"
 
-    async def evidence_check(self, claim: str, evidence: str, extra_notes: Optional[str] = None) -> str:
+    async def evidence_check(
+        self, claim: str, evidence: str, extra_notes: Optional[str] = None
+    ) -> str:
         """Check a claim against provided evidence."""
         prompt = f"""Evaluate this claim against the provided evidence:
 
@@ -67,10 +77,14 @@ Assess the validity of the claim based on the evidence. Be objective and specifi
 
         # Build system prompt using PCL with chad role directive
         role_content = self._load_role_directive("chad")
-        system_prompt = self._build_system_prompt("evidence evaluation", extra_notes, role_content)
+        system_prompt = self._build_system_prompt(
+            "evidence evaluation", extra_notes, role_content
+        )
         return await self.engine.send_and_collect(prompt, system_prompt)
 
-    async def source_analysis(self, sources: List[str], question: str, extra_notes: Optional[str] = None) -> str:
+    async def source_analysis(
+        self, sources: List[str], question: str, extra_notes: Optional[str] = None
+    ) -> str:
         """Analyze multiple sources to answer a question."""
         sources_text = "\n\n".join(
             [f"Source {i+1}: {source}" for i, source in enumerate(sources)]
@@ -87,10 +101,14 @@ Synthesize information from all sources to provide a comprehensive answer. Note 
 
         # Build system prompt using PCL with chad role directive
         role_content = self._load_role_directive("chad")
-        system_prompt = self._build_system_prompt("source analysis", extra_notes, role_content)
+        system_prompt = self._build_system_prompt(
+            "source analysis", extra_notes, role_content
+        )
         return await self.engine.send_and_collect(prompt, system_prompt)
 
-    async def fact_check(self, statement: str, extra_notes: Optional[str] = None) -> str:
+    async def fact_check(
+        self, statement: str, extra_notes: Optional[str] = None
+    ) -> str:
         """Fact-check a given statement."""
         prompt = f"""Fact-check this statement:
 
@@ -100,10 +118,14 @@ Provide evidence for or against the statement. State the veracity clearly and ci
 
         # Build system prompt using PCL with chad role directive
         role_content = self._load_role_directive("chad")
-        system_prompt = self._build_system_prompt("fact checking", extra_notes, role_content)
+        system_prompt = self._build_system_prompt(
+            "fact checking", extra_notes, role_content
+        )
         return await self.engine.send_and_collect(prompt, system_prompt)
 
-    async def summarize_evidence(self, evidence_list: List[str], extra_notes: Optional[str] = None) -> str:
+    async def summarize_evidence(
+        self, evidence_list: List[str], extra_notes: Optional[str] = None
+    ) -> str:
         """Summarize a list of evidence points."""
         evidence_text = "\n\n".join(
             [f"Item {i+1}: {item}" for i, item in enumerate(evidence_list)]
@@ -117,7 +139,9 @@ Provide a concise summary of the key points and their implications."""
 
         # Build system prompt using PCL with chad role directive
         role_content = self._load_role_directive("chad")
-        system_prompt = self._build_system_prompt("evidence summarization", extra_notes, role_content)
+        system_prompt = self._build_system_prompt(
+            "evidence summarization", extra_notes, role_content
+        )
         return await self.engine.send_and_collect(prompt, system_prompt)
 
     def _load_role_directive(self, role_name: str) -> str:
@@ -125,28 +149,32 @@ Provide a concise summary of the key points and their implications."""
         # Try relative to project root (relative to this file)
         project_root = Path(__file__).parent.parent.parent.parent
         role_path = project_root / "directives" / "roles" / f"{role_name}.md"
-        
+
         if role_path.exists():
             try:
                 return role_path.read_text(encoding="utf-8").strip()
             except Exception:
                 pass
-        
+
         # Return empty string if not found
         return ""
 
-    def _build_system_prompt(self, subject: str, extra_notes: Optional[str], role_content: str) -> str:
+    def _build_system_prompt(
+        self, subject: str, extra_notes: Optional[str], role_content: str
+    ) -> str:
         """Build system prompt using PCL with role directive content."""
         # Compose the prompt using PCL
         composition = pcl.compose(
             subject=subject,
             base="reference",  # Use reference base for factual accuracy
-            overlays=["no_bs"],  # Use no_bs overlay for direct, evidence-based responses
-            extra_notes=extra_notes
+            overlays=[
+                "no_bs"
+            ],  # Use no_bs overlay for direct, evidence-based responses
+            extra_notes=extra_notes,
         )
-        
+
         # If role directive exists, append its content to the system text
         if role_content:
             composition.system_text += f"\n\n{role_content}"
-        
+
         return composition.system_text

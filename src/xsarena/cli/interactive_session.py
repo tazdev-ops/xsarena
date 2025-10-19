@@ -41,15 +41,15 @@ class InteractiveSession:
             "out.minchars": self.set_output_config,
             "out.passes": self.set_output_config,
             "minchars": self.set_output_config,  # Short alias for /out.minchars
-            "passes": self.set_output_config,    # Short alias for /out.passes
+            "passes": self.set_output_config,  # Short alias for /out.passes
             "cont.mode": self.set_continuation_config,
             "cont.anchor": self.set_continuation_config,
-            "mode": self.set_continuation_config,    # Short alias for /cont.mode
+            "mode": self.set_continuation_config,  # Short alias for /cont.mode
             "anchor": self.set_continuation_config,  # Short alias for /cont.anchor
             "repeat.warn": self.set_repetition_config,
             "repeat.thresh": self.set_repetition_config,
-            "warn": self.set_repetition_config,      # Short alias for /repeat.warn
-            "thresh": self.set_repetition_config,    # Short alias for /repeat.thresh
+            "warn": self.set_repetition_config,  # Short alias for /repeat.warn
+            "thresh": self.set_repetition_config,  # Short alias for /repeat.thresh
             "config.show": self.show_config,
             "prompt.show": self.cmd_prompt_show,
             "prompt.style": self.cmd_prompt_style,

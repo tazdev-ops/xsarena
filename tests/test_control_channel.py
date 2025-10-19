@@ -3,7 +3,6 @@
 import asyncio
 
 import pytest
-
 from xsarena.core.jobs.model import JobManager
 
 

@@ -21,6 +21,7 @@ app = typer.Typer(help="System health, maintenance, and self-healing operations.
 
 # --- Fix Commands ---
 
+
 @app.command("fix-run")
 def fix_run(ctx: typer.Context):
     """Self-heal common configuration/state issues."""

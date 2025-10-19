@@ -1,7 +1,8 @@
 """Unified settings commands for XSArena."""
 
-import typer
 from typing import Optional
+
+import typer
 
 app = typer.Typer(help="Unified settings interface (configuration + controls)")
 
@@ -10,7 +11,7 @@ app = typer.Typer(help="Unified settings interface (configuration + controls)")
 def settings_show(ctx: typer.Context):
     """Show both configuration and controls settings."""
     cli = ctx.obj
-    
+
     # Show config settings
     typer.echo("=== Configuration Settings (ops settings) ===")
     typer.echo(f"  Backend: {cli.config.backend}")
@@ -18,8 +19,10 @@ def settings_show(ctx: typer.Context):
     typer.echo(f"  Base URL: {cli.config.base_url}")
     typer.echo(f"  Window Size: {cli.config.window_size}")
     typer.echo(f"  Anchor Length: {cli.config.anchor_length}")
-    typer.echo(f"  API Key: {'Set' if cli.config.api_key else 'Not set (use environment variable)'}")
-    
+    typer.echo(
+        f"  API Key: {'Set' if cli.config.api_key else 'Not set (use environment variable)'}"
+    )
+
     # Show controls settings
     typer.echo("\n=== Controls Settings (utils settings) ===")
     typer.echo(f"  Output min chars: {cli.state.output_min_chars}")
@@ -29,7 +32,9 @@ def settings_show(ctx: typer.Context):
     typer.echo(f"  Repetition threshold: {cli.state.repetition_threshold}")
     typer.echo(f"  Repetition warn: {'ON' if cli.state.repetition_warn else 'OFF'}")
     typer.echo(f"  Coverage hammer: {'ON' if cli.state.coverage_hammer_on else 'OFF'}")
-    typer.echo(f"  Output budget: {'ON' if cli.state.output_budget_snippet_on else 'OFF'}")
+    typer.echo(
+        f"  Output budget: {'ON' if cli.state.output_budget_snippet_on else 'OFF'}"
+    )
     typer.echo(f"  Output push: {'ON' if cli.state.output_push_on else 'OFF'}")
 
 
@@ -37,29 +42,71 @@ def settings_show(ctx: typer.Context):
 def settings_set(
     ctx: typer.Context,
     # Config options
-    backend: Optional[str] = typer.Option(None, "--backend", help="Set backend (ops settings)"),
-    model: Optional[str] = typer.Option(None, "--model", help="Set default model (ops settings)"),
-    base_url: Optional[str] = typer.Option(None, "--base-url", help="Set base URL for bridge backend (ops settings)"),
-    api_key: Optional[str] = typer.Option(None, "--api-key", help="Set API key (ops settings)"),
+    backend: Optional[str] = typer.Option(
+        None, "--backend", help="Set backend (ops settings)"
+    ),
+    model: Optional[str] = typer.Option(
+        None, "--model", help="Set default model (ops settings)"
+    ),
+    base_url: Optional[str] = typer.Option(
+        None, "--base-url", help="Set base URL for bridge backend (ops settings)"
+    ),
+    api_key: Optional[str] = typer.Option(
+        None, "--api-key", help="Set API key (ops settings)"
+    ),
     # Controls options
-    output_min_chars: Optional[int] = typer.Option(None, "--output-min-chars", help="Set minimal chars per chunk (utils settings)"),
-    output_push_max_passes: Optional[int] = typer.Option(None, "--output-push-max-passes", help="Set max extension steps per chunk (utils settings)"),
-    continuation_mode: Optional[str] = typer.Option(None, "--continuation-mode", help="Set continuation mode (utils settings)"),
-    anchor_length_config: Optional[int] = typer.Option(None, "--anchor-length-config", help="Set config anchor length (ops settings)"),
-    anchor_length_control: Optional[int] = typer.Option(None, "--anchor-length-control", help="Set control anchor length (utils settings)"),
-    repetition_threshold: Optional[float] = typer.Option(None, "--repetition-threshold", help="Set repetition detection threshold (utils settings)"),
-    repetition_warn: Optional[bool] = typer.Option(None, "--repetition-warn/--no-repetition-warn", help="Enable or disable repetition warning (utils settings)"),
-    coverage_hammer: Optional[bool] = typer.Option(None, "--coverage-hammer/--no-coverage-hammer", help="Enable or disable coverage hammer (utils settings)"),
-    output_budget: Optional[bool] = typer.Option(None, "--output-budget/--no-output-budget", help="Enable or disable output budget addendum (utils settings)"),
-    output_push: Optional[bool] = typer.Option(None, "--output-push/--no-output-push", help="Enable or disable output pushing (utils settings)"),
+    output_min_chars: Optional[int] = typer.Option(
+        None, "--output-min-chars", help="Set minimal chars per chunk (utils settings)"
+    ),
+    output_push_max_passes: Optional[int] = typer.Option(
+        None,
+        "--output-push-max-passes",
+        help="Set max extension steps per chunk (utils settings)",
+    ),
+    continuation_mode: Optional[str] = typer.Option(
+        None, "--continuation-mode", help="Set continuation mode (utils settings)"
+    ),
+    anchor_length_config: Optional[int] = typer.Option(
+        None, "--anchor-length-config", help="Set config anchor length (ops settings)"
+    ),
+    anchor_length_control: Optional[int] = typer.Option(
+        None,
+        "--anchor-length-control",
+        help="Set control anchor length (utils settings)",
+    ),
+    repetition_threshold: Optional[float] = typer.Option(
+        None,
+        "--repetition-threshold",
+        help="Set repetition detection threshold (utils settings)",
+    ),
+    repetition_warn: Optional[bool] = typer.Option(
+        None,
+        "--repetition-warn/--no-repetition-warn",
+        help="Enable or disable repetition warning (utils settings)",
+    ),
+    coverage_hammer: Optional[bool] = typer.Option(
+        None,
+        "--coverage-hammer/--no-coverage-hammer",
+        help="Enable or disable coverage hammer (utils settings)",
+    ),
+    output_budget: Optional[bool] = typer.Option(
+        None,
+        "--output-budget/--no-output-budget",
+        help="Enable or disable output budget addendum (utils settings)",
+    ),
+    output_push: Optional[bool] = typer.Option(
+        None,
+        "--output-push/--no-output-push",
+        help="Enable or disable output pushing (utils settings)",
+    ),
 ):
     """Set configuration or controls settings."""
     cli = ctx.obj
-    
+
     # Track changes made to each layer
     config_changed = False
     controls_changed = False
-    
+
     # Handle config settings
     if backend is not None:
         cli.config.backend = backend
@@ -76,7 +123,7 @@ def settings_set(
     if anchor_length_config is not None:
         cli.config.anchor_length = anchor_length_config
         config_changed = True
-    
+
     # Handle controls settings
     if output_min_chars is not None:
         cli.state.output_min_chars = output_min_chars
@@ -105,21 +152,22 @@ def settings_set(
     if output_push is not None:
         cli.state.output_push_on = output_push
         controls_changed = True
-    
+
     # Save changes if any were made
     if config_changed:
         typer.echo("Configuration settings updated (ops settings layer).")
         # Save config to file
         from pathlib import Path
+
         config_path = Path(".xsarena/config.yml")
         config_path.parent.mkdir(parents=True, exist_ok=True)
         cli.config.save_to_file(str(config_path))
-    
+
     if controls_changed:
         typer.echo("Controls settings updated (utils settings layer).")
         # Save state
         cli.save()
-    
+
     if not config_changed and not controls_changed:
         typer.echo("No settings were changed. Use --help for available options.")
 
@@ -131,6 +179,7 @@ def settings_persist(ctx: typer.Context):
     s = cli.state
 
     from pathlib import Path
+
     import yaml
 
     # Read current config
@@ -172,8 +221,10 @@ def settings_persist(ctx: typer.Context):
     with open(config_path, "w", encoding="utf-8") as f:
         yaml.dump(config, f, default_flow_style=False)
 
-    typer.echo("Controls settings persisted to .xsarena/config.yml under 'settings:' key")
-    
+    typer.echo(
+        "Controls settings persisted to .xsarena/config.yml under 'settings:' key"
+    )
+
     # Also save the config layer
     cli.config.save_to_file(str(config_path))
     typer.echo("Configuration settings also saved to .xsarena/config.yml")
@@ -182,9 +233,11 @@ def settings_persist(ctx: typer.Context):
 @app.command("reset")
 def settings_reset(ctx: typer.Context):
     """Reset settings from persisted configuration (controls layer) and reload config (config layer)."""
-    from ..core.config import Config
     from pathlib import Path
+
     import yaml
+
+    from ..core.config import Config
 
     cli = ctx.obj
     config_path = Path(".xsarena/config.yml")
@@ -214,7 +267,7 @@ def settings_reset(ctx: typer.Context):
     typer.echo("Values applied:")
     for key, value in settings.items():
         typer.echo(f"  {key}: {value}")
-    
+
     # Reload config from file (config layer)
     cli.config = Config.load_from_file(".xsarena/config.yml")
     typer.echo("Configuration settings reloaded from .xsarena/config.yml")

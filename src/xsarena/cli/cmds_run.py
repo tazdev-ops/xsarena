@@ -53,7 +53,9 @@ def run_book(
         False, "--follow", help="Submit job and follow to completion"
     ),
     resume: bool = typer.Option(
-        None, "--resume/--no-resume", help="Resume existing job if found (default: ask if resumable job exists)"
+        None,
+        "--resume/--no-resume",
+        help="Resume existing job if found (default: ask if resumable job exists)",
     ),
     overwrite: bool = typer.Option(
         False, "--overwrite", help="Start a new job even if one exists for same output"
@@ -184,45 +186,31 @@ def run_book(
         except KeyboardInterrupt:
             raise typer.Exit(1)
 
-    # Check for existing job with same output path
-    from ..core.jobs.model import JobManager
-    job_runner = JobManager()
-    existing_job_id = job_runner.find_resumable_job_by_output(out_path or f'./books/{subject.replace(" ", "_")}.final.md')
-    
-    if existing_job_id and not overwrite:
-        # If --resume flag is explicitly set to True, use that
-        if resume is True:
-            # Prepare the existing job for resume
-            job_id = job_runner.prepare_job_for_resume(existing_job_id)
-        # If --resume flag is explicitly set to False, create a new job
-        elif resume is False:
-            # Create a new job with a different output path to avoid conflicts
-            import uuid
-            new_out_path = f"{out_path or './books/' + subject.replace(' ', '_') + '.final.md'}.{uuid.uuid4().hex[:8]}"
-            run_spec.out_path = new_out_path
-            job_id = asyncio.run(
-                orchestrator.run_spec(run_spec, backend_type="bridge", priority=priority)
-            )
-        # If resume flag is None (default), ask user
-        else:
-            typer.echo(f"⚠️  Warning: A job already exists for output path: {out_path or './books/' + subject.replace(' ', '_') + '.final.md'}")
-            typer.echo(f"   Existing job ID: {existing_job_id}")
-            typer.echo("   Job state: PENDING/RUNNING/STALLED")
-            typer.echo("   Options:")
-            typer.echo("   - Resume the existing job (--resume)")
-            typer.echo("   - Start a new job (--overwrite)")
-            typer.echo("   - Cancel and choose manually")
-            raise typer.Exit(1)  # Exit with error code to indicate user needs to make a choice
-    else:
-        # Submit job using the new system
-        import warnings
+    # Gate implicit resume: fail unless --resume or --overwrite when a resumable exists
+    try:
+        # Determine final output path
+        target_out = out_path
+        if not target_out:
+            slug = re.sub(r"[^a-zA-Z0-9]+", "_", subject).strip("_")
+            target_out = f"./books/{slug}.final.md"
+        resumable = orchestrator.job_runner.find_resumable_job_by_output(target_out)
+        if resumable and not (resume or overwrite):
+            typer.echo(f"Resumable job exists for {target_out}: {resumable}", err=True)
+            typer.echo("Use --resume to continue or --overwrite to start fresh.", err=True)
+            raise typer.Exit(2)
+    except Exception:
+        # If anything goes wrong here, don't block the run; just proceed
+        pass
 
-        warnings.warn("Using new JobsV3 system", DeprecationWarning, stacklevel=2)
+    # Submit job using the new system
+    import warnings
 
-        # Run the job using the orchestrator
-        job_id = asyncio.run(
-            orchestrator.run_spec(run_spec, backend_type="bridge", priority=priority)
-        )
+    warnings.warn("Using new JobsV3 system", DeprecationWarning, stacklevel=2)
+
+    # Run the job using the orchestrator
+    job_id = asyncio.run(
+        orchestrator.run_spec(run_spec, backend_type="bridge", priority=priority)
+    )
 
     typer.echo(f"[run] submitted: {job_id}")
 
@@ -362,6 +350,17 @@ def run_from_recipe(
         profile="",
     )
 
+    # Gate implicit resume: fail unless --resume or --overwrite when a resumable exists
+    try:
+        resumable = orchestrator.job_runner.find_resumable_job_by_output(out_path)
+        if resumable and not (resume or overwrite):
+            typer.echo(f"Resumable job exists for {out_path}: {resumable}", err=True)
+            typer.echo("Use --resume to continue or --overwrite to start fresh.", err=True)
+            raise typer.Exit(2)
+    except Exception:
+        # If anything goes wrong here, don't block the run; just proceed
+        pass
+
     # Submit job using the new system
     import warnings
 
@@ -475,7 +474,9 @@ def run_from_plan(
         help="Prompt to wait for browser capture before starting",
     ),
     resume: bool = typer.Option(
-        None, "--resume/--no-resume", help="Resume existing job if found (default: ask if resumable job exists)"
+        None,
+        "--resume/--no-resume",
+        help="Resume existing job if found (default: ask if resumable job exists)",
     ),
     overwrite: bool = typer.Option(
         False, "--overwrite", help="Start a new job even if one exists for same output"
@@ -487,7 +488,12 @@ def run_from_plan(
     """
     cli: CLIContext = ctx.obj
 
-    _PLANNER_PROMPT = """You are an editorial planner for a long-form self-study manual.
+    # Load planner directive from file if present (fallback to inline)
+    planner_path = Path("directives/system/plan_from_seeds.md")
+    if planner_path.exists():
+        _PLANNER_PROMPT = planner_path.read_text(encoding="utf-8")
+    else:
+        _PLANNER_PROMPT = """You are an editorial planner for a long-form self-study manual.
 The user will provide rough seeds (topics/notes). Your job:
 - subject: one-line final title (concise, specific)
 - goal: 3–5 sentences (scope, depth, audience, exclusions)
@@ -636,9 +642,12 @@ SEEDS>>>"""
 
     # Check for existing job with same output path
     from ..core.jobs.model import JobManager
+
     job_runner = JobManager()
-    existing_job_id = job_runner.find_resumable_job_by_output(out_path or f'./books/finals/{slugify(plan_subject, default="book")}.final.md')
-    
+    existing_job_id = job_runner.find_resumable_job_by_output(
+        out_path or f'./books/finals/{slugify(plan_subject, default="book")}.final.md'
+    )
+
     if existing_job_id and not overwrite:
         # If --resume flag is explicitly set to True, use that
         if resume is True:
@@ -648,21 +657,24 @@ SEEDS>>>"""
         elif resume is False:
             # Create a new job with a different output path to avoid conflicts
             import uuid
+
             new_out_path = f"{out_path or './books/finals/' + slugify(plan_subject, default='book') + '.final.md'}.{uuid.uuid4().hex[:8]}"
             run_spec.out_path = new_out_path
-            job_id = asyncio.run(
-                orchestrator.run_spec(run_spec, backend_type="bridge")
-            )
+            job_id = asyncio.run(orchestrator.run_spec(run_spec, backend_type="bridge"))
         # If resume flag is None (default), ask user
         else:
-            typer.echo(f"⚠️  Warning: A job already exists for output path: {out_path or './books/finals/' + slugify(plan_subject, default='book') + '.final.md'}")
+            typer.echo(
+                f"⚠️  Warning: A job already exists for output path: {out_path or './books/finals/' + slugify(plan_subject, default='book') + '.final.md'}"
+            )
             typer.echo(f"   Existing job ID: {existing_job_id}")
             typer.echo("   Job state: PENDING/RUNNING/STALLED")
             typer.echo("   Options:")
             typer.echo("   - Resume the existing job (--resume)")
             typer.echo("   - Start a new job (--overwrite)")
             typer.echo("   - Cancel and choose manually")
-            raise typer.Exit(1)  # Exit with error code to indicate user needs to make a choice
+            raise typer.Exit(
+                1
+            )  # Exit with error code to indicate user needs to make a choice
     else:
         # Submit job using the new system
         import warnings
@@ -676,9 +688,6 @@ SEEDS>>>"""
     typer.echo(f"[run] done → {out_path}")
 
 
-
-
-
 @app.command("replay")
 def run_replay(
     ctx: typer.Context,
@@ -687,7 +696,9 @@ def run_replay(
         False, "--follow", help="Submit job and follow to completion"
     ),
     resume: bool = typer.Option(
-        None, "--resume/--no-resume", help="Resume existing job if found (default: ask if resumable job exists)"
+        None,
+        "--resume/--no-resume",
+        help="Resume existing job if found (default: ask if resumable job exists)",
     ),
     overwrite: bool = typer.Option(
         False, "--overwrite", help="Start a new job even if one exists for same output"
@@ -810,36 +821,25 @@ def run_replay(
 
     # Check for existing job with same output path
     from ..core.jobs.model import JobManager
+
     job_runner = JobManager()
-    existing_job_id = job_runner.find_resumable_job_by_output(run_spec.out_path or f'./books/{run_spec.subject.replace(" ", "_")}.final.md')
-    
-    if existing_job_id and not overwrite:
-        # If --resume flag is explicitly set to True, use that
-        if resume is True:
-            # Prepare the existing job for resume
-            job_id = job_runner.prepare_job_for_resume(existing_job_id)
-        # If --resume flag is explicitly set to False, create a new job
-        elif resume is False:
-            # Create a new job with a different output path to avoid conflicts
-            import uuid
-            new_out_path = f"{run_spec.out_path or './books/' + run_spec.subject.replace(' ', '_') + '.final.md'}.{uuid.uuid4().hex[:8]}"
-            run_spec.out_path = new_out_path
-            job_id = asyncio.run(
-                orchestrator.run_spec(run_spec, backend_type="bridge")
-            )
-        # If resume flag is None (default), ask user
-        else:
-            typer.echo(f"⚠️  Warning: A job already exists for output path: {run_spec.out_path or f'./books/{run_spec.subject.replace(' ', '_')}.final.md'}")
-            typer.echo(f"   Existing job ID: {existing_job_id}")
-            typer.echo("   Job state: PENDING/RUNNING/STALLED")
-            typer.echo("   Options:")
-            typer.echo("   - Resume the existing job (--resume)")
-            typer.echo("   - Start a new job (--overwrite)")
-            typer.echo("   - Cancel and choose manually")
-            raise typer.Exit(1)  # Exit with error code to indicate user needs to make a choice
-    else:
-        # Submit job using the orchestrator with the original system text from manifest
-        job_id = asyncio.run(orchestrator.run_spec(run_spec, backend_type="bridge"))
+    existing_job_id = job_runner.find_resumable_job_by_output(
+        run_spec.out_path or f'./books/{run_spec.subject.replace(" ", "_")}.final.md'
+    )
+
+    # Gate implicit resume: fail unless --resume or --overwrite when a resumable exists
+    try:
+        resumable = orchestrator.job_runner.find_resumable_job_by_output(run_spec.out_path)
+        if resumable and not (resume or overwrite):
+            typer.echo(f"Resumable job exists for {run_spec.out_path}: {resumable}", err=True)
+            typer.echo("Use --resume to continue or --overwrite to start fresh.", err=True)
+            raise typer.Exit(2)
+    except Exception:
+        # If anything goes wrong here, don't block the run; just proceed
+        pass
+
+    # Submit job using the orchestrator with the original system text from manifest
+    job_id = asyncio.run(orchestrator.run_spec(run_spec, backend_type="bridge"))
 
     typer.echo(f"[run] submitted: {job_id}")
 
@@ -873,7 +873,9 @@ def run_continue(
         False, "--follow", help="Submit job and follow to completion"
     ),
     resume: bool = typer.Option(
-        None, "--resume/--no-resume", help="Resume existing job if found (default: ask if resumable job exists)"
+        None,
+        "--resume/--no-resume",
+        help="Resume existing job if found (default: ask if resumable job exists)",
     ),
     overwrite: bool = typer.Option(
         False, "--overwrite", help="Start a new job even if one exists for same output"
@@ -934,38 +936,25 @@ def run_continue(
 
     # Check for existing job with same output path
     from ..core.jobs.model import JobManager
+
     job_runner = JobManager()
     existing_job_id = job_runner.find_resumable_job_by_output(str(p))
-    
-    if existing_job_id and not overwrite:
-        # If --resume flag is explicitly set to True, use that
-        if resume is True:
-            # Prepare the existing job for resume
-            job_id = job_runner.prepare_job_for_resume(existing_job_id)
-        # If --resume flag is explicitly set to False, create a new job
-        elif resume is False:
-            # Create a new job with a different output path to avoid conflicts
-            import uuid
-            new_out_path = f"{str(p)}.{uuid.uuid4().hex[:8]}"
-            run_spec.out_path = new_out_path
-            job_id = asyncio.run(
-                orchestrator.run_continue(run_spec, str(p), until_end=until_end)
-            )
-        # If resume flag is None (default), ask user
-        else:
-            typer.echo(f"⚠️  Warning: A job already exists for output path: {str(p)}")
-            typer.echo(f"   Existing job ID: {existing_job_id}")
-            typer.echo("   Job state: PENDING/RUNNING/STALLED")
-            typer.echo("   Options:")
-            typer.echo("   - Resume the existing job (--resume)")
-            typer.echo("   - Start a new job (--overwrite)")
-            typer.echo("   - Cancel and choose manually")
-            raise typer.Exit(1)  # Exit with error code to indicate user needs to make a choice
-    else:
-        # Use the orchestrator to continue from file
-        job_id = asyncio.run(
-            orchestrator.run_continue(run_spec, str(p), until_end=until_end)
-        )
+
+    # Gate implicit resume: fail unless --resume or --overwrite when a resumable exists
+    try:
+        resumable = orchestrator.job_runner.find_resumable_job_by_output(str(p))
+        if resumable and not (resume or overwrite):
+            typer.echo(f"Resumable job exists for {str(p)}: {resumable}", err=True)
+            typer.echo("Use --resume to continue or --overwrite to start fresh.", err=True)
+            raise typer.Exit(2)
+    except Exception:
+        # If anything goes wrong here, don't block the run; just proceed
+        pass
+
+    # Use the orchestrator to continue from file
+    job_id = asyncio.run(
+        orchestrator.run_continue(run_spec, str(p), until_end=until_end)
+    )
 
     typer.echo(f"[run] submitted: {job_id}")
 

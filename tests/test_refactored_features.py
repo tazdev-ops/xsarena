@@ -1,7 +1,6 @@
 """Tests for the refactored XSArena features."""
 
 import pytest
-
 from xsarena.core.anchor_service import (
     anchor_from_text,
     build_anchor_continue_prompt,

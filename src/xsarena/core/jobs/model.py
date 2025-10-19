@@ -3,11 +3,8 @@
 import asyncio
 import json
 import os
-import re
-import time
 import uuid
 from datetime import datetime
-from pathlib import Path
 from typing import Any, Awaitable, Callable, Dict, List, Optional
 
 from pydantic import BaseModel
@@ -119,7 +116,6 @@ class JobV3(BaseModel):
     progress: Dict[str, Any] = {}  # Track progress like chunks completed, tokens used
 
 
-import contextlib
 
 from .executor import JobExecutor
 from .store import JobStore
@@ -246,6 +242,7 @@ class JobManager:
     def _ts(self) -> str:
         """Get current timestamp."""
         from datetime import datetime
+
         return datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
 
     def list_jobs(self) -> List[JobV3]:
@@ -327,7 +324,13 @@ class JobManager:
         self._log_event(job_id, {"type": "job_prepared_for_resume"})
         return job_id
 
-    async def run_job(self, job_id: str, transport: BackendTransport, control_queue: asyncio.Queue = None, resume_event: asyncio.Event = None):
+    async def run_job(
+        self,
+        job_id: str,
+        transport: BackendTransport,
+        control_queue: asyncio.Queue = None,
+        resume_event: asyncio.Event = None,
+    ):
         """Run a job by delegating its execution to the JobExecutor."""
         job = self.load(job_id)
 
@@ -355,7 +358,7 @@ class JobManager:
             transport=transport,
             on_event=on_event_handler,
             control_queue=self.executor.control_queues[job_id],
-            resume_event=self.executor.resume_events[job_id]
+            resume_event=self.executor.resume_events[job_id],
         )
 
     async def send_control_message(self, job_id: str, command: str, text: str = None):
@@ -401,43 +404,44 @@ class JobManager:
     def _get_last_error_message(self, job_id: str) -> str:
         """Get the last error message from job events."""
         import json
-        from pathlib import Path
-        
+
         events_file = self.job_store._events_path(job_id)
         if not events_file.exists():
             return ""
-        
+
         # Read the last few lines of the events file to find error events
         try:
-            with open(events_file, 'r', encoding='utf-8') as f:
+            with open(events_file, "r", encoding="utf-8") as f:
                 lines = f.readlines()
-            
+
             # Look at the last 10 lines to find error events
             for line in reversed(lines[-10:]):
                 try:
                     event = json.loads(line.strip())
-                    if event.get('type') == 'error' and 'user_message' in event:
-                        return event['user_message']
-                    elif event.get('type') == 'error' and 'message' in event:
-                        return event['message']
-                    elif event.get('type') == 'job_failed' and 'error' in event:
-                        return str(event['error'])
+                    if event.get("type") == "error" and "user_message" in event:
+                        return event["user_message"]
+                    elif event.get("type") == "error" and "message" in event:
+                        return event["message"]
+                    elif event.get("type") == "job_failed" and "error" in event:
+                        return str(event["error"])
                 except (json.JSONDecodeError, KeyError):
                     continue
-            
+
             # If no specific error message found, check for any error-related events
             for line in reversed(lines[-20:]):  # Check more lines if needed
                 try:
                     event = json.loads(line.strip())
-                    if 'error' in event or event.get('type') == 'error':
-                        message = event.get('user_message', event.get('message', event.get('error', '')))
+                    if "error" in event or event.get("type") == "error":
+                        message = event.get(
+                            "user_message", event.get("message", event.get("error", ""))
+                        )
                         if message:
                             return str(message)
                 except (json.JSONDecodeError, KeyError):
                     continue
-                    
+
         except Exception:
             # If there's an issue reading the events file, return empty string
             pass
-        
+
         return ""

@@ -4,22 +4,22 @@ import json
 from pathlib import Path
 from typing import Dict, List, Optional
 
-from ..core.jobs.model import JobManager, JobV3
+from ..core.jobs.model import JobManager
 
 
 class JobService:
     """Service layer for job operations that the bridge API server can use."""
-    
+
     def __init__(self):
         self.job_manager = JobManager()
-    
+
     def list_jobs(self) -> List[Dict]:
         """List all jobs with statistics."""
         jobs = self.job_manager.list_jobs()
-        
+
         # Sort by creation time, newest first
         jobs.sort(key=lambda j: j.created_at, reverse=True)
-        
+
         job_list = []
         for job in jobs:
             # Get job events to calculate stats
@@ -58,7 +58,7 @@ class JobService:
             job_list.append(job_data)
 
         return job_list
-    
+
     def get_job(self, job_id: str) -> Optional[Dict]:
         """Get a specific job's details with statistics."""
         try:

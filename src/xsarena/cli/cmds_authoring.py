@@ -258,6 +258,7 @@ def ingest_run(
 
 # --- Lossless Commands ---
 
+
 @app.command("lossless-ingest")
 def lossless_ingest(
     ctx: typer.Context,
@@ -338,6 +339,7 @@ def lossless_enhance_structure(
 
 
 # --- Style Commands ---
+
 
 @app.command("style-narrative")
 def style_narrative(ctx: typer.Context, enable: bool = typer.Argument(True)):

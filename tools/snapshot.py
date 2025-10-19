@@ -35,16 +35,33 @@ ROOT = Path.cwd()
 try:
     from xsarena.core.redact import redact as redact_text  # type: ignore
 except Exception:
+
     def redact_text(text: str) -> str:
         pats = [
             # Generic secrets like API keys / tokens / passwords
-            (re.compile(r'(?i)\b(api[_-]?key|secret|token|password|pwd|auth|bearer|access[_-]?key|refresh[_-]?token)\b[\s:=]+["\']?([A-Za-z0-9._\-]{12,})["\']?'), r'\1="[REDACTED]"'),
+            (
+                re.compile(
+                    r'(?i)\b(api[_-]?key|secret|token|password|pwd|auth|bearer|access[_-]?key|refresh[_-]?token)\b[\s:=]+["\']?([A-Za-z0-9._\-]{12,})["\']?'
+                ),
+                r'\1="[REDACTED]"',
+            ),
             # .env style KEY=verylongvalue
-            (re.compile(r'(?m)^\s*([A-Z0-9_]{3,})\s*=\s*(["\']?)[^\s#]{12,}\2\s*$'), r'\1=[REDACTED]'),
+            (
+                re.compile(r'(?m)^\s*([A-Z0-9_]{3,})\s*=\s*(["\']?)[^\s#]{12,}\2\s*$'),
+                r"\1=[REDACTED]",
+            ),
             # JWT
-            (re.compile(r"\beyJ[0-9A-Za-z_\-]{10,}\.[0-9A-Za-z_\-]{10,}\.[0-9A-Za-z_\-]{10,}\b"), "[REDACTED_JWT]"),
+            (
+                re.compile(
+                    r"\beyJ[0-9A-Za-z_\-]{10,}\.[0-9A-Za-z_\-]{10,}\.[0-9A-Za-z_\-]{10,}\b"
+                ),
+                "[REDACTED_JWT]",
+            ),
             # Emails
-            (re.compile(r"\b[A-Za-z0-9._%+-]+ @[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b"), "[REDACTED_EMAIL]"),
+            (
+                re.compile(r"\b[A-Za-z0-9._%+-]+ @[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b"),
+                "[REDACTED_EMAIL]",
+            ),
             # IPv4
             (re.compile(r"\b(?:\d{1,3}\.){3}\d{1,3}\b"), "[REDACTED_IP]"),
         ]
@@ -52,16 +69,21 @@ except Exception:
             text = rgx.sub(repl, text)
         return text
 
+
 # ----- Helpers -----
+
 
 def ts_utc() -> str:
     return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
 
+
 def rel_posix(p: Path) -> str:
     return p.relative_to(ROOT).as_posix()
 
+
 def sha256_bytes(b: bytes) -> str:
     return hashlib.sha256(b).hexdigest()
+
 
 def is_binary_sample(b: bytes) -> bool:
     if not b:
@@ -71,6 +93,7 @@ def is_binary_sample(b: bytes) -> bool:
     text_chars = bytes(range(32, 127)) + b"\n\r\t\b\f"
     non_text = sum(ch not in text_chars for ch in b)
     return non_text / max(1, len(b)) > 0.30
+
 
 def safe_read_bytes(p: Path, cap: int) -> tuple[bytes, bool]:
     try:
@@ -83,6 +106,7 @@ def safe_read_bytes(p: Path, cap: int) -> tuple[bytes, bool]:
         truncated = True
     return data, truncated
 
+
 def render_tree(files: list[Path]) -> str:
     tree = {}
     for f in files:
@@ -90,6 +114,7 @@ def render_tree(files: list[Path]) -> str:
         node = tree
         for part in parts:
             node = node.setdefault(part, {})
+
     def walk(node: dict, prefix="") -> list[str]:
         lines = []
         names = sorted(node.keys())
@@ -101,26 +126,41 @@ def render_tree(files: list[Path]) -> str:
                 ext = "    " if last else "│   "
                 lines.extend(walk(node[name], prefix + ext))
         return lines
+
     return ".\n" + "\n".join(walk(tree))
+
 
 def get_git_info() -> str:
     if not (ROOT / ".git").exists():
         return "Git: (Not a git repository)\n"
     try:
-        branch = subprocess.check_output(["git", "rev-parse", "--abbrev-ref", "HEAD"], cwd=ROOT, text=True).strip()
-        commit = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip()
-        status = subprocess.check_output(["git", "status", "--porcelain"], cwd=ROOT, text=True).strip()
-        status_summary = f"{len(status.splitlines())} changed file(s)" if status else "clean"
+        branch = subprocess.check_output(
+            ["git", "rev-parse", "--abbrev-ref", "HEAD"], cwd=ROOT, text=True
+        ).strip()
+        commit = subprocess.check_output(
+            ["git", "rev-parse", "HEAD"], cwd=ROOT, text=True
+        ).strip()
+        status = subprocess.check_output(
+            ["git", "status", "--porcelain"], cwd=ROOT, text=True
+        ).strip()
+        status_summary = (
+            f"{len(status.splitlines())} changed file(s)" if status else "clean"
+        )
         return f"Git Branch: {branch}\nGit Commit: {commit}\nGit Status: {status_summary}\n"
     except Exception as e:
         return f"Git: (Error gathering info: {e})\n"
+
 
 def get_jobs_summary() -> str:
     jobs_dir = ROOT / ".xsarena" / "jobs"
     if not jobs_dir.exists():
         return "Jobs: (No jobs directory found)\n"
     summaries = []
-    job_dirs = sorted([p for p in jobs_dir.iterdir() if p.is_dir()], key=lambda p: p.stat().st_mtime, reverse=True)
+    job_dirs = sorted(
+        [p for p in jobs_dir.iterdir() if p.is_dir()],
+        key=lambda p: p.stat().st_mtime,
+        reverse=True,
+    )
     for job_dir in job_dirs[:5]:
         job_file = job_dir / "job.json"
         events_file = job_dir / "events.jsonl"
@@ -133,15 +173,20 @@ def get_jobs_summary() -> str:
             chunks = 0
             retries = 0
             if events_file.exists():
-                for line in events_file.read_text("utf-8", errors="replace").splitlines():
+                for line in events_file.read_text(
+                    "utf-8", errors="replace"
+                ).splitlines():
                     if '"type": "chunk_done"' in line:
                         chunks += 1
                     if '"type": "retry"' in line:
                         retries += 1
-            summaries.append(f"  - {job_dir.name[:8]}: {state:<10} | Chunks: {chunks:<3} | Retries: {retries:<2} | {name}")
+            summaries.append(
+                f"  - {job_dir.name[:8]}: {state:<10} | Chunks: {chunks:<3} | Retries: {retries:<2} | {name}"
+            )
         except Exception:
             summaries.append(f"  - {job_dir.name[:8]}: (Error parsing job data)")
     return "Recent Jobs:\n" + "\n".join(summaries) + "\n"
+
 
 def get_code_manifest() -> str:
     src_root = ROOT / "src"
@@ -156,16 +201,19 @@ def get_code_manifest() -> str:
             lines.append(f"{'[ERROR]':<12}  {py.relative_to(ROOT)}")
     return "Code Manifest (src/**/*.py):\n" + "\n".join(lines) + "\n"
 
+
 # ----- Config (.snapshot.toml) -----
 try:
     import tomllib  # Python 3.11+
 except Exception:
     tomllib = None
 
+
 @dataclass
 class ModeConfig:
     include: list[str]
     exclude: list[str]
+
 
 @dataclass
 class SnapshotConfig:
@@ -176,6 +224,7 @@ class SnapshotConfig:
     context_jobs: bool
     context_manifest: bool
     modes: dict[str, ModeConfig]
+
 
 def load_config() -> SnapshotConfig:
     # Defaults align with your spec (minimal covers src/xsarena + key root files)
@@ -189,10 +238,27 @@ def load_config() -> SnapshotConfig:
                 "src/xsarena/**",
             ],
             exclude=[
-                ".git/**", "venv/**", ".venv/**",
-                "__pycache__/**", ".pytest_cache/**", ".mypy_cache/**", ".ruff_cache/**", ".cache/**",
-                "*.pyc", "*.pyo", "*.pyd", "*.o", "*.a", "*.so", "*.dll", "*.dylib",
-                "*.log", "logs/**", ".xsarena/**", "*.egg-info/**", ".ipynb_checkpoints/**",
+                ".git/**",
+                "venv/**",
+                ".venv/**",
+                "__pycache__/**",
+                ".pytest_cache/**",
+                ".mypy_cache/**",
+                ".ruff_cache/**",
+                ".cache/**",
+                "*.pyc",
+                "*.pyo",
+                "*.pyd",
+                "*.o",
+                "*.a",
+                "*.so",
+                "*.dll",
+                "*.dylib",
+                "*.log",
+                "logs/**",
+                ".xsarena/**",
+                "*.egg-info/**",
+                ".ipynb_checkpoints/**",
             ],
         ),
         "standard": ModeConfig(
@@ -209,26 +275,82 @@ def load_config() -> SnapshotConfig:
                 "directives/modes.catalog.json",
             ],
             exclude=[
-                ".git/**", "venv/**", ".venv/**",
-                "__pycache__/**", ".pytest_cache/**", ".mypy_cache/**", ".ruff_cache/**", ".cache/**",
-                "*.pyc", "*.pyo", "*.pyd", "*.o", "*.a", "*.so", "*.dll", "*.dylib",
-                "*.log", "logs/**", ".xsarena/**", "*.egg-info/**", ".ipynb_checkpoints/**",
-                "books/**", "review/**", "recipes/**", "tests/**", "packaging/**", "pipelines/**", "examples/**",
-                "directives/_preview/**", "directives/_mixer/**", "directives/quickref/**",
-                "directives/roles/**", "directives/prompt/**", "directives/style/**",
+                ".git/**",
+                "venv/**",
+                ".venv/**",
+                "__pycache__/**",
+                ".pytest_cache/**",
+                ".mypy_cache/**",
+                ".ruff_cache/**",
+                ".cache/**",
+                "*.pyc",
+                "*.pyo",
+                "*.pyd",
+                "*.o",
+                "*.a",
+                "*.so",
+                "*.dll",
+                "*.dylib",
+                "*.log",
+                "logs/**",
+                ".xsarena/**",
+                "*.egg-info/**",
+                ".ipynb_checkpoints/**",
+                "books/**",
+                "review/**",
+                "recipes/**",
+                "tests/**",
+                "packaging/**",
+                "pipelines/**",
+                "examples/**",
+                "directives/_preview/**",
+                "directives/_mixer/**",
+                "directives/quickref/**",
+                "directives/roles/**",
+                "directives/prompt/**",
+                "directives/style/**",
             ],
         ),
         "full": ModeConfig(
             include=[
-                "README.md", "COMMANDS_REFERENCE.md", "pyproject.toml",
-                "src/**", "docs/**", "directives/**", "data/**", "recipes/**", "tests/**",
-                "tools/**", "scripts/**", "books/**", "packaging/**", "pipelines/**", "examples/**", "review/**",
+                "README.md",
+                "COMMANDS_REFERENCE.md",
+                "pyproject.toml",
+                "src/**",
+                "docs/**",
+                "directives/**",
+                "data/**",
+                "recipes/**",
+                "tests/**",
+                "tools/**",
+                "scripts/**",
+                "books/**",
+                "packaging/**",
+                "pipelines/**",
+                "examples/**",
+                "review/**",
             ],
             exclude=[
-                ".git/**", "venv/**", ".venv/**",
-                "__pycache__/**", ".pytest_cache/**", ".mypy_cache/**", ".ruff_cache/**", ".cache/**",
-                "*.pyc", "*.pyo", "*.pyd", "*.o", "*.a", "*.so", "*.dll", "*.dylib",
-                "*.log", "logs/**", "*.egg-info/**", ".ipynb_checkpoints/**",
+                ".git/**",
+                "venv/**",
+                ".venv/**",
+                "__pycache__/**",
+                ".pytest_cache/**",
+                ".mypy_cache/**",
+                ".ruff_cache/**",
+                ".cache/**",
+                "*.pyc",
+                "*.pyo",
+                "*.pyd",
+                "*.o",
+                "*.a",
+                "*.so",
+                "*.dll",
+                "*.dylib",
+                "*.log",
+                "logs/**",
+                "*.egg-info/**",
+                ".ipynb_checkpoints/**",
             ],
         ),
     }
@@ -266,7 +388,9 @@ def load_config() -> SnapshotConfig:
 
     return cfg
 
+
 # ----- Collection -----
+
 
 def _expand_patterns(patterns: list[str]) -> set[Path]:
     out: set[Path] = set()
@@ -280,8 +404,10 @@ def _expand_patterns(patterns: list[str]) -> set[Path]:
                         out.add(f)
     return out
 
+
 def _matches(rel: str, pattern: str) -> bool:
     return PurePosixPath(rel).match(pattern.lstrip("/"))
+
 
 def _apply_excludes(files: set[Path], exclude: list[str]) -> list[Path]:
     kept = []
@@ -292,26 +418,62 @@ def _apply_excludes(files: set[Path], exclude: list[str]) -> list[Path]:
         kept.append(p)
     return sorted(kept)
 
+
 def collect_files(includes: list[str], excludes: list[str]) -> list[Path]:
     candidates = _expand_patterns(includes)
     return _apply_excludes(candidates, excludes)
 
+
 # ----- Main -----
+
 
 def main():
     ap = argparse.ArgumentParser(description="XSArena Snapshot")
-    ap.add_argument("output", nargs="?", default="xsa_snapshot.txt", help="Output path (.txt or .zip).")
-    ap.add_argument("--mode", choices=["minimal", "standard", "full"], help="Mode from .snapshot.toml (default: config.default_mode).")
-    ap.add_argument("--include", action="append", default=[], help="Extra include glob(s).")
-    ap.add_argument("--exclude", action="append", default=[], help="Extra exclude glob(s).")
-    ap.add_argument("--dry-run", action="store_true", help="List files only; do not write snapshot.")
-    ap.add_argument("--zip", action="store_true", help="Write a zip archive with redacted copies + snapshot_manifest.txt.")
-    ap.add_argument("--max-size", type=int, help="Override max bytes per file (default from config).")
-    ap.add_argument("--no-git", action="store_true", help="Disable git status in context.")
-    ap.add_argument("--no-jobs", action="store_true", help="Disable jobs summary in context.")
-    ap.add_argument("--no-manifest", action="store_true", help="Disable code manifest in context.")
-    ap.add_argument("--no-redact", action="store_true", help="Do not redact file contents.")
-    ap.add_argument("-q", "--silent", action="store_true", help="Suppress progress messages.")
+    ap.add_argument(
+        "output",
+        nargs="?",
+        default="xsa_snapshot.txt",
+        help="Output path (.txt or .zip).",
+    )
+    ap.add_argument(
+        "--mode",
+        choices=["minimal", "standard", "full"],
+        help="Mode from .snapshot.toml (default: config.default_mode).",
+    )
+    ap.add_argument(
+        "--include", action="append", default=[], help="Extra include glob(s)."
+    )
+    ap.add_argument(
+        "--exclude", action="append", default=[], help="Extra exclude glob(s)."
+    )
+    ap.add_argument(
+        "--dry-run", action="store_true", help="List files only; do not write snapshot."
+    )
+    ap.add_argument(
+        "--zip",
+        action="store_true",
+        help="Write a zip archive with redacted copies + snapshot_manifest.txt.",
+    )
+    ap.add_argument(
+        "--max-size",
+        type=int,
+        help="Override max bytes per file (default from config).",
+    )
+    ap.add_argument(
+        "--no-git", action="store_true", help="Disable git status in context."
+    )
+    ap.add_argument(
+        "--no-jobs", action="store_true", help="Disable jobs summary in context."
+    )
+    ap.add_argument(
+        "--no-manifest", action="store_true", help="Disable code manifest in context."
+    )
+    ap.add_argument(
+        "--no-redact", action="store_true", help="Do not redact file contents."
+    )
+    ap.add_argument(
+        "-q", "--silent", action="store_true", help="Suppress progress messages."
+    )
     args = ap.parse_args()
 
     cfg = load_config()
@@ -380,7 +542,9 @@ def main():
                         if do_redact:
                             text = redact_text(text)
                         if truncated:
-                            text = f"[... FILE TRUNCATED to {max_size} bytes ...]\n" + text
+                            text = (
+                                f"[... FILE TRUNCATED to {max_size} bytes ...]\n" + text
+                            )
                         z.writestr(rp, text)
                 except Exception as e:
                     z.writestr(rp + ".error", f"[ERROR READING FILE: {e}]")
@@ -426,6 +590,7 @@ def main():
         print(f"  Output file: {txt_path}")
         print(f"  Files included: {len(files)}")
         print("=" * 30)
+
 
 if __name__ == "__main__":
     main()

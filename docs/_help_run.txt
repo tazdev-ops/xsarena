@@ -1,9 +1,9 @@
 Warning: Unknown config keys in .xsarena/config.yml: bridge
-                                                                                
- Usage: python -m xsarena run [OPTIONS] COMMAND [ARGS]...                       
-                                                                                
- Run a book or recipe in authoring mode                                         
-                                                                                
+
+ Usage: python -m xsarena run [OPTIONS] COMMAND [ARGS]...
+
+ Run a book or recipe in authoring mode
+
 ╭─ Options ────────────────────────────────────────────────────────────────────╮
 │ --help          Show this message and exit.                                  │
 ╰──────────────────────────────────────────────────────────────────────────────╯
@@ -19,4 +19,3 @@ Warning: Unknown config keys in .xsarena/config.yml: bridge
 │ template      Run a structured directive from the library (optionally        │
 │               JSON-validated if a schema exists).                            │
 ╰──────────────────────────────────────────────────────────────────────────────╯
-

@@ -1,8 +1,8 @@
-                                                                                
- Usage: xsarena [OPTIONS] COMMAND [ARGS]...                                     
-                                                                                
- XSArena — AI-powered writing and coding studio                                 
-                                                                                
+
+ Usage: xsarena [OPTIONS] COMMAND [ARGS]...
+
+ XSArena — AI-powered writing and coding studio
+
 ╭─ Options ────────────────────────────────────────────────────────────────────╮
 │ --backend                   TEXT     Backend to use (bridge or openrouter)   │
 │                                      [default: bridge]                       │
@@ -29,4 +29,3 @@
 │ utils         General utility commands.                                      │
 │ docs          Documentation generation commands                              │
 ╰──────────────────────────────────────────────────────────────────────────────╯
-

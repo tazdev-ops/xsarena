@@ -1,6 +1,5 @@
 """Smoke tests for CLI commands to ensure they can be invoked without crashing."""
 from typer.testing import CliRunner
-
 from xsarena.cli.main import app
 
 runner = CliRunner()
@@ -33,18 +32,32 @@ def test_author_commands_help():
 
     # Test specific author commands
     author_commands = [
-        "workshop", "preview", "ingest-ack", "ingest-synth",
-        "ingest-style", "ingest-run", "lossless-ingest", "lossless-rewrite",
-        "lossless-run", "lossless-improve-flow", "lossless-break-paragraphs",
-        "lossless-enhance-structure", "style-narrative", "style-nobs",
-        "style-reading", "style-show"
+        "workshop",
+        "preview",
+        "ingest-ack",
+        "ingest-synth",
+        "ingest-style",
+        "ingest-run",
+        "lossless-ingest",
+        "lossless-rewrite",
+        "lossless-run",
+        "lossless-improve-flow",
+        "lossless-break-paragraphs",
+        "lossless-enhance-structure",
+        "style-narrative",
+        "style-nobs",
+        "style-reading",
+        "style-show",
     ]
 
     for cmd in author_commands:
         result = runner.invoke(app, ["author", cmd, "--help"])
         # Some commands might not have help or might be simple functions
         # We just want to ensure they don't crash when invoked
-        assert result.exit_code in [0, 2]  # 2 is common for commands that require arguments
+        assert result.exit_code in [
+            0,
+            2,
+        ]  # 2 is common for commands that require arguments
 
 
 def test_analyze_commands_help():

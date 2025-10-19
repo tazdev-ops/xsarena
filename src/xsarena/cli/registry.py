@@ -7,15 +7,14 @@ from .cmds_adapt import app as adapt_app
 
 # Import all command modules
 from .cmds_agent import app as agent_app
-from .cmds_analyze import coverage_cmd, secrets_cmd, style_lint_cmd, readtime_cmd
+from .cmds_analyze import coverage_cmd, readtime_cmd, secrets_cmd, style_lint_cmd
 from .cmds_audio import app as audio_app
 from .cmds_booster import app as booster_app
 from .cmds_chad import app as chad_app
 from .cmds_checklist import app as checklist_app
 from .cmds_coach import app as coach_app
-from .cmds_controls import app as controls_app
 from .cmds_debug import app as debug_app
-from .cmds_dev import app as dev_app, dev_simulate
+from .cmds_dev import dev_simulate
 from .cmds_directives import app as directives_app
 from .cmds_docs import app as docs_app
 from .cmds_doctor import app as doctor_app
@@ -35,10 +34,10 @@ from .cmds_preview import app as preview_app
 from .cmds_project import app as project_app
 from .cmds_publish import app as publish_app
 from .cmds_run import app as run_app
-from .cmds_settings import app as settings_app
 from .cmds_snapshot import app as snapshot_app
 from .cmds_study import app as study_app
-from .cmds_tools import app as tools_app, fun_tldr
+from .cmds_tools import app as tools_app
+from .cmds_tools import fun_tldr
 from .cmds_unified_settings import app as unified_settings_app
 from .cmds_upgrade import app as upgrade_app
 from .cmds_workshop import app as workshop_app
@@ -50,7 +49,11 @@ app = typer.Typer(help="XSArena — AI-powered writing and coding studio")
 # --- Essential Top-Level Commands ---
 app.add_typer(run_app, name="run", help="Run a book or recipe in authoring mode")
 app.add_typer(interactive_app, name="interactive", help="Interactive authoring session")
-app.add_typer(unified_settings_app, name="settings", help="Unified settings interface (configuration + controls)")
+app.add_typer(
+    unified_settings_app,
+    name="settings",
+    help="Unified settings interface (configuration + controls)",
+)
 
 # --- Semantic Command Groups ---
 author_app = typer.Typer(name="author", help="Core content creation workflows.")
@@ -59,7 +62,10 @@ author_app.add_typer(preview_app, name="preview")
 
 # Add post-process tools as a subgroup under author
 from .cmds_tools import export_chapters_cmd, extract_checklists_cmd
-post_process_app = typer.Typer(name="post-process", help="Post-processing tools (aliases to utils tools)")
+
+post_process_app = typer.Typer(
+    name="post-process", help="Post-processing tools (aliases to utils tools)"
+)
 post_process_app.command("export-chapters")(export_chapters_cmd)
 post_process_app.command("extract-checklists")(extract_checklists_cmd)
 author_app.add_typer(post_process_app, name="post-process")
@@ -131,7 +137,11 @@ ops_app = typer.Typer(
 ops_app.add_typer(service_app, name="service")
 ops_app.add_typer(jobs_app, name="jobs")
 ops_app.add_typer(doctor_app, name="doctor")
-ops_app.add_typer(health_app, name="health", help="System health, maintenance, and self-healing operations")
+ops_app.add_typer(
+    health_app,
+    name="health",
+    help="System health, maintenance, and self-healing operations",
+)
 ops_app.add_typer(snapshot_app, name="snapshot")
 
 ops_app.add_typer(metrics_app, name="metrics")

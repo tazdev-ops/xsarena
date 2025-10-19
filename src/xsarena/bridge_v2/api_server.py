@@ -98,7 +98,9 @@ def load_model_endpoint_map():
         logger.warning("model_endpoint_map.json not found. Using empty map.")
         MODEL_ENDPOINT_MAP = {}
     except json.JSONDecodeError as e:
-        logger.error(f"Failed to parse 'model_endpoint_map.json': {e}. Using empty map.")
+        logger.error(
+            f"Failed to parse 'model_endpoint_map.json': {e}. Using empty map."
+        )
         MODEL_ENDPOINT_MAP = {}
     except Exception as e:
         logger.error(f"Failed to load 'model_endpoint_map.json': {e}. Using empty map.")
@@ -382,14 +384,15 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(lifespan=lifespan)
 
-# Load allowed origins from config, default to secure localhost-only if not configured
-# Note: This config is loaded in the lifespan function, but CORS is set at import time.
-# For a truly dynamic solution, we'd need a custom middleware, but for now we use secure defaults.
-allowed_origins = ["http://localhost", "http://127.0.0.1", "http://0.0.0.0"]  # Default to secure
-
+# Safer default CORS: localhost-only; make configurable later via CONFIG if needed
+_DEFAULT_ORIGINS = [
+    "http://localhost",
+    "http://127.0.0.1",
+    "http://0.0.0.0",
+]
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=allowed_origins,
+    allow_origins=_DEFAULT_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -1042,9 +1045,6 @@ def add_content_filter_explanation(content, finish_reason):
     return content
 
 
-
-
-
 # Health endpoint expected by XSArena
 @app.get("/health")
 def health():
@@ -1097,6 +1097,7 @@ async def api_get_job(job_id: str):
 async def console():
     """Serve the minimal web console HTML page."""
     from pathlib import Path
+
     from fastapi.responses import HTMLResponse
 
     console_html_path = Path(__file__).parent / "static" / "console.html"

@@ -11,7 +11,6 @@ from rich.console import Console
 from ..utils.text import slugify
 from .context import CLIContext
 
-
 console = Console()
 
 app = typer.Typer(help="Workshop design and facilitation tools")

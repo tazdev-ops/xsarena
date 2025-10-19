@@ -37,6 +37,11 @@ class SessionState:
     outline_first_enabled: bool = False
     semantic_anchor_enabled: bool = False
     reading_overlay_on: bool = False
+    # Lossless controls (optional; default off)
+    lossless_enforce: bool = False
+    target_density: float = 0.55
+    max_adverbs_per_k: int = 15
+    max_sentence_len: int = 22
     # Prompt configuration (make defaults explicit and persisted)
     active_profile: Optional[str] = None
     overlays_active: List[str] = field(default_factory=list)
@@ -84,6 +89,10 @@ class SessionState:
             "smart_min_enabled": self.smart_min_enabled,
             "outline_first_enabled": self.outline_first_enabled,
             "semantic_anchor_enabled": self.semantic_anchor_enabled,
+            "lossless_enforce": self.lossless_enforce,
+            "target_density": self.target_density,
+            "max_adverbs_per_k": self.max_adverbs_per_k,
+            "max_sentence_len": self.max_sentence_len,
             "active_profile": self.active_profile,
             "overlays_active": self.overlays_active,
         }

@@ -13,6 +13,7 @@ app = typer.Typer(help="Configuration and backend management")
 
 # --- Config Commands ---
 
+
 @app.command("config-show")
 def config_show(ctx: typer.Context):
     """Show current configuration."""
@@ -392,6 +393,7 @@ def config_capture_ids():
 
 # --- Backend Commands ---
 
+
 @app.command("backend-set")
 def set_backend(
     ctx: typer.Context,
@@ -407,7 +409,9 @@ def set_backend(
         cli.state.model = model
     if api_key:
         cli.config.api_key = api_key  # not persisted to disk; use env or secrets store
-        typer.echo("⚠️  API key set in-memory only, not persisted to disk. Use environment variable XSA_API_KEY or secrets store for persistence.")
+        typer.echo(
+            "⚠️  API key set in-memory only, not persisted to disk. Use environment variable XSA_API_KEY or secrets store for persistence."
+        )
     if base_url:
         cli.config.base_url = base_url
     cli.rebuild_engine()

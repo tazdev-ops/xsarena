@@ -17,6 +17,7 @@ from xsarena.core.chunking import (
 
 class MockMessage:
     """Mock message object for testing."""
+
     def __init__(self, role, content):
         self.role = role
         self.content = content
@@ -124,7 +125,7 @@ def test_continuation_anchor_basic():
     # Create mock history with assistant message
     history = [
         MockMessage("user", "Tell me a story"),
-        MockMessage("assistant", "Once upon a time, there was a brave knight.")
+        MockMessage("assistant", "Once upon a time, there was a brave knight."),
     ]
 
     anchor = continuation_anchor(history)
@@ -146,7 +147,9 @@ def test_continuation_anchor_no_assistant_message():
 
 def test_anchor_from_text_basic():
     """Test basic anchor extraction from text."""
-    text = "This is a sample text. It has multiple sentences! Does it end with a question?"
+    text = (
+        "This is a sample text. It has multiple sentences! Does it end with a question?"
+    )
     anchor = anchor_from_text(text, 30)
 
     assert isinstance(anchor, str)
@@ -171,7 +174,10 @@ def test_anchor_from_text_empty():
 
 def test_semantic_anchor_from_text_basic():
     """Test semantic anchor extraction."""
-    text = "This is the beginning of a long text. " * 5 + "Here is the end of the text with important content."
+    text = (
+        "This is the beginning of a long text. " * 5
+        + "Here is the end of the text with important content."
+    )
     semantic_anchor = semantic_anchor_from_text(text)
 
     assert isinstance(semantic_anchor, str)

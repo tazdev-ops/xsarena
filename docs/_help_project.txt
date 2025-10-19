@@ -1,9 +1,9 @@
 Warning: Unknown config keys in .xsarena/config.yml: bridge
-                                                                                
- Usage: python -m xsarena project [OPTIONS] COMMAND [ARGS]...                   
-                                                                                
- Project management and initialization.                                         
-                                                                                
+
+ Usage: python -m xsarena project [OPTIONS] COMMAND [ARGS]...
+
+ Project management and initialization.
+
 ╭─ Options ────────────────────────────────────────────────────────────────────╮
 │ --help          Show this message and exit.                                  │
 ╰──────────────────────────────────────────────────────────────────────────────╯
@@ -27,4 +27,3 @@ Warning: Unknown config keys in .xsarena/config.yml: bridge
 │ init                   Initialize XSArena project structure (.xsarena/,      │
 │                        books/, etc.) and index directives if present.        │
 ╰──────────────────────────────────────────────────────────────────────────────╯
-

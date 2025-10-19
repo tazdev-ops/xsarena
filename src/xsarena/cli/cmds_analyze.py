@@ -1,6 +1,5 @@
 """Analysis commands for XSArena."""
 
-import math
 from pathlib import Path
 from typing import List
 
@@ -129,10 +128,14 @@ def secrets_cmd(
 ):
     """Scan for secrets (API keys, passwords, etc.) in the specified path."""
     # Print deprecation message
-    typer.echo("⚠️  DEPRECATION WARNING: 'xsarena analyze secrets' is deprecated. Use 'xsarena ops health scan-secrets' instead.", err=True)
-    
+    typer.echo(
+        "⚠️  DEPRECATION WARNING: 'xsarena analyze secrets' is deprecated. Use 'xsarena ops health scan-secrets' instead.",
+        err=True,
+    )
+
     # Import the health app and call the scan_secrets command via ctx.invoke
     from .cmds_health import scan_secrets as health_scan_secrets
+
     ctx.invoke(health_scan_secrets, path=path, no_fail=no_fail)
 
 
@@ -183,34 +186,38 @@ def continuity_cmd(
 @app.command("readtime")
 def readtime_cmd(
     file: Path = typer.Argument(..., help="Path to the text file to analyze"),
-    words_per_minute: int = typer.Option(200, "--wpm", help="Words per minute reading speed"),
+    words_per_minute: int = typer.Option(
+        200, "--wpm", help="Words per minute reading speed"
+    ),
 ):
     """Analyze reading time and density of a text file."""
     if not file.exists():
         typer.echo(f"Error: File '{file}' not found.", err=True)
         raise typer.Exit(1)
-    
+
     content = file.read_text(encoding="utf-8")
-    
+
     # Count words
     words = len(content.split())
-    
+
     # Calculate reading time
     reading_time = words / words_per_minute
-    
+
     # Calculate density (words per character)
     density = words / len(content) if len(content) > 0 else 0
-    
+
     # Estimate reading time in minutes and seconds
     minutes = int(reading_time)
     seconds = int((reading_time - minutes) * 60)
-    
+
     typer.echo(f"File: {file}")
     typer.echo(f"Words: {words:,}")
     typer.echo(f"Characters: {len(content):,}")
     typer.echo(f"Reading time: ~{minutes}m {seconds}s (at {words_per_minute} wpm)")
-    typer.echo(f"Density: {density:.4f} words per character ({density*1000:.2f} words per 1000 characters)")
-    
+    typer.echo(
+        f"Density: {density:.4f} words per character ({density*1000:.2f} words per 1000 characters)"
+    )
+
     # Density interpretation
     if density > 0.15:
         typer.echo("Density: High (dense text)")

@@ -23,10 +23,14 @@ Provide a synthesized summary that captures the essential information in a struc
 
         # Build system prompt using PCL with lossless role directive
         role_content = self._load_role_directive("lossless")
-        system_prompt = self._build_system_prompt("text synthesis", extra_notes, role_content)
+        system_prompt = self._build_system_prompt(
+            "text synthesis", extra_notes, role_content
+        )
         return await self.engine.send_and_collect(prompt, system_prompt)
 
-    async def rewrite_lossless(self, text: str, extra_notes: Optional[str] = None) -> str:
+    async def rewrite_lossless(
+        self, text: str, extra_notes: Optional[str] = None
+    ) -> str:
         """Rewrite text while preserving all meaning."""
         prompt = f"""Rewrite this text to improve clarity, grammar, and structure while preserving all original facts, details, and meaning:
 
@@ -36,7 +40,9 @@ Focus on making it more readable while keeping every piece of information intact
 
         # Build system prompt using PCL with lossless role directive
         role_content = self._load_role_directive("lossless")
-        system_prompt = self._build_system_prompt("lossless text rewriting", extra_notes, role_content)
+        system_prompt = self._build_system_prompt(
+            "lossless text rewriting", extra_notes, role_content
+        )
         return await self.engine.send_and_collect(prompt, system_prompt)
 
     async def lossless_run(self, text: str, extra_notes: Optional[str] = None) -> str:
@@ -45,7 +51,9 @@ Focus on making it more readable while keeping every piece of information intact
         result = await self.rewrite_lossless(text, extra_notes=extra_notes)
 
         # Additional passes could be added here
-        result = await self.rewrite_lossless(result, extra_notes=extra_notes)  # Second pass for refinement
+        result = await self.rewrite_lossless(
+            result, extra_notes=extra_notes
+        )  # Second pass for refinement
 
         return result
 
@@ -59,10 +67,14 @@ Add connecting phrases, improve transitions, and ensure smooth reading flow whil
 
         # Build system prompt using PCL with lossless role directive
         role_content = self._load_role_directive("lossless")
-        system_prompt = self._build_system_prompt("text flow improvement", extra_notes, role_content)
+        system_prompt = self._build_system_prompt(
+            "text flow improvement", extra_notes, role_content
+        )
         return await self.engine.send_and_collect(prompt, system_prompt)
 
-    async def break_paragraphs(self, text: str, extra_notes: Optional[str] = None) -> str:
+    async def break_paragraphs(
+        self, text: str, extra_notes: Optional[str] = None
+    ) -> str:
         """Break dense paragraphs into more readable chunks."""
         prompt = f"""Break up these dense paragraphs into more readable, shorter paragraphs:
 
@@ -72,10 +84,14 @@ Keep related ideas together but separate distinct concepts into their own paragr
 
         # Build system prompt using PCL with lossless role directive
         role_content = self._load_role_directive("lossless")
-        system_prompt = self._build_system_prompt("paragraph restructuring", extra_notes, role_content)
+        system_prompt = self._build_system_prompt(
+            "paragraph restructuring", extra_notes, role_content
+        )
         return await self.engine.send_and_collect(prompt, system_prompt)
 
-    async def enhance_structure(self, text: str, extra_notes: Optional[str] = None) -> str:
+    async def enhance_structure(
+        self, text: str, extra_notes: Optional[str] = None
+    ) -> str:
         """Enhance text structure with appropriate headings and formatting."""
         prompt = f"""Improve the structure of this text with appropriate headings, subheadings, and formatting:
 
@@ -85,7 +101,9 @@ Add markdown formatting where appropriate to improve readability while preservin
 
         # Build system prompt using PCL with lossless role directive
         role_content = self._load_role_directive("lossless")
-        system_prompt = self._build_system_prompt("text structure enhancement", extra_notes, role_content)
+        system_prompt = self._build_system_prompt(
+            "text structure enhancement", extra_notes, role_content
+        )
         return await self.engine.send_and_collect(prompt, system_prompt)
 
     def _load_role_directive(self, role_name: str) -> str:
@@ -93,28 +111,30 @@ Add markdown formatting where appropriate to improve readability while preservin
         # Try relative to project root (relative to this file)
         project_root = Path(__file__).parent.parent.parent.parent
         role_path = project_root / "directives" / "roles" / f"{role_name}.md"
-        
+
         if role_path.exists():
             try:
                 return role_path.read_text(encoding="utf-8").strip()
             except Exception:
                 pass
-        
+
         # Return empty string if not found
         return ""
 
-    def _build_system_prompt(self, subject: str, extra_notes: Optional[str], role_content: str) -> str:
+    def _build_system_prompt(
+        self, subject: str, extra_notes: Optional[str], role_content: str
+    ) -> str:
         """Build system prompt using PCL with role directive content."""
         # Compose the prompt using PCL
         composition = pcl.compose(
             subject=subject,
             base="reference",  # Use reference base for structured text processing
             overlays=["no_bs"],  # Use no_bs overlay for clear, direct instructions
-            extra_notes=extra_notes
+            extra_notes=extra_notes,
         )
-        
+
         # If role directive exists, append its content to the system text
         if role_content:
             composition.system_text += f"\n\n{role_content}"
-        
+
         return composition.system_text

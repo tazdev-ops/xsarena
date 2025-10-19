@@ -131,20 +131,22 @@ def extract_checklists_cmd(
 @app.command("tldr")
 def fun_tldr(
     file: str = typer.Argument(..., help="Path to the file to summarize"),
-    bullets: int = typer.Option(7, "--bullets", "-b", help="Number of bullet points for summary"),
-    output_file: str = typer.Option(None, "--out", help="Output file for the summary")
+    bullets: int = typer.Option(
+        7, "--bullets", "-b", help="Number of bullet points for summary"
+    ),
+    output_file: str = typer.Option(None, "--out", help="Output file for the summary"),
 ):
     """Create a tight summary with callouts from a text file."""
     import asyncio
     from pathlib import Path
-    
+
     file_path = Path(file)
     if not file_path.exists():
         typer.echo(f"Error: File '{file}' not found.")
         raise typer.Exit(1)
-    
+
     content = file_path.read_text(encoding="utf-8")
-    
+
     # Create a system prompt for TL;DR generation
     system_prompt = (
         f"You create tight, actionable summaries with key callouts. "
@@ -153,17 +155,17 @@ def fun_tldr(
         f"and 'Glossary' (3 key terms with definitions). "
         f"Keep it concise and preserve the core meaning."
     )
-    
+
     prompt = f"Please create a TL;DR summary of the following content:\n\n{content}"
-    
+
     # Use the engine to generate the summary
     try:
         from ..core.backends import create_backend
         from ..core.state import SessionState
-        
+
         eng = Engine(create_backend("openrouter"), SessionState())
         result = asyncio.run(eng.send_and_collect(prompt, system_prompt=system_prompt))
-        
+
         if output_file:
             output_path = Path(output_file)
             output_path.write_text(result, encoding="utf-8")
