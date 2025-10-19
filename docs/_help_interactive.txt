@@ -1,11 +1,13 @@
-
- Usage: python -m xsarena interactive [OPTIONS] COMMAND [ARGS]...
-
- Interactive cockpit (REPL-lite) with live steering
-
+Warning: Unknown config keys in .xsarena/config.yml: bridge
+                                                                                
+ Usage: xsarena interactive [OPTIONS] COMMAND [ARGS]...                         
+                                                                                
+ Interactive authoring session                                                  
+                                                                                
 ╭─ Options ────────────────────────────────────────────────────────────────────╮
 │ --help          Show this message and exit.                                  │
 ╰──────────────────────────────────────────────────────────────────────────────╯
 ╭─ Commands ───────────────────────────────────────────────────────────────────╮
 │ start   Start the interactive cockpit session.                               │
 ╰──────────────────────────────────────────────────────────────────────────────╯
+

@@ -9,7 +9,7 @@ from typing import Optional
 
 import typer
 
-app = typer.Typer(help="Health checks and smoke tests")
+app = typer.Typer(help="Health checks and smoke tests (DEPRECATED: use ops health instead)", hidden=True)
 
 
 def _ok(m):
@@ -52,6 +52,8 @@ def ping(
         False, "--deep", help="Show detailed diagnostic information"
     ),
 ):
+    typer.echo("⚠️  WARNING: 'xsarena doctor ping' is deprecated. Use 'xsarena ops settings backend-test' instead.")
+    
     cli = ctx.obj
     if backend:
         cli.state.backend = backend
@@ -87,24 +89,28 @@ def ping(
 
 
 @app.command("run")
-def run():
+def run(ctx: typer.Context):
+    typer.echo("⚠️  WARNING: 'xsarena doctor' is deprecated. Use 'xsarena ops health' instead.")
+    typer.echo("Running equivalent ops health commands...")
+    
     try:
         env()
     except SystemExit as e:
         raise typer.Exit(code=e.code)
+    
+    # Use ctx.invoke to reuse Typer's context instead of creating a new one
     try:
-        # For the run command, we need to call ping with proper context
-        # Since this is a command-line call, we'll need to create a context
-        # that contains the CLIContext object
-        import typer
-
-        from .context import CLIContext
-
-        # Create a temporary context and set the CLIContext object
-        temp_ctx = typer.Context(None)
-        cli = CLIContext.load()
-        temp_ctx.obj = cli
-        ping(temp_ctx, None, 1, 0.5, False)
+        # Find the ping command in the app
+        if hasattr(app, 'commands') and 'ping' in app.commands:
+            ping_callback = app.commands['ping']
+            ctx.invoke(ping_callback, backend=None, retries=1, delay=0.5, deep=False)
+        else:
+            # Fallback if invoke doesn't work
+            ping(ctx, backend=None, retries=1, delay=0.5, deep=False)
     except SystemExit as e:
         raise typer.Exit(code=e.code)
-    _ok("Doctor run complete.")
+    except:
+        # Fallback to direct call if invoke doesn't work
+        ping(ctx, backend=None, retries=1, delay=0.5, deep=False)
+    
+    _ok("Doctor run complete. Please use 'xsarena ops health' for future health checks.")

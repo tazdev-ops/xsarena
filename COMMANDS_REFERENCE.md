@@ -7,22 +7,37 @@ This document provides a comprehensive reference for all XSArena commands, organ
 ### Author
 Core content creation workflows.
 
-- `xsarena author run` - Run a book or recipe in authoring mode
-  - `xsarena author run book "Subject"` - Generate a book with specified subject
-  - `xsarena author run continue <file>` - Continue writing from an existing file
-  - `xsarena author run from-recipe <file>` - Run a job from a recipe file
-  - `xsarena author run from-plan` - Plan from rough seeds and run a book
-  - `xsarena author run template <template> <subject>` - Run a structured directive
-  - `xsarena author run replay <manifest>` - Replay a job from a run manifest
+- `xsarena run` - Run a book or recipe in authoring mode (alias for `xsarena author run`)
+  - `xsarena run book "Subject"` - Generate a book with specified subject
+  - `xsarena run continue <file>` - Continue writing from an existing file
+  - `xsarena run from-recipe <file>` - Run a job from a recipe file
+  - `xsarena run from-plan` - Plan from rough seeds and run a book
+  - `xsarena run template <template> <subject>` - Run a structured directive
+  - `xsarena run replay <manifest>` - Replay a job from a run manifest
 - `xsarena author interactive` - Start an interactive authoring session
-- `xsarena author ingest` - Ingest and process content
-- `xsarena author lossless` - Lossless operations
-- `xsarena author style` - Apply style and pedagogy overlays
+- `xsarena author ingest-ack` - Ingest a large document in 'acknowledge' mode with 'OK i/N' handshake loop
+- `xsarena author ingest-synth` - Ingest a large document in 'synthesis' mode with rolling update loop
+- `xsarena author ingest-style` - Ingest a large document in 'style' mode with rolling style profile update loop
+- `xsarena author ingest-run` - Ingest a large document and create a dense synthesis (alias for synth mode)
+- `xsarena author lossless-ingest` - Ingest and synthesize information from text
+- `xsarena author lossless-rewrite` - Rewrite text while preserving all meaning
+- `xsarena author lossless-run` - Perform a comprehensive lossless processing run
+- `xsarena author lossless-improve-flow` - Improve the flow and transitions in text
+- `xsarena author lossless-break-paragraphs` - Break dense paragraphs into more readable chunks
+- `xsarena author lossless-enhance-structure` - Enhance text structure with appropriate headings and formatting
+- `xsarena author style-narrative` - Enable or disable the narrative/pedagogy overlay for the session
+- `xsarena author style-nobs` - Enable or disable the no-bullshit (no-bs) language overlay
+- `xsarena author style-reading` - Enable or disable the further reading overlay for the session
+- `xsarena author style-show` - Show currently active overlays
+- `xsarena author workshop` - Workshop tools
+- `xsarena author preview` - Preview tools
+- `xsarena author post-process` - Post-processing tools (aliases to utils tools)
+  - `xsarena author post-process export-chapters <book>` - Export a book into chapters with navigation links (alias to xsarena utils tools export-chapters)
+  - `xsarena author post-process extract-checklists --book <book>` - Extract checklist items from a book (alias to xsarena utils tools extract-checklists)
 
 ### Analyze
-Analysis, reporting, and evidence-based tools.
+Analysis and evidence-based tools.
 
-- `xsarena analyze report` - Generate reports
 - `xsarena analyze coverage --outline <file> --book <file>` - Analyze coverage of a book against an outline
 - `xsarena analyze continuity` - Analyze book continuity for anchor drift and re-introductions
 - `xsarena analyze style-lint <path>` - Lint directive files for best practices
@@ -33,6 +48,12 @@ Analysis, reporting, and evidence-based tools.
 Study aids, learning tools, and practice drills.
 
 - `xsarena study generate` - Generate study materials
+  - `xsarena study generate flashcards <content_file>` - Generate flashcards from a content file
+  - `xsarena study generate quiz <content_file>` - Generate a quiz from a content file
+  - `xsarena study generate glossary <content_file>` - Create a glossary from a content file with frequency filtering
+  - `xsarena study generate index <content_file>` - Generate an index from a content file with depth control
+  - `xsarena study generate cloze <content_file>` - Create cloze deletions from a content file
+  - `xsarena study generate drill <content_file>` - Generate active recall drills from a content file
 - `xsarena study coach` - Coaching tools
 - `xsarena study joy` - Joy-related tools (hidden)
 
@@ -54,40 +75,57 @@ System health, jobs, services, and configuration.
 
 - `xsarena ops service` - Service management
 - `xsarena ops jobs` - Job management
-- `xsarena ops doctor` - System health checks
-- `xsarena ops fix` - Fix common issues
-- `xsarena ops clean` - Clean operations
+- `xsarena ops doctor` - System health checks (DEPRECATED → use xsarena ops health ...)
+- `xsarena ops health` - System health, maintenance, and self-healing operations
+  - `xsarena ops health fix-run` - Self-heal common configuration/state issues
+  - `xsarena ops health sweep` - Purge ephemeral artifacts by TTL
+  - `xsarena ops health scan-secrets` - Scan for secrets (API keys, passwords, etc.) in working tree
+  - `xsarena ops health mark` - Add an XSA-EPHEMERAL header to a helper script so the sweeper can purge it later
+  - `xsarena ops health read` - Read startup plan; attempt merge; print sources found
+  - `xsarena ops health init` - One-time helper: create a minimal rules baseline if merged rules and sources are missing
 - `xsarena ops snapshot` - Snapshot management
-- `xsarena ops settings` - Fine-tune output, continuation and repetition behavior
-- `xsarena ops config` - Configuration management commands
+  - `xsarena ops snapshot write` - Generate a snapshot using the smart snapshot builder
+  - `xsarena ops snapshot pro` - Generate a pro snapshot with enhanced debugging capabilities
 - `xsarena ops debug` - Debugging commands
 - `xsarena ops directives` - Directive tools (index)
 - `xsarena ops booster` - Interactively engineer and improve prompts
+- `xsarena ops adapt` - Adaptive inspection and safe fixes
+  - `xsarena ops adapt inspect` - Analyze repo state and write a plan (no changes)
+  - `xsarena ops adapt fix` - Apply safe, targeted fixes (no refactors)
+  - `xsarena ops adapt plan` - Alias to inspect (compat)
+  - `xsarena ops adapt suppress-add` - Add suppression patterns to avoid false positives
+  - `xsarena ops adapt suppress-ls` - List current suppression patterns
+  - `xsarena ops adapt suppress-clear` - Clear suppression patterns
 
 ### Top-Level Commands
 Essential commands available at the top level.
 
 - `xsarena run` - Run a book or recipe in authoring mode (alias for `xsarena author run`)
 - `xsarena interactive` - Interactive authoring session (alias for `xsarena author interactive`)
+- `xsarena settings` - Unified settings interface (configuration + controls)
 
 ## Settings Commands
 
-The `xsarena ops settings` group provides fine-grained control over output and continuation behavior:
+The `xsarena settings` group provides unified access to both configuration and controls settings:
 
-- `xsarena ops settings hammer [enable]` - Toggle the coverage hammer (prevents premature summarization)
-- `xsarena ops settings budget [enable]` - Toggle the output budget addendum (pushes for longer chunks)
-- `xsarena ops settings push [enable]` - Toggle output push (micro-extends to meet min_chars)
-- `xsarena ops settings minchars <n>` - Set the target minimum characters per chunk
-- `xsarena ops settings passes <n>` - Set the max number of micro-extend passes per chunk
-- `xsarena ops settings cont-anchor <n>` - Set the continuation anchor length
-- `xsarena ops settings repeat-warn [enable]` - Toggle the repetition detection warning
-- `xsarena ops settings repeat-thresh <threshold>` - Set the repetition detection threshold (0.0-1.0)
-- `xsarena ops settings smart-min [enable]` - Toggle token-aware minimum length scaling
-- `xsarena ops settings outline-first [enable]` - Toggle outline-first seed for the first chunk only
-- `xsarena ops settings cont-mode <mode>` - Set the continuation strategy ('anchor', 'normal', or 'semantic-anchor')
-- `xsarena ops settings persist` - Persist current CLI knobs to .xsarena/config.yml under settings: key
-- `xsarena ops settings reset` - Reset CLI knobs from persisted settings in .xsarena/config.yml
-- `xsarena ops settings show` - Show current continuation/output/repetition knobs
+- `xsarena settings show` - Show both configuration and controls settings
+- `xsarena settings set` - Set configuration or controls settings with various options:
+  - `--backend` - Set backend (ops settings)
+  - `--model` - Set default model (ops settings)
+  - `--base-url` - Set base URL for bridge backend (ops settings)
+  - `--api-key` - Set API key (ops settings)
+  - `--output-min-chars` - Set minimal chars per chunk (utils settings)
+  - `--output-push-max-passes` - Set max extension steps per chunk (utils settings)
+  - `--continuation-mode` - Set continuation mode (utils settings)
+  - `--anchor-length-config` - Set config anchor length (ops settings)
+  - `--anchor-length-control` - Set control anchor length (utils settings)
+  - `--repetition-threshold` - Set repetition detection threshold (utils settings)
+  - `--repetition-warn/--no-repetition-warn` - Enable or disable repetition warning (utils settings)
+  - `--coverage-hammer/--no-coverage-hammer` - Enable or disable coverage hammer (utils settings)
+  - `--output-budget/--no-output-budget` - Enable or disable output budget addendum (utils settings)
+  - `--output-push/--no-output-push` - Enable or disable output pushing (utils settings)
+- `xsarena settings persist` - Persist current CLI knobs to .xsarena/config.yml (controls layer) and save config (config layer)
+- `xsarena settings reset` - Reset settings from persisted configuration (controls layer) and reload config (config layer)
 
 ## Jobs Commands
 
@@ -103,9 +141,9 @@ The `xsarena ops jobs` group provides job management:
 
 ## Run Commands
 
-The `xsarena author run` group provides various ways to run content generation:
+The `xsarena run` group provides various ways to run content generation:
 
-- `xsarena author run book <subject>` - Generate a book with specified subject
+- `xsarena run book <subject>` - Generate a book with specified subject
   - `--profile <profile>` - Use a specific profile
   - `--length <length>` - Set length preset (standard|long|very-long|max)
   - `--span <span>` - Set span preset (medium|long|book)
@@ -122,11 +160,11 @@ The `xsarena author run` group provides various ways to run content generation:
 
 ## Tools Commands
 
-Various utility commands are available through different groups:
+Various utility commands are available through the utils group:
 
-- `xsarena tools eli5 <topic>` - Explain like I'm five
-- `xsarena tools story <concept>` - Explain the concept with a short story
-- `xsarena tools persona <name>` - Set persona overlay (chad|prof|coach)
-- `xsarena tools nobs <on|off>` - Toggle no-BS setting
-- `xsarena tools export-chapters <book>` - Export a book into chapters with navigation links
-- `xsarena tools extract-checklists --book <book>` - Extract checklist items from a book
+- `xsarena utils tools eli5 <topic>` - Explain like I'm five
+- `xsarena utils tools story <concept>` - Explain the concept with a short story
+- `xsarena utils tools persona <name>` - Set persona overlay (chad|prof|coach)
+- `xsarena utils tools nobs <on|off>` - Toggle no-BS setting
+- `xsarena utils tools export-chapters <book>` - Export a book into chapters with navigation links
+- `xsarena utils tools extract-checklists --book <book>` - Extract checklist items from a book

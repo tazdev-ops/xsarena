@@ -1,6 +1,7 @@
-"""Configuration management commands for XSArena."""
+"""Configuration and backend management commands for XSArena."""
 
 from pathlib import Path
+from typing import Optional
 
 import typer
 import yaml
@@ -8,10 +9,11 @@ import yaml
 from ..core.config import Config
 from .context import CLIContext
 
-app = typer.Typer(help="Configuration management")
+app = typer.Typer(help="Configuration and backend management")
 
+# --- Config Commands ---
 
-@app.command("show")
+@app.command("config-show")
 def config_show(ctx: typer.Context):
     """Show current configuration."""
 
@@ -44,7 +46,7 @@ def config_show(ctx: typer.Context):
             typer.echo(f"    Message ID: {bridge_config.get('message_id', 'Not set')}")
 
 
-@app.command("set")
+@app.command("config-set")
 def config_set(
     ctx: typer.Context,
     backend: str = typer.Option(
@@ -188,7 +190,7 @@ def config_set(
     typer.echo("Configuration updated and saved to .xsarena/config.yml")
 
 
-@app.command("reset")
+@app.command("config-reset")
 def config_reset(ctx: typer.Context):
     """Reset configuration to defaults."""
 
@@ -207,7 +209,7 @@ def config_reset(ctx: typer.Context):
     typer.echo("Configuration reset to defaults and saved to .xsarena/config.yml")
 
 
-@app.command("path")
+@app.command("config-path")
 def config_path():
     """Show configuration file path."""
     config_paths = [
@@ -231,7 +233,7 @@ def config_path():
         typer.echo("To create a config file, use: xsarena config set --backend bridge")
 
 
-@app.command("export")
+@app.command("config-export")
 def config_export(
     ctx: typer.Context, out: str = typer.Option(".xsarena/config.backup.yml", "--out")
 ):
@@ -241,7 +243,7 @@ def config_export(
     typer.echo(f"✓ Exported config to {out}")
 
 
-@app.command("import")
+@app.command("config-import")
 def config_import(
     ctx: typer.Context, inp: str = typer.Option(".xsarena/config.backup.yml", "--in")
 ):
@@ -261,7 +263,7 @@ def config_import(
     typer.echo("✓ Imported config")
 
 
-@app.command("check")
+@app.command("config-check")
 def config_check():
     """Validate configuration and show any issues."""
     try:
@@ -296,7 +298,7 @@ def config_check():
         raise typer.Exit(1)
 
 
-@app.command("capture-ids")
+@app.command("config-capture-ids")
 def config_capture_ids():
     """Capture bridge session and message IDs from LMArena."""
     import time
@@ -386,3 +388,54 @@ def config_capture_ids():
     typer.echo("  - LMArena tab is not properly activated")
     typer.echo("  - Cloudflare verification may be required")
     raise typer.Exit(1)
+
+
+# --- Backend Commands ---
+
+@app.command("backend-set")
+def set_backend(
+    ctx: typer.Context,
+    backend_type: str = typer.Argument(..., help="Backend type (bridge or openrouter)"),
+    api_key: Optional[str] = typer.Option(None, help="API key for openrouter backend"),
+    model: Optional[str] = typer.Option(None, help="Model to use"),
+    base_url: Optional[str] = typer.Option(None, help="Base URL for bridge backend"),
+):
+    """Set backend configuration (persistent)."""
+    cli: CLIContext = ctx.obj
+    cli.state.backend = backend_type
+    if model:
+        cli.state.model = model
+    if api_key:
+        cli.config.api_key = api_key  # not persisted to disk; use env or secrets store
+        typer.echo("⚠️  API key set in-memory only, not persisted to disk. Use environment variable XSA_API_KEY or secrets store for persistence.")
+    if base_url:
+        cli.config.base_url = base_url
+    cli.rebuild_engine()
+    cli.save()
+    typer.echo(f"Backend: {cli.state.backend}")
+    typer.echo(f"Model: {cli.state.model}")
+    typer.echo(f"Base URL: {cli.config.base_url}")
+
+
+@app.command("backend-show")
+def show_backend(ctx: typer.Context):
+    """Show current backend configuration."""
+    cli: CLIContext = ctx.obj
+    typer.echo("Current Backend Configuration:")
+    typer.echo(f"  Backend: {cli.state.backend}")
+    typer.echo(f"  Model: {cli.state.model}")
+    typer.echo(f"  Base URL: {cli.config.base_url}")
+    typer.echo(f"  API Key: {'Set' if cli.config.api_key else 'Not set'}")
+
+
+@app.command("backend-test")
+def test_backend(ctx: typer.Context):
+    """Test the current backend configuration."""
+    cli: CLIContext = ctx.obj
+    try:
+        cli.rebuild_engine()
+        typer.echo(f"Backend {cli.state.backend} configured successfully")
+        typer.echo("Backend test: Configuration valid")
+    except Exception as e:
+        typer.echo(f"Backend test failed: {str(e)}")
+        raise typer.Exit(code=1)

@@ -253,7 +253,7 @@ def controls_show(ctx: typer.Context):
         f"  Outline-first: {'ON' if getattr(s, 'outline_first_enabled', False) else 'OFF'}"
     )
     typer.echo(
-        f"  Semantic anchor: {'ON' if getattr(s, 'semantic_anchor_enabled', False) else 'ON'}"
+        f"  Semantic anchor: {'ON' if getattr(s, 'semantic_anchor_enabled', False) else 'OFF'}"
     )
 
     # Add token budget estimation

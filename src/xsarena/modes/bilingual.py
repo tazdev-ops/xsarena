@@ -1,38 +1,10 @@
 """Bilingual processing modes for XSArena."""
 
 from pathlib import Path
-from typing import Dict
+from typing import Dict, List, Optional
 
 from ..core.engine import Engine
-
-
-# Load templates directly from directive files
-def _load_directive_content(file_path: str) -> str:
-    """Load content from a directive file."""
-    # First try relative to current working directory
-    if Path(file_path).exists():
-        return Path(file_path).read_text(encoding="utf-8").strip()
-
-    # Try relative to project root (relative to this file)
-    project_root = Path(__file__).parent.parent.parent.parent
-    full_path = project_root / file_path
-    if full_path.exists():
-        return full_path.read_text(encoding="utf-8").strip()
-
-    # Return empty string if not found
-    return ""
-
-
-# Load system prompts from directive files
-SYSTEM_PROMPTS = {
-    "bilingual": _load_directive_content("directives/roles/bilingual.md"),
-}
-
-# Fallback hardcoded value if directive file is not available
-if not SYSTEM_PROMPTS["bilingual"]:
-    SYSTEM_PROMPTS[
-        "bilingual"
-    ] = "You are a bilingual translation assistant. Provide accurate translations between languages while preserving meaning and context."
+from ..core.prompt import pcl
 
 
 class BilingualMode:
@@ -41,7 +13,7 @@ class BilingualMode:
     def __init__(self, engine: Engine):
         self.engine = engine
 
-    async def transform(self, text: str, source_lang: str, target_lang: str) -> str:
+    async def transform(self, text: str, source_lang: str, target_lang: str, extra_notes: Optional[str] = None) -> str:
         """Transform text from source language to target language."""
         prompt = f"""Translate the following text from {source_lang} to {target_lang}:
 
@@ -49,11 +21,13 @@ class BilingualMode:
 
 Maintain the original meaning, tone, and context. Provide a natural translation in the target language."""
 
-        system_prompt = SYSTEM_PROMPTS["bilingual"]
+        # Build system prompt using PCL with bilingual role directive
+        role_content = self._load_role_directive("bilingual")
+        system_prompt = self._build_system_prompt("bilingual text processing", extra_notes, role_content)
         return await self.engine.send_and_collect(prompt, system_prompt)
 
     async def alignment_check(
-        self, source_text: str, translated_text: str, source_lang: str, target_lang: str
+        self, source_text: str, translated_text: str, source_lang: str, target_lang: str, extra_notes: Optional[str] = None
     ) -> str:
         """Check alignment between source and translated text."""
         prompt = f"""Analyze the alignment between this source text in {source_lang} and its translation in {target_lang}:
@@ -66,11 +40,13 @@ Translation ({target_lang}):
 
 Provide an alignment analysis highlighting any discrepancies, omissions, or mistranslations. Rate the alignment quality and suggest improvements."""
 
-        system_prompt = SYSTEM_PROMPTS["bilingual"]
+        # Build system prompt using PCL with bilingual role directive
+        role_content = self._load_role_directive("bilingual")
+        system_prompt = self._build_system_prompt("bilingual alignment analysis", extra_notes, role_content)
         return await self.engine.send_and_collect(prompt, system_prompt)
 
     async def swap_direction(
-        self, source_text: str, translated_text: str, source_lang: str, target_lang: str
+        self, source_text: str, translated_text: str, source_lang: str, target_lang: str, extra_notes: Optional[str] = None
     ) -> str:
         """Swap the translation direction and verify consistency."""
         prompt = f"""You are provided with a text in {source_lang} and its translation in {target_lang}.
@@ -84,7 +60,9 @@ Original {source_lang} text:
 
 Please translate the {target_lang} text back to {source_lang} and compare with the original to check for consistency."""
 
-        system_prompt = SYSTEM_PROMPTS["bilingual"]
+        # Build system prompt using PCL with bilingual role directive
+        role_content = self._load_role_directive("bilingual")
+        system_prompt = self._build_system_prompt("bilingual consistency check", extra_notes, role_content)
         return await self.engine.send_and_collect(prompt, system_prompt)
 
     async def improve_translation(
@@ -93,6 +71,7 @@ Please translate the {target_lang} text back to {source_lang} and compare with t
         current_translation: str,
         source_lang: str,
         target_lang: str,
+        extra_notes: Optional[str] = None
     ) -> str:
         """Improve an existing translation."""
         prompt = f"""Improve this translation from {source_lang} to {target_lang}:
@@ -105,11 +84,13 @@ Current translation ({target_lang}):
 
 Provide an improved translation that better captures the meaning, tone, and nuance of the original text."""
 
-        system_prompt = SYSTEM_PROMPTS["bilingual"]
+        # Build system prompt using PCL with bilingual role directive
+        role_content = self._load_role_directive("bilingual")
+        system_prompt = self._build_system_prompt("bilingual translation improvement", extra_notes, role_content)
         return await self.engine.send_and_collect(prompt, system_prompt)
 
     async def glossary_build(
-        self, text: str, source_lang: str, target_lang: str
+        self, text: str, source_lang: str, target_lang: str, extra_notes: Optional[str] = None
     ) -> Dict[str, str]:
         """Build a glossary of key terms from bilingual text."""
         prompt = f"""Extract key terms and their translations from this bilingual text:
@@ -119,9 +100,42 @@ Source text ({source_lang}):
 
 Create a glossary mapping important terms from {source_lang} to {target_lang}. Focus on domain-specific terminology, technical terms, and culturally specific concepts."""
 
-        system_prompt = SYSTEM_PROMPTS["bilingual"]
+        # Build system prompt using PCL with bilingual role directive
+        role_content = self._load_role_directive("bilingual")
+        system_prompt = self._build_system_prompt("bilingual glossary building", extra_notes, role_content)
         result = await self.engine.send_and_collect(prompt, system_prompt)
 
         # This would parse the result into a structured glossary
         # For now, return the raw result as a placeholder
         return {"glossary": result}
+
+    def _load_role_directive(self, role_name: str) -> str:
+        """Load content from a role directive file."""
+        # Try relative to project root (relative to this file)
+        project_root = Path(__file__).parent.parent.parent.parent
+        role_path = project_root / "directives" / "roles" / f"{role_name}.md"
+        
+        if role_path.exists():
+            try:
+                return role_path.read_text(encoding="utf-8").strip()
+            except Exception:
+                pass
+        
+        # Return empty string if not found
+        return ""
+
+    def _build_system_prompt(self, subject: str, extra_notes: Optional[str], role_content: str) -> str:
+        """Build system prompt using PCL with role directive content."""
+        # Compose the prompt using PCL
+        composition = pcl.compose(
+            subject=subject,
+            base="reference",  # Use reference base for clear, structured output
+            overlays=["no_bs"],  # Use no_bs overlay for clarity
+            extra_notes=extra_notes
+        )
+        
+        # If role directive exists, append its content to the system text
+        if role_content:
+            composition.system_text += f"\n\n{role_content}"
+        
+        return composition.system_text

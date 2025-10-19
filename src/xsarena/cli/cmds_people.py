@@ -35,7 +35,7 @@ def rp_list_personas():
 
     personas = _load_personas()
     for key, val in personas.items():
-        print(f"{key}: {val.get('title','')}")
+        typer.echo(f"{key}: {val.get('title','')}")
 
 
 @app.command("start")
@@ -65,7 +65,7 @@ def rp_start(
 
     personas = _load_personas()
     if persona not in personas:
-        print("Unknown persona. Use: xsarena rp list")
+        typer.echo("Unknown persona. Use: xsarena rp list")
         raise typer.Exit(1)
     overlay = personas[persona].get("overlay", "")
     s = new_session(
@@ -77,7 +77,7 @@ def rp_start(
         rating=rating,
         safeword=safeword,
     )
-    print(
+    typer.echo(
         json.dumps(
             {
                 "rp_id": s.id,
@@ -116,7 +116,7 @@ def rp_say(sess_id: str, text: str):
             "assistant",
             "Safeword received. Pausing. Do you want a summary or to resume?",
         )
-        print("PAUSED.")
+        typer.echo("PAUSED.")
         return
     # Append user turn
     append_turn(sess_id, "user", text)
@@ -142,7 +142,7 @@ def rp_say(sess_id: str, text: str):
     reply = asyncio.run(eng.send_and_collect(user, system_prompt=sys))
     reply = redact_boundary_violations(s.boundaries, reply)
     append_turn(sess_id, "assistant", reply)
-    print(reply)
+    typer.echo(reply)
     # Check if we should award an achievement
     current_session = load_session(sess_id)
     if len(current_session.turns) >= 10:
@@ -181,10 +181,10 @@ def rp_memory(
     if add:
         s.memory.append(add)
         save_session(s)
-        print("Added to memory.")
+        typer.echo("Added to memory.")
     if show or not add:
         for i, m in enumerate(s.memory, start=1):
-            print(f"{i}. {m}")
+            typer.echo(f"{i}. {m}")
 
 
 @app.command("model")
@@ -215,7 +215,7 @@ def rp_model(
     if model:
         s.model = model
     save_session(s)
-    print(json.dumps({"backend": s.backend, "model": s.model or "(default)"}))
+    typer.echo(json.dumps({"backend": s.backend, "model": s.model or "(default)"}))
 
 
 @app.command("bounds")
@@ -246,7 +246,7 @@ def rp_bounds(
     if safeword:
         s.boundaries.safeword = safeword
     save_session(s)
-    print(
+    typer.echo(
         json.dumps({"rating": s.boundaries.rating, "safeword": s.boundaries.safeword})
     )
 
@@ -271,6 +271,6 @@ def rp_export(sess_id: str):
 
     p = export_markdown(sess_id)
     if p:
-        print(f"Transcript → {p}")
+        typer.echo(f"Transcript → {p}")
     else:
-        print("No transcript found.")
+        typer.echo("No transcript found.")

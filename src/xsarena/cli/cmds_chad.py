@@ -29,7 +29,7 @@ def chad_ask(
 
     async def run():
         result = await mode.answer_question(question, context)
-        print(result)
+        typer.echo(result)
 
     asyncio.run(run())
 
@@ -46,7 +46,7 @@ def chad_batch(
 
     async def run():
         result = await mode.batch_questions(questions_file, answers_file)
-        print(result)
+        typer.echo(result)
 
     asyncio.run(run())
 
@@ -65,7 +65,7 @@ def chad_check(
 
     async def run():
         result = await mode.evidence_check(claim, evidence)
-        print(result)
+        typer.echo(result)
 
     asyncio.run(run())
 
@@ -86,7 +86,7 @@ def chad_sources(
 
     async def run():
         result = await mode.source_analysis(sources, question)
-        print(result)
+        typer.echo(result)
 
     asyncio.run(run())
 
@@ -102,7 +102,7 @@ def chad_fact_check(
 
     async def run():
         result = await mode.fact_check(statement)
-        print(result)
+        typer.echo(result)
 
     asyncio.run(run())
 
@@ -122,6 +122,6 @@ def chad_summarize(
 
     async def run():
         result = await mode.summarize_evidence(evidence_list)
-        print(result)
+        typer.echo(result)
 
     asyncio.run(run())

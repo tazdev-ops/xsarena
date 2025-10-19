@@ -57,54 +57,7 @@ def load_config():
             # Extract bridge config if present, otherwise use the whole config
             CONFIG = yaml_config.get("bridge", yaml_config)
             logger.info(f"Successfully loaded configuration from '{yaml_config_path}'.")
-        else:
-            # Fallback to legacy config.jsonc
-            legacy_config_path = Path("config.jsonc")
-            if legacy_config_path.exists():
-                with open(legacy_config_path, "r", encoding="utf-8") as f:
-                    content = f.read()
-                    # Remove JSONC comments
-                    lines = [
-                        line
-                        for line in content.splitlines()
-                        if not line.strip().startswith("//")
-                    ]
-                    json_content = "\n".join(lines)
-                    legacy_config = json.loads(json_content)
 
-                # Map legacy config keys to bridge config format
-                CONFIG = {
-                    "session_id": legacy_config.get("session_id"),
-                    "message_id": legacy_config.get("message_id"),
-                    "tavern_mode_enabled": legacy_config.get(
-                        "tavern_mode_enabled", False
-                    ),
-                    "bypass_enabled": legacy_config.get("bypass_enabled", False),
-                    "file_bed_enabled": legacy_config.get("file_bed_enabled", False),
-                    "file_bed_upload_url": legacy_config.get("file_bed_upload_url"),
-                    "file_bed_api_key": legacy_config.get("file_bed_api_key"),
-                    "enable_idle_restart": legacy_config.get(
-                        "enable_idle_restart", False
-                    ),
-                    "idle_restart_timeout_seconds": legacy_config.get(
-                        "idle_restart_timeout_seconds", 3600
-                    ),
-                    "stream_response_timeout_seconds": legacy_config.get(
-                        "stream_response_timeout_seconds", 360
-                    ),
-                    "api_key": legacy_config.get("api_key"),
-                    "use_default_ids_if_mapping_not_found": legacy_config.get(
-                        "use_default_ids_if_mapping_not_found", True
-                    ),
-                }
-                logger.info(
-                    f"Successfully loaded legacy configuration from '{legacy_config_path}'."
-                )
-            else:
-                logger.error(
-                    ".xsarena/config.yml and config.jsonc not found. Please run 'xsarena project config-migrate'"
-                )
-                CONFIG = {}
     except Exception as e:
         logger.error(
             f"Failed to load configuration: {e}. Please run 'xsarena project config-migrate'"
@@ -116,10 +69,17 @@ def load_model_map():
     global MODEL_NAME_TO_ID_MAP
     try:
         with open("models.json", "r", encoding="utf-8") as f:
-            MODEL_NAME_TO_ID_MAP = json.load(f)
+            content = f.read()
+            MODEL_NAME_TO_ID_MAP = json.loads(content) if content.strip() else {}
         logger.info(
             f"Successfully loaded {len(MODEL_NAME_TO_ID_MAP)} models from 'models.json'."
         )
+    except FileNotFoundError:
+        logger.warning("models.json not found. Using empty model list.")
+        MODEL_NAME_TO_ID_MAP = {}
+    except json.JSONDecodeError as e:
+        logger.error(f"Failed to parse 'models.json': {e}. Using empty model list.")
+        MODEL_NAME_TO_ID_MAP = {}
     except Exception as e:
         logger.error(f"Failed to load 'models.json': {e}. Using empty model list.")
         MODEL_NAME_TO_ID_MAP = {}
@@ -134,6 +94,12 @@ def load_model_endpoint_map():
         logger.info(
             f"Successfully loaded {len(MODEL_ENDPOINT_MAP)} model endpoint mappings."
         )
+    except FileNotFoundError:
+        logger.warning("model_endpoint_map.json not found. Using empty map.")
+        MODEL_ENDPOINT_MAP = {}
+    except json.JSONDecodeError as e:
+        logger.error(f"Failed to parse 'model_endpoint_map.json': {e}. Using empty map.")
+        MODEL_ENDPOINT_MAP = {}
     except Exception as e:
         logger.error(f"Failed to load 'model_endpoint_map.json': {e}. Using empty map.")
         MODEL_ENDPOINT_MAP = {}
@@ -415,9 +381,15 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(lifespan=lifespan)
+
+# Load allowed origins from config, default to secure localhost-only if not configured
+# Note: This config is loaded in the lifespan function, but CORS is set at import time.
+# For a truly dynamic solution, we'd need a custom middleware, but for now we use secure defaults.
+allowed_origins = ["http://localhost", "http://127.0.0.1", "http://0.0.0.0"]  # Default to secure
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -493,7 +465,7 @@ async def websocket_endpoint(websocket: WebSocket):
 
 @app.post("/v1/chat/completions")
 async def chat_completions(request: Request):
-    global cloudflare_verified, last_activity_time
+    global cloudflare_verified, last_activity_time, IS_REFRESHING_FOR_VERIFICATION
     if not browser_ws:
         raise HTTPException(status_code=503, detail="Userscript client not connected.")
 
@@ -590,7 +562,7 @@ async def chat_completions(request: Request):
         cloudflare_verified = False
 
         async def stream_generator():
-            global cloudflare_verified
+            global cloudflare_verified, IS_REFRESHING_FOR_VERIFICATION
             try:
                 queue = response_channels[request_id]
                 timeout_seconds = CONFIG.get("stream_response_timeout_seconds", 360)
@@ -671,6 +643,8 @@ async def chat_completions(request: Request):
                         yield "data: [DONE]\n\n"
                         break
             finally:
+                # Reset the refresh flag in all exit paths to prevent getting stuck
+                IS_REFRESHING_FOR_VERIFICATION = False
                 if request_id in response_channels:
                     del response_channels[request_id]
 
@@ -778,6 +752,8 @@ async def chat_completions(request: Request):
                 }
                 return JSONResponse(response)
             finally:
+                # Reset the refresh flag in all exit paths to prevent getting stuck
+                IS_REFRESHING_FOR_VERIFICATION = False
                 if request_id in response_channels:
                     del response_channels[request_id]
     except HTTPException:
@@ -1066,14 +1042,7 @@ def add_content_filter_explanation(content, finish_reason):
     return content
 
 
-if __name__ == "__main__":
-    import os
 
-    api_port = int(os.getenv("PORT", "5102"))
-    logger.info("🚀 LMArena Bridge v2.0 API 服务器正在启动...")
-    logger.info(f"   - 监听地址: http://127.0.0.1:{api_port}")
-    logger.info(f"   - WebSocket 端点: ws://127.0.0.1:{api_port}/ws")
-    uvicorn.run(app, host="0.0.0.0", port=api_port)
 
 
 # Health endpoint expected by XSArena
@@ -1101,295 +1070,37 @@ def health():
 @app.get("/api/jobs")
 async def api_list_jobs():
     """API endpoint to list all jobs."""
-    from ..core.jobs.model import JobManager
+    from .job_service import JobService
 
-    job_runner = JobManager()
-    jobs = job_runner.list_jobs()
+    job_service = JobService()
+    jobs = job_service.list_jobs()
 
-    # Sort by creation time, newest first
-    jobs.sort(key=lambda j: j.created_at, reverse=True)
-
-    job_list = []
-    for job in jobs:
-        # Get job events to calculate stats
-        import json
-        from pathlib import Path
-
-        events_path = Path(".xsarena") / "jobs" / job.id / "events.jsonl"
-        chunks = retries = failovers = stalls = 0
-        if events_path.exists():
-            for ln in events_path.read_text(encoding="utf-8").splitlines():
-                if not ln.strip():
-                    continue
-                try:
-                    ev = json.loads(ln)
-                    t = ev.get("type")
-                    if t == "chunk_done":
-                        chunks += 1
-                    elif t == "retry":
-                        retries += 1
-                    elif t == "failover":
-                        failovers += 1
-                    elif t == "watchdog_timeout":
-                        stalls += 1
-                except json.JSONDecodeError:
-                    continue
-
-        job_data = {
-            "id": job.id,
-            "name": job.name,
-            "state": job.state,
-            "created_at": job.created_at,
-            "updated_at": job.updated_at,
-            "chunks": chunks,
-            "retries": retries,
-            "failovers": failovers,
-            "stalls": stalls,
-            "backend": job.backend,
-        }
-        job_list.append(job_data)
-
-    return {"jobs": job_list}
+    return {"jobs": jobs}
 
 
 @app.get("/api/jobs/{job_id}")
 async def api_get_job(job_id: str):
     """API endpoint to get a specific job's status."""
-    from ..core.jobs.model import JobManager
+    from .job_service import JobService
 
-    job_runner = JobManager()
+    job_service = JobService()
+    job_data = job_service.get_job(job_id)
 
-    try:
-        job = job_runner.load(job_id)
-    except FileNotFoundError:
+    if job_data is None:
         raise HTTPException(status_code=404, detail="Job not found")
 
-    # Get job events to calculate stats
-    import json
-    from pathlib import Path
-
-    events_path = Path(".xsarena") / "jobs" / job_id / "events.jsonl"
-    chunks = retries = failovers = stalls = 0
-    if events_path.exists():
-        for ln in events_path.read_text(encoding="utf-8").splitlines():
-            if not ln.strip():
-                continue
-            try:
-                ev = json.loads(ln)
-                t = ev.get("type")
-                if t == "chunk_done":
-                    chunks += 1
-                elif t == "retry":
-                    retries += 1
-                elif t == "failover":
-                    failovers += 1
-                elif t == "watchdog_timeout":
-                    stalls += 1
-            except json.JSONDecodeError:
-                continue
-
-    return {
-        "id": job.id,
-        "name": job.name,
-        "state": job.state,
-        "created_at": job.created_at,
-        "updated_at": job.updated_at,
-        "chunks": chunks,
-        "retries": retries,
-        "failovers": failovers,
-        "stalls": stalls,
-        "backend": job.backend,
-        "artifacts": job.artifacts,
-        "progress": job.progress,
-    }
+    return job_data
 
 
 # Console endpoint - serves static HTML
 @app.get("/console")
 async def console():
     """Serve the minimal web console HTML page."""
-    console_html = """
-<!DOCTYPE html>
-<html>
-<head>
-    <title>XSArena Mission Control</title>
-    <style>
-        body { font-family: Arial, sans-serif; margin: 20px; background-color: #f5f5f5; }
-        .container { max-width: 1200px; margin: 0 auto; }
-        h1 { color: #333; text-align: center; }
-        .jobs-table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        .jobs-table th, .jobs-table td { padding: 10px; border: 1px solid #ddd; text-align: left; }
-        .jobs-table th { background-color: #4CAF50; color: white; }
-        .status-running { color: #4CAF50; font-weight: bold; }
-        .status-pending { color: #FF9800; font-weight: bold; }
-        .status-done { color: #2196F3; font-weight: bold; }
-        .status-failed { color: #f44336; font-weight: bold; }
-        .status-cancelled { color: #9E9E9E; font-weight: bold; }
-        .refresh-btn { background-color: #4CAF50; color: white; padding: 10px 20px; border: none; cursor: pointer; margin-bottom: 20px; }
-        .refresh-btn:hover { background-color: #45a049; }
-        .job-details { margin-top: 20px; }
-        .event-log {
-            height: 400px;
-            overflow-y: auto;
-            border: 1px solid #ddd;
-            padding: 10px;
-            background-color: #fff;
-            font-family: monospace;
-            white-space: pre-wrap;
-        }
-        select { padding: 8px; margin-left: 10px; }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <h1>XSArena Mission Control</h1>
-        <button class="refresh-btn" onclick="refreshJobs()">Refresh Jobs</button>
-        <select id="jobSelect" onchange="loadJobLog()">
-            <option value="">Select a job to view log...</option>
-        </select>
-
-        <table class="jobs-table">
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Name</th>
-                    <th>State</th>
-                    <th>Created</th>
-                    <th>Updated</th>
-                    <th>Chunks</th>
-                    <th>Retries</th>
-                    <th>Backend</th>
-                </tr>
-            </thead>
-            <tbody id="jobsTableBody">
-                <!-- Jobs will be populated here -->
-            </tbody>
-        </table>
-
-        <div class="job-details">
-            <h3>Event Log</h3>
-            <div id="eventLog" class="event-log">Select a job to view its event log...</div>
-        </div>
-    </div>
-
-    <script>
-        let jobs = [];
-        let ws = null;
-        let selectedJobId = null;
-
-        // Load jobs initially and set up auto-refresh
-        document.addEventListener('DOMContentLoaded', function() {
-            refreshJobs();
-            setInterval(refreshJobs, 5000); // Refresh every 5 seconds
-        });
-
-        function refreshJobs() {
-            fetch('/api/jobs')
-                .then(response => response.json())
-                .then(data => {
-                    jobs = data.jobs;
-                    updateJobsTable();
-                    updateJobSelect();
-                })
-                .catch(error => console.error('Error fetching jobs:', error));
-        }
-
-        function updateJobsTable() {
-            const tbody = document.getElementById('jobsTableBody');
-            tbody.innerHTML = '';
-
-            jobs.forEach(job => {
-                const row = tbody.insertRow();
-                row.insertCell(0).textContent = job.id.substring(0, 8) + '...';
-                row.insertCell(1).textContent = job.name;
-
-                const stateCell = row.insertCell(2);
-                stateCell.className = `status-${job.state.toLowerCase()}`;
-                stateCell.textContent = job.state;
-
-                row.insertCell(3).textContent = new Date(job.created_at).toLocaleString();
-                row.insertCell(4).textContent = new Date(job.updated_at).toLocaleString();
-                row.insertCell(5).textContent = job.chunks;
-                row.insertCell(6).textContent = job.retries;
-                row.insertCell(7).textContent = job.backend;
-            });
-        }
-
-        function updateJobSelect() {
-            const select = document.getElementById('jobSelect');
-            // Keep the current selection if it still exists
-            const currentSelection = select.value;
-
-            // Clear options except the first one
-            select.innerHTML = '<option value="">Select a job to view log...</option>';
-
-            jobs.forEach(job => {
-                const option = document.createElement('option');
-                option.value = job.id;
-                option.textContent = `${job.id.substring(0, 8)}... - ${job.name} (${job.state})`;
-                select.appendChild(option);
-            });
-
-            // Restore selection if the job still exists
-            if (currentSelection) {
-                const jobExists = jobs.some(job => job.id === currentSelection);
-                if (jobExists) {
-                    select.value = currentSelection;
-                    selectedJobId = currentSelection;
-                    loadJobLog();
-                } else {
-                    select.value = '';
-                    selectedJobId = null;
-                    document.getElementById('eventLog').textContent = 'Select a job to view its event log...';
-                }
-            }
-        }
-
-        function loadJobLog() {
-            const jobId = document.getElementById('jobSelect').value;
-            selectedJobId = jobId;
-
-            if (!jobId) {
-                document.getElementById('eventLog').textContent = 'Select a job to view its event log...';
-                return;
-            }
-
-            // Load initial events from the job's events file
-            fetch(`/api/jobs/${jobId}`)
-                .then(response => response.json())
-                .then(job => {
-                    document.getElementById('eventLog').textContent = `Job: ${job.name}\\nState: ${job.state}\\nChunks: ${job.chunks}\\nRetries: ${job.retries}`;
-
-                    // Now poll the events file for updates
-                    if (selectedJobId) {
-                        pollJobEvents(selectedJobId);
-                    }
-                })
-                .catch(error => console.error('Error fetching job details:', error));
-        }
-
-        function pollJobEvents(jobId) {
-            // For now, just poll the job API endpoint to get updated info
-            // In a real implementation, we'd have a dedicated event stream endpoint
-            if (selectedJobId !== jobId) return; // Stop if user selected a different job
-
-            fetch(`/api/jobs/${jobId}`)
-                .then(response => response.json())
-                .then(job => {
-                    document.getElementById('eventLog').textContent = `Job: ${job.name}\\nState: ${job.state}\\nChunks: ${job.chunks}\\nRetries: ${job.retries}\\nUpdated: ${new Date(job.updated_at).toLocaleString()}`;
-                })
-                .catch(error => console.error('Error fetching job events:', error));
-
-            // Continue polling every 2 seconds
-            setTimeout(() => pollJobEvents(jobId), 2000);
-        }
-    </script>
-</body>
-</html>
-    """
+    from pathlib import Path
     from fastapi.responses import HTMLResponse
 
-    return HTMLResponse(content=console_html)
+    console_html_path = Path(__file__).parent / "static" / "console.html"
+    return HTMLResponse(content=console_html_path.read_text(encoding="utf-8"))
 
 
 # Alias under v1/ for some clients
@@ -1403,6 +1114,6 @@ if __name__ == "__main__":
 
     api_port = int(os.getenv("PORT", "5102"))
     logger.info("🚀 LMArena Bridge v2.0 API 服务器正在启动...")
-    logger.info(f"   - 监听地址: http://127.0.0.1:{api_port}")
-    logger.info(f"   - WebSocket 端点: ws://127.0.0.1:{api_port}/ws")
+    logger.info(f"   - 监听地址: http://0.0.0.0:{api_port}")
+    logger.info(f"   - WebSocket 端点: ws://0.0.0.0:{api_port}/ws")
     uvicorn.run(app, host="0.0.0.0", port=api_port)

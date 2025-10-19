@@ -197,6 +197,7 @@ def get_cached_composition(
         min_chars=min_chars,
         passes=passes,
         max_chunks=max_chunks,
+        use_cache=False,  # Prevent recursion
         apply_reading_overlay=apply_reading_overlay,
     )
 

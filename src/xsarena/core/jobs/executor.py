@@ -266,6 +266,8 @@ class JobExecutor:
                     )
 
                 # Build the chunk prompt using the helper function
+                from ..prompt_runtime import build_chunk_prompt
+
                 user_content = build_chunk_prompt(
                     chunk_idx=chunk_idx,
                     job=job,

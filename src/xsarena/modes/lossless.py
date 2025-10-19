@@ -1,37 +1,10 @@
 """Lossless processing modes for XSArena."""
 
 from pathlib import Path
+from typing import Optional
 
 from ..core.engine import Engine
-
-
-# Load templates directly from directive files
-def _load_directive_content(file_path: str) -> str:
-    """Load content from a directive file."""
-    # First try relative to current working directory
-    if Path(file_path).exists():
-        return Path(file_path).read_text(encoding="utf-8").strip()
-
-    # Try relative to project root (relative to this file)
-    project_root = Path(__file__).parent.parent.parent.parent
-    full_path = project_root / file_path
-    if full_path.exists():
-        return full_path.read_text(encoding="utf-8").strip()
-
-    # Return empty string if not found
-    return ""
-
-
-# Load system prompts from directive files
-SYSTEM_PROMPTS = {
-    "lossless": _load_directive_content("directives/roles/lossless.md"),
-}
-
-# Fallback hardcoded value if directive file is not available
-if not SYSTEM_PROMPTS["lossless"]:
-    SYSTEM_PROMPTS[
-        "lossless"
-    ] = "You are a text processing assistant. Preserve all original meaning while improving clarity and structure."
+from ..core.prompt import pcl
 
 
 class LosslessMode:
@@ -40,7 +13,7 @@ class LosslessMode:
     def __init__(self, engine: Engine):
         self.engine = engine
 
-    async def ingest_synth(self, text: str) -> str:
+    async def ingest_synth(self, text: str, extra_notes: Optional[str] = None) -> str:
         """Ingest and synthesize information from text."""
         prompt = f"""Please analyze and synthesize this text, extracting key concepts, facts, and insights:
 
@@ -48,10 +21,12 @@ class LosslessMode:
 
 Provide a synthesized summary that captures the essential information in a structured format."""
 
-        system_prompt = SYSTEM_PROMPTS["lossless"]
+        # Build system prompt using PCL with lossless role directive
+        role_content = self._load_role_directive("lossless")
+        system_prompt = self._build_system_prompt("text synthesis", extra_notes, role_content)
         return await self.engine.send_and_collect(prompt, system_prompt)
 
-    async def rewrite_lossless(self, text: str) -> str:
+    async def rewrite_lossless(self, text: str, extra_notes: Optional[str] = None) -> str:
         """Rewrite text while preserving all meaning."""
         prompt = f"""Rewrite this text to improve clarity, grammar, and structure while preserving all original facts, details, and meaning:
 
@@ -59,20 +34,22 @@ Provide a synthesized summary that captures the essential information in a struc
 
 Focus on making it more readable while keeping every piece of information intact."""
 
-        system_prompt = SYSTEM_PROMPTS["lossless"]
+        # Build system prompt using PCL with lossless role directive
+        role_content = self._load_role_directive("lossless")
+        system_prompt = self._build_system_prompt("lossless text rewriting", extra_notes, role_content)
         return await self.engine.send_and_collect(prompt, system_prompt)
 
-    async def lossless_run(self, text: str) -> str:
+    async def lossless_run(self, text: str, extra_notes: Optional[str] = None) -> str:
         """Perform a comprehensive lossless processing run."""
         # This would typically run multiple passes of improvement
-        result = await self.rewrite_lossless(text)
+        result = await self.rewrite_lossless(text, extra_notes=extra_notes)
 
         # Additional passes could be added here
-        result = await self.rewrite_lossless(result)  # Second pass for refinement
+        result = await self.rewrite_lossless(result, extra_notes=extra_notes)  # Second pass for refinement
 
         return result
 
-    async def improve_flow(self, text: str) -> str:
+    async def improve_flow(self, text: str, extra_notes: Optional[str] = None) -> str:
         """Improve the flow and transitions in text."""
         prompt = f"""Review this text and improve the flow and transitions between paragraphs and sections:
 
@@ -80,10 +57,12 @@ Focus on making it more readable while keeping every piece of information intact
 
 Add connecting phrases, improve transitions, and ensure smooth reading flow while preserving all original content."""
 
-        system_prompt = SYSTEM_PROMPTS["lossless"]
+        # Build system prompt using PCL with lossless role directive
+        role_content = self._load_role_directive("lossless")
+        system_prompt = self._build_system_prompt("text flow improvement", extra_notes, role_content)
         return await self.engine.send_and_collect(prompt, system_prompt)
 
-    async def break_paragraphs(self, text: str) -> str:
+    async def break_paragraphs(self, text: str, extra_notes: Optional[str] = None) -> str:
         """Break dense paragraphs into more readable chunks."""
         prompt = f"""Break up these dense paragraphs into more readable, shorter paragraphs:
 
@@ -91,10 +70,12 @@ Add connecting phrases, improve transitions, and ensure smooth reading flow whil
 
 Keep related ideas together but separate distinct concepts into their own paragraphs."""
 
-        system_prompt = SYSTEM_PROMPTS["lossless"]
+        # Build system prompt using PCL with lossless role directive
+        role_content = self._load_role_directive("lossless")
+        system_prompt = self._build_system_prompt("paragraph restructuring", extra_notes, role_content)
         return await self.engine.send_and_collect(prompt, system_prompt)
 
-    async def enhance_structure(self, text: str) -> str:
+    async def enhance_structure(self, text: str, extra_notes: Optional[str] = None) -> str:
         """Enhance text structure with appropriate headings and formatting."""
         prompt = f"""Improve the structure of this text with appropriate headings, subheadings, and formatting:
 
@@ -102,5 +83,38 @@ Keep related ideas together but separate distinct concepts into their own paragr
 
 Add markdown formatting where appropriate to improve readability while preserving all content."""
 
-        system_prompt = SYSTEM_PROMPTS["lossless"]
+        # Build system prompt using PCL with lossless role directive
+        role_content = self._load_role_directive("lossless")
+        system_prompt = self._build_system_prompt("text structure enhancement", extra_notes, role_content)
         return await self.engine.send_and_collect(prompt, system_prompt)
+
+    def _load_role_directive(self, role_name: str) -> str:
+        """Load content from a role directive file."""
+        # Try relative to project root (relative to this file)
+        project_root = Path(__file__).parent.parent.parent.parent
+        role_path = project_root / "directives" / "roles" / f"{role_name}.md"
+        
+        if role_path.exists():
+            try:
+                return role_path.read_text(encoding="utf-8").strip()
+            except Exception:
+                pass
+        
+        # Return empty string if not found
+        return ""
+
+    def _build_system_prompt(self, subject: str, extra_notes: Optional[str], role_content: str) -> str:
+        """Build system prompt using PCL with role directive content."""
+        # Compose the prompt using PCL
+        composition = pcl.compose(
+            subject=subject,
+            base="reference",  # Use reference base for structured text processing
+            overlays=["no_bs"],  # Use no_bs overlay for clear, direct instructions
+            extra_notes=extra_notes
+        )
+        
+        # If role directive exists, append its content to the system text
+        if role_content:
+            composition.system_text += f"\n\n{role_content}"
+        
+        return composition.system_text

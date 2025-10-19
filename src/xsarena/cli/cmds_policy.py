@@ -29,7 +29,7 @@ def policy_generate(
 
     async def run():
         result = await mode.generate_from_topic(topic, requirements)
-        print(result)
+        typer.echo(result)
 
     asyncio.run(run())
 
@@ -51,7 +51,7 @@ def policy_analyze(
 
     async def run():
         result = await mode.analyze_compliance(policy, evidence_texts)
-        print(result)
+        typer.echo(result)
 
     asyncio.run(run())
 
@@ -73,7 +73,7 @@ def policy_score(
 
     async def run():
         result = await mode.score_compliance(policy, evidence_texts)
-        print(result)
+        typer.echo(result)
 
     asyncio.run(run())
 
@@ -93,7 +93,7 @@ def policy_gaps(
 
     async def run():
         result = await mode.gap_analysis(policy, requirements)
-        print(result)
+        typer.echo(result)
 
     asyncio.run(run())
 
@@ -111,6 +111,6 @@ def policy_checklist(
 
     async def run():
         result = await mode.implementation_checklist(policy)
-        print(result)
+        typer.echo(result)
 
     asyncio.run(run())

@@ -1,0 +1,142 @@
+# Snapshot configuration for XSArena
+default_mode = "minimal"
+max_size = 262144       # 256 KB per file
+redact = true
+
+[context]
+git = true
+jobs = true
+manifest = true
+
+[modes.minimal]
+include = [
+  ".snapshot.toml",
+  "README.md",
+  "COMMANDS_REFERENCE.md",
+  "pyproject.toml",
+  "src/xsarena/**",
+]
+exclude = [
+  ".git/**",
+  ".svn/**",
+  ".hg/**",
+  ".idea/**",
+  ".vscode/**",
+  "venv/**",
+  ".venv/**",
+  "__pycache__/**",
+  ".pytest_cache/**",
+  ".mypy_cache/**",
+  ".ruff_cache/**",
+  ".cache/**",
+  "*.pyc",
+  "*.pyo",
+  "*.pyd",
+  "*.o",
+  "*.a",
+  "*.so",
+  "*.dll",
+  "*.dylib",
+  "*.log",
+  "logs/**",
+  ".xsarena/**",
+  "*.egg-info/**",
+  ".ipynb_checkpoints/**"
+]
+
+[modes.standard]
+include = [
+  ".snapshot.toml",
+  "README.md",
+  "COMMANDS_REFERENCE.md",
+  "pyproject.toml",
+  "src/xsarena/**",
+  "docs/**",
+  "data/schemas/**",
+  "directives/manifest.yml",
+  "directives/profiles/presets.yml",
+  "directives/modes.catalog.json",
+]
+exclude = [
+  ".git/**",
+  ".svn/**",
+  ".hg/**",
+  ".idea/**",
+  ".vscode/**",
+  "venv/**",
+  ".venv/**",
+  "__pycache__/**",
+  ".pytest_cache/**",
+  ".mypy_cache/**",
+  ".ruff_cache/**",
+  ".cache/**",
+  "*.pyc",
+  "*.pyo",
+  "*.pyd",
+  "*.o",
+  "*.a",
+  "*.so",
+  "*.dll",
+  "*.dylib",
+  "*.log",
+  "logs/**",
+  ".xsarena/**",
+  "*.egg-info/**",
+  ".ipynb_checkpoints/**",
+  # Explicitly omit non-architectural or generated content
+  "books/**",
+  "review/**",
+  "recipes/**",
+  "tests/**",
+  "packaging/**",
+  "pipelines/**",
+  "examples/**",
+  "directives/_preview/**",
+  "directives/_mixer/**",
+  "directives/quickref/**",
+  "directives/roles/**",
+  "directives/prompt/**",
+  "directives/style/**",
+]
+
+[modes.full]
+include = [
+  "README.md",
+  "COMMANDS_REFERENCE.md",
+  "pyproject.toml",
+  "src/**",
+  "docs/**",
+  "directives/**",
+  "data/**",
+  "recipes/**",
+  "tests/**",
+  "tools/**",
+  "scripts/**",
+  "books/**",
+  "packaging/**",
+  "pipelines/**",
+  "examples/**",
+  "review/**",
+]
+exclude = [
+  ".git/**",
+  "venv/**",
+  ".venv/**",
+  "__pycache__/**",
+  ".pytest_cache/**",
+  ".mypy_cache/**",
+  ".ruff_cache/**",
+  ".cache/**",
+  "*.pyc",
+  "*.pyo",
+  "*.pyd",
+  "*.o",
+  "*.a",
+  "*.so",
+  "*.dll",
+  "*.dylib",
+  "*.log",
+  "logs/**",
+  "*.egg-info/**",
+  ".ipynb_checkpoints/**",
+]

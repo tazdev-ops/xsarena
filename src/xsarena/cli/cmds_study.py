@@ -9,6 +9,7 @@ import typer
 
 from ..modes.study import StudyMode
 from .context import CLIContext
+from .context import CLIContext
 
 app = typer.Typer(help="Study and learning tools (flashcards, quizzes, etc.)")
 
@@ -102,7 +103,7 @@ def study_flashcards(
     study_mode = StudyMode(cli.engine)
     content = _read_content_file(content_file)
     result = asyncio.run(study_mode.generate_flashcards(content, num_cards))
-    print(result)
+    typer.echo(result)
 
 
 @app.command("quiz")
@@ -120,7 +121,7 @@ def study_quiz(
     study_mode = StudyMode(cli.engine)
     content = _read_content_file(content_file)
     result = asyncio.run(study_mode.generate_quiz(content, num_questions))
-    print(result)
+    typer.echo(result)
 
 
 @app.command("glossary")
@@ -136,7 +137,7 @@ def study_glossary(
 ):
     """Create a glossary from a content file with frequency filtering."""
     cli: CLIContext = ctx.obj
-    StudyMode(cli.engine)
+    study_mode = StudyMode(cli.engine)  # Fixed variable assignment
     content = _read_content_file(content_file)
 
     # Get terms with frequency
@@ -163,7 +164,7 @@ def study_glossary(
         Path(output_file).write_text(result, encoding="utf-8")
         typer.echo(f"Glossary saved to {output_file}")
     else:
-        print(result)
+        typer.echo(result)
 
 
 @app.command("index")
@@ -179,7 +180,7 @@ def study_index(
 ):
     """Generate an index from a content file with depth control."""
     cli: CLIContext = ctx.obj
-    StudyMode(cli.engine)
+    study_mode = StudyMode(cli.engine)  # Fixed variable assignment
     content = _read_content_file(content_file)
 
     # Extract headings up to the specified depth
@@ -201,4 +202,74 @@ def study_index(
         Path(output_file).write_text(result, encoding="utf-8")
         typer.echo(f"Index saved to {output_file}")
     else:
-        print(result)
+        typer.echo(result)
+
+
+@app.command("cloze")
+def study_cloze(
+    ctx: typer.Context,
+    content_file: str = typer.Argument(..., help="Path to the content file to process."),
+    ratio: float = typer.Option(0.15, "--ratio", "-r", help="Ratio of terms to hide (0.0 to 1.0)")
+):
+    """Create cloze deletions from a content file."""
+    cli: CLIContext = ctx.obj
+    content = _read_content_file(content_file)
+    
+    # Extract terms using existing function
+    term_counts = _extract_terms_with_frequency(content)
+    
+    # Get terms sorted by frequency (most frequent first)
+    sorted_terms = [term for term, count in sorted(term_counts.items(), key=lambda x: x[1], reverse=True)]
+    
+    # Determine how many terms to hide based on ratio
+    num_to_hide = max(1, int(len(sorted_terms) * ratio))
+    terms_to_hide = set(sorted_terms[:num_to_hide])
+    
+    # Create cloze deletions by replacing terms with blanks
+    result_content = content
+    for term in terms_to_hide:
+        # Use word boundaries to avoid partial matches
+        import re
+        pattern = r'\b' + re.escape(term) + r'\b'
+        result_content = re.sub(pattern, f"{{{{{term}}}}}", result_content, flags=re.IGNORECASE)
+    
+    # Create answer key
+    answer_key = "\n\n## Answer Key\n"
+    for i, term in enumerate(terms_to_hide, 1):
+        answer_key += f"{i}. {term}\n"
+    
+    final_result = result_content + answer_key
+    
+    typer.echo(final_result)
+
+
+@app.command("drill")
+def study_drill(
+    ctx: typer.Context,
+    content_file: str = typer.Argument(..., help="Path to the content file to process."),
+    rounds: int = typer.Option(2, "--rounds", "-r", help="Number of drill rounds"),
+    num_questions: int = typer.Option(20, "--num", "-n", help="Number of questions to generate")
+):
+    """Generate active recall drills from a content file."""
+    import asyncio
+    
+    cli: CLIContext = ctx.obj
+    content = _read_content_file(content_file)
+    
+    # Create a system prompt for generating questions
+    system_prompt = (
+        f"Generate {num_questions} short, focused questions from the following content. "
+        f"Each question should test understanding of key concepts. "
+        f"Provide questions only, no answers in the first section. "
+        f"Then provide a second section with answers to all questions."
+    )
+    
+    prompt = f"Content for drill generation:\n\n{content}"
+    
+    try:
+        # Use the engine to generate questions
+        result = asyncio.run(cli.engine.send_and_collect(prompt, system_prompt=system_prompt))
+        typer.echo(result)
+    except Exception as e:
+        typer.echo(f"Error generating drill: {e}", err=True)
+        raise typer.Exit(1)

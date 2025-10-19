@@ -80,7 +80,30 @@ def append_file(
 
 
 async def run_cmd(cmd: List[str], timeout: int = 30) -> Dict[str, str]:
-    """Run a command safely with timeout."""
+    """Run a command safely with timeout and allowlist."""
+    # Define allowlist of safe commands
+    safe_commands = {
+        "pytest", "ruff", "black", "flake8", "mypy", "isort", "autoflake", 
+        "ls", "cat", "head", "tail", "grep", "find", "which", "echo", "pwd",
+        "git", "node", "npm", "yarn", "python", "python3", "pip", "pip3",
+        "make", "cmake", "cargo", "go", "javac", "java", "gcc", "g++",
+        "wc", "sort", "uniq", "cut", "awk", "sed", "diff", "patch",
+        "tar", "zip", "unzip", "cp", "mv", "rm", "mkdir", "touch", "stat",
+        "ps", "top", "htop", "df", "du", "free", "netstat", "ping", "curl", "wget"
+    }
+    
+    # Check if the command is in the allowlist
+    if not cmd:
+        return {"returncode": -1, "stdout": "", "stderr": "Command is empty"}
+    
+    command_name = Path(cmd[0]).name
+    if command_name not in safe_commands:
+        return {
+            "returncode": -1, 
+            "stdout": "", 
+            "stderr": f"Command '{command_name}' is not allowed. Safe commands: {', '.join(sorted(safe_commands))}"
+        }
+
     try:
         process = await asyncio.create_subprocess_exec(
             *cmd, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE

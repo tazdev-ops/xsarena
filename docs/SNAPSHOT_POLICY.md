@@ -67,10 +67,14 @@ The pro snapshot tool (`tools/snapshot_pro.py`) provides enhanced debugging capa
 
 **Usage**:
 ```bash
-# Basic usage (creates ~/xsa_snapshot_pro.txt)
-python tools/snapshot_pro.py
+# Using the CLI command (recommended)
+xsarena ops snapshot pro
 
-# With custom options
+# With custom options via CLI
+xsarena ops snapshot pro --out /tmp/snapshot.txt --max-inline 100000
+
+# Direct script usage
+python tools/snapshot_pro.py
 python tools/snapshot_pro.py --out /tmp/snapshot.txt --max-inline 100000
 ```
 

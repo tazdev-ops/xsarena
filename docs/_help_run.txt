@@ -1,8 +1,9 @@
-
- Usage: python -m xsarena run [OPTIONS] COMMAND [ARGS]...
-
- Unified runner (book/continue)
-
+Warning: Unknown config keys in .xsarena/config.yml: bridge
+                                                                                
+ Usage: python -m xsarena run [OPTIONS] COMMAND [ARGS]...                       
+                                                                                
+ Run a book or recipe in authoring mode                                         
+                                                                                
 ╭─ Options ────────────────────────────────────────────────────────────────────╮
 │ --help          Show this message and exit.                                  │
 ╰──────────────────────────────────────────────────────────────────────────────╯
@@ -12,7 +13,10 @@
 │ lint-recipe   Lint a recipe file for validity and best practices.            │
 │ from-plan     Plan from rough seeds in your editor, then run a long, dense   │
 │               book. Replaces 'plan start' command.                           │
+│ replay        Replay a job from a run manifest, warning if directive digests │
+│               drift.                                                         │
 │ continue                                                                     │
 │ template      Run a structured directive from the library (optionally        │
 │               JSON-validated if a schema exists).                            │
 ╰──────────────────────────────────────────────────────────────────────────────╯
+

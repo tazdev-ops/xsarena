@@ -28,7 +28,7 @@ def bilingual_transform(
 
     async def run():
         result = await mode.transform(text, source_lang, target_lang)
-        print(result)
+        typer.echo(result)
 
     asyncio.run(run())
 
@@ -56,7 +56,7 @@ def bilingual_check(
         result = await mode.alignment_check(
             source_text, translated_text, source_lang, target_lang
         )
-        print(result)
+        typer.echo(result)
 
     asyncio.run(run())
 
@@ -86,7 +86,7 @@ def bilingual_improve(
         result = await mode.improve_translation(
             source_text, current_translation, source_lang, target_lang
         )
-        print(result)
+        typer.echo(result)
 
     asyncio.run(run())
 
@@ -112,6 +112,6 @@ def bilingual_glossary(
 
     async def run():
         result = await mode.glossary_build(text, source_lang, target_lang)
-        print(result)
+        typer.echo(result)
 
     asyncio.run(run())

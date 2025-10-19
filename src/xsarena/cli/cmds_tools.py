@@ -27,7 +27,8 @@ def fun_eli5(topic: str):
         )
         raise typer.Exit(1)
     sys = "Explain like I'm five (ELI5): plain, short sentences; vivid but accurate analogies; 120–180 words."
-    print(asyncio.run(eng.send_and_collect(topic, system_prompt=sys)))
+    result = asyncio.run(eng.send_and_collect(topic, system_prompt=sys))
+    typer.echo(result)
 
 
 @app.command("story")
@@ -41,7 +42,8 @@ def fun_story(concept: str):
         )
         raise typer.Exit(1)
     sys = "Explain the concept with a short story that aids memory. 200–300 words; accurate; one clear moral at end."
-    print(asyncio.run(eng.send_and_collect(concept, system_prompt=sys)))
+    result = asyncio.run(eng.send_and_collect(concept, system_prompt=sys))
+    typer.echo(result)
 
 
 @app.command("persona")
@@ -52,16 +54,16 @@ def fun_persona(name: str):
         "prof": "Persona: Professor — structured, cites sources sparingly, neutral tone.",
         "coach": "Persona: Coach — encouraging, actionable next steps, no fluff.",
     }
-    print(overlays.get(name.lower(), "Unknown persona. Try chad|prof|coach."))
+    typer.echo(overlays.get(name.lower(), "Unknown persona. Try chad|prof|coach."))
 
 
 @app.command("nobs")
 def fun_nobs(flag: str):
     """on|off — alias to no‑BS"""
     if flag.lower() not in ("on", "off"):
-        print("Use: xsarena fun nobs on|off")
+        typer.echo("Use: xsarena fun nobs on|off")
         return
-    print(f"(alias) Run: /style.nobs {flag.lower()}")
+    typer.echo(f"(alias) Run: /style.nobs {flag.lower()}")
 
 
 @app.command("export-chapters")
@@ -124,3 +126,50 @@ def extract_checklists_cmd(
     typer.echo("Checklist extraction complete!")
     typer.echo(f"Found {len(items)} checklist items")
     typer.echo(f"Checklist saved to: {output_file}")
+
+
+@app.command("tldr")
+def fun_tldr(
+    file: str = typer.Argument(..., help="Path to the file to summarize"),
+    bullets: int = typer.Option(7, "--bullets", "-b", help="Number of bullet points for summary"),
+    output_file: str = typer.Option(None, "--out", help="Output file for the summary")
+):
+    """Create a tight summary with callouts from a text file."""
+    import asyncio
+    from pathlib import Path
+    
+    file_path = Path(file)
+    if not file_path.exists():
+        typer.echo(f"Error: File '{file}' not found.")
+        raise typer.Exit(1)
+    
+    content = file_path.read_text(encoding="utf-8")
+    
+    # Create a system prompt for TL;DR generation
+    system_prompt = (
+        f"You create tight, actionable summaries with key callouts. "
+        f"Extract the most important points in {bullets} bullet points maximum. "
+        f"Include: 'So what?' (key insight), 'Action items' (2-3 concrete steps), "
+        f"and 'Glossary' (3 key terms with definitions). "
+        f"Keep it concise and preserve the core meaning."
+    )
+    
+    prompt = f"Please create a TL;DR summary of the following content:\n\n{content}"
+    
+    # Use the engine to generate the summary
+    try:
+        from ..core.backends import create_backend
+        from ..core.state import SessionState
+        
+        eng = Engine(create_backend("openrouter"), SessionState())
+        result = asyncio.run(eng.send_and_collect(prompt, system_prompt=system_prompt))
+        
+        if output_file:
+            output_path = Path(output_file)
+            output_path.write_text(result, encoding="utf-8")
+            typer.echo(f"TL;DR summary saved to {output_file}")
+        else:
+            typer.echo(result)
+    except Exception as e:
+        typer.echo(f"Error generating TL;DR: {e}", err=True)
+        raise typer.Exit(1)

@@ -41,15 +41,6 @@ class CoderMode:
     def __init__(self, engine: Engine):
         self.engine = engine
         self.path_jail = PathJail("./workspace")  # Default workspace jail
-        self.engine.set_tools(
-            [
-                self.list_dir,
-                self.read_file,
-                self.write_file,
-                self.append_file,
-                self.run_cmd,
-            ]
-        )
 
     async def list_dir(self, path: str) -> str:
         """List directory contents."""

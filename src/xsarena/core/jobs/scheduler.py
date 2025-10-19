@@ -115,8 +115,14 @@ class Scheduler:
 
         # Create a job runner and run the job
         runner = JobManager()
+        
+        # Create control queue and resume event for this job
+        control_queue = asyncio.Queue()
+        resume_event = asyncio.Event()
+        resume_event.set()  # Initially not paused
+        
         try:
-            await runner.run_job(job_id, self.transport)
+            await runner.run_job(job_id, self.transport, control_queue, resume_event)
         finally:
             # Remove from running jobs when done
             if job_id in self.running_jobs:
@@ -127,6 +133,9 @@ class Scheduler:
 
     async def _process_queue(self):
         """Process queued jobs if there's capacity."""
+        # Load any external changes to the queue from file
+        self._load_persisted_queue()
+        
         # Process jobs that can run within limits
         remaining_queue = []
         for priority, job_id in self.job_queue:

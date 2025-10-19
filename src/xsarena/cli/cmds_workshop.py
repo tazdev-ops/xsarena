@@ -2,19 +2,14 @@ from __future__ import annotations
 
 import asyncio
 import json
-import re
 from pathlib import Path
 from typing import Optional
 
 import typer
 from rich.console import Console
 
+from ..utils.text import slugify
 from .context import CLIContext
-
-
-def _slugify(s: str) -> str:
-    s = re.sub(r"[^a-zA-Z0-9]+", "-", s.strip().lower())
-    return re.sub(r"-{2,}", "-", s).strip("-") or "workshop"
 
 
 console = Console()
@@ -57,7 +52,7 @@ def workshop_design(
     # Create output file if not provided
     if out_file is None:
         # Generate a safe slug for the filename using the shared slugify function
-        slug = _slugify(topic)
+        slug = slugify(topic, default="workshop")
         out_file = Path("review") / f"{slug}_agenda.json"
 
     # Ensure the output directory exists

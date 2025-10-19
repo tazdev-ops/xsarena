@@ -1,5 +1,7 @@
 """Anchor service for all anchor-related functionality."""
 
+from typing import Optional
+
 from .backends.transport import BackendTransport
 
 

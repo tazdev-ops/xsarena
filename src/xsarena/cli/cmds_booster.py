@@ -9,7 +9,7 @@ from rich.console import Console
 app = typer.Typer(help="Interactively engineer and improve prompts.")
 console = Console()
 
-BOOSTER_STATE_FILE = Path(".xsarena/booster_state.json")
+BOOSTER_STATE_FILE = Path(".xsarena/ops/booster_state.json")
 
 
 @app.command("start")

@@ -1,8 +1,8 @@
-
- Usage: python -m xsarena [OPTIONS] COMMAND [ARGS]...
-
- XSArena — AI-powered writing and coding studio
-
+                                                                                
+ Usage: xsarena [OPTIONS] COMMAND [ARGS]...                                     
+                                                                                
+ XSArena — AI-powered writing and coding studio                                 
+                                                                                
 ╭─ Options ────────────────────────────────────────────────────────────────────╮
 │ --backend                   TEXT     Backend to use (bridge or openrouter)   │
 │                                      [default: bridge]                       │
@@ -17,52 +17,16 @@
 ╰──────────────────────────────────────────────────────────────────────────────╯
 ╭─ Commands ───────────────────────────────────────────────────────────────────╮
 │ version                                                                      │
+│ run           Run a book or recipe in authoring mode                         │
+│ interactive   Interactive authoring session                                  │
 │ author        Core content creation workflows.                               │
 │ analyze       Analysis, reporting, and evidence-based tools.                 │
-│ study         Study and learning tools                                       │
-│ dev           Coding agent, git integration, and automation pipelines.       │
+│ study         Study aids, learning tools, and practice drills.               │
+│ dev           Coding agent, simulation, and automation pipelines.            │
 │ ops           System health, jobs, services, and configuration.              │
-│ run           Unified runner (book/continue)                                 │
-│ interactive   Interactive cockpit (REPL-lite) with live steering             │
-│ jobs          Jobs manager (list, monitor, control jobs)                     │
-│ control       Fine-tune output, continuation, and repetition behavior        │
-│ report        Create a redacted report bundle                                │
-│ preview       Preview prompt + style sample for recipes                      │
-│ profiles      Inspect prompt profiles                                        │
-│ config        Configuration management                                       │
-│ backend       Backend configuration commands                                 │
-│ service       Service management (start servers)                             │
-│ snapshot      Snapshot tools with chunking and redaction                     │
-│ list          Discover profiles, roles, overlays, templates                  │
-│ directives    Directive tools (index)                                        │
-│ docs          Documentation tools (gen-help)                                 │
-│ json          JSON validation and processing tools                           │
-│ ingest        Ingest and synthesize large documents                          │
-│ lossless      Lossless text processing commands                              │
-│ style         Apply style and pedagogy overlays                              │
-│ policy        Policy analysis and generation tools                           │
-│ chad          Direct, evidence-based Q&A                                     │
-│ bilingual     Bilingual text processing tools                                │
-│ booster       Interactively engineer and improve prompts                     │
-│ tools         Fun explainers, personas, and toggles                          │
-│ coach         Coaching drills and boss exams                                 │
-│ joy           Daily activities, streaks, and achievements                    │
-│ agent         AI coding agent with local file system access                  │
-│ coder         Advanced coding session with tickets, patches, and git         │
-│               integration                                                    │
-│ pipeline      Pipeline runner (fix → test → format → commit)                 │
-│ project       Project management commands                                    │
-│ metrics       Metrics and observability                                      │
-│ debug         Debugging commands                                             │
-│ adapt         Adaptive inspection and safe fixes                             │
-│ boot          Startup reader (startup.yml)                                   │
-│ checklist     Implementation checklist and verification                      │
-│ upgrade       Version-aware upgrader                                         │
-│ fix           Self-heal configuration/state                                  │
-│ clean         Cleanup (TTL-based sweeper)                                    │
-│ macros        Macro registry                                                 │
-│ playground    Prompt composition and sampling                                │
-│ doctor        Health checks and smoke tests                                  │
-│ people        Roleplay engine: start, say, boundaries, model, export         │
-│ workshop      Workshop design and facilitation tools                         │
+│ project       Project management and initialization.                         │
+│ directives    Manage directives, profiles, and endpoints.                    │
+│ utils         General utility commands.                                      │
+│ docs          Documentation generation commands                              │
 ╰──────────────────────────────────────────────────────────────────────────────╯
+

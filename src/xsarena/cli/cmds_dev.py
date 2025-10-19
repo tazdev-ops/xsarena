@@ -15,7 +15,7 @@ app = typer.Typer(help="Development tools, automation, and fast offline simulati
 def dev_simulate(
     subject: str = typer.Argument(..., help="Subject for the simulation"),
     length: str = typer.Option(
-        "short", "--length", help="Length preset: short|standard|long|very-long|max"
+        "standard", "--length", help="Length preset: standard|long|very-long|max"
     ),
     span: str = typer.Option("medium", "--span", help="Span preset: medium|long|book"),
     script_path: str = typer.Option(
@@ -24,9 +24,9 @@ def dev_simulate(
 ):
     """Run a fast offline simulation using the null transport."""
     # Validate presets
-    if length not in ["short", "standard", "long", "very-long", "max"]:
+    if length not in ["standard", "long", "very-long", "max"]:
         typer.echo(
-            f"Error: Invalid length preset '{length}'. Choose from: short, standard, long, very-long, max"
+            f"Error: Invalid length preset '{length}'. Choose from: standard, long, very-long, max"
         )
         raise typer.Exit(1)
 

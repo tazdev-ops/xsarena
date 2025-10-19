@@ -45,8 +45,8 @@ def joy_daily(subject: str):
     streak = bump_streak()
     add_achievement("First Daily") if streak == 1 else None
     log_event("daily", {"subject": subject})
-    print(f"Streak: {streak}  [{sparkline(7)}]\n")
-    print(reply)
+    typer.echo(f"Streak: {streak}  [{sparkline(7)}]\n")
+    typer.echo(reply)
 
 
 @app.command("streak")
@@ -61,9 +61,9 @@ def joy_streak():
         raise typer.Exit(1)
 
     s = get_state()
-    print(f"Streak: {s['streak']}  [{sparkline(7)}]  Last: {s.get('last_day')}")
+    typer.echo(f"Streak: {s['streak']}  [{sparkline(7)}]  Last: {s.get('last_day')}")
     if s["achievements"]:
-        print("Achievements:", ", ".join(s["achievements"]))
+        typer.echo("Achievements:", ", ".join(s["achievements"]))
 
 
 @app.command("achievements")
@@ -78,7 +78,7 @@ def joy_achievements():
         raise typer.Exit(1)
 
     s = get_state()
-    print("Achievements:", ", ".join(s["achievements"]) or "(none)")
+    typer.echo("Achievements:", ", ".join(s["achievements"]) or "(none)")
 
 
 @app.command("kudos")
@@ -95,4 +95,4 @@ def joy_kudos():
         "Small steps make mountains. ⛰️",
         "Great focus—keep shipping. 🚀",
     ]
-    print(random.choice(msgs))
+    typer.echo(random.choice(msgs))

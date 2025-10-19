@@ -1,14 +1,15 @@
-
- Usage: python -m xsarena study [OPTIONS] COMMAND [ARGS]...
-
- Study and learning tools
-
+Warning: Unknown config keys in .xsarena/config.yml: bridge
+                                                                                
+ Usage: python -m xsarena study [OPTIONS] COMMAND [ARGS]...                     
+                                                                                
+ Study aids, learning tools, and practice drills.                               
+                                                                                
 ╭─ Options ────────────────────────────────────────────────────────────────────╮
 │ --help          Show this message and exit.                                  │
 ╰──────────────────────────────────────────────────────────────────────────────╯
 ╭─ Commands ───────────────────────────────────────────────────────────────────╮
-│ flashcards   Generate flashcards from a content file.                        │
-│ quiz         Generate a quiz from a content file.                            │
-│ glossary     Create a glossary from a content file.                          │
-│ index        Generate an index from a content file.                          │
+│ generate   Study and learning tools (flashcards, quizzes, etc.)              │
+│ coach      Coach drills and Boss mini-exams                                  │
+│ joy        Daily joy, streaks, achievements, and surprises                   │
 ╰──────────────────────────────────────────────────────────────────────────────╯
+

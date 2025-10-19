@@ -1,5 +1,6 @@
 """Analysis commands for XSArena."""
 
+import math
 from pathlib import Path
 from typing import List
 
@@ -9,6 +10,11 @@ from rich.table import Table
 
 app = typer.Typer(help="Analysis, reporting, and evidence-based tools.")
 
+from ..utils.continuity import (
+    analyze_continuity,
+    generate_continuity_report,
+    save_continuity_report,
+)
 from ..utils.coverage import (
     analyze_coverage,
     generate_coverage_report,
@@ -113,6 +119,7 @@ def coverage_cmd(
 
 @app.command("secrets")
 def secrets_cmd(
+    ctx: typer.Context,
     path: str = typer.Argument(
         ".", help="Path to scan for secrets (defaults to current directory)"
     ),
@@ -121,17 +128,93 @@ def secrets_cmd(
     ),
 ):
     """Scan for secrets (API keys, passwords, etc.) in the specified path."""
-    from ..utils.secrets_scanner import scan_secrets
+    # Print deprecation message
+    typer.echo("⚠️  DEPRECATION WARNING: 'xsarena analyze secrets' is deprecated. Use 'xsarena ops health scan-secrets' instead.", err=True)
+    
+    # Import the health app and call the scan_secrets command via ctx.invoke
+    from .cmds_health import scan_secrets as health_scan_secrets
+    ctx.invoke(health_scan_secrets, path=path, no_fail=no_fail)
 
-    typer.echo(f"Scanning '{path}' for potential secrets...")
 
-    findings, has_secrets = scan_secrets(path, fail_on_hits=not no_fail)
+@app.command("continuity")
+def continuity_cmd(
+    book: str = typer.Argument(..., help="Path to the book file to analyze"),
+    output: str = typer.Option(
+        "review/continuity_report.md",
+        "--output",
+        "-o",
+        help="Output path for the report",
+    ),
+):
+    """Analyze book continuity for anchor drift and re-introductions."""
+    # Verify file exists
+    book_path = Path(book)
 
-    if has_secrets:
-        if not no_fail:
-            typer.echo("\\nSecrets found! Exiting with error code.", err=True)
-            raise typer.Exit(code=1)
-        else:
-            typer.echo("\\nSecrets found, but continuing as --no-fail was specified.")
+    if not book_path.exists():
+        typer.echo(f"Error: Book file not found at '{book}'")
+        raise typer.Exit(1)
+
+    # Perform continuity analysis
+    typer.echo("Analyzing continuity...")
+    issues = analyze_continuity(str(book_path))
+
+    # Generate report
+    report = generate_continuity_report(issues, book)
+
+    # Save report
+    save_continuity_report(report, output)
+
+    typer.echo("Continuity analysis complete!")
+    typer.echo(f"Report saved to: {output}")
+
+    # Print summary
+    issue_counts = {}
+    for issue in issues:
+        issue_counts[issue.type] = issue_counts.get(issue.type, 0) + 1
+
+    if issue_counts:
+        typer.echo("Issues found:")
+        for issue_type, count in issue_counts.items():
+            typer.echo(f"  - {issue_type.title()}: {count}")
     else:
-        typer.echo("\\nNo secrets found. Scan completed successfully.")
+        typer.echo("No continuity issues detected!")
+
+
+@app.command("readtime")
+def readtime_cmd(
+    file: Path = typer.Argument(..., help="Path to the text file to analyze"),
+    words_per_minute: int = typer.Option(200, "--wpm", help="Words per minute reading speed"),
+):
+    """Analyze reading time and density of a text file."""
+    if not file.exists():
+        typer.echo(f"Error: File '{file}' not found.", err=True)
+        raise typer.Exit(1)
+    
+    content = file.read_text(encoding="utf-8")
+    
+    # Count words
+    words = len(content.split())
+    
+    # Calculate reading time
+    reading_time = words / words_per_minute
+    
+    # Calculate density (words per character)
+    density = words / len(content) if len(content) > 0 else 0
+    
+    # Estimate reading time in minutes and seconds
+    minutes = int(reading_time)
+    seconds = int((reading_time - minutes) * 60)
+    
+    typer.echo(f"File: {file}")
+    typer.echo(f"Words: {words:,}")
+    typer.echo(f"Characters: {len(content):,}")
+    typer.echo(f"Reading time: ~{minutes}m {seconds}s (at {words_per_minute} wpm)")
+    typer.echo(f"Density: {density:.4f} words per character ({density*1000:.2f} words per 1000 characters)")
+    
+    # Density interpretation
+    if density > 0.15:
+        typer.echo("Density: High (dense text)")
+    elif density > 0.10:
+        typer.echo("Density: Medium")
+    else:
+        typer.echo("Density: Low (sparse text)")

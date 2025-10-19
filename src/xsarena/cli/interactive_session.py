@@ -40,10 +40,16 @@ class InteractiveSession:
             "cancel": self.cancel_job,
             "out.minchars": self.set_output_config,
             "out.passes": self.set_output_config,
+            "minchars": self.set_output_config,  # Short alias for /out.minchars
+            "passes": self.set_output_config,    # Short alias for /out.passes
             "cont.mode": self.set_continuation_config,
             "cont.anchor": self.set_continuation_config,
+            "mode": self.set_continuation_config,    # Short alias for /cont.mode
+            "anchor": self.set_continuation_config,  # Short alias for /cont.anchor
             "repeat.warn": self.set_repetition_config,
             "repeat.thresh": self.set_repetition_config,
+            "warn": self.set_repetition_config,      # Short alias for /repeat.warn
+            "thresh": self.set_repetition_config,    # Short alias for /repeat.thresh
             "config.show": self.show_config,
             "prompt.show": self.cmd_prompt_show,
             "prompt.style": self.cmd_prompt_style,
@@ -141,11 +147,17 @@ Available commands:
   /next <job_id> "hint" - Send a hint to the next chunk of a job
   /cancel <job_id> - Cancel a running job
   /out.minchars N - Set minimum output characters per chunk
+  /minchars N - Set minimum output characters per chunk (alias for /out.minchars)
   /out.passes N - Set number of output push passes
+  /passes N - Set number of output push passes (alias for /out.passes)
   /cont.mode anchor|normal - Set continuation mode
+  /mode anchor|normal - Set continuation mode (alias for /cont.mode)
   /cont.anchor N - Set anchor length for anchored continuation
+  /anchor N - Set anchor length for anchored continuation (alias for /cont.anchor)
   /repeat.warn on|off - Enable/disable repetition warnings
+  /warn on|off - Enable/disable repetition warnings (alias for /repeat.warn)
   /repeat.thresh F - Set repetition threshold (0.0-1.0)
+  /thresh F - Set repetition threshold (0.0-1.0) (alias for /repeat.thresh)
   /prompt.show - Show active profile, overlays, and extra note
   /prompt.style on|off <name> - Toggle prompt overlays
   /prompt.profile <name> - Apply profile (clears manual overrides)
@@ -161,11 +173,14 @@ Available commands:
         self.console.print("Starting ID capture...")
         self.console.print("Please click 'Retry' in your browser to capture IDs")
 
+        # Build URLs from config base_url
+        base_url = self.ctx.config.base_url.rstrip("/v1")
+        start_capture_url = f"{base_url}/internal/start_id_capture"
+        config_url = f"{base_url}/internal/config"
+
         # Make request to start ID capture (requests is in dependencies)
         try:
-            resp = requests.post(
-                "http://127.0.0.1:5102/internal/start_id_capture", timeout=10
-            )
+            resp = requests.post(start_capture_url, timeout=10)
             if resp.status_code == 200:
                 self.console.print(
                     "[green]ID capture started. Please click 'Retry' in browser.[/green]"
@@ -183,9 +198,7 @@ Available commands:
         max_attempts = 30  # 30 seconds max wait
         for _ in range(max_attempts):
             try:
-                response = requests.get(
-                    "http://127.0.0.1:5102/internal/config", timeout=5
-                )
+                response = requests.get(config_url, timeout=5)
                 if response.status_code == 200:
                     config_data = response.json()
                     session_id = config_data.get("bridge", {}).get("session_id")

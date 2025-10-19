@@ -34,7 +34,7 @@ def coach_start(subject: str, minutes: int = 10):
     asked = 0
     while time.time() < end:
         q = _ask_q(eng, subject)
-        print("\n" + q)
+        typer.echo("\n" + q)
         ans = input("Your answer (A-D, or q=quit): ").strip().upper()
         if ans == "Q":
             break
@@ -45,10 +45,10 @@ def coach_start(subject: str, minutes: int = 10):
         asked += 1
         if ans == correct:
             score += 1
-            print("✅ Correct!\n")
+            typer.echo("✅ Correct!\n")
         else:
-            print(f"❌ Nope. Correct: {correct}\n")
-    print(f"Coach done. Score: {score}/{asked}")
+            typer.echo(f"❌ Nope. Correct: {correct}\n")
+    typer.echo(f"Coach done. Score: {score}/{asked}")
     log_event("coach", {"subject": subject, "score": score, "asked": asked})
     if asked >= 8 and score / asked >= 0.75:
         add_achievement("Coach Bronze")
@@ -76,7 +76,7 @@ def coach_quiz(subject: str, n: int = 10):
     score = 0
     for _i in range(n):
         q = _ask_q(eng, subject)
-        print("\n" + q)
+        typer.echo("\n" + q)
         ans = input("Your answer (A-D): ").strip().upper()
         correct = (
             "ANSWER:" in q
@@ -84,10 +84,10 @@ def coach_quiz(subject: str, n: int = 10):
         )
         if ans == correct:
             score += 1
-            print("✅")
+            typer.echo("✅")
         else:
-            print(f"❌ ({correct})")
-    print(f"Quiz: {score}/{n}")
+            typer.echo(f"❌ ({correct})")
+    typer.echo(f"Quiz: {score}/{n}")
     log_event("quiz", {"subject": subject, "score": score, "n": n})
 
 
@@ -115,7 +115,7 @@ def boss_start(subject: str, n: int = 20, minutes: int = 25):
     misses = []
     while time.time() < end and asked < n:
         q = _ask_q(eng, subject)
-        print("\n" + q)
+        typer.echo("\n" + q)
         ans = input("Your answer (A-D, or q=quit): ").strip().upper()
         if ans == "Q":
             break
@@ -126,11 +126,11 @@ def boss_start(subject: str, n: int = 20, minutes: int = 25):
         asked += 1
         if ans == correct:
             score += 1
-            print("✅")
+            typer.echo("✅")
         else:
             misses.append({"q": q, "your": ans, "correct": correct})
-            print(f"❌ ({correct})")
-    print(f"Boss fought: {score}/{asked}")
+            typer.echo(f"❌ ({correct})")
+    typer.echo(f"Boss fought: {score}/{asked}")
     log_event("boss", {"subject": subject, "score": score, "asked": asked})
     # Auto repair chapter prompt
     if misses:
@@ -145,6 +145,6 @@ def boss_start(subject: str, n: int = 20, minutes: int = 25):
         )
         out = pathlib.Path("books") / f"{subject.lower().replace(' ','-')}.repair.md"
         out.write_text(rep, encoding="utf-8")
-        print(f"Repair chapter → {out}")
+        typer.echo(f"Repair chapter → {out}")
         if score / asked >= 0.8:
             add_achievement("Boss Bronze")
