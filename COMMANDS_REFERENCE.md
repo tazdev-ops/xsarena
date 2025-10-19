@@ -86,6 +86,10 @@ System health, jobs, services, and configuration.
 - `xsarena ops snapshot` - Snapshot management
   - `xsarena ops snapshot write` - Generate a snapshot using the smart snapshot builder
   - `xsarena ops snapshot pro` - Generate a pro snapshot with enhanced debugging capabilities
+  - `xsarena ops snapshot txt` - Flatten curated files into a single .txt with strict includes/excludes for chatbot upload
+    - `xsarena ops snapshot txt --preset author-core --total-max 4000000 --max-per-file 200000 --no-repo-map` - Author core preset (recommended)
+    - `xsarena ops snapshot txt --preset ultra-tight --total-max 2500000 --max-per-file 180000 --no-repo-map` - Ultra-tight preset (minimal)
+    - `xsarena ops snapshot txt -I README.md -I src/xsarena/core/prompt.py --out repo_flat.txt` - Custom includes
 - `xsarena ops debug` - Debugging commands
 - `xsarena ops directives` - Directive tools (index)
 - `xsarena ops booster` - Interactively engineer and improve prompts

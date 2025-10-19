@@ -10,6 +10,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Awaitable, Callable, Dict, List, Optional
 
+from ...utils.density import avg_sentence_len, filler_rate, lexical_density
 from ..backends.transport import BackendTransport, BaseEvent
 from .model import JobV3, get_user_friendly_error_message, map_exception_to_error_code
 from .store import JobStore
@@ -556,6 +557,121 @@ class JobExecutor:
                                         },
                                     )
                                     break
+
+                    # NEW: Lossless metrics + optional compress pass (gated by session_state)
+                    try:
+                        # Reconstruct session_state if present
+                        sstate = None
+                        if "session_state" in job.meta and job.meta["session_state"]:
+                            from ..state import SessionState
+
+                            sstate = SessionState(**job.meta["session_state"])
+                        # Compute metrics
+                        ld = lexical_density(extended_content)
+                        fr = filler_rate(extended_content)
+                        asl = avg_sentence_len(extended_content)
+                        self.job_store._log_event(
+                            job.id,
+                            {
+                                "type": "density_metrics",
+                                "chunk_idx": chunk_idx,
+                                "lexical_density": round(ld, 4),
+                                "filler_per_k": round(fr, 2),
+                                "avg_sentence_len": round(asl, 2),
+                            },
+                        )
+
+                        enforce = (
+                            bool(getattr(sstate, "lossless_enforce", False))
+                            if sstate
+                            else False
+                        )
+                        target_density = (
+                            float(getattr(sstate, "target_density", 0.55))
+                            if sstate
+                            else 0.55
+                        )
+                        max_adverbs_k = (
+                            int(getattr(sstate, "max_adverbs_per_k", 15))
+                            if sstate
+                            else 15
+                        )
+                        max_sent_len = (
+                            int(getattr(sstate, "max_sentence_len", 22))
+                            if sstate
+                            else 22
+                        )
+
+                        needs_compress = enforce and (
+                            ld < target_density
+                            or fr > max_adverbs_k
+                            or asl > max_sent_len
+                        )
+                        if needs_compress:
+                            compress_prompt = (
+                                "Lossless compression pass: Rewrite the EXACT content below to higher density.\n"
+                                "- Preserve every fact and entailment.\n"
+                                "- Remove fillers/hedges; avoid generic transitions.\n"
+                                "- Do not add or remove claims.\n"
+                                "CONTENT:\n<<<CHUNK\n" + extended_content + "\nCHUNK>>>"
+                            )
+                            extend_payload = {
+                                "messages": [
+                                    {
+                                        "role": "system",
+                                        "content": "You are a precision editor enforcing a lossless compression contract.",
+                                    },
+                                    {"role": "user", "content": compress_prompt},
+                                ],
+                                "model": (
+                                    job.run_spec.model
+                                    if hasattr(job.run_spec, "model")
+                                    and job.run_spec.model
+                                    else "gpt-4o"
+                                ),
+                            }
+                            try:
+                                compress_resp = await transport.send(extend_payload)
+                                new_content = (
+                                    compress_resp.get("choices", [{}])[0]
+                                    .get("message", {})
+                                    .get("content", "")
+                                )
+                                if new_content and len(new_content.strip()) > 0:
+                                    extended_content = new_content.strip()
+                                    # Recompute metrics after compress
+                                    ld2 = lexical_density(extended_content)
+                                    fr2 = filler_rate(extended_content)
+                                    asl2 = avg_sentence_len(extended_content)
+                                    self.job_store._log_event(
+                                        job.id,
+                                        {
+                                            "type": "compress_pass",
+                                            "chunk_idx": chunk_idx,
+                                            "before": {
+                                                "ld": round(ld, 4),
+                                                "fr": round(fr, 2),
+                                                "asl": round(asl, 2),
+                                            },
+                                            "after": {
+                                                "ld": round(ld2, 4),
+                                                "fr": round(fr2, 2),
+                                                "asl": round(asl2, 2),
+                                            },
+                                        },
+                                    )
+                            except Exception:
+                                # If compress fails, proceed with extended_content as-is
+                                self.job_store._log_event(
+                                    job.id,
+                                    {
+                                        "type": "compress_pass_failed",
+                                        "chunk_idx": chunk_idx,
+                                    },
+                                )
+                    except Exception:
+                        # Metrics must never break the run
+                        pass
 
                     await on_chunk(chunk_idx, extended_content, next_hint)
                 except Exception as e:
