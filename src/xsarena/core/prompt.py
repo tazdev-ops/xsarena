@@ -2,8 +2,22 @@
 
 from __future__ import annotations
 
+import os
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Any, Dict, List, Optional
+
+from ..utils.project_paths import get_project_root
+
+
+def _directives_root() -> Path:
+    env = os.getenv("XSARENA_DIRECTIVES_ROOT")
+    if env:
+        p = Path(env)
+        if p.exists():
+            return p
+    # Use robust project root resolution
+    return get_project_root() / "directives"
 
 
 @dataclass
@@ -39,15 +53,9 @@ class PromptCompositionLayer:
 
     def _load_extended_templates(self):
         """Load richer templates from directive files directly."""
-        from pathlib import Path
 
         # Load narrative overlay from directive
-        narrative_path = (
-            Path(__file__).parent.parent.parent.parent
-            / "directives"
-            / "style"
-            / "narrative.md"
-        )
+        narrative_path = _directives_root() / "style" / "narrative.md"
         if narrative_path.exists():
             try:
                 with open(narrative_path, "r", encoding="utf-8") as f:
@@ -66,12 +74,7 @@ class PromptCompositionLayer:
             ] = "Teach-before-use narrative. Define terms at first mention."
 
         # Load compressed overlay from directive
-        compressed_path = (
-            Path(__file__).parent.parent.parent.parent
-            / "directives"
-            / "style"
-            / "compressed.md"
-        )
+        compressed_path = _directives_root() / "style" / "compressed.md"
         if compressed_path.exists():
             try:
                 with open(compressed_path, "r", encoding="utf-8") as f:
@@ -90,12 +93,7 @@ class PromptCompositionLayer:
             ] = "Compressed narrative. Minimal headings; dense flow."
 
         # Load no_bs overlay from directive
-        no_bs_path = (
-            Path(__file__).parent.parent.parent.parent
-            / "directives"
-            / "style"
-            / "no_bs.md"
-        )
+        no_bs_path = _directives_root() / "style" / "no_bs.md"
         if no_bs_path.exists():
             try:
                 with open(no_bs_path, "r", encoding="utf-8") as f:
@@ -158,17 +156,8 @@ class PromptCompositionLayer:
         # Base intent
         if base == "zero2hero":
             # Load the zero2hero template from directive file
-            from pathlib import Path
 
-            zero2hero_path = Path("directives/base/zero2hero.md")
-            if not zero2hero_path.exists():
-                # Try the full path relative to the project root
-                zero2hero_path = (
-                    Path(__file__).parent.parent.parent.parent
-                    / "directives"
-                    / "base"
-                    / "zero2hero.md"
-                )
+            zero2hero_path = _directives_root() / "base" / "zero2hero.md"
 
             if zero2hero_path.exists():
                 try:

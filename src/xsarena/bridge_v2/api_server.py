@@ -1,5 +1,6 @@
 # src/xsarena/bridge_v2/api_server.py
 import asyncio
+import hmac
 import json
 import logging
 import os
@@ -8,6 +9,7 @@ import sys
 import threading
 import time
 import uuid
+from collections import deque
 from contextlib import asynccontextmanager
 from datetime import datetime
 
@@ -28,11 +30,16 @@ MODEL_NAME_TO_ID_MAP = {}
 MODEL_ENDPOINT_MAP = {}
 last_activity_time = datetime.now()
 cloudflare_verified = False  # Track Cloudflare verification status per request
-IS_REFRESHING_FOR_VERIFICATION = False  # Global flag for Cloudflare refresh status
+REFRESHING_BY_REQUEST: dict[str, bool] = {}  # Per-request Cloudflare refresh status
 # Queue for thread-safe communication from background threads to main thread
 command_queue = queue.Queue()
 idle_restart_thread = None
 idle_restart_stop_event = None
+
+# Rate limiting and channel limits
+MAX_CHANNELS = int(CONFIG.get("max_channels", 200))
+RATE = CONFIG.get("rate_limit", {"burst": 10, "window_seconds": 10})
+PER_PEER = {}  # dict[ip] -> deque of timestamps
 
 
 def _parse_jsonc(jsonc_string: str) -> dict:
@@ -40,6 +47,15 @@ def _parse_jsonc(jsonc_string: str) -> dict:
         line for line in jsonc_string.splitlines() if not line.strip().startswith("//")
     ]
     return json.loads("\n".join(lines))
+
+
+def _internal_ok(request: Request) -> bool:
+    try:
+        token = (CONFIG.get("internal_api_token") or "").strip()
+        header = request.headers.get("x-internal-token", "")
+        return bool(token) and hmac.compare_digest(header, token)
+    except Exception:
+        return False
 
 
 def load_config():
@@ -142,7 +158,14 @@ def idle_restart_worker():
                     time.sleep(2.5)  # Sleep 2-3 seconds as specified
 
                     # Restart the process
-                    logger.info("Restarting process...")
+                    logger.warning(
+                        "Idle restart: restarting process; active jobs may be interrupted. "
+                        "Set bridge.enable_idle_restart=false to disable."
+                    )
+                    # Skip restart when active requests present
+                    if response_channels:  # active streams present
+                        idle_restart_stop_event.wait(timeout=30)
+                        continue
                     os.execv(sys.executable, [sys.executable] + sys.argv)
 
             # Check every 30 seconds to avoid excessive CPU usage
@@ -338,7 +361,7 @@ async def convert_openai_to_lmarena_payload(
             if model_info and isinstance(model_info, dict):
                 if model_info.get("type") == "image":
                     is_image_request = True
-        except:
+        except (FileNotFoundError, json.JSONDecodeError):
             pass
 
     # First-message guard: if the first message is an assistant message, insert a fake user message
@@ -384,15 +407,11 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(lifespan=lifespan)
 
-# Safer default CORS: localhost-only; make configurable later via CONFIG if needed
-_DEFAULT_ORIGINS = [
-    "http://localhost",
-    "http://127.0.0.1",
-    "http://0.0.0.0",
-]
+# Safer default CORS: localhost-only; make configurable via CONFIG
+cors_origins = CONFIG.get("cors_origins") or ["http://127.0.0.1", "http://localhost"]
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=_DEFAULT_ORIGINS,
+    allow_origins=cors_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -401,7 +420,7 @@ app.add_middleware(
 
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
-    global browser_ws, IS_REFRESHING_FOR_VERIFICATION
+    global browser_ws, REFRESHING_BY_REQUEST
     await websocket.accept()
     if browser_ws:
         logger.warning("New userscript connection received, replacing the old one.")
@@ -411,7 +430,7 @@ async def websocket_endpoint(websocket: WebSocket):
     # Reset Cloudflare verification flag and refresh status on new connection
     global cloudflare_verified
     cloudflare_verified = False
-    IS_REFRESHING_FOR_VERIFICATION = False
+    REFRESHING_BY_REQUEST.clear()  # Clear all per-request refresh flags
 
     try:
         while True:
@@ -437,7 +456,7 @@ async def websocket_endpoint(websocket: WebSocket):
                     logger.info("Received refresh command from userscript")
                     # This means Cloudflare challenge was handled, reset verification flag
                     cloudflare_verified = False
-                    IS_REFRESHING_FOR_VERIFICATION = False
+                    REFRESHING_BY_REQUEST.clear()  # Clear all per-request refresh flags
                 elif command == "reconnect":
                     logger.info("Received reconnect command from userscript")
                     # This means userscript wants to reconnect
@@ -461,19 +480,37 @@ async def websocket_endpoint(websocket: WebSocket):
         logger.warning("❌ Userscript disconnected.")
     finally:
         browser_ws = None
-        for queue in response_channels.values():
-            await queue.put({"error": "Browser disconnected."})
+        for resp_q in response_channels.values():
+            await resp_q.put({"error": "Browser disconnected."})
         response_channels.clear()
 
 
 @app.post("/v1/chat/completions")
 async def chat_completions(request: Request):
-    global cloudflare_verified, last_activity_time, IS_REFRESHING_FOR_VERIFICATION
+    global cloudflare_verified, last_activity_time, REFRESHING_BY_REQUEST
     if not browser_ws:
         raise HTTPException(status_code=503, detail="Userscript client not connected.")
 
+    # Check channel limit
+    if len(response_channels) >= MAX_CHANNELS:
+        raise HTTPException(status_code=503, detail="Server busy")
+
     # Update last activity time
     last_activity_time = datetime.now()
+
+    # Rate limiting per peer
+    peer = request.client.host or "unknown"
+    now = time.time()
+    if peer not in PER_PEER:
+        PER_PEER[peer] = deque()
+    # Prune old timestamps
+    while PER_PEER[peer] and now - PER_PEER[peer][0] > RATE["window_seconds"]:
+        PER_PEER[peer].popleft()
+    # Check if over burst limit
+    if len(PER_PEER[peer]) >= RATE["burst"]:
+        raise HTTPException(status_code=429, detail="Rate limit exceeded")
+    # Add current timestamp
+    PER_PEER[peer].append(now)
 
     # Check for API key if configured
     api_key = CONFIG.get("api_key")
@@ -483,7 +520,8 @@ async def chat_completions(request: Request):
             raise HTTPException(
                 status_code=401, detail="Missing or invalid Authorization header"
             )
-        if auth_header.split(" ")[1] != api_key:
+        parts = auth_header.split(" ", 1)
+        if len(parts) != 2 or not hmac.compare_digest(parts[1], api_key):
             raise HTTPException(status_code=401, detail="Invalid API key")
 
     openai_req = await request.json()
@@ -537,6 +575,9 @@ async def chat_completions(request: Request):
     response_channels[request_id] = asyncio.Queue()
 
     try:
+        # Initialize per-request refresh state
+        REFRESHING_BY_REQUEST.pop(request_id, None)
+
         # Process attachments if file_bed_enabled
         file_bed_enabled = CONFIG.get("file_bed_enabled", False)
         if file_bed_enabled and "messages" in openai_req:
@@ -565,7 +606,7 @@ async def chat_completions(request: Request):
         cloudflare_verified = False
 
         async def stream_generator():
-            global cloudflare_verified, IS_REFRESHING_FOR_VERIFICATION
+            global cloudflare_verified, REFRESHING_BY_REQUEST
             try:
                 queue = response_channels[request_id]
                 timeout_seconds = CONFIG.get("stream_response_timeout_seconds", 360)
@@ -585,12 +626,12 @@ async def chat_completions(request: Request):
                                 or "Enable JavaScript and cookies to continue" in data
                                 or "Checking your browser before accessing" in data
                             ):
-                                if not IS_REFRESHING_FOR_VERIFICATION:
+                                if not REFRESHING_BY_REQUEST.get(request_id, False):
                                     # First time seeing Cloudflare, trigger refresh
                                     logger.info(
                                         "Detected Cloudflare challenge, sending refresh command"
                                     )
-                                    IS_REFRESHING_FOR_VERIFICATION = True
+                                    REFRESHING_BY_REQUEST[request_id] = True
                                     await browser_ws.send_json({"command": "refresh"})
                                     # Wait for a short backoff period before retrying
                                     await asyncio.sleep(5.0)  # 5 second backoff
@@ -622,8 +663,8 @@ async def chat_completions(request: Request):
                             yield format_openai_finish_chunk(
                                 model_name, request_id, reason="stop"
                             )
-                            # Reset the refresh flag after successful completion
-                            IS_REFRESHING_FOR_VERIFICATION = False
+                            # Reset per-request refresh flag after successful completion
+                            REFRESHING_BY_REQUEST.pop(request_id, None)
                             break
 
                         # Handle image content for image models
@@ -646,8 +687,8 @@ async def chat_completions(request: Request):
                         yield "data: [DONE]\n\n"
                         break
             finally:
-                # Reset the refresh flag in all exit paths to prevent getting stuck
-                IS_REFRESHING_FOR_VERIFICATION = False
+                # Reset per-request refresh flag in all exit paths to prevent getting stuck
+                REFRESHING_BY_REQUEST.pop(request_id, None)
                 if request_id in response_channels:
                     del response_channels[request_id]
 
@@ -674,12 +715,12 @@ async def chat_completions(request: Request):
                                 or "Enable JavaScript and cookies to continue" in data
                                 or "Checking your browser before accessing" in data
                             ):
-                                if not IS_REFRESHING_FOR_VERIFICATION:
+                                if not REFRESHING_BY_REQUEST.get(request_id, False):
                                     # First time seeing Cloudflare, trigger refresh
                                     logger.info(
                                         "Detected Cloudflare challenge, sending refresh command"
                                     )
-                                    IS_REFRESHING_FOR_VERIFICATION = True
+                                    REFRESHING_BY_REQUEST[request_id] = True
                                     await browser_ws.send_json({"command": "refresh"})
                                     # Wait for a short backoff period before retrying
                                     await asyncio.sleep(5.0)  # 5 second backoff
@@ -704,8 +745,8 @@ async def chat_completions(request: Request):
                             logger.error(f"Error from browser: {data['error']}")
                             raise HTTPException(status_code=502, detail=data["error"])
                         if data == "[DONE]":
-                            # Reset the refresh flag after successful completion
-                            IS_REFRESHING_FOR_VERIFICATION = False
+                            # Reset per-request refresh flag after successful completion
+                            REFRESHING_BY_REQUEST.pop(request_id, None)
                             break
                         content_parts.append(str(data))
                     except asyncio.TimeoutError:
@@ -755,8 +796,8 @@ async def chat_completions(request: Request):
                 }
                 return JSONResponse(response)
             finally:
-                # Reset the refresh flag in all exit paths to prevent getting stuck
-                IS_REFRESHING_FOR_VERIFICATION = False
+                # Reset per-request refresh flag in all exit paths to prevent getting stuck
+                REFRESHING_BY_REQUEST.pop(request_id, None)
                 if request_id in response_channels:
                     del response_channels[request_id]
     except HTTPException:
@@ -765,12 +806,15 @@ async def chat_completions(request: Request):
     except Exception as e:
         if request_id in response_channels:
             del response_channels[request_id]
+        REFRESHING_BY_REQUEST.pop(request_id, None)
         logger.error(f"Error processing chat completion: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail=str(e))
 
 
 @app.post("/internal/start_id_capture")
-async def start_id_capture():
+async def start_id_capture(request: Request):
+    if not _internal_ok(request):
+        raise HTTPException(status_code=401, detail="Unauthorized")
     if not browser_ws:
         raise HTTPException(status_code=503, detail="Browser client not connected.")
     await browser_ws.send_json({"command": "activate_id_capture"})
@@ -778,7 +822,9 @@ async def start_id_capture():
 
 
 @app.post("/internal/request_model_update")
-async def request_model_update():
+async def request_model_update(request: Request):
+    if not _internal_ok(request):
+        raise HTTPException(status_code=401, detail="Unauthorized")
     """Request userscript to send page source for model update."""
     if not browser_ws:
         raise HTTPException(status_code=503, detail="Browser client not connected.")
@@ -788,13 +834,18 @@ async def request_model_update():
 
 @app.post("/internal/update_available_models")
 async def update_available_models(request: Request):
+    if not _internal_ok(request):
+        raise HTTPException(status_code=401, detail="Unauthorized")
     """Update available models from HTML source."""
     try:
+        # Check payload size limit
+        body = await request.body()
+        if len(body) > int(CONFIG.get("max_internal_post_bytes", 2_000_000)):
+            raise HTTPException(status_code=413, detail="Payload too large")
+        html_str = body.decode("utf-8", "replace")
+
         content_type = request.headers.get("content-type", "")
         if "text/html" in content_type:
-            html_content = await request.body()
-            html_str = html_content.decode("utf-8")
-
             # Extract models from HTML - find the JSON part containing models
             import re
 
@@ -872,11 +923,22 @@ async def update_available_models(request: Request):
 
 @app.post("/internal/id_capture/update")
 async def update_id_capture(request: Request):
+    if not _internal_ok(request):
+        raise HTTPException(status_code=401, detail="Unauthorized")
     """Update session and message IDs from the userscript."""
     try:
+        import re
+
         payload = await request.json()
         session_id = payload.get("sessionId") or payload.get("session_id")
         message_id = payload.get("messageId") or payload.get("message_id")
+
+        # Validate session_id and message_id format to prevent pathologically large/evil inputs
+        rx = re.compile(r"^[A-Za-z0-9_\-:.]{1,200}$")
+        if not (
+            session_id and message_id and rx.match(session_id) and rx.match(message_id)
+        ):
+            raise HTTPException(status_code=400, detail="Invalid id format")
 
         if not session_id or not message_id:
             raise HTTPException(
@@ -901,7 +963,7 @@ async def update_id_capture(request: Request):
             try:
                 with open(config_path, "r", encoding="utf-8") as f:
                     existing_config = yaml.safe_load(f) or {}
-            except:
+            except (FileNotFoundError, yaml.YAMLError):
                 pass  # If config file is invalid, start with empty dict
 
         # Update the bridge section with the new IDs
@@ -932,7 +994,9 @@ async def update_id_capture(request: Request):
 
 # XSArena cockpit uses this to confirm IDs after capture
 @app.get("/internal/config")
-def internal_config():
+def internal_config(request: Request):
+    if not _internal_ok(request):
+        raise HTTPException(status_code=401, detail="Unauthorized")
     return {
         "bridge": {
             "session_id": CONFIG.get("session_id"),
@@ -966,7 +1030,7 @@ async def list_models():
                 if model_info and isinstance(model_info, dict):
                     if model_info.get("type") == "image":
                         pass
-            except:
+            except (FileNotFoundError, json.JSONDecodeError):
                 pass  # If models.json doesn't exist, continue with is_image_model = False
 
             model_obj = {
@@ -1023,7 +1087,9 @@ def format_openai_finish_chunk(model, request_id, reason="stop"):
 
 
 @app.post("/internal/reload")
-def internal_reload():
+def internal_reload(request: Request):
+    if not _internal_ok(request):
+        raise HTTPException(status_code=401, detail="Unauthorized")
     try:
         load_config()
         load_model_map()
@@ -1054,7 +1120,7 @@ def health():
         last_activity_iso = (
             last_activity_time.isoformat() if last_activity_time else None
         )
-    except:
+    except AttributeError:
         last_activity_iso = None
 
     return {
@@ -1114,7 +1180,8 @@ if __name__ == "__main__":
     import os
 
     api_port = int(os.getenv("PORT", "5102"))
+    host = os.getenv("XSA_BRIDGE_HOST", "127.0.0.1")
     logger.info("🚀 LMArena Bridge v2.0 API 服务器正在启动...")
-    logger.info(f"   - 监听地址: http://0.0.0.0:{api_port}")
-    logger.info(f"   - WebSocket 端点: ws://0.0.0.0:{api_port}/ws")
-    uvicorn.run(app, host="0.0.0.0", port=api_port)
+    logger.info(f"   - 监听地址: http://{host}:{api_port}")
+    logger.info(f"   - WebSocket 端点: ws://{host}:{api_port}/ws")
+    uvicorn.run(app, host=host, port=api_port)

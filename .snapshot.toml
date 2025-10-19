@@ -1,5 +1,5 @@
 # Snapshot configuration for XSArena
-default_mode = "minimal"
+default_mode = "core_logic"
 max_size = 262144       # 256 KB per file
 redact = true
 
@@ -139,4 +139,91 @@ exclude = [
   "logs/**",
   "*.egg-info/**",
   ".ipynb_checkpoints/**",
+]
+
+[modes.tight]
+include = [
+  "README.md",
+  "COMMANDS_REFERENCE.md",
+  "pyproject.toml",
+  "src/xsarena/cli/main.py",
+  "src/xsarena/cli/registry.py",
+  "src/xsarena/cli/context.py",
+  "src/xsarena/core/prompt.py",
+  "src/xsarena/core/prompt_runtime.py",
+  "src/xsarena/core/v2_orchestrator/orchestrator.py",
+  "src/xsarena/core/v2_orchestrator/specs.py",
+  "src/xsarena/core/jobs/model.py",
+  "src/xsarena/core/jobs/executor.py",
+  "src/xsarena/core/jobs/scheduler.py",
+  "src/xsarena/core/jobs/store.py"
+]
+exclude = [
+  ".git/**","venv/**",".venv/**","__pycache__/**",".pytest_cache/**",".mypy_cache/**",".ruff_cache/**",".cache/**",
+  "*.pyc","logs/**",".xsarena/**","*.egg-info/**",".ipynb_checkpoints/**",
+  "docs/**","examples/**","tests/**","tools/**","pipelines/**","packaging/**",
+  "review/**","books/**","directives/**","src/xsarena/bridge_v2/static/**"
+]
+
+[modes.core_logic]
+# This mode includes only the essential architectural components.
+include = [
+  # Project Definition & High-Level Overview
+  ".snapshot.toml",
+  "README.md",
+  "pyproject.toml",
+
+  # Core Application Entry & Routing
+  "src/xsarena/cli/main.py",
+  "src/xsarena/cli/registry.py",
+  "src/xsarena/cli/context.py",
+
+  # Key User Workflows
+  "src/xsarena/cli/cmds_run.py",
+  "src/xsarena/cli/interactive_session.py",  # <-- ADDED: Essential interactive mode logic
+
+  # Core Orchestration & Job Logic
+  "src/xsarena/core/v2_orchestrator/orchestrator.py",
+  "src/xsarena/core/v2_orchestrator/specs.py",
+  "src/xsarena/core/jobs/model.py",
+  "src/xsarena/core/jobs/executor.py",
+  "src/xsarena/core/jobs/scheduler.py",
+
+  # Core Prompting & State Management
+  "src/xsarena/core/prompt.py",
+  "src/xsarena/core/config.py",
+  "src/xsarena/core/state.py",
+
+  # Backend Communication Layer (Client & Server)
+  "src/xsarena/core/backends/__init__.py",
+  "src/xsarena/core/backends/bridge_v2.py",
+  "src/xsarena/bridge_v2/api_server.py",  # <-- ADDED: The critical bridge server implementation
+]
+# We can reuse the same excellent exclude list.
+exclude = [
+  ".git/**",
+  ".svn/**",
+  ".hg/**",
+  ".idea/**",
+  ".vscode/**",
+  "venv/**",
+  ".venv/**",
+  "__pycache__/**",
+  ".pytest_cache/**",
+  ".mypy_cache/**",
+  ".ruff_cache/**",
+  ".cache/**",
+  "*.pyc",
+  "*.pyo",
+  "*.pyd",
+  "*.o",
+  "*.a",
+  "*.so",
+  "*.dll",
+  "*.dylib",
+  "*.log",
+  "logs/**",
+  ".xsarena/**",
+  "*.egg-info/**",
+  ".ipynb_checkpoints/**"
 ]

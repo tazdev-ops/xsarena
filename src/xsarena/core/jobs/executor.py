@@ -23,6 +23,7 @@ class JobExecutor:
         self.job_store = job_store
         self.control_queues: Dict[str, asyncio.Queue] = {}
         self.resume_events: Dict[str, asyncio.Event] = {}
+        self._ctl_lock = asyncio.Lock()
 
     async def run(
         self,
@@ -215,7 +216,8 @@ class JobExecutor:
                         break  # No more control messages to process
 
                 # Drain any 'next' hints that have accumulated and use the latest one
-                next_hint = await _drain_next_hint(job.id)
+                async with self._ctl_lock:
+                    next_hint = await _drain_next_hint(job.id)
 
                 # Wait for resume if paused
                 if not self.resume_events[job.id].is_set():
@@ -234,9 +236,13 @@ class JobExecutor:
 
                     session_state = SessionState(**job.meta["session_state"])
 
-                # Prepare anchor for subsequent chunks
+                # Always await hint drain and prefer hint over anchor
+                async with self._ctl_lock:
+                    next_hint = await _drain_next_hint(job.id)
+
+                # For chunk_idx > 1, get a local anchor from current file tail
                 anchor = None
-                if chunk_idx > 1:  # Only need anchor for chunks after the first
+                if chunk_idx > 1:
                     out_path = (
                         job.run_spec.out_path
                         or f"./books/{job.run_spec.subject.replace(' ', '_')}.final.md"
@@ -251,10 +257,8 @@ class JobExecutor:
                                 content, use_semantic=use_semantic, transport=transport
                             )
                         except Exception:
-                            pass  # If we can't read the file, continue without anchor
+                            anchor = None
 
-                # Get next hint
-                next_hint = await _drain_next_hint(job.id)
                 if next_hint:
                     self.job_store._log_event(
                         job.id,
@@ -269,11 +273,13 @@ class JobExecutor:
                 # Build the chunk prompt using the helper function
                 from ..prompt_runtime import build_chunk_prompt
 
+                # Pass next_hint if present; only use anchor if next_hint is None
+                hint_to_use = next_hint if next_hint is not None else anchor
                 user_content = build_chunk_prompt(
                     chunk_idx=chunk_idx,
                     job=job,
                     session_state=session_state,
-                    next_hint=next_hint,
+                    next_hint=hint_to_use,
                     anchor=anchor,
                 )
 
@@ -402,14 +408,15 @@ class JobExecutor:
                                     break  # No more control messages to process
 
                             # Drain any 'next' hints that have accumulated for this extend
-                            await _drain_next_hint(job.id)
+                            async with self._ctl_lock:
+                                hint_now = await _drain_next_hint(job.id)
 
                             # Wait for resume if paused
                             if not self.resume_events[job.id].is_set():
                                 await self.resume_events[job.id].wait()
 
                             # Prevent hot-looping the bridge
-                            await asyncio.sleep(0.1)
+                            await asyncio.sleep(0.05)  # Changed from 0.1 to 0.05
 
                             # Get a local anchor from the current chunk content using centralized service
                             local_anchor = await create_anchor(
@@ -418,7 +425,7 @@ class JobExecutor:
                                 transport=transport,
                                 tail_chars=150,
                             )
-                            hint_now = await _drain_next_hint(job.id)
+
                             if local_anchor or hint_now:
                                 extend_prompt = (
                                     hint_now

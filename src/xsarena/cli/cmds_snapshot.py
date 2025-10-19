@@ -1,6 +1,7 @@
 import subprocess
 import sys
 from pathlib import Path
+from typing import Optional
 
 import typer
 
@@ -79,8 +80,8 @@ def snapshot_write(
     out: str = typer.Option(
         None, "--out", "-o", help="Output file path. Defaults to xsa_snapshot.txt."
     ),
-    mode: str = typer.Option(
-        "minimal", "--mode", help="Snapshot breadth: minimal, standard, or max."
+    mode: Optional[str] = typer.Option(
+        None, "--mode", help="Snapshot breadth: minimal, standard, core_logic, or max."
     ),
     with_git: bool = typer.Option(
         False, "--with-git", help="Include git status information."
@@ -162,8 +163,8 @@ def snapshot_simple_cmd(
     out: str = typer.Option(
         None, "--out", "-o", help="Output file path. Defaults to xsa_snapshot.txt."
     ),
-    mode: str = typer.Option(
-        "minimal", "--mode", help="Snapshot breadth: minimal, standard, or max."
+    mode: Optional[str] = typer.Option(
+        None, "--mode", help="Snapshot breadth: minimal, standard, core_logic, or max."
     ),
     with_git: bool = typer.Option(
         False, "--with-git", help="Include git status information."

@@ -1,6 +1,7 @@
 """Bridge transport implementation for XSArena backends."""
 
 import asyncio
+import json
 import os
 from typing import Any, Dict, List
 
@@ -58,15 +59,15 @@ class BridgeV2Transport(BackendTransport):
         """Check if the bridge server is healthy and responsive."""
         try:
             timeout = aiohttp.ClientTimeout(total=self.timeout)
-            async with (
-                aiohttp.ClientSession(timeout=timeout) as session,
-                session.get(f"{self.base_url.replace('/v1', '')}/health") as resp,
-            ):
-                if resp.status == 200:
-                    health_data = await resp.json()
-                    return health_data.get("ws_connected", False) is True
-                return False
-        except:
+            async with aiohttp.ClientSession(timeout=timeout) as session:
+                async with session.get(
+                    f"{self.base_url.replace('/v1', '')}/health"
+                ) as resp:
+                    if resp.status == 200:
+                        health_data = await resp.json()
+                        return health_data.get("ws_connected", False) is True
+                    return False
+        except (aiohttp.ClientError, asyncio.TimeoutError, json.JSONDecodeError):
             return False
 
     async def stream_events(self) -> List[BaseEvent]:
@@ -83,7 +84,7 @@ class OpenRouterTransport(BackendTransport):
     def __init__(self, api_key: str, model: str = "openai/gpt-4o", timeout: int = 60):
         self.api_key = api_key
         self.model = model
-        self.base_url = "https://openrouter.ai/api/v1"
+        self.base_url = os.getenv("OPENROUTER_BASE_URL", "https://openrouter.ai/api/v1")
         self.timeout = timeout
 
     async def send(self, payload: Dict[str, Any]) -> Dict[str, Any]:
@@ -140,12 +141,12 @@ class OpenRouterTransport(BackendTransport):
                 "Content-Type": "application/json",
             }
             timeout = aiohttp.ClientTimeout(total=self.timeout)
-            async with (
-                aiohttp.ClientSession(timeout=timeout) as session,
-                session.get(f"{self.base_url}/models", headers=headers) as response,
-            ):
-                return response.status == 200
-        except:
+            async with aiohttp.ClientSession(timeout=timeout) as session:
+                async with session.get(
+                    f"{self.base_url}/models", headers=headers
+                ) as response:
+                    return response.status == 200
+        except (aiohttp.ClientError, asyncio.TimeoutError):
             return False
 
     async def stream_events(self) -> List[BaseEvent]:

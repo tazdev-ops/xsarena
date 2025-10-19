@@ -5,6 +5,8 @@ from pathlib import Path
 
 import typer
 
+from ..core.v2_orchestrator.orchestrator import Orchestrator
+from ..core.v2_orchestrator.specs import LengthPreset, RunSpecV2, SpanPreset
 from ..modes.lossless import LosslessMode
 from .context import CLIContext
 
@@ -398,3 +400,34 @@ def style_show(ctx: typer.Context):
         typer.echo("No overlays currently active")
 
     typer.echo(f"Reading overlay: {reading_status}")
+
+
+@app.command("style-apply")
+def style_apply(
+    ctx: typer.Context,
+    style_profile: str = typer.Argument(..., help="Path to a style profile markdown"),
+    subject: str = typer.Argument(..., help="New subject/topic"),
+    out_path: str = typer.Option("", "--out", "-o", help="Output file path"),
+    length: str = typer.Option("long", "--length"),
+    span: str = typer.Option("book", "--span"),
+):
+    """Generate content on a new subject using a captured style profile file."""
+    cli: CLIContext = ctx.obj
+    p = Path(style_profile)
+    if not p.exists():
+        typer.echo(f"Error: Style profile not found: {style_profile}", err=True)
+        raise typer.Exit(1)
+    # Build run spec with the style profile appended as an extra file
+    run_spec = RunSpecV2(
+        subject=subject,
+        length=LengthPreset(length),
+        span=SpanPreset(span),
+        overlays=getattr(cli.state, "overlays_active", ["narrative", "no_bs"]),
+        extra_note="",
+        extra_files=[str(p)],
+        out_path=out_path or "",
+        profile=getattr(cli.state, "active_profile", "") or "",
+    )
+    orch = Orchestrator()
+    job_id = asyncio.run(orch.run_spec(run_spec, backend_type=cli.state.backend))
+    typer.echo(f"[style-apply] submitted: {job_id}")

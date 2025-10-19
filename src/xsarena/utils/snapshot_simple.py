@@ -5,6 +5,7 @@ Zero dependencies; optional tomllib if present; otherwise default modes (minimal
 Best-effort Git context and Jobs summary; never fatal.
 Text or Zip output; truncates large files per max_size; optional redact.
 """
+
 import hashlib
 import json
 import os
@@ -224,7 +225,7 @@ def read_snapshot_config() -> Dict:
     config_path = ROOT / ".snapshot.toml"
     if config_path.exists() and tomllib:
         try:
-            data = tomllib.loads(config_path.read_text("utf-8", errors="replace"))
+            data = tomllib.loads(config_path.read_bytes())
             # Update modes separately since it's a nested structure
             if "modes" in data:
                 cfg["modes"].update(data.pop("modes", {}))
@@ -300,6 +301,7 @@ def collect_paths(
     # Handle max mode differently - include everything except excludes
     if mode == "max":
         include_patterns = ["**/*"]
+        exclude_patterns = []
     else:
         # Get mode-specific patterns
         mode_config = cfg.get("modes", {}).get(mode, {})
@@ -503,7 +505,7 @@ def build_system_info() -> str:
     info.append(f"Working Directory: {os.getcwd()}")
     try:
         info.append(f"User: {os.getlogin()}")
-    except:
+    except OSError:
         info.append("User: N/A")
     info.append(f"Platform: {platform.platform()}")
     return "System Information:\\n" + "\\n".join(info) + "\\n"

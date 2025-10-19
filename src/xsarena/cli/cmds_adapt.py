@@ -114,8 +114,10 @@ def _append_gitignore(lines: List[str]) -> List[str]:
 
 def _gen_help_file(cmd: str, dest: Path):
     try:
+        import shlex
+
         out = subprocess.check_output(
-            cmd, shell=True, text=True, stderr=subprocess.STDOUT
+            shlex.split(cmd), text=True, stderr=subprocess.STDOUT
         )
         _write(dest, out)
         return True, ""

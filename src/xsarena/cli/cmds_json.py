@@ -117,7 +117,7 @@ def lint_template(file_path: str = typer.Argument(..., help="Template file to li
             except json.JSONDecodeError:
                 # This might be a malformed JSON snippet
                 pass
-    except:
+    except re.error:
         pass
 
     # Output results

@@ -3,7 +3,7 @@
 import os
 import tempfile
 
-from src.xsarena.utils.continuity import (
+from xsarena.utils.continuity import (
     ContinuityIssue,
     analyze_continuity,
     generate_continuity_report,

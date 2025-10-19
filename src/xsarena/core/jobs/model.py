@@ -116,7 +116,6 @@ class JobV3(BaseModel):
     progress: Dict[str, Any] = {}  # Track progress like chunks completed, tokens used
 
 
-
 from .executor import JobExecutor
 from .store import JobStore
 
@@ -128,7 +127,9 @@ class JobManager:
         self.defaults = project_defaults or {}
         self.job_store = JobStore()
         self.executor = JobExecutor(self.job_store)
-        self.event_handlers: List[Callable[[BaseEvent], Awaitable[None]]] = {}
+        self.event_handlers: List[Callable[[BaseEvent], Awaitable[None]]] = []
+        # Add control_queues attribute for compatibility with tests
+        self.control_queues = self.executor.control_queues
 
     def register_event_handler(self, handler: Callable[[BaseEvent], Awaitable[None]]):
         """Register an event handler for job events."""

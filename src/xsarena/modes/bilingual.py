@@ -1,6 +1,5 @@
 """Bilingual processing modes for XSArena."""
 
-from pathlib import Path
 from typing import Dict, Optional
 
 from ..core.engine import Engine
@@ -141,8 +140,10 @@ Create a glossary mapping important terms from {source_lang} to {target_lang}. F
 
     def _load_role_directive(self, role_name: str) -> str:
         """Load content from a role directive file."""
-        # Try relative to project root (relative to this file)
-        project_root = Path(__file__).parent.parent.parent.parent
+        from ..utils.project_paths import get_project_root
+
+        # Use robust project root resolution
+        project_root = get_project_root()
         role_path = project_root / "directives" / "roles" / f"{role_name}.md"
 
         if role_path.exists():

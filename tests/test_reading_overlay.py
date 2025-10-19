@@ -1,7 +1,7 @@
 """Tests for reading overlay functionality."""
 
-from src.xsarena.core.prompt import compose_prompt
-from src.xsarena.core.state import SessionState
+from xsarena.core.prompt import compose_prompt
+from xsarena.core.state import SessionState
 
 
 def test_reading_overlay_state():

@@ -116,7 +116,7 @@ def run(ctx: typer.Context):
             ping(ctx, backend=None, retries=1, delay=0.5, deep=False)
     except SystemExit as e:
         raise typer.Exit(code=e.code)
-    except:
+    except (AttributeError, TypeError, ValueError):
         # Fallback to direct call if invoke doesn't work
         ping(ctx, backend=None, retries=1, delay=0.5, deep=False)
 

@@ -3,7 +3,7 @@
 import os
 import tempfile
 
-from src.xsarena.utils.coverage import (
+from xsarena.utils.coverage import (
     CoverageItem,
     analyze_coverage,
     generate_coverage_report,
@@ -13,7 +13,7 @@ from src.xsarena.utils.coverage import (
 
 def test_parse_outline():
     """Test parsing of outline files."""
-    from src.xsarena.utils.coverage import parse_outline
+    from xsarena.utils.coverage import parse_outline
 
     outline_content = """# Introduction
 ## Background

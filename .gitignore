@@ -40,6 +40,8 @@ directives/_preview/
 snapshot_chunks/
 xsa_min_snapshot*.txt
 xsa_snapshot*.txt
+xsa_snapshot.zip
+repo_flat.txt
 *.tar.gz
 
 # Local configuration (if any, secrets should never be committed)
@@ -47,6 +49,7 @@ xsa_snapshot*.txt
 
 # Generated artifacts
 snapshot.txt
+directives/_rules/rules.merged.md
 # Python build artifacts and cache
 __pycache__/
 *.pyc

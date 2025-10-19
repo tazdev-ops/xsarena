@@ -9,6 +9,23 @@ from ..core.backends import create_backend
 from ..core.engine import Engine
 from ..core.state import SessionState
 
+
+# Define safe no-op fallbacks for optional modules
+def _no_op_log_event(*args, **kwargs):
+    """No-op fallback for log_event when joy module is not available."""
+    return None
+
+
+def _no_op_add_achievement(*args, **kwargs):
+    """No-op fallback for add_achievement when joy module is not available."""
+    return None
+
+
+# Initialize with fallbacks
+log_event = _no_op_log_event
+add_achievement = _no_op_add_achievement
+
+
 app = typer.Typer(help="Coach drills and Boss mini-exams")
 
 
@@ -20,6 +37,14 @@ def _ask_q(eng: Engine, subject: str):
 
 @app.command("start")
 def coach_start(subject: str, minutes: int = 10):
+    # Import joy functions if available, otherwise use existing fallbacks
+    global log_event, add_achievement
+    try:
+        from ..core.joy import add_achievement, log_event
+    except ImportError:
+        # Joy module is optional, keep using the fallbacks defined at module level
+        pass
+
     try:
         eng = Engine(create_backend("openrouter"), SessionState())
     except ValueError:
@@ -57,12 +82,13 @@ def coach_start(subject: str, minutes: int = 10):
 @app.command("quiz")
 def coach_quiz(subject: str, n: int = 10):
     """A quick N-question MCQ quiz."""
+    # Import joy functions if available, otherwise use existing fallbacks
+    global log_event, add_achievement
     try:
         from ..core.joy import add_achievement, log_event
     except ImportError:
-        # Joy module is optional, skip achievements
-        def log_event(*args, **kwargs):
-            return None
+        # Joy module is optional, keep using the fallbacks defined at module level
+        pass
 
     try:
         eng = Engine(create_backend("openrouter"), SessionState())
@@ -94,11 +120,13 @@ def coach_quiz(subject: str, n: int = 10):
 @app.command("boss")
 def boss_start(subject: str, n: int = 20, minutes: int = 25):
     """Timed Boss mini-exam; auto-creates a repair prompt."""
+    # Import joy functions if available, otherwise use existing fallbacks
+    global log_event, add_achievement
     try:
         from ..core.joy import add_achievement, log_event
     except ImportError:
-        # Joy module is optional, skip achievements
-        add_achievement = log_event = lambda *args, **kwargs: None
+        # Joy module is optional, keep using the fallbacks defined at module level
+        pass
 
     try:
         eng = Engine(create_backend("openrouter"), SessionState())

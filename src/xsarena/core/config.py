@@ -30,8 +30,12 @@ class Config(BaseModel):
     @classmethod
     def normalize_base_url(cls, v: str) -> str:
         """Normalize base_url to always end with /v1"""
+        v = (v or "").strip()
+        if not v:
+            return "/v1"
+        v = v.rstrip("/")
         if not v.endswith("/v1"):
-            v = v + "v1" if v.endswith("/") else v + "/v1"
+            v = v + "/v1"
         return v
 
     def save_to_file(self, path: str) -> None:
@@ -61,7 +65,9 @@ class Config(BaseModel):
     def load_with_layered_config(
         cls, config_file_path: Optional[str] = ".xsarena/config.yml"
     ) -> "Config":
-        """Load config with layered precedence: env → CLI flags → .xsarena/config.yml"""
+        """Load config with layered precedence:
+        defaults → .xsarena/config.yml → environment variables → CLI flags (applied by main).
+        """
         # Start with defaults
         config_dict: Dict[str, Any] = {
             "backend": "bridge",

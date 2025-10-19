@@ -1,6 +1,5 @@
 """Tests for backend payload construction and error handling."""
 
-from unittest.mock import AsyncMock, patch
 
 import pytest
 from xsarena.core.backends.bridge_v2 import BridgeV2Transport, OpenRouterTransport
@@ -9,6 +8,8 @@ from xsarena.core.backends.bridge_v2 import BridgeV2Transport, OpenRouterTranspo
 @pytest.mark.asyncio
 async def test_bridge_backend_payload():
     """Test BridgeV2Transport payload construction."""
+    from unittest.mock import AsyncMock, patch
+
     transport = BridgeV2Transport(base_url="http://test:8080/v1")
 
     payload = {
@@ -18,24 +19,31 @@ async def test_bridge_backend_payload():
         ]
     }
 
-    # Mock the aiohttp session
-    with patch("aiohttp.ClientSession") as mock_session_class:
-        mock_session = AsyncMock()
-        mock_session_class.return_value.__aenter__.return_value = mock_session
+    # Create a proper async context manager mock
+    mock_response = AsyncMock()
+    mock_response.status = 200
+    mock_response.json.return_value = {
+        "choices": [{"message": {"content": "Response"}}]
+    }
 
-        mock_response = AsyncMock()
-        mock_response.status = 200
-        mock_response.json.return_value = {
-            "choices": [{"message": {"content": "Response"}}]
-        }
+    # Create a mock for the post context manager
+    mock_post_cm = AsyncMock()
+    mock_post_cm.__aenter__.return_value = mock_response
 
-        mock_post_context_manager = AsyncMock()
-        mock_post_context_manager.__aenter__.return_value = mock_response
-        mock_session.post.return_value = mock_post_context_manager
+    # Create a mock session
+    mock_session = AsyncMock()
+    mock_session.post.return_value = mock_post_cm
+
+    # Create a mock ClientSession class that returns our session when used as context manager
+    mock_client_session_cm = AsyncMock()
+    mock_client_session_cm.__aenter__.return_value = mock_session
+
+    with patch("aiohttp.ClientSession") as MockClientSession:
+        MockClientSession.return_value = mock_client_session_cm
 
         await transport.send(payload)
 
-        # Verify the payload structure
+        # Verify the call was made correctly
         mock_session.post.assert_called_once()
         call_args = mock_session.post.call_args
         assert call_args[0][0] == "http://test:8080/v1/chat/completions"
@@ -52,21 +60,31 @@ async def test_bridge_backend_payload():
 @pytest.mark.asyncio
 async def test_bridge_backend_error_handling():
     """Test BridgeV2Transport error handling."""
+    from unittest.mock import AsyncMock, patch
+
     transport = BridgeV2Transport(base_url="http://test:8080/v1")
 
     payload = {"messages": [{"role": "user", "content": "Test message"}]}
 
-    with patch("aiohttp.ClientSession") as mock_session_class:
-        mock_session = AsyncMock()
-        mock_session_class.return_value.__aenter__.return_value = mock_session
+    # Create a proper async context manager mock for error case
+    mock_response = AsyncMock()
+    mock_response.status = 500
+    mock_response.text.return_value = "Internal Server Error"
 
-        mock_response = AsyncMock()
-        mock_response.status = 500
-        mock_response.text.return_value = "Internal Server Error"
+    # Create a mock for the post context manager
+    mock_post_cm = AsyncMock()
+    mock_post_cm.__aenter__.return_value = mock_response
 
-        mock_post_context_manager = AsyncMock()
-        mock_post_context_manager.__aenter__.return_value = mock_response
-        mock_session.post.return_value = mock_post_context_manager
+    # Create a mock session
+    mock_session = AsyncMock()
+    mock_session.post.return_value = mock_post_cm
+
+    # Create a mock ClientSession class that returns our session when used as context manager
+    mock_client_session_cm = AsyncMock()
+    mock_client_session_cm.__aenter__.return_value = mock_session
+
+    with patch("aiohttp.ClientSession") as MockClientSession:
+        MockClientSession.return_value = mock_client_session_cm
 
         with pytest.raises(RuntimeError) as exc_info:
             await transport.send(payload)
@@ -77,24 +95,33 @@ async def test_bridge_backend_error_handling():
 @pytest.mark.asyncio
 async def test_openrouter_backend_payload():
     """Test OpenRouterTransport payload construction."""
+    from unittest.mock import AsyncMock, patch
+
     transport = OpenRouterTransport(api_key="test-key", model="test-model")
 
     payload = {"messages": [{"role": "user", "content": "User message"}]}
 
-    # Mock the aiohttp session
-    with patch("aiohttp.ClientSession") as mock_session_class:
-        mock_session = AsyncMock()
-        mock_session_class.return_value.__aenter__.return_value = mock_session
+    # Create a proper async context manager mock
+    mock_response = AsyncMock()
+    mock_response.status = 200
+    mock_response.json.return_value = {
+        "choices": [{"message": {"content": "Response"}}]
+    }
 
-        mock_response = AsyncMock()
-        mock_response.status = 200
-        mock_response.json.return_value = {
-            "choices": [{"message": {"content": "Response"}}]
-        }
+    # Create a mock for the post context manager
+    mock_post_cm = AsyncMock()
+    mock_post_cm.__aenter__.return_value = mock_response
 
-        mock_post_context_manager = AsyncMock()
-        mock_post_context_manager.__aenter__.return_value = mock_response
-        mock_session.post.return_value = mock_post_context_manager
+    # Create a mock session
+    mock_session = AsyncMock()
+    mock_session.post.return_value = mock_post_cm
+
+    # Create a mock ClientSession class that returns our session when used as context manager
+    mock_client_session_cm = AsyncMock()
+    mock_client_session_cm.__aenter__.return_value = mock_session
+
+    with patch("aiohttp.ClientSession") as MockClientSession:
+        MockClientSession.return_value = mock_client_session_cm
 
         await transport.send(payload)
 

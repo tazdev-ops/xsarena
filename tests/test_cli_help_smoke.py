@@ -1,5 +1,4 @@
 from typer.testing import CliRunner
-
 from xsarena.cli.main import app
 
 runner = CliRunner()

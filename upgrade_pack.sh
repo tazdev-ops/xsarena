@@ -93,7 +93,7 @@ txt = re.sub(r"app\s*=\s*web\.Application\(\)", "app = web.Application(middlewar
 
 # Ensure OPTIONS routes exist (simple responders; headers via middleware)
 if " @routes.options(\"/v1/chat/completions\")" not in txt:
-    txt = txt.replace(" @routes.post(\"/v1/chat/completions\")", 
+    txt = txt.replace(" @routes.post(\"/v1/chat/completions\")",
                       " @routes.options(\"/v1/chat/completions\")\nasync def options_handler(_request):\n    return web.Response()\n\n"
                       " @routes.options(\"/push_response\")\nasync def options_handler_push(_request):\n    return web.Response()\n\n"
                       " @routes.options(\"/health\")\nasync def options_handler_health(_request):\n    return web.Response()\n\n"

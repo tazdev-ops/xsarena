@@ -326,6 +326,40 @@ def gc(
     typer.echo(f"Deleted {deleted} job(s)")
 
 
+@app.command("clone")
+def clone(job_id: str, new_name: str = typer.Option("", "--name", "-n")):
+    """Clone a job directory into a new job with a fresh id."""
+    base = Path(".xsarena") / "jobs"
+    src = base / job_id
+    if not src.exists():
+        typer.echo(f"Not found: {job_id}", err=True)
+        raise typer.Exit(1)
+    import uuid
+
+    new_id = uuid.uuid4().hex
+    dst = base / new_id
+    try:
+        shutil.copytree(src, dst)
+        # Rewrite job.json with new id and name suffix
+        job_json = dst / "job.json"
+        if job_json.exists():
+            import json
+            import time
+
+            data = json.loads(job_json.read_text(encoding="utf-8"))
+            data["id"] = new_id
+            data["name"] = new_name or (data.get("name", "") + " (clone)")
+            data["created_at"] = data.get("created_at") or time.strftime(
+                "%Y-%m-%dT%H:%M:%S"
+            )
+            data["updated_at"] = time.strftime("%Y-%m-%dT%H:%M:%S")
+            job_json.write_text(json.dumps(data, indent=2), encoding="utf-8")
+        typer.echo(f"✓ Cloned {job_id} → {new_id}")
+    except Exception as e:
+        typer.echo(f"Clone failed: {e}", err=True)
+        raise typer.Exit(1)
+
+
 @app.command("rm")
 def rm(job_id: str, yes: bool = typer.Option(False, "--yes")):
     """Remove a specific job directory."""

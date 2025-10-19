@@ -82,7 +82,18 @@ def append_file(
 async def run_cmd(cmd: List[str], timeout: int = 30) -> Dict[str, str]:
     """Run a command with a safety allowlist and timeout."""
     # Minimal allowlist to avoid destructive actions
-    ALLOW = {"pytest", "ruff", "black", "ls", "cat", "git", "mypy", "echo", "python", "pip"}
+    ALLOW = {
+        "pytest",
+        "ruff",
+        "black",
+        "ls",
+        "cat",
+        "git",
+        "mypy",
+        "echo",
+        "python",
+        "pip",
+    }
     GIT_SAFE = {"status", "diff", "log", "show"}
     if not cmd:
         return {"returncode": -1, "stdout": "", "stderr": "No command provided"}
@@ -93,7 +104,11 @@ async def run_cmd(cmd: List[str], timeout: int = 30) -> Dict[str, str]:
         # deny potentially destructive subcommands by default
         sub = cmd[1] if len(cmd) > 1 else "status"
         if sub not in GIT_SAFE:
-            return {"returncode": -1, "stdout": "", "stderr": f"Blocked git subcommand: {sub}"}
+            return {
+                "returncode": -1,
+                "stdout": "",
+                "stderr": f"Blocked git subcommand: {sub}",
+            }
 
     try:
         process = await asyncio.create_subprocess_exec(

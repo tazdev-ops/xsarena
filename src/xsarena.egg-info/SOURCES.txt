@@ -1,5 +1,6 @@
 .gitignore
 .pre-commit-config.yaml
+.snapshot.toml
 CHANGELOG.md
 COMMANDS_REFERENCE.md
 CONTRIBUTING.md
@@ -49,6 +50,7 @@ directives/style.fun_overlays3.md
 directives/style.history_overlays.md
 directives/style.kasravi_oliver.bilingual_en-fa.md
 directives/style.kasravi_oliver.en.md
+directives/style.lossless.md
 directives/style.modes_overlays.md
 directives/style.modes_overlays2.md
 directives/style.overlays.md
@@ -216,6 +218,10 @@ directives/prompt/timeline_analytic.json.md
 directives/quickref/agent_quickref.bilingual.md
 directives/quickref/agent_quickref.compressed.md
 directives/quickref/agent_quickref.md
+directives/roles/bilingual.md
+directives/roles/chad.md
+directives/roles/lossless.md
+directives/roles/policy.md
 directives/roles/role.analogy_engineer.md
 directives/roles/role.backwards_planner.md
 directives/roles/role.bayesian_reasoner.md
@@ -395,6 +401,7 @@ directives/style/reasoning_overlays.md
 directives/style/style.workshop_overlays.md
 directives/style/style.writing_clinic_overlays.md
 directives/style/technical_manual.md
+directives/system/plan_from_seeds.md
 docs/AGENT.md
 docs/AGENT_MANUAL.md
 docs/Bridge.md
@@ -520,6 +527,8 @@ src/xsarena.egg-info/requires.txt
 src/xsarena.egg-info/top_level.txt
 src/xsarena/bridge_v2/__init__.py
 src/xsarena/bridge_v2/api_server.py
+src/xsarena/bridge_v2/job_service.py
+src/xsarena/bridge_v2/static/console.html
 src/xsarena/cli/__init__.py
 src/xsarena/cli/cmds_adapt.py
 src/xsarena/cli/cmds_agent.py
@@ -559,6 +568,7 @@ src/xsarena/cli/cmds_settings.py
 src/xsarena/cli/cmds_snapshot.py
 src/xsarena/cli/cmds_study.py
 src/xsarena/cli/cmds_tools.py
+src/xsarena/cli/cmds_unified_settings.py
 src/xsarena/cli/cmds_upgrade.py
 src/xsarena/cli/cmds_workshop.py
 src/xsarena/cli/context.py
@@ -618,17 +628,20 @@ src/xsarena/modes/study.py
 src/xsarena/router/__init__.py
 src/xsarena/utils/__init__.py
 src/xsarena/utils/chapter_splitter.py
-src/xsarena/utils/circuit_breaker.py
 src/xsarena/utils/continuity.py
 src/xsarena/utils/coverage.py
+src/xsarena/utils/density.py
 src/xsarena/utils/directives.py
 src/xsarena/utils/discovery.py
 src/xsarena/utils/extractors.py
+src/xsarena/utils/flatpack_txt.py
 src/xsarena/utils/io.py
 src/xsarena/utils/metrics.py
 src/xsarena/utils/prompt_cache.py
 src/xsarena/utils/secrets_scanner.py
+src/xsarena/utils/snapshot_simple.py
 src/xsarena/utils/style_lint.py
+src/xsarena/utils/text.py
 src/xsarena/utils/token_estimator.py
 tests/conftest.py
 tests/test_backends_payloads.py
@@ -637,6 +650,7 @@ tests/test_bridge_v2_health.py
 tests/test_chunking.py
 tests/test_cli_commands.py
 tests/test_cli_help_smoke.py
+tests/test_config_model.py
 tests/test_continuity_analyzer.py
 tests/test_control_channel.py
 tests/test_core_logic.py
@@ -644,13 +658,16 @@ tests/test_coverage_map.py
 tests/test_discovery_roles_overlays.py
 tests/test_endpoints.py
 tests/test_extract_checklists.py
+tests/test_flatpack_cli.py
 tests/test_health_transport.py
 tests/test_implementation.py
 tests/test_integration_cli.py
 tests/test_jobs_next_immediate.py
+tests/test_jobstore_events_parsing.py
 tests/test_macros_import.py
 tests/test_modes_imports.py
 tests/test_orchestrator_composition.py
+tests/test_orchestrator_null.py
 tests/test_output_push_repetition.py
 tests/test_playground_import.py
 tests/test_preview_autorun.py
@@ -659,6 +676,7 @@ tests/test_prompt.py
 tests/test_reading_overlay.py
 tests/test_refactored_features.py
 tests/test_runner_anchor.py
+tests/test_snapshot_simple.py
 tests/test_state_persistence.py
 tests/test_style_lint.py
 tests/test_thin_core.py
@@ -669,5 +687,7 @@ tests/fixtures/book.md
 tests/fixtures/book_with_checklist.md
 tests/fixtures/outline.md
 tools/dedupe_by_hash.py
+tools/flatpack_txt.py
 tools/id_updater.py
 tools/mock_userscript.py
+tools/snapshot.py

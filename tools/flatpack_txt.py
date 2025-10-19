@@ -6,30 +6,45 @@ import fnmatch
 import glob
 import hashlib
 import io
-import os
 import subprocess
 import sys
 from pathlib import Path
-from typing import Iterable, List, Optional, Sequence, Set, Tuple
+from typing import List, Optional, Sequence, Set, Tuple
+
 
 # Optional redact
 def _load_redact():
     try:
-        from xsarena.core.redact import redact as _redact  # if running inside the project
+        from xsarena.core.redact import (
+            redact as _redact,
+        )
+
         return _redact
     except Exception:
         import re
+
         patterns = [
-            (re.compile(r"(?i)(api[_-]?key|secret|token|password)\s*[:=]\s*['\"][^'\"\s]{6,}['\"]"), r"\1=\"[REDACTED]\""),
-            (re.compile(r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b"), "[REDACTED_EMAIL]"),
+            (
+                re.compile(
+                    r"(?i)(api[_-]?key|secret|token|password)\s*[:=]\s*['\"][^'\"\s]{6,}['\"]"
+                ),
+                r"\1=\"[REDACTED]\"",
+            ),
+            (
+                re.compile(r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b"),
+                "[REDACTED_EMAIL]",
+            ),
             (re.compile(r"\b(?:\d{1,3}\.){3}\d{1,3}\b"), "[REDACTED_IP]"),
         ]
+
         def _fallback(text: str) -> str:
             out = text or ""
             for rx, repl in patterns:
                 out = rx.sub(repl, out)
             return out
+
         return _fallback
+
 
 REDACT = _load_redact()
 
@@ -40,9 +55,19 @@ DEFAULT_INCLUDE = [
     "src/xsarena/**",
 ]
 DEFAULT_EXCLUDE = [
-    ".git/**", "venv/**", ".venv/**", "__pycache__/**", ".pytest_cache/**",
-    ".mypy_cache/**", ".ruff_cache/**", ".cache/**", "*.pyc", "logs/**",
-    ".xsarena/tmp/**", "*.egg-info/**", ".ipynb_checkpoints/**",
+    ".git/**",
+    "venv/**",
+    ".venv/**",
+    "__pycache__/**",
+    ".pytest_cache/**",
+    ".mypy_cache/**",
+    ".ruff_cache/**",
+    ".cache/**",
+    "*.pyc",
+    "logs/**",
+    ".xsarena/tmp/**",
+    "*.egg-info/**",
+    ".ipynb_checkpoints/**",
 ]
 # XSArena-specific priority ordering (tune as needed)
 PINNED_FIRST = [
@@ -65,11 +90,13 @@ PINNED_FIRST = [
     "src/xsarena/bridge_v2/api_server.py",
 ]
 
+
 def _posix(p: Path) -> str:
     try:
         return p.as_posix()
     except Exception:
         return str(p)
+
 
 def _expand_includes(includes: Sequence[str]) -> Set[Path]:
     files: Set[Path] = set()
@@ -93,6 +120,7 @@ def _expand_includes(includes: Sequence[str]) -> Set[Path]:
                         files.add(f.resolve())
     return files
 
+
 def _is_excluded(path: str, exclude_patterns: Sequence[str]) -> bool:
     p = path.replace("\\", "/")
     for pat in exclude_patterns:
@@ -100,9 +128,12 @@ def _is_excluded(path: str, exclude_patterns: Sequence[str]) -> bool:
             return True
     return False
 
+
 def _git_ls_files(args: List[str]) -> Set[Path]:
     try:
-        cp = subprocess.run(["git"] + args, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, text=True)
+        cp = subprocess.run(
+            ["git"] + args, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, text=True
+        )
         if cp.returncode != 0:
             return set()
         out = set()
@@ -117,6 +148,7 @@ def _git_ls_files(args: List[str]) -> Set[Path]:
     except Exception:
         return set()
 
+
 def _sha256(path: Path) -> str:
     h = hashlib.sha256()
     try:
@@ -127,6 +159,7 @@ def _sha256(path: Path) -> str:
     except Exception:
         return ""
 
+
 def _read_truncated(path: Path, max_bytes: int) -> Tuple[str, bool]:
     try:
         size = path.stat().st_size
@@ -136,9 +169,13 @@ def _read_truncated(path: Path, max_bytes: int) -> Tuple[str, bool]:
             return data.decode("utf-8", errors="replace"), False
         else:
             data = path.read_bytes()[:limit]
-            return data.decode("utf-8", errors="replace") + "\n--- TRUNCATED ---\n", True
+            return (
+                data.decode("utf-8", errors="replace") + "\n--- TRUNCATED ---\n",
+                True,
+            )
     except Exception as e:
         return f"\n--- READ ERROR: {e} ---\n", False
+
 
 def _language_tag(path: Path) -> str:
     ext = path.suffix.lower()
@@ -150,6 +187,7 @@ def _language_tag(path: Path) -> str:
         ".yaml": "yaml",
         ".json": "json",
     }.get(ext, "")
+
 
 def flatten_txt(
     out_path: Path,
@@ -192,7 +230,9 @@ def flatten_txt(
             pinned.append(f)
         else:
             rest.append(f)
-    rest.sort(key=lambda p: _posix(p.relative_to(base)) if p.is_absolute() else _posix(p))
+    rest.sort(
+        key=lambda p: _posix(p.relative_to(base)) if p.is_absolute() else _posix(p)
+    )
     ordered = []
     # Add pinned in declared order if present
     for pth in PINNED_FIRST:
@@ -257,15 +297,38 @@ def flatten_txt(
     out_path.write_text(buf.getvalue(), encoding="utf-8")
     return out_path, notes
 
+
 def main(argv: Optional[Sequence[str]] = None) -> int:
-    ap = argparse.ArgumentParser(description="Flatten a repo into a single LLM-friendly .txt file.")
+    ap = argparse.ArgumentParser(
+        description="Flatten a repo into a single LLM-friendly .txt file."
+    )
     ap.add_argument("--out", "-o", default="repo_flat.txt")
-    ap.add_argument("--include", "-I", action="append", default=None, help="Glob to include (repeatable)")
-    ap.add_argument("--exclude", "-X", action="append", default=None, help="Glob to exclude (repeatable)")
-    ap.add_argument("--max-per-file", type=int, default=220_000, help="Max bytes per file")
+    ap.add_argument(
+        "--include",
+        "-I",
+        action="append",
+        default=None,
+        help="Glob to include (repeatable)",
+    )
+    ap.add_argument(
+        "--exclude",
+        "-X",
+        action="append",
+        default=None,
+        help="Glob to exclude (repeatable)",
+    )
+    ap.add_argument(
+        "--max-per-file", type=int, default=220_000, help="Max bytes per file"
+    )
     ap.add_argument("--total-max", type=int, default=5_000_000, help="Total max bytes")
-    ap.add_argument("--git-tracked", action="store_true", help="Use git ls-files as baseline")
-    ap.add_argument("--git-include-untracked", action="store_true", help="Include git untracked files")
+    ap.add_argument(
+        "--git-tracked", action="store_true", help="Use git ls-files as baseline"
+    )
+    ap.add_argument(
+        "--git-include-untracked",
+        action="store_true",
+        help="Include git untracked files",
+    )
     ap.add_argument("--no-redact", action="store_true", help="Disable redaction")
     ap.add_argument("--no-repo-map", action="store_true", help="Omit repo map header")
     ns = ap.parse_args(argv)
@@ -290,6 +353,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         print(f"[note] {n}")
     print(f"[flatpack] wrote → {out}")
     return 0
+
 
 if __name__ == "__main__":
     sys.exit(main())

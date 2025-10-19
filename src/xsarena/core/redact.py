@@ -36,6 +36,11 @@ REDACTION_PATTERNS = [
         re.compile(r"https?://[^\s<>\"']*(?:[?&](?:[A-Za-z0-9_-]+=[^&\s<>\"']*)*)*"),
         "[REDACTED_URL]",
     ),
+    # JWT tokens
+    (
+        re.compile(r"\beyJ[A-Za-z0-9_-]*\.[A-Za-z0-9_-]*\.[A-Za-z0-9_-]*\b"),
+        "[REDACTED_JWT]",
+    ),
     # Long alphanumeric strings (likely tokens)
     (re.compile(r"\b[A-Za-z0-9]{30,}\b"), "[REDACTED_LONG_TOKEN]"),
     # AWS-style access keys (multiple formats)

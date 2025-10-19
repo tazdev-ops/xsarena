@@ -89,6 +89,7 @@ class SessionState:
             "smart_min_enabled": self.smart_min_enabled,
             "outline_first_enabled": self.outline_first_enabled,
             "semantic_anchor_enabled": self.semantic_anchor_enabled,
+            "reading_overlay_on": self.reading_overlay_on,
             "lossless_enforce": self.lossless_enforce,
             "target_density": self.target_density,
             "max_adverbs_per_k": self.max_adverbs_per_k,

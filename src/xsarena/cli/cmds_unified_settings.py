@@ -23,6 +23,18 @@ def settings_show(ctx: typer.Context):
         f"  API Key: {'Set' if cli.config.api_key else 'Not set (use environment variable)'}"
     )
 
+    # Show current session overrides (if any differ from config)
+    typer.echo("\n=== Current Session Values (overrides) ===")
+    typer.echo(
+        f"  Backend: {cli.state.backend} {'(OVERRIDE)' if cli.state.backend != cli.config.backend else ''}"
+    )
+    typer.echo(
+        f"  Model: {cli.state.model} {'(OVERRIDE)' if cli.state.model != cli.config.model else ''}"
+    )
+    typer.echo(
+        f"  Window Size: {cli.state.window_size} {'(OVERRIDE)' if cli.state.window_size != cli.config.window_size else ''}"
+    )
+
     # Show controls settings
     typer.echo("\n=== Controls Settings (utils settings) ===")
     typer.echo(f"  Output min chars: {cli.state.output_min_chars}")

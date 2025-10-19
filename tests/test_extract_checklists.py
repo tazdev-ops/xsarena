@@ -3,7 +3,7 @@
 import os
 import tempfile
 
-from src.xsarena.utils.extractors import (
+from xsarena.utils.extractors import (
     ChecklistItem,
     extract_checklists,
     group_checklist_items_by_section,
@@ -160,7 +160,7 @@ def test_extract_checklists_from_file():
         with open(file_path, "w", encoding="utf-8") as f:
             f.write(content)
 
-        from src.xsarena.utils.extractors import extract_checklists_from_file
+        from xsarena.utils.extractors import extract_checklists_from_file
 
         items = extract_checklists_from_file(file_path)
 

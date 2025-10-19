@@ -53,7 +53,7 @@ class MetricsCollector:
             self.tokens_used_total = Counter(
                 "xsarena_tokens_used_total",
                 "Total tokens used by XSArena",
-                ["model", "type"],  # type: input/output
+                ["model", "type"],  # Labels: model and type (input/output)
             )
             self.costs_total = Counter(
                 "xsarena_costs_total", "Total estimated costs in USD", ["model"]

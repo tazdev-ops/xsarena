@@ -39,7 +39,7 @@ XSArena is a human writer workflow tool that bridges to LMArena for long-form co
 ## Quick Start
 
 - **Install**: `pip install -e ".[dev]"`
-- **Start bridge**: `xsarena service start-bridge-v2`
+- **Start bridge**: `xsarena ops service start-bridge-v2`
 - **First run**: `xsarena run book "Hello World" --length standard --span medium`
 
 ## Essential Workflows
@@ -67,13 +67,13 @@ xsarena interactive start
 Generate educational materials from your content:
 ```bash
 # Create flashcards from a text file
-xsarena study flashcards path/to/content.txt
+xsarena study generate flashcards path/to/content.txt
 
 # Generate a quiz
-xsarena study quiz path/to/content.txt --num 20
+xsarena study generate quiz path/to/content.txt --num 20
 
 # Create a glossary
-xsarena study glossary path/to/content.txt
+xsarena study generate glossary path/to/content.txt
 ```
 
 ### Content Processing

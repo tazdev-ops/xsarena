@@ -196,7 +196,9 @@ def run_book(
         resumable = orchestrator.job_runner.find_resumable_job_by_output(target_out)
         if resumable and not (resume or overwrite):
             typer.echo(f"Resumable job exists for {target_out}: {resumable}", err=True)
-            typer.echo("Use --resume to continue or --overwrite to start fresh.", err=True)
+            typer.echo(
+                "Use --resume to continue or --overwrite to start fresh.", err=True
+            )
             raise typer.Exit(2)
     except Exception:
         # If anything goes wrong here, don't block the run; just proceed
@@ -220,13 +222,13 @@ def run_book(
 
         job_runner = JobManager()
         asyncio.run(job_runner.wait_for_job_completion(job_id))
-        typer.echo(
-            f"[run] done → {out_path or f'./books/{subject.replace(' ', '_')}.final.md'}"
-        )
+        slug = subject.replace(" ", "_")
+        default_out = f"./books/{slug}.final.md"
+        typer.echo(f"[run] done → {out_path or default_out}")
     else:
-        typer.echo(
-            f"[run] done → {out_path or f'./books/{subject.replace(' ', '_')}.final.md'}"
-        )
+        slug = subject.replace(" ", "_")
+        default_out = f"./books/{slug}.final.md"
+        typer.echo(f"[run] done → {out_path or default_out}")
 
 
 @app.command("from-recipe")
@@ -234,6 +236,14 @@ def run_from_recipe(
     file: str = typer.Argument(..., help="Recipe file (.yml/.yaml/.json)"),
     apply: bool = typer.Option(
         True, "--apply/--dry-run", help="Execute job (default: execute)"
+    ),
+    resume: bool = typer.Option(
+        None,
+        "--resume/--no-resume",
+        help="Resume existing job if found (default: ask if resumable job exists)",
+    ),
+    overwrite: bool = typer.Option(
+        False, "--overwrite", help="Start a new job even if one exists for same output"
     ),
 ):
     """Run a job from recipe file (replaces 'jobs run')."""
@@ -355,7 +365,9 @@ def run_from_recipe(
         resumable = orchestrator.job_runner.find_resumable_job_by_output(out_path)
         if resumable and not (resume or overwrite):
             typer.echo(f"Resumable job exists for {out_path}: {resumable}", err=True)
-            typer.echo("Use --resume to continue or --overwrite to start fresh.", err=True)
+            typer.echo(
+                "Use --resume to continue or --overwrite to start fresh.", err=True
+            )
             raise typer.Exit(2)
     except Exception:
         # If anything goes wrong here, don't block the run; just proceed
@@ -829,10 +841,16 @@ def run_replay(
 
     # Gate implicit resume: fail unless --resume or --overwrite when a resumable exists
     try:
-        resumable = orchestrator.job_runner.find_resumable_job_by_output(run_spec.out_path)
+        resumable = orchestrator.job_runner.find_resumable_job_by_output(
+            run_spec.out_path
+        )
         if resumable and not (resume or overwrite):
-            typer.echo(f"Resumable job exists for {run_spec.out_path}: {resumable}", err=True)
-            typer.echo("Use --resume to continue or --overwrite to start fresh.", err=True)
+            typer.echo(
+                f"Resumable job exists for {run_spec.out_path}: {resumable}", err=True
+            )
+            typer.echo(
+                "Use --resume to continue or --overwrite to start fresh.", err=True
+            )
             raise typer.Exit(2)
     except Exception:
         # If anything goes wrong here, don't block the run; just proceed
@@ -849,13 +867,13 @@ def run_replay(
 
         job_runner = JobManager()
         asyncio.run(job_runner.wait_for_job_completion(job_id))
-        typer.echo(
-            f"[run] done → {run_spec.out_path or f'./books/{run_spec.subject.replace(' ', '_')}.final.md'}"
-        )
+        slug = run_spec.subject.replace(" ", "_")
+        default_out = f"./books/{slug}.final.md"
+        typer.echo(f"[run] done → {run_spec.out_path or default_out}")
     else:
-        typer.echo(
-            f"[run] done → {run_spec.out_path or f'./books/{run_spec.subject.replace(' ', '_')}.final.md'}"
-        )
+        slug = run_spec.subject.replace(" ", "_")
+        default_out = f"./books/{slug}.final.md"
+        typer.echo(f"[run] done → {run_spec.out_path or default_out}")
 
 
 @app.command("continue")
@@ -945,7 +963,9 @@ def run_continue(
         resumable = orchestrator.job_runner.find_resumable_job_by_output(str(p))
         if resumable and not (resume or overwrite):
             typer.echo(f"Resumable job exists for {str(p)}: {resumable}", err=True)
-            typer.echo("Use --resume to continue or --overwrite to start fresh.", err=True)
+            typer.echo(
+                "Use --resume to continue or --overwrite to start fresh.", err=True
+            )
             raise typer.Exit(2)
     except Exception:
         # If anything goes wrong here, don't block the run; just proceed

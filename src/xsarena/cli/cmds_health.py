@@ -5,7 +5,6 @@ from __future__ import annotations
 import contextlib
 import json
 import re
-import subprocess
 import time
 from datetime import datetime, timedelta
 from pathlib import Path
@@ -261,10 +260,47 @@ def _save_ptr(d: dict):
 
 
 def _maybe_merge():
-    sh = Path("scripts/merge_session_rules.sh")
-    if sh.exists():
-        with contextlib.suppress(Exception):
-            subprocess.run(["bash", str(sh)], check=False)
+    """
+    Pure Python replacement for merge_session_rules.sh
+    Reads all *.md under directives/_rules/sources/, concatenates with separators
+    """
+    sources_dir = Path("directives/_rules/sources")
+    merged_file = Path("directives/_rules/rules.merged.md")
+
+    if sources_dir.exists():
+        # Collect all .md files in the sources directory
+        md_files = list(sources_dir.glob("*.md"))
+        if md_files:
+            merged_content = []
+            for md_file in sorted(md_files):
+                try:
+                    content = md_file.read_text(encoding="utf-8")
+                    merged_content.append(content)
+                    merged_content.append("\n---\n\n")  # separator
+                except Exception:
+                    continue  # skip files that can't be read
+
+            # Write the merged content
+            if merged_content:
+                # Remove the last separator
+                merged_content = merged_content[:-1] if merged_content else []
+                merged_text = "".join(merged_content)
+                merged_file.parent.mkdir(parents=True, exist_ok=True)
+                merged_file.write_text(merged_text, encoding="utf-8")
+                return True  # Successfully merged in Python
+    return False  # No merge happened
+
+
+@app.command("merge-rules")
+def merge_rules():
+    """
+    Merge all rules from directives/_rules/sources/ into directives/_rules/rules.merged.md
+    """
+    success = _maybe_merge()
+    if success:
+        typer.echo("✓ Merged rules to directives/_rules/rules.merged.md")
+    else:
+        typer.echo("⚠ No source rules found to merge")
 
 
 @app.command("read")

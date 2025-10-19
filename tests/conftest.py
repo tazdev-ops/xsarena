@@ -2,7 +2,6 @@ from typing import Any, Dict, List
 from unittest.mock import patch
 
 import pytest
-
 from xsarena.core.backends.transport import BackendTransport
 
 

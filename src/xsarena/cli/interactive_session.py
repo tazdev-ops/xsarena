@@ -2,6 +2,7 @@
 
 import asyncio
 import shlex
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 import requests
@@ -13,6 +14,8 @@ from ..core.profiles import load_profiles
 from ..core.v2_orchestrator.orchestrator import Orchestrator
 from ..core.v2_orchestrator.specs import LengthPreset, RunSpecV2, SpanPreset
 from .context import CLIContext
+from .dispatch import dispatch_command
+from .registry import app
 
 
 class InteractiveSession:
@@ -23,6 +26,10 @@ class InteractiveSession:
         self.console = Console()
         self.orchestrator = Orchestrator()
         self.transport = create_backend(ctx.state.backend)
+
+        # Busy guard to prevent overlapping command runs
+        self._command_busy = False
+        self._executor = ThreadPoolExecutor(max_workers=1)
 
         # Load all available profiles and known styles
         self.profiles = load_profiles()
@@ -56,6 +63,11 @@ class InteractiveSession:
             "prompt.list": self.cmd_prompt_list,
             "prompt.profile": self.cmd_prompt_profile,
             "prompt.preview": self.cmd_prompt_preview,
+            # Power commands
+            "run.inline": self.cmd_run_inline,
+            "quickpaste": self.cmd_quickpaste,
+            "checkpoint.save": self.cmd_ckpt_save,
+            "checkpoint.load": self.cmd_ckpt_load,
             "exit": lambda args: exit(0),
         }
 
@@ -103,6 +115,29 @@ class InteractiveSession:
         parts = cmd_line.split(maxsplit=1)
         command_name = parts[0].lower()
         args_str = parts[1] if len(parts) > 1 else ""
+
+        # Check if this is a Typer command (not starting with a known local command)
+        if command_name not in self.commands and not command_name.startswith("help"):
+            # This is a Typer command, dispatch it in background thread
+            if self._command_busy:
+                self.console.print("[yellow]Command busy, please wait...[/yellow]")
+                return
+
+            self._command_busy = True
+            try:
+                # Dispatch the command to the Typer app in a background thread
+                loop = asyncio.get_event_loop()
+                exit_code = await loop.run_in_executor(
+                    self._executor, dispatch_command, app, cmd_line, self.ctx
+                )
+
+                if exit_code != 0:
+                    self.console.print(
+                        f"[red]Command failed with exit code: {exit_code}[/red]"
+                    )
+            finally:
+                self._command_busy = False
+            return
 
         try:
             args = shlex.split(args_str)
@@ -164,6 +199,10 @@ Available commands:
   /prompt.list - List available profiles and styles
   /prompt.preview <recipe> - Print system_text preview from recipe
   /config.show - Show current configuration
+  /run.inline - Paste and run a multi-line YAML recipe (end with EOF)
+  /quickpaste - Paste multiple /commands (end with EOF)
+  /checkpoint.save [name] - Save current session state to checkpoint
+  /checkpoint.load [name] - Load session state from checkpoint
   /exit - Exit the interactive session
         """
         self.console.print(help_text)
@@ -713,6 +752,116 @@ Available commands:
         self.console.print(f"[bold]System Text Preview from {file_path}:[/bold]")
         self.console.print(system_text)
         self.console.print(f"[dim]Length: {len(system_text)} characters[/dim]")
+
+    async def cmd_run_inline(self, args: list):
+        """Read a multi-line YAML recipe until a line 'EOF' and run it."""
+        self.console.print("[dim]Paste YAML recipe. End with a line: EOF[/dim]")
+        buf = []
+        while True:
+            try:
+                line = input()
+            except EOFError:
+                break
+            if line.strip() == "EOF":
+                break
+            buf.append(line)
+        recipe = "\n".join(buf)
+        if not recipe.strip():
+            self.console.print("[red]No content provided[/red]")
+            return
+        # Write to temp file and call run_from_recipe via orchestrator
+        from tempfile import NamedTemporaryFile
+
+        import yaml
+
+        with NamedTemporaryFile(
+            "w", delete=False, suffix=".yml", encoding="utf-8"
+        ) as tf:
+            tf.write(recipe)
+            path = tf.name
+        self.console.print(f"[dim]Recipe → {path}[/dim]")
+        try:
+            # Minimal loader: parse subject,length,span,overlays
+            data = yaml.safe_load(recipe) or {}
+            subject = data.get("subject") or "inline"
+            length = data.get("length", "long")
+            span = data.get("span", "book")
+            overlays = data.get("overlays") or getattr(
+                self.ctx.state, "overlays_active", ["narrative", "no_bs"]
+            )
+            out_path = (data.get("io") or {}).get("outPath") or ""
+            run_spec = RunSpecV2(
+                subject=subject,
+                length=LengthPreset(length),
+                span=SpanPreset(span),
+                overlays=overlays,
+                out_path=out_path,
+            )
+            job_id = await self.orchestrator.run_spec(
+                run_spec, backend_type=self.ctx.state.backend
+            )
+            self.console.print(f"[green]✓ Submitted inline job: {job_id}[/green]")
+        except Exception as e:
+            self.console.print(f"[red]Inline run failed: {e}[/red]")
+
+    async def cmd_quickpaste(self, args: list):
+        """Paste multiple /commands; end with 'EOF'."""
+        self.console.print("[dim]Paste /commands (one per line). End with: EOF[/dim]")
+        lines = []
+        while True:
+            try:
+                line = input()
+            except EOFError:
+                break
+            if line.strip() == "EOF":
+                break
+            lines.append(line.strip())
+        for ln in lines:
+            if not ln:
+                continue
+            if not ln.startswith("/"):
+                self.console.print(f"[yellow]Skipping (not a /command): {ln}[/yellow]")
+                continue
+            await self.handle_command(ln[1:])
+
+    def _ckpt_dir(self) -> Path:
+        p = Path(".xsarena/checkpoints")
+        p.mkdir(parents=True, exist_ok=True)
+        return p
+
+    def _ckpt_path(self, name: str) -> Path:
+        safe = (
+            "".join(c for c in name if c.isalnum() or c in ("-", "_")).strip() or "ckpt"
+        )
+        return self._ckpt_dir() / f"{safe}.json"
+
+    def cmd_ckpt_save(self, args: list):
+        """Save interactive session state to .xsarena/checkpoints/<name>.json"""
+        name = args[0] if args else "session"
+        path = self._ckpt_path(name)
+        try:
+            data = self.ctx.state.to_dict()
+            path.write_text(json.dumps(data, indent=2), encoding="utf-8")
+            self.console.print(f"[green]✓ Saved checkpoint → {path}[/green]")
+        except Exception as e:
+            self.console.print(f"[red]Checkpoint save failed: {e}[/red]")
+
+    def cmd_ckpt_load(self, args: list):
+        """Load interactive session state from .xsarena/checkpoints/<name>.json"""
+        name = args[0] if args else "session"
+        path = self._ckpt_path(name)
+        if not path.exists():
+            self.console.print(f"[red]Not found: {path}[/red]")
+            return
+        try:
+            data = json.loads(path.read_text(encoding="utf-8"))
+            # Update the current state with the loaded data
+            for key, value in data.items():
+                setattr(self.ctx.state, key, value)
+            self.ctx.save()
+            self.console.print(f"[green]✓ Loaded checkpoint ← {path}[/green]")
+        except Exception as e:
+            self.console.print(f"[red]Checkpoint load failed: {e}[/red]")
 
 
 async def start_interactive_session(ctx: CLIContext):

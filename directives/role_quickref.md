@@ -13,7 +13,7 @@
 - **Output**: Q→A ladder (6-12 q's) + verdict
 - **File**: /systemfile directives/role.socratic.md
 
-### Steelman + Synthesis Mediator  
+### Steelman + Synthesis Mediator
 - **Purpose**: Best cases for both sides → synthesis
 - **Output**: Side A, Side B, Synthesis, Risks, Next steps
 - **File**: /systemfile directives/role.steelman.md

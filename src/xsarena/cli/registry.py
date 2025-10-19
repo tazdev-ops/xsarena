@@ -7,7 +7,13 @@ from .cmds_adapt import app as adapt_app
 
 # Import all command modules
 from .cmds_agent import app as agent_app
-from .cmds_analyze import coverage_cmd, readtime_cmd, secrets_cmd, style_lint_cmd
+from .cmds_analyze import (
+    continuity_cmd,
+    coverage_cmd,
+    readtime_cmd,
+    secrets_cmd,
+    style_lint_cmd,
+)
 from .cmds_audio import app as audio_app
 from .cmds_booster import app as booster_app
 from .cmds_chad import app as chad_app
@@ -111,6 +117,7 @@ analyze_app = typer.Typer(
 analyze_app.command("coverage")(coverage_cmd)
 analyze_app.command("style-lint")(style_lint_cmd)
 analyze_app.command("secrets")(secrets_cmd)
+analyze_app.command("continuity")(continuity_cmd)
 analyze_app.command("readtime")(readtime_cmd)
 analyze_app.add_typer(chad_app, name="chad")
 app.add_typer(analyze_app)

@@ -4,6 +4,7 @@ from pathlib import Path
 
 from ..core.engine import Engine
 from ..core.tools import PathJail, append_file, list_dir, read_file, run_cmd, write_file
+from ..utils.project_paths import get_project_root
 
 
 # Load templates directly from directive files
@@ -13,8 +14,8 @@ def _load_directive_content(file_path: str) -> str:
     if Path(file_path).exists():
         return Path(file_path).read_text(encoding="utf-8").strip()
 
-    # Try relative to project root (relative to this file)
-    project_root = Path(__file__).parent.parent.parent.parent
+    # Try relative to project root using robust resolution
+    project_root = get_project_root()
     full_path = project_root / file_path
     if full_path.exists():
         return full_path.read_text(encoding="utf-8").strip()

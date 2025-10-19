@@ -15,6 +15,15 @@ Core content creation workflows.
   - `xsarena run template <template> <subject>` - Run a structured directive
   - `xsarena run replay <manifest>` - Replay a job from a run manifest
 - `xsarena author interactive` - Start an interactive authoring session
+
+### Interactive Session Commands (REPL)
+
+Commands available within the interactive session (use /command format):
+
+- `/run.inline` - Paste and run a multi-line YAML recipe (end with EOF)
+- `/quickpaste` - Paste multiple /commands (end with EOF)
+- `/checkpoint.save [name]` - Save current session state to checkpoint
+- `/checkpoint.load [name]` - Load session state from checkpoint
 - `xsarena author ingest-ack` - Ingest a large document in 'acknowledge' mode with 'OK i/N' handshake loop
 - `xsarena author ingest-synth` - Ingest a large document in 'synthesis' mode with rolling update loop
 - `xsarena author ingest-style` - Ingest a large document in 'style' mode with rolling style profile update loop
@@ -29,6 +38,7 @@ Core content creation workflows.
 - `xsarena author style-nobs` - Enable or disable the no-bullshit (no-bs) language overlay
 - `xsarena author style-reading` - Enable or disable the further reading overlay for the session
 - `xsarena author style-show` - Show currently active overlays
+- `xsarena author style-apply` - Generate content on a new subject using a captured style profile file
 - `xsarena author workshop` - Workshop tools
 - `xsarena author preview` - Preview tools
 - `xsarena author post-process` - Post-processing tools (aliases to utils tools)
@@ -75,7 +85,6 @@ System health, jobs, services, and configuration.
 
 - `xsarena ops service` - Service management
 - `xsarena ops jobs` - Job management
-- `xsarena ops doctor` - System health checks (DEPRECATED → use xsarena ops health ...)
 - `xsarena ops health` - System health, maintenance, and self-healing operations
   - `xsarena ops health fix-run` - Self-heal common configuration/state issues
   - `xsarena ops health sweep` - Purge ephemeral artifacts by TTL
@@ -107,6 +116,10 @@ Essential commands available at the top level.
 - `xsarena run` - Run a book or recipe in authoring mode (alias for `xsarena author run`)
 - `xsarena interactive` - Interactive authoring session (alias for `xsarena author interactive`)
 - `xsarena settings` - Unified settings interface (configuration + controls)
+
+### Deprecated Commands
+
+- `xsarena ops doctor` - System health checks (DEPRECATED → use xsarena ops health ...)
 
 ## Settings Commands
 
@@ -142,6 +155,7 @@ The `xsarena ops jobs` group provides job management:
 - `xsarena ops jobs pause <job_id>` - Pause a running job
 - `xsarena ops jobs resume <job_id>` - Resume a paused job
 - `xsarena ops jobs next <job_id> <hint>` - Send a hint to the next chunk of a job
+- `xsarena ops jobs clone <job_id>` - Clone a job directory into a new job with a fresh id
 
 ## Run Commands
 

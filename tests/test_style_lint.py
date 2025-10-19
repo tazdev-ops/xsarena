@@ -3,7 +3,7 @@
 import os
 import tempfile
 
-from src.xsarena.utils.style_lint import (
+from xsarena.utils.style_lint import (
     LintIssue,
     analyze_style,
     generate_style_report,

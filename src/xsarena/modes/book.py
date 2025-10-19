@@ -5,6 +5,7 @@ from typing import Dict, Optional
 
 from ..core.backends.transport import BackendTransport
 from ..core.state import SessionState
+from ..utils.project_paths import get_project_root
 
 
 # Load templates directly from directive files
@@ -14,8 +15,8 @@ def _load_directive_content(file_path: str) -> str:
     if Path(file_path).exists():
         return Path(file_path).read_text(encoding="utf-8").strip()
 
-    # Try relative to project root (relative to this file)
-    project_root = Path(__file__).parent.parent.parent.parent
+    # Try relative to project root using robust resolution
+    project_root = get_project_root()
     full_path = project_root / file_path
     if full_path.exists():
         return full_path.read_text(encoding="utf-8").strip()
@@ -85,15 +86,11 @@ USER_PROMPTS = {
 
 def _load_output_budget_addendum() -> str:
     """Load the output budget addendum from directive file or return default."""
-    from pathlib import Path
+    from ..utils.project_paths import get_project_root
 
-    # Try to load from directive file
-    budget_path = (
-        Path(__file__).parent.parent.parent.parent
-        / "directives"
-        / "prompt"
-        / "output_budget.md"
-    )
+    # Try to load from directive file using robust project root resolution
+    project_root = get_project_root()
+    budget_path = project_root / "directives" / "prompt" / "output_budget.md"
 
     if budget_path.exists():
         try:
