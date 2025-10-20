@@ -1,1 +1,8 @@
-{ "model": "override-from-session" }
+{
+  "backend": "bridge",
+  "model": "from-session",
+  "output_min_chars": 4500,
+  "history": [],
+  "anchors": [],
+  "continuation_mode": "anchor"
+}

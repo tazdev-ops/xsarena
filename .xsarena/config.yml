@@ -1,2 +1,3 @@
 backend: bridge
-model: default
+model: from-config
+output_min_chars: 3000
