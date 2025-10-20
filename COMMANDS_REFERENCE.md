@@ -1,4 +1,5 @@
 # XSArena Command Reference
+<!-- This file is the source of truth for CLI usage; regenerate via scripts/gen_docs.sh -->
 
 This document provides a comprehensive reference for all XSArena commands, organized by their semantic groups.
 

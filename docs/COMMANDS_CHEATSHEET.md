@@ -1,5 +1,9 @@
 # Commands Cheatsheet
 
+<!-- This file is the source of truth for CLI usage; regenerate via scripts/gen_docs.sh -->
+
+# Commands Cheatsheet
+
 ## Bridge and health
 - Start bridge:
   - xsarena ops service start-bridge-v2
