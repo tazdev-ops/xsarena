@@ -1,8 +1,8 @@
-
- Usage: python -m xsarena json [OPTIONS] COMMAND [ARGS]...
-
- JSON validation and processing tools
-
+                                                                                
+ Usage: python -m xsarena json [OPTIONS] COMMAND [ARGS]...                      
+                                                                                
+ JSON validation and processing tools                                           
+                                                                                
 ╭─ Options ────────────────────────────────────────────────────────────────────╮
 │ --help          Show this message and exit.                                  │
 ╰──────────────────────────────────────────────────────────────────────────────╯
@@ -12,3 +12,4 @@
 │ run             Run a prompt and optionally validate JSON output against a   │
 │                 schema.                                                      │
 ╰──────────────────────────────────────────────────────────────────────────────╯
+

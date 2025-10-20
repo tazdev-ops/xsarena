@@ -1,8 +1,8 @@
-
- Usage: python -m xsarena metrics [OPTIONS] COMMAND [ARGS]...
-
- Metrics and observability
-
+                                                                                
+ Usage: python -m xsarena metrics [OPTIONS] COMMAND [ARGS]...                   
+                                                                                
+ Metrics and observability commands.                                            
+                                                                                
 ╭─ Options ────────────────────────────────────────────────────────────────────╮
 │ --help          Show this message and exit.                                  │
 ╰──────────────────────────────────────────────────────────────────────────────╯
@@ -11,3 +11,4 @@
 │ start-server   Start the metrics server.                                     │
 │ status         Show metrics system status.                                   │
 ╰──────────────────────────────────────────────────────────────────────────────╯
+

@@ -1,8 +1,8 @@
-
- Usage: python -m xsarena report [OPTIONS] COMMAND [ARGS]...
-
- Create a redacted report bundle
-
+                                                                                
+ Usage: python -m xsarena report [OPTIONS] COMMAND [ARGS]...                    
+                                                                                
+ Create diagnostic reports                                                      
+                                                                                
 ╭─ Options ────────────────────────────────────────────────────────────────────╮
 │ --help          Show this message and exit.                                  │
 ╰──────────────────────────────────────────────────────────────────────────────╯
@@ -10,8 +10,5 @@
 │ quick                                                                        │
 │ job                                                                          │
 │ full                                                                         │
-│ handoff     Create a handoff file for higher AI with snapshot digest and     │
-│             context.                                                         │
-│ situation   Create a situation report with                                   │
-│             tree/LS/rules/config/session/recipes/books/jobs and chunk it.    │
 ╰──────────────────────────────────────────────────────────────────────────────╯
+

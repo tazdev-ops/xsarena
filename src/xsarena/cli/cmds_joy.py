@@ -63,7 +63,7 @@ def joy_streak():
     s = get_state()
     typer.echo(f"Streak: {s['streak']}  [{sparkline(7)}]  Last: {s.get('last_day')}")
     if s["achievements"]:
-        typer.echo("Achievements:", ", ".join(s["achievements"]))
+        typer.echo("Achievements: " + ", ".join(s["achievements"]))
 
 
 @app.command("achievements")
@@ -78,7 +78,7 @@ def joy_achievements():
         raise typer.Exit(1)
 
     s = get_state()
-    typer.echo("Achievements:", ", ".join(s["achievements"]) or "(none)")
+    typer.echo("Achievements: " + (", ".join(s["achievements"]) or "(none)"))
 
 
 @app.command("kudos")

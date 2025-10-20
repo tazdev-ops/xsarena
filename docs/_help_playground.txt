@@ -1,11 +1,12 @@
-
- Usage: python -m xsarena playground [OPTIONS] COMMAND [ARGS]...
-
- Prompt composition and sampling
-
+                                                                                
+ Usage: python -m xsarena playground [OPTIONS] COMMAND [ARGS]...                
+                                                                                
+ A playground for testing prompts.                                              
+                                                                                
 ╭─ Options ────────────────────────────────────────────────────────────────────╮
 │ --help          Show this message and exit.                                  │
 ╰──────────────────────────────────────────────────────────────────────────────╯
 ╭─ Commands ───────────────────────────────────────────────────────────────────╮
 │ run   Run a prompt against a subject in the playground.                      │
 ╰──────────────────────────────────────────────────────────────────────────────╯
+

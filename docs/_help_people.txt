@@ -1,8 +1,8 @@
-
- Usage: python -m xsarena people [OPTIONS] COMMAND [ARGS]...
-
- Roleplay engine: start, say, boundaries, model, export
-
+                                                                                
+ Usage: python -m xsarena people [OPTIONS] COMMAND [ARGS]...                    
+                                                                                
+ Roleplay engine: start, say, boundaries, model, export                         
+                                                                                
 ╭─ Options ────────────────────────────────────────────────────────────────────╮
 │ --help          Show this message and exit.                                  │
 ╰──────────────────────────────────────────────────────────────────────────────╯
@@ -15,3 +15,4 @@
 │ bounds                                                                       │
 │ export                                                                       │
 ╰──────────────────────────────────────────────────────────────────────────────╯
+

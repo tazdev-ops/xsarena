@@ -1,5 +1,35 @@
-disallow_globs: ["books/**", "review/**", ".xsarena/**"]
-require: ["README.md", "pyproject.toml"]
-max_per_file: 180000
-total_max: 2500000
-fail_on: ["secrets", "oversize", "disallowed", "binary", "missing_required"]
+disallow_globs:
+- books/**
+- review/**
+- .xsarena/**
+- tools/**
+- tests/**
+- examples/**
+fail_on:
+- secrets
+- oversize
+- disallowed
+- binary
+- missing_required
+max_per_file: 60000
+require:
+- README.md
+- COMMANDS_REFERENCE.md
+- pyproject.toml
+- src/xsarena/cli/main.py
+- src/xsarena/cli/registry.py
+- src/xsarena/cli/context.py
+- src/xsarena/core/prompt.py
+- src/xsarena/core/prompt_runtime.py
+- src/xsarena/core/v2_orchestrator/orchestrator.py
+- src/xsarena/core/v2_orchestrator/specs.py
+- src/xsarena/core/jobs/model.py
+- src/xsarena/core/jobs/executor.py
+- src/xsarena/core/jobs/scheduler.py
+- src/xsarena/core/jobs/store.py
+- src/xsarena/core/config.py
+- src/xsarena/core/state.py
+- src/xsarena/bridge_v2/api_server.py
+- docs/ARCHITECTURE.md
+- directives/_rules/rules.merged.md
+total_max: 800000

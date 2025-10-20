@@ -1,8 +1,8 @@
-
- Usage: python -m xsarena macros [OPTIONS] COMMAND [ARGS]...
-
- Macro registry
-
+                                                                                
+ Usage: python -m xsarena macros [OPTIONS] COMMAND [ARGS]...                    
+                                                                                
+ Manage CLI command macros.                                                     
+                                                                                
 ╭─ Options ────────────────────────────────────────────────────────────────────╮
 │ --help          Show this message and exit.                                  │
 ╰──────────────────────────────────────────────────────────────────────────────╯
@@ -11,3 +11,4 @@
 │ list     List all saved macros.                                              │
 │ delete   Delete a macro.                                                     │
 ╰──────────────────────────────────────────────────────────────────────────────╯
+

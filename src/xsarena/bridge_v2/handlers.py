@@ -20,7 +20,6 @@ logger = logging.getLogger(__name__)
 CONFIG = {}
 MODEL_NAME_TO_ID_MAP = {}
 MODEL_ENDPOINT_MAP = {}
-RATE = CONFIG.get("rate_limit", {"burst": 10, "window_seconds": 10})
 PER_PEER = {}  # dict[ip] -> deque of timestamps
 
 
@@ -130,11 +129,15 @@ async def chat_completions_handler(
     now = time.time()
     if peer not in PER_PEER:
         PER_PEER[peer] = deque()
+    
+    # Read rate limit config dynamically each call to allow config changes to take effect
+    rate_cfg = CONFIG.get("rate_limit", {"burst": 10, "window_seconds": 10})
+    
     # Prune old timestamps
-    while PER_PEER[peer] and now - PER_PEER[peer][0] > RATE["window_seconds"]:
+    while PER_PEER[peer] and now - PER_PEER[peer][0] > rate_cfg["window_seconds"]:
         PER_PEER[peer].popleft()
     # Check if over burst limit
-    if len(PER_PEER[peer]) >= RATE["burst"]:
+    if len(PER_PEER[peer]) >= rate_cfg["burst"]:
         raise HTTPException(status_code=429, detail="Rate limit exceeded")
     # Add current timestamp
     PER_PEER[peer].append(now)
@@ -306,7 +309,7 @@ async def chat_completions_handler(
                             raise HTTPException(status_code=502, detail=data["error"])
                         if data == "[DONE]":
                             # Check if we need to add content filter explanation in the final chunk
-                            from .api_server import format_openai_finish_chunk
+                            from .formatters import format_openai_finish_chunk
 
                             yield format_openai_finish_chunk(
                                 model_name, request_id, reason="stop"
@@ -318,7 +321,7 @@ async def chat_completions_handler(
                         # Handle image content for image models
                         if isinstance(data, str) and data.startswith("![Image]"):
                             # This is an image markdown, format as appropriate
-                            from .api_server import format_openai_chunk
+                            from .formatters import format_openai_chunk
 
                             yield format_openai_chunk(data, model_name, request_id)
                         else:

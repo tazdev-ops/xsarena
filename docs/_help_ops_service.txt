@@ -1,14 +1,12 @@
                                                                                 
- Usage: python -m xsarena booster [OPTIONS] COMMAND [ARGS]...                   
+ Usage: python -m xsarena ops service [OPTIONS] COMMAND [ARGS]...               
                                                                                 
- Interactively engineer and improve prompts                                     
+ Service management commands.                                                   
                                                                                 
 ╭─ Options ────────────────────────────────────────────────────────────────────╮
 │ --help          Show this message and exit.                                  │
 ╰──────────────────────────────────────────────────────────────────────────────╯
 ╭─ Commands ───────────────────────────────────────────────────────────────────╮
-│ start    Start a new prompt boosting session.                                │
-│ answer   Provide answers to the booster's questions.                         │
-│ apply    Apply the generated prompt to a file.                               │
+│ start-bridge-v2   Start the bridge v2 server.                                │
 ╰──────────────────────────────────────────────────────────────────────────────╯
 

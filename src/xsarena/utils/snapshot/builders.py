@@ -10,6 +10,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import List
 
+from ..helpers import is_binary_sample, safe_read_bytes, safe_read_text
 from .config import ROOT
 
 
@@ -168,8 +169,6 @@ def get_rules_digest() -> str:
         return "Rules Digest: (directives/_rules/rules.merged.md not found)\n"
 
     try:
-        from ..helpers import safe_read_text
-
         content, truncated = safe_read_text(rules_file, 10000)  # Read first 10000 chars
         lines = content.splitlines()
         first_200_lines = "\n".join(lines[:200])
@@ -190,8 +189,6 @@ def get_review_artifacts() -> str:
     for item in review_dir.iterdir():
         if item.is_file():
             try:
-                from ..helpers import safe_read_text
-
                 content, truncated = safe_read_text(
                     item, 5000
                 )  # Limit to first 5000 chars

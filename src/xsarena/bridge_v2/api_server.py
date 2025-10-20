@@ -57,9 +57,19 @@ async def lifespan(app: FastAPI):
 app = FastAPI(lifespan=lifespan)
 
 # Safer default CORS: localhost-only; make configurable via CONFIG
-cors_origins = CONFIG.get("cors_origins") or [
-    "*"
-]  # Default to ["*"] when CONFIG has no cors_origins
+cors_origins = CONFIG.get("cors_origins")
+if not cors_origins:
+    # Default to localhost origins only for safety unless explicitly configured
+    cors_origins = [
+        "http://localhost",
+        "http://127.0.0.1", 
+        "http://localhost:5102",
+        "http://127.0.0.1:5102"
+    ]
+elif cors_origins == ["*"]:
+    # Only if explicitly set to "*" in config, allow all origins
+    cors_origins = ["*"]
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=cors_origins,

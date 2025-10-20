@@ -43,6 +43,7 @@ def map_exception_to_error_code(exception: Exception) -> str:
                 aiohttp.ClientConnectorError: "transport_unavailable",
                 aiohttp.ServerTimeoutError: "transport_timeout",
                 aiohttp.ClientResponseError: "api_error",
+                aiohttp.ClientPayloadError: "api_error",
             }
         )
 
@@ -52,6 +53,7 @@ def map_exception_to_error_code(exception: Exception) -> str:
             {
                 requests.ConnectionError: "transport_unavailable",
                 requests.Timeout: "transport_timeout",
+                requests.HTTPError: "api_error",
             }
         )
 

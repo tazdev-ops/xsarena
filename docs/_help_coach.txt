@@ -1,8 +1,8 @@
-
- Usage: python -m xsarena coach [OPTIONS] COMMAND [ARGS]...
-
- Coaching drills and boss exams
-
+                                                                                
+ Usage: python -m xsarena coach [OPTIONS] COMMAND [ARGS]...                     
+                                                                                
+ Coach drills and Boss mini-exams                                               
+                                                                                
 ╭─ Options ────────────────────────────────────────────────────────────────────╮
 │ --help          Show this message and exit.                                  │
 ╰──────────────────────────────────────────────────────────────────────────────╯
@@ -11,3 +11,4 @@
 │ quiz    A quick N-question MCQ quiz.                                         │
 │ boss    Timed Boss mini-exam; auto-creates a repair prompt.                  │
 ╰──────────────────────────────────────────────────────────────────────────────╯
+

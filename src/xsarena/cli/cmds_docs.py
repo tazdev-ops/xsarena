@@ -36,14 +36,11 @@ def gen_help():
     subcommands = [
         "run",
         "interactive",
-        "jobs",
         "control",
         "report",
         "profiles",
         "config",
         "backend",
-        "service",
-        "snapshot",
         "preview",
         "ingest",
         "lossless",
@@ -71,7 +68,6 @@ def gen_help():
         "mode",
         "macros",
         "playground",
-        "doctor",
         "people",
         "roles",
         "overlays",
@@ -87,6 +83,27 @@ def gen_help():
                 check=True,
             )
             (docs_dir / f"_help_{cmd.replace('-', '_')}.txt").write_text(result.stdout)
+        except subprocess.CalledProcessError:
+            # Some commands might not have --help or might require arguments
+            continue
+
+    # Get help for ops subcommands
+    ops_subcommands = [
+        "jobs",
+        "service", 
+        "snapshot",
+        "health",  # replacing deprecated "doctor"
+    ]
+
+    for cmd in ops_subcommands:
+        try:
+            result = subprocess.run(
+                [sys.executable, "-m", "xsarena", "ops", cmd, "--help"],
+                capture_output=True,
+                text=True,
+                check=True,
+            )
+            (docs_dir / f"_help_ops_{cmd.replace('-', '_')}.txt").write_text(result.stdout)
         except subprocess.CalledProcessError:
             # Some commands might not have --help or might require arguments
             continue

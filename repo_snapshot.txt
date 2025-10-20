@@ -1,6 +1,0 @@
-# Repo Flat Pack
-
-Instructions for assistant:
-- Treat '=== START FILE: path ===' boundaries as file delimiters.
-- Do not summarize early; ask for next files if needed.
-- Keep references by path for follow-ups.

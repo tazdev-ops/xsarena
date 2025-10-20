@@ -1,7 +1,7 @@
 # src/xsarena/core/config.py
 import os
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional
 
 import yaml
 from dotenv import load_dotenv
@@ -189,7 +189,7 @@ class Config(BaseModel):
         return cls(**config_dict)
 
     @classmethod
-    def validate_config_keys(cls, config_data: Dict[str, Any]) -> Dict[str, str]:
+    def validate_config_keys(cls, config_data: Dict[str, Any]) -> Dict[str, List[str]]:
         """Validate config keys and return unknown keys with suggestions"""
         unknown_keys = {}
         for key in config_data:

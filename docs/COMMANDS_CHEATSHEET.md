@@ -1,56 +1,40 @@
-# Commands Cheatsheet
+# XSArena Commands Cheatsheet
 
-<!-- This file is the source of truth for CLI usage; regenerate via scripts/gen_docs.sh -->
+## Bridge + Health
+- Start bridge: xsarena ops service start-bridge-v2
+- Health: curl $(xsarena settings config-show | sed -n 's/.*Base URL: //p')/health
+- Capture IDs (modern): xsarena unified-settings capture-ids
+  - or: xsarena settings config-capture-ids
 
-# Commands Cheatsheet
-
-## Bridge and health
-- Start bridge:
-  - xsarena ops service start-bridge-v2
-- Health:
-  - curl http://127.0.0.1:5102/v1/health
-- Quick smoke:
-  - xsarena dev simulate "Sanity" --length standard --span medium
-
-## Authoring (book)
-- Dry-run:
-  - xsarena run book "Subject" --dry-run
-- Real run:
-  - xsarena run book "Subject" --follow --length long --span book
+## Authoring
+- Book (follow to completion):
+  - xsarena run book "Subject" --length long --span book --follow
 - Continue:
-  - xsarena run continue ./books/Your_Book.final.md --wait false
+  - xsarena run continue ./books/Your_Book.final.md --follow
+- Styles (session toggles):
+  - xsarena author style-narrative on
+  - xsarena author style-nobs on
+  - xsarena author style-reading on
+
+## Interactive
+- Start cockpit: xsarena interactive start
+- Handy /commands: /prompt.show, /prompt.list, /out.minchars 4500, /cont.mode anchor, /repeat.warn on
 
 ## Jobs
-- List:
-  - xsarena ops jobs ls
-- Follow:
-  - xsarena ops jobs follow JOB_ID
-- Control:
-  - xsarena ops jobs pause|resume|cancel JOB_ID
-  - Hint:
-    - xsarena ops jobs next JOB_ID "Continue with X"
-- Cleanup:
-  - xsarena ops jobs gc --days 14 --yes
+- List: xsarena ops jobs ls
+- Follow: xsarena ops jobs follow JOB_ID
+- Controls: xsarena ops jobs pause|resume|cancel JOB_ID
+- Hint: xsarena ops jobs next JOB_ID "Continue with X"
 
-## Study / Analysis
-- xsarena study generate flashcards book.md --num 50
-- xsarena analyze continuity book.md
-- xsarena analyze coverage --outline outline.md --book book.md
+## Snapshots (flat, lean)
+- Create: xsarena ops snapshot create --mode ultra-tight --total-max 2500000 --max-per-file 180000 --out ~/repo_flat.txt
+- Verify: xsarena ops snapshot verify --file ~/repo_flat.txt --fail-on oversize --fail-on secrets --redaction-expected
 
-## Snapshots (three-tier system)
-- Minimal (flat text for chatbot uploads):
-  - xsarena ops snapshot create --mode ultra-tight --total-max 2500000 --max-per-file 180000 --no-repo-map
-  - Output: ~/repo_flat.txt
-- Normal (zip for most use):
-  - xsarena ops snapshot write --mode tight --with-git=false --with-jobs=false --with-manifest=false --zip
-  - Output: ~/xsa_snapshot.zip
-- Maximal (verbose debug report):
-  - xsarena ops snapshot debug-report
-  - Output: ~/xsa_debug_report.txt
-- Note: All snapshot commands write to your home directory (~) by default. Use --out to override.
+## Study + Analyze
+- Flashcards: xsarena study generate flashcards ./books/book.md --num 50
+- Continuity: xsarena analyze continuity ./books/book.md
+- Coverage: xsarena analyze coverage --outline outline.md --book ./books/book.md
 
 ## Settings
-- Show:
-  - xsarena settings show
-- Normalize config:
-  - xsarena settings config-check
+- Show: xsarena settings show
+- Validate: xsarena settings config-check

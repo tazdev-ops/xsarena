@@ -319,12 +319,19 @@ def config_check(
 
 
 @app.command("config-capture-ids")
-def config_capture_ids():
+def config_capture_ids(ctx: typer.Context):
     """Capture bridge session and message IDs from LMArena."""
     import time
 
     import requests
 
+    # Get the CLI context to access the configuration
+    cli = ctx.obj
+
+    # Compute base URL from config using utility function
+    from ..utils.project_paths import base_from_config_url
+    base = base_from_config_url(cli.config.base_url)
+    
     typer.echo("To capture bridge IDs:")
     typer.echo("1. Make sure the bridge is running (xsarena service start-bridge-v2)")
     typer.echo("2. Open https://lmarena.ai and add '#bridge=5102' to the URL")
@@ -337,9 +344,10 @@ def config_capture_ids():
         raise typer.Exit(1)
 
     # Send start capture command to bridge
+    start_url = f"{base}/internal/start_id_capture"
     try:
         response = requests.post(
-            "http://127.0.0.1:5102/internal/start_id_capture", timeout=10
+            start_url, timeout=10
         )
         if response.status_code == 200:
             typer.echo("✓ ID capture started. Please click 'Retry' in your browser.")
@@ -353,12 +361,13 @@ def config_capture_ids():
         raise typer.Exit(1)
 
     # Poll for captured IDs
+    cfg_url = f"{base}/internal/config"
     timeout = 30  # seconds
     start_time = time.time()
 
     while time.time() - start_time < timeout:
         try:
-            response = requests.get("http://127.0.0.1:5102/internal/config", timeout=5)
+            response = requests.get(cfg_url, timeout=5)
             if response.status_code == 200:
                 data = response.json()
                 bridge_config = data.get("bridge", {})

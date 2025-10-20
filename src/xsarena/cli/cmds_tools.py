@@ -61,7 +61,7 @@ def fun_persona(name: str):
 def fun_nobs(flag: str):
     """on|off — alias to no‑BS"""
     if flag.lower() not in ("on", "off"):
-        typer.echo("Use: xsarena fun nobs on|off")
+        typer.echo("Use: xsarena tools nobs on|off")
         return
     typer.echo(f"(alias) Run: /style.nobs {flag.lower()}")
 

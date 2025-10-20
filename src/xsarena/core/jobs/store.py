@@ -12,9 +12,7 @@ from ...utils.io import atomic_write
 from .model import JobV3
 
 
-def load_json(path: Path) -> dict:
-    """Helper to load JSON with error handling."""
-    return load_json_with_error_handling(path)
+# No need for load_json wrapper since load_json_with_error_handling now returns data directly
 
 
 class JobStore:
@@ -57,7 +55,17 @@ class JobStore:
     def load(self, job_id: str) -> JobV3:
         """Load a job by ID."""
         job_path = self._job_dir(job_id) / "job.json"
-        data = load_json(job_path)
+        try:
+            data = load_json_with_error_handling(job_path)
+        except FileNotFoundError:
+            raise FileNotFoundError(f"Job file not found: {job_path}")
+        except json.JSONDecodeError as e:
+            raise ValueError(f"Invalid JSON in job file {job_path}: {str(e)}")
+        except Exception as e:
+            raise ValueError(f"Error reading job file {job_path}: {str(e)}")
+        
+        if not isinstance(data, dict):
+            raise ValueError(f"Invalid job.json structure @ {job_path}")
         return JobV3(**data)
 
     def save(self, job: JobV3):

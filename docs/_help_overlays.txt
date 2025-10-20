@@ -1,14 +1,13 @@
                                                                                 
- Usage: python -m xsarena booster [OPTIONS] COMMAND [ARGS]...                   
+ Usage: python -m xsarena overlays [OPTIONS] COMMAND [ARGS]...                  
                                                                                 
- Interactively engineer and improve prompts                                     
+ Manage overlays                                                                
                                                                                 
 ╭─ Options ────────────────────────────────────────────────────────────────────╮
 │ --help          Show this message and exit.                                  │
 ╰──────────────────────────────────────────────────────────────────────────────╯
 ╭─ Commands ───────────────────────────────────────────────────────────────────╮
-│ start    Start a new prompt boosting session.                                │
-│ answer   Provide answers to the booster's questions.                         │
-│ apply    Apply the generated prompt to a file.                               │
+│ list   List all available overlays.                                          │
+│ show   Show the content of a specific overlay.                               │
 ╰──────────────────────────────────────────────────────────────────────────────╯
 

@@ -16,7 +16,7 @@ DEFAULT_PRESETS = {
             "src/xsarena/core/v2_orchestrator/orchestrator.py",
             "src/xsarena/core/v2_orchestrator/specs.py",
             "src/xsarena/core/jobs/model.py",
-            "src/xsarena/core/jobs/executor.py",
+            "src/xsarena/core/jobs/executor_core.py",
             "src/xsarena/core/jobs/scheduler.py",
             "src/xsarena/core/jobs/store.py",
             "directives/base/zero2hero.md",

@@ -93,7 +93,7 @@ async def perform_micro_extension(
             await asyncio.sleep(0.05)  # Changed from 0.1 to 0.05
 
             # Get a local anchor from the current chunk content using centralized service
-            from ....anchor_service import create_anchor
+            from ..anchor_service import create_anchor
 
             local_anchor = await create_anchor(
                 extended_content,
@@ -103,7 +103,7 @@ async def perform_micro_extension(
             )
 
             if local_anchor or hint_now:
-                from ....anchor_service import build_anchor_continue_prompt
+                from ..anchor_service import build_anchor_continue_prompt
 
                 extend_prompt = (
                     hint_now if hint_now else build_anchor_continue_prompt(local_anchor)

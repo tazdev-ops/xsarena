@@ -1,8 +1,8 @@
-
- Usage: python -m xsarena joy [OPTIONS] COMMAND [ARGS]...
-
- Daily activities, streaks, and achievements
-
+                                                                                
+ Usage: python -m xsarena joy [OPTIONS] COMMAND [ARGS]...                       
+                                                                                
+ Daily joy, streaks, achievements, and surprises                                
+                                                                                
 ╭─ Options ────────────────────────────────────────────────────────────────────╮
 │ --help          Show this message and exit.                                  │
 ╰──────────────────────────────────────────────────────────────────────────────╯
@@ -13,3 +13,4 @@
 │ achievements                                                                 │
 │ kudos                                                                        │
 ╰──────────────────────────────────────────────────────────────────────────────╯
+

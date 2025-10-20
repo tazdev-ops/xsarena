@@ -1,8 +1,8 @@
-
- Usage: python -m xsarena chad [OPTIONS] COMMAND [ARGS]...
-
- Direct, evidence-based Q&A
-
+                                                                                
+ Usage: python -m xsarena chad [OPTIONS] COMMAND [ARGS]...                      
+                                                                                
+ Direct, evidence-based Q&A                                                     
+                                                                                
 ╭─ Options ────────────────────────────────────────────────────────────────────╮
 │ --help          Show this message and exit.                                  │
 ╰──────────────────────────────────────────────────────────────────────────────╯
@@ -14,3 +14,4 @@
 │ fact-check   Fact-check a given statement.                                   │
 │ summarize    Summarize a list of evidence points.                            │
 ╰──────────────────────────────────────────────────────────────────────────────╯
+

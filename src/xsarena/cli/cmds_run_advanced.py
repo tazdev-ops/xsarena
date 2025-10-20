@@ -68,48 +68,33 @@ def run_from_recipe(
     recipe_content = recipe_path.read_text(encoding="utf-8")
     recipe = yaml.safe_load(recipe_content)
 
-    # Extract parameters from recipe
+    # Extract supported parameters from recipe
     subject = recipe.get("subject", "Recipe Output")
-    task = recipe.get("task", "book")
-    styles = recipe.get("styles", [])
-    max_chunks = recipe.get("max_chunks", 12)
-    min_chars = recipe.get("min_length", 4200)
-    passes = recipe.get("passes", 1)
+    length = recipe.get("length", "standard")
+    span = recipe.get("span", "medium")
+    overlays = recipe.get("overlays", [])
+    extra_files = recipe.get("extra_files", [])
+    generate_plan = recipe.get("generate_plan", False)
 
-    # Get continuation settings
-    continuation = recipe.get("continuation", {})
-    min_chars_continuation = continuation.get("minChars", min_chars)
-    push_passes = continuation.get("pushPasses", passes)
-
-    # Prepare system text from recipe
-    system_text = recipe.get("system_text", "")
-
-    # Build the run spec
+    # Build the run spec with only supported fields
     run_spec = RunSpecV2(
-        task=task,
         subject=subject,
-        length=LengthPreset("custom"),
-        span=SpanPreset("custom"),
-        min_length=min_chars_continuation,
-        passes=push_passes,
-        chunks=max_chunks,
+        length=LengthPreset(length) if length in ["standard", "long", "very-long", "max"] else LengthPreset.STANDARD,
+        span=SpanPreset(span) if span in ["medium", "long", "book"] else SpanPreset.MEDIUM,
+        overlays=overlays,
+        extra_files=extra_files,
+        out_path=recipe.get("out_path", out),
+        generate_plan=generate_plan,
         backend=cli_ctx.cfg.backend,
         model=cli_ctx.cfg.model,
-        out_path=out,
-        system_text=system_text,
-        user_text="",
-    )
-
-    # Submit the job
-    job_id = orch.submit(
-        run_spec, system_text=system_text, session_state=cli_ctx.session_state
     )
 
     if follow:
+        job_id = asyncio.run(orch.run_spec(run_spec, backend_type=cli_ctx.cfg.backend))
         typer.echo(f"Recipe job submitted: {job_id}")
         typer.echo("Following job to completion...")
-        asyncio.run(orch.follow_job(job_id))
     else:
+        job_id = asyncio.run(orch.run_spec(run_spec, backend_type=cli_ctx.cfg.backend))
         typer.echo(f"Recipe job submitted: {job_id}")
         typer.echo(f"Run 'xsarena ops jobs follow {job_id}' to monitor progress")
 
@@ -250,48 +235,8 @@ def run_replay(
     """
     Replay a job from a run manifest.
     """
-    cli_ctx: CLIContext = ctx.obj
-    orch = Orchestrator()
-
-    if not manifest_path.exists():
-        typer.echo(f"Error: Manifest file not found: {manifest_path}", err=True)
-        raise typer.Exit(1)
-
-    # Load manifest
-    manifest_content = manifest_path.read_text(encoding="utf-8")
-    manifest = json.loads(manifest_content)
-
-    # Extract run spec from manifest
-    run_spec_data = manifest.get("run_spec", {})
-
-    # Create RunSpecV2 from manifest data
-    run_spec = RunSpecV2(
-        task=run_spec_data.get("task", "book"),
-        subject=run_spec_data.get("subject", "Replay Job"),
-        length=LengthPreset(run_spec_data.get("length", "standard")),
-        span=SpanPreset(run_spec_data.get("span", "medium")),
-        min_length=run_spec_data.get("min_length", 4200),
-        passes=run_spec_data.get("passes", 1),
-        chunks=run_spec_data.get("chunks", 12),
-        backend=run_spec_data.get("backend", cli_ctx.cfg.backend),
-        model=run_spec_data.get("model", cli_ctx.cfg.model),
-        out_path=run_spec_data.get("out_path"),
-        system_text=run_spec_data.get("system_text", ""),
-        user_text=run_spec_data.get("user_text", ""),
-    )
-
-    # Submit the replay job
-    job_id = orch.submit(
-        run_spec, system_text=run_spec.system_text, session_state=cli_ctx.session_state
-    )
-
-    if follow:
-        typer.echo(f"Replay job submitted: {job_id}")
-        typer.echo("Following job to completion...")
-        asyncio.run(orch.follow_job(job_id))
-    else:
-        typer.echo(f"Replay job submitted: {job_id}")
-        typer.echo(f"Run 'xsarena ops jobs follow {job_id}' to monitor progress")
+    typer.echo("Not implemented for v0.3 manifests yet. Use: xsarena ops jobs clone and rerun.")
+    raise typer.Exit(2)
 
 
 def run_template(

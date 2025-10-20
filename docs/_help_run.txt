@@ -1,22 +1,19 @@
-
- Usage: xsarena run [OPTIONS] COMMAND [ARGS]...
-
- Run a book or recipe in authoring mode
-
+                                                                                
+ Usage: python -m xsarena run [OPTIONS] COMMAND [ARGS]...                       
+                                                                                
+ Run a book or recipe in authoring mode                                         
+                                                                                
 ╭─ Options ────────────────────────────────────────────────────────────────────╮
 │ --help          Show this message and exit.                                  │
 ╰──────────────────────────────────────────────────────────────────────────────╯
 ╭─ Commands ───────────────────────────────────────────────────────────────────╮
-│ book                                                                         │
-│ from-recipe   Run a job from recipe file (replaces 'jobs run').              │
-│ lint-recipe   Lint a recipe file for validity and best practices.            │
-│ from-plan     Plan from rough seeds in your editor, then run a long, dense   │
-│               book. Replaces 'plan start' command.                           │
-│ replay        Replay a job from a run manifest, warning if directive digests │
-│               drift.                                                         │
-│ continue                                                                     │
-│ write         Golden-path alias for 'run book' with narrative + no_bs        │
-│               overlays.                                                      │
-│ template      Run a structured directive from the library (optionally        │
-│               JSON-validated if a schema exists).                            │
+│ book          Generate a book with specified subject.                        │
+│ from-recipe   Run a job from a recipe file.                                  │
+│ lint-recipe   Lint a recipe file for syntax errors.                          │
+│ from-plan     Plan from rough seeds and run a book.                          │
+│ replay        Replay a job from a run manifest.                              │
+│ continue      Continue writing from an existing file.                        │
+│ write         Write content with specified subject (alias for run_book).     │
+│ template      Run a structured directive from the template library.          │
 ╰──────────────────────────────────────────────────────────────────────────────╯
+

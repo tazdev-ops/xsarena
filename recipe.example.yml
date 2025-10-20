@@ -1,13 +1,8 @@
-task: book.zero2hero
-subject: Behavioral Economics
-styles: [no-bs]
-hammer: true
-continuation:
-  mode: anchor
-  anchorLen: 200
-  minChars: 3500
-  pushPasses: 2
-io:
-  output: file
-  outPath: ./books/behavioral-econ.manual.md
-max_chunks: 6
+# Minimal example for xsarena run from-recipe
+subject: "Behavioral Economics"
+length: "long"         # standard|long|very-long|max
+span: "book"           # medium|long|book
+overlays: ["narrative", "no_bs"]
+extra_files: []        # e.g., ["directives/base/zero2hero.md"]
+generate_plan: false   # outline-first
+out_path: "./books/behavioral_econ.final.md"

@@ -1,11 +1,10 @@
-
- Usage: python -m xsarena pipeline [OPTIONS] COMMAND [ARGS]...
-
- Pipeline runner (fix → test → format → commit)
-
+                                                                                
+ Usage: python -m xsarena pipeline [OPTIONS] COMMAND [ARGS]...                  
+                                                                                
 ╭─ Options ────────────────────────────────────────────────────────────────────╮
 │ --help          Show this message and exit.                                  │
 ╰──────────────────────────────────────────────────────────────────────────────╯
 ╭─ Commands ───────────────────────────────────────────────────────────────────╮
 │ run   Run a project pipeline (fix → test → format → commit).                 │
 ╰──────────────────────────────────────────────────────────────────────────────╯
+

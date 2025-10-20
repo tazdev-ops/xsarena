@@ -7,7 +7,8 @@ import zipfile
 from pathlib import Path
 from typing import Optional
 
-from ..helpers import is_binary_sample, safe_read_bytes
+from ..helpers import is_binary_sample, safe_read_bytes, safe_read_text
+from ...core.redact import redact_snapshot_content
 from .builders import (
     build_git_context,
     build_jobs_summary,
@@ -101,8 +102,6 @@ def write_text_snapshot(
                         text = f"[... FILE TRUNCATED to {max_size} bytes ...]\n" + text
                     # Apply redaction if enabled
                     if redact and cfg.get("redact", True):
-                        from ..redact import redact_snapshot_content
-
                         text = redact_snapshot_content(text)
                     f_out.write(text)
             except Exception as e:
@@ -199,8 +198,6 @@ def write_zip_snapshot(
                         text = f"[... FILE TRUNCATED to {max_size} bytes ...]\n" + text
                     # Apply redaction if enabled
                     if redact and cfg.get("redact", True):
-                        from ..redact import redact_snapshot_content
-
                         text = redact_snapshot_content(text)
                     z.writestr(rp, text)
             except Exception as e:
@@ -284,8 +281,6 @@ def write_pro_snapshot(
                     text = f"[... FILE TRUNCATED to {max_size} bytes ...]\n" + text
                 # Apply redaction if enabled
                 if redact and cfg.get("redact", True):
-                    from ..redact import redact_snapshot_content
-
                     text = redact_snapshot_content(text)
                 content_parts.append(text)
         except Exception as e:

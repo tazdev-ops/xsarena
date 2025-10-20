@@ -1,0 +1,26 @@
+                                                                                
+ Usage: python -m xsarena ops health [OPTIONS] COMMAND [ARGS]...                
+                                                                                
+ System health, maintenance, and self-healing operations                        
+                                                                                
+╭─ Options ────────────────────────────────────────────────────────────────────╮
+│ --help          Show this message and exit.                                  │
+╰──────────────────────────────────────────────────────────────────────────────╯
+╭─ Commands ───────────────────────────────────────────────────────────────────╮
+│ fix-run        Self-heal common configuration/state issues.                  │
+│ sweep          Purge ephemeral artifacts by TTL: - Matches                   │
+│                .xsarena/cleanup.yml policy globs - Honors XSA-EPHEMERAL ttl  │
+│                header which overrides policy TTL - Removes empty directories │
+│                after file deletions                                          │
+│ scan-secrets   Scan for secrets (API keys, passwords, etc.) in working tree. │
+│ mark           Add an XSA-EPHEMERAL header to a helper script so the sweeper │
+│                can purge it later.                                           │
+│ merge-rules    Merge all rules from directives/_rules/sources/ into          │
+│                directives/_rules/rules.merged.md                             │
+│ read           Read startup plan; attempt merge; print sources found. Does   │
+│                not modify code.                                              │
+│ init           One-time helper: create a minimal rules baseline if merged    │
+│                rules and sources are missing.                                │
+│ quick          Quick health check - verify core functionality.               │
+╰──────────────────────────────────────────────────────────────────────────────╯
+
