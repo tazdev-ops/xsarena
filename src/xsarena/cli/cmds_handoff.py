@@ -5,7 +5,7 @@ from pathlib import Path
 import typer
 
 from ..core.jobs.model import JobManager
-from ..utils.snapshot_simple import write_text_snapshot
+from ..utils.snapshot.writers import write_text_snapshot
 
 app = typer.Typer(help="Prepare a clean handoff package for higher AI.")
 

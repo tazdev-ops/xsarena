@@ -6,7 +6,7 @@ from pathlib import Path
 
 def test_snapshot_simple():
     """Test basic snapshot functionality."""
-    from xsarena.utils.snapshot_simple import write_zip_snapshot
+    from xsarena.utils.snapshot.writers import write_zip_snapshot
 
     with tempfile.TemporaryDirectory() as tmp_dir:
         # Change to the temp directory to run the snapshot

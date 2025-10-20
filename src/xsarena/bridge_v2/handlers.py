@@ -583,6 +583,48 @@ async def update_available_models_handler(request: Request):
         raise HTTPException(status_code=500, detail=str(e))
 
 
+def format_openai_chunk(content, model, request_id):
+    """Format content as an OpenAI-compatible chunk for streaming."""
+    import json
+    import time
+    
+    chunk = {
+        "id": request_id,
+        "object": "chat.completion.chunk",
+        "created": int(time.time()),
+        "model": model,
+        "choices": [
+            {
+                "index": 0,
+                "delta": {"content": content},
+                "finish_reason": None
+            }
+        ]
+    }
+    return f"data: {json.dumps(chunk)}\n\n"
+
+
+def format_openai_finish_chunk(model, request_id, reason="stop"):
+    """Format a finish chunk for OpenAI-compatible streaming."""
+    import json
+    import time
+    
+    chunk = {
+        "id": request_id,
+        "object": "chat.completion.chunk",
+        "created": int(time.time()),
+        "model": model,
+        "choices": [
+            {
+                "index": 0,
+                "delta": {},
+                "finish_reason": reason
+            }
+        ]
+    }
+    return f"data: {json.dumps(chunk)}\n\n"
+
+
 async def update_id_capture_handler(request: Request):
     """Update session and message IDs from the userscript."""
     try:

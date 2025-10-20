@@ -49,8 +49,7 @@ PRESET_DEFAULT_EXCLUDE = [
     "snapshot_chunks/**",
 ]
 
-# Corrected Snapshot Presets using Glob Patterns
-
+# Refined Snapshot Presets
 PRESET_ULTRA_TIGHT_INCLUDE = [
     "README.md",
     "COMMANDS_REFERENCE.md",
@@ -58,15 +57,12 @@ PRESET_ULTRA_TIGHT_INCLUDE = [
     "src/xsarena/cli/main.py",
     "src/xsarena/cli/registry.py",
     "src/xsarena/core/v2_orchestrator/orchestrator.py",
-    "src/xsarena/core/v2_orchestrator/specs.py",
     "src/xsarena/core/jobs/model.py",
-    "src/xsarena/core/jobs/executor_core.py",
-    "directives/_rules/rules.merged.md",
-    "docs/ARCHITECTURE.md",
 ]
 
 PRESET_AUTHOR_CORE_INCLUDE = PRESET_ULTRA_TIGHT_INCLUDE + [
-    "src/xsarena/cli/**/*.py",
+    "src/xsarena/cli/cmds_run_core.py",
+    "src/xsarena/cli/cmds_snapshot.py",
     "src/xsarena/core/prompt.py",
     "src/xsarena/core/config.py",
     "src/xsarena/core/state.py",
@@ -74,17 +70,13 @@ PRESET_AUTHOR_CORE_INCLUDE = PRESET_ULTRA_TIGHT_INCLUDE + [
     "directives/base/zero2hero.md",
 ]
 
-PRESET_TIGHT_500K_INCLUDE = [
-    "README.md",
-    "COMMANDS_REFERENCE.md",
-    "pyproject.toml",
-    "src/xsarena/**/*.py",
-    "directives/**/*.md",
-    "directives/**/*.yml",
-    "docs/USAGE.md",
+PRESET_TIGHT_500K_INCLUDE = PRESET_AUTHOR_CORE_INCLUDE + [
+    "src/xsarena/cli/**/*.py",
+    "src/xsarena/core/**/*.py",
+    "directives/manifest.yml",
+    "directives/_rules/rules.merged.md",
     "docs/ARCHITECTURE.md",
     "docs/OPERATING_MODEL.md",
-    "docs/COMMANDS_CHEATSHEET.md",
 ]
 
 PRESET_NORMAL_INCLUDE = [
