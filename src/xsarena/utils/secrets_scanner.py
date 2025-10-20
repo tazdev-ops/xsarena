@@ -2,17 +2,17 @@
 
 import re
 from pathlib import Path
-from typing import Any, Dict, List, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 
 class SecretsScanner:
     """Scans for potential secrets and sensitive information in files."""
 
-    def __init__(self):
+    def __init__(self, whitelist_file: Optional[str] = None):
         # Regex patterns for common secrets
         self.patterns = {
             "api_key": re.compile(
-                r"(?i)(api[_-]?key|api[_-]?token|secret[_-]?key)\s*[=:]\s*['\"][a-zA-Z0-9_\-]{20,}['\"]"
+                r"(?i)(?:api[_-]?key|api[_-]?token|secret[_-]?key)\s*[=:]\s*['\"][a-zA-Z0-9_\-]{20,}['\"]"
             ),
             "aws_access_key": re.compile(r"(?i)AKIA[0-9A-Z]{16}"),
             "aws_secret_key": re.compile(
@@ -31,7 +31,20 @@ class SecretsScanner:
             "phone": re.compile(
                 r"\b(\+?1[-.\s]?)?\(?([0-9]{3})\)?[-.\s]?([0-9]{3})[-.\s]?([0-9]{4})\b"
             ),
+            "github_token": re.compile(r"gh[pousr]_[A-Za-z0-9_]{36,}"),
+            "slack_token": re.compile(r"xox[baprs]-[0-9]{10,13}-[0-9]{10,13}-[A-Za-z0-9]{24,}"),
+            "jwt": re.compile(r"eyJ[A-Za-z0-9_-]{10,}\.eyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}"),
+            "google_api": re.compile(r"AIza[0-9A-Za-z_-]{35}"),
+            "stripe_key": re.compile(r"(sk|pk)_(test|live)_[0-9a-zA-Z]{24,}"),
+            "auth_header": re.compile(r"(?i)(authorization|auth):\s*bearer\s+[a-zA-Z0-9_\-\.]{20,}"),
+            "connection_string": re.compile(r"(mongodb|postgres|mysql)://[^\\s\"']+"),
+            "url_with_password": re.compile(r"https?://[^:]+:[^ @]+ @"),
         }
+        
+        # Initialize whitelist
+        self.whitelist = set()
+        if whitelist_file and Path(whitelist_file).exists():
+            self.whitelist = set(Path(whitelist_file).read_text().splitlines())
 
     def scan_file(self, file_path: Path) -> List[Dict[str, Any]]:
         """Scan a single file for secrets."""
@@ -49,13 +62,21 @@ class SecretsScanner:
         for pattern_name, pattern in self.patterns.items():
             matches = pattern.findall(content)
             for match in matches:
+                # If match is a tuple (from multiple capture groups), take the first non-empty group
+                if isinstance(match, tuple):
+                    match_str = next((m for m in match if m), str(match))
+                else:
+                    match_str = match if isinstance(match, str) else str(match)
+                # Skip if whitelisted
+                if self.is_whitelisted(match_str):
+                    continue
                 findings.append(
                     {
                         "file": str(file_path),
                         "type": pattern_name,
-                        "match": match if isinstance(match, str) else str(match),
+                        "match": match_str,
                         "line_number": self._find_line_number(
-                            content, match if isinstance(match, str) else str(match)
+                            content, match_str
                         ),
                     }
                 )
@@ -69,6 +90,10 @@ class SecretsScanner:
             if match in line:
                 return i
         return 0
+
+    def is_whitelisted(self, match: str) -> bool:
+        """Check if a match is in the whitelist."""
+        return any(pattern in match for pattern in self.whitelist)
 
     def scan_directory(
         self, directory: Path, exclude_patterns: List[str] = None

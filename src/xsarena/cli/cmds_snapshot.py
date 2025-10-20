@@ -34,6 +34,10 @@ PRESET_DEFAULT_EXCLUDE = [
     "pipelines/**",
     "*.egg-info/**",
     ".ipynb_checkpoints/**",
+    "repo_flat.txt",
+    "xsa_snapshot*.txt",
+    "xsa_debug_report*.txt",
+    "snapshot_chunks/**",
 ]
 
 PRESET_AUTHOR_CORE_INCLUDE = [
@@ -54,7 +58,7 @@ PRESET_AUTHOR_CORE_INCLUDE = [
     "src/xsarena/core/jobs/scheduler.py",
     "src/xsarena/core/jobs/store.py",
     "directives/base/zero2hero.md",
-    "directives/style.lossless.md",
+    "directives/_rules/rules.merged.md",
     "directives/system/plan_from_seeds.md",
 ]
 
@@ -233,8 +237,8 @@ def snapshot_create(
     # Combine default excludes with any user-provided excludes
     final_excludes = PRESET_DEFAULT_EXCLUDE + (exclude or [])
 
-    # Set default to home directory if no output path provided
-    if out is None:
+    # Set default to home directory if using the default filename
+    if out == "repo_flat.txt":
         out = "~/repo_flat.txt"
     outp = Path(out).expanduser()
     outp.parent.mkdir(parents=True, exist_ok=True)
@@ -261,7 +265,7 @@ def snapshot_create(
         raise typer.Exit(1) from e
 
 
-@app.command("legacy-write")
+@app.command("legacy-write", hidden=True)
 def snapshot_write(
     out: str = typer.Option(
         "xsa_snapshot.txt", "--out", "-o", help="Output file path."
@@ -296,6 +300,7 @@ def snapshot_write(
     ),
 ):
     """
+    DEPRECATED: Use 'create' command instead.
     Legacy snapshot command - use 'create' for the recommended flat format.
     Generate a snapshot using the smart snapshot builder.
 
@@ -305,6 +310,9 @@ def snapshot_write(
     Precedence: CLI flags override values from .snapshot.toml configuration file.
     Use --dry-run to see the effective plan before creating the snapshot.
     """
+    typer.echo(
+        "⚠️  Warning: 'legacy-write' command is deprecated. Use 'create' command instead."
+    )
     # Set default to home directory if no output path provided
     if out is None:
         out = "~/xsa_snapshot.txt"
@@ -349,7 +357,7 @@ def snapshot_write(
             )
 
 
-@app.command("legacy-simple")
+@app.command("legacy-simple", hidden=True)
 def snapshot_simple_cmd(
     out: str = typer.Option(
         "xsa_snapshot.txt", "--out", "-o", help="Output file path."
@@ -471,7 +479,7 @@ def snapshot_debug_report(
         raise typer.Exit(1) from e
 
 
-@app.command("legacy-txt")
+@app.command("legacy-txt", hidden=True)
 def snapshot_txt(
     preset: str = typer.Option(
         "author-core",
@@ -687,6 +695,29 @@ def snapshot_verify(
                     fail_on = list(raw)
         except Exception as e:
             typer.echo(f"[verify] Warning: could not load policy: {e}")
+    else:
+        # If no policy is given, try to load default policy from .xsarena/ops/snapshot_policy.yml
+        try:
+            import yaml
+
+            default_policy_path = Path(".xsarena/ops/snapshot_policy.yml")
+            if default_policy_path.exists():
+                data = (
+                    yaml.safe_load(default_policy_path.read_text(encoding="utf-8"))
+                    or {}
+                )
+                disallow = data.get("disallow_globs", disallow) or disallow
+                require = data.get("require", require) or require
+                max_per_file = int(data.get("max_per_file", max_per_file))
+                total_max = int(data.get("total_max", total_max))
+                if "fail_on" in data:
+                    raw = data["fail_on"]
+                    if isinstance(raw, str):
+                        fail_on = [s.strip() for s in raw.split(",") if s.strip()]
+                    elif isinstance(raw, list):
+                        fail_on = list(raw)
+        except Exception as e:
+            typer.echo(f"[verify] Warning: could not load default policy: {e}")
 
     violations = {
         "secrets": [],

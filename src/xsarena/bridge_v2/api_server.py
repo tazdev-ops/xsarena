@@ -38,8 +38,7 @@ command_queue = queue.Queue()
 idle_restart_thread = None
 idle_restart_stop_event = None
 
-# Rate limiting and channel limits
-MAX_CHANNELS = int(CONFIG.get("max_channels", 200))
+# Rate limiting (channel limits moved inside handler)
 RATE = CONFIG.get("rate_limit", {"burst": 10, "window_seconds": 10})
 PER_PEER = {}  # dict[ip] -> deque of timestamps
 
@@ -88,7 +87,16 @@ def load_model_map():
     try:
         with open("models.json", "r", encoding="utf-8") as f:
             content = f.read()
-            MODEL_NAME_TO_ID_MAP = json.loads(content) if content.strip() else {}
+            raw_data = json.loads(content) if content.strip() else {}
+
+            # Ensure MODEL_NAME_TO_ID_MAP is dict; if a list is read, convert to {name: name}
+            if isinstance(raw_data, list):
+                MODEL_NAME_TO_ID_MAP = {name: name for name in raw_data}
+            elif isinstance(raw_data, dict):
+                MODEL_NAME_TO_ID_MAP = raw_data
+            else:
+                MODEL_NAME_TO_ID_MAP = {}
+
         logger.info(
             f"Successfully loaded {len(MODEL_NAME_TO_ID_MAP)} models from 'models.json'."
         )
@@ -410,7 +418,9 @@ async def lifespan(app: FastAPI):
 app = FastAPI(lifespan=lifespan)
 
 # Safer default CORS: localhost-only; make configurable via CONFIG
-cors_origins = CONFIG.get("cors_origins") or ["http://127.0.0.1", "http://localhost"]
+cors_origins = CONFIG.get("cors_origins") or [
+    "*"
+]  # Default to ["*"] when CONFIG has no cors_origins
 app.add_middleware(
     CORSMiddleware,
     allow_origins=cors_origins,
@@ -494,7 +504,8 @@ async def chat_completions(request: Request):
         raise HTTPException(status_code=503, detail="Userscript client not connected.")
 
     # Check channel limit
-    if len(response_channels) >= MAX_CHANNELS:
+    max_channels = int(CONFIG.get("max_channels", 200))
+    if len(response_channels) >= max_channels:
         raise HTTPException(status_code=503, detail="Server busy")
 
     # Update last activity time
@@ -892,17 +903,28 @@ async def update_available_models(request: Request):
                             parsed = json.loads(cleaned_match)
                             if "models" in parsed:
                                 models = parsed["models"]
+                                # Ensure models is a dict {name: id or name} for models.json
+                                if isinstance(models, list):
+                                    # Convert list to dict format {name: name}
+                                    models_dict = {name: name for name in models}
+                                elif isinstance(models, dict):
+                                    # Already in correct format
+                                    models_dict = models
+                                else:
+                                    # If it's neither list nor dict, use empty dict
+                                    models_dict = {}
+
                                 # Save models to models.json
                                 with open("models.json", "w", encoding="utf-8") as f:
-                                    json.dump(models, f, indent=2)
+                                    json.dump(models_dict, f, indent=2)
                                 logger.info(
-                                    f"Updated {len(models)} models from HTML source"
+                                    f"Updated {len(models_dict)} models from HTML source"
                                 )
                                 return JSONResponse(
                                     {
                                         "status": "success",
-                                        "message": f"Updated {len(models)} models",
-                                        "count": len(models),
+                                        "message": f"Updated {len(models_dict)} models",
+                                        "count": len(models_dict),
                                     }
                                 )
                     except json.JSONDecodeError:
@@ -920,15 +942,28 @@ async def update_available_models(request: Request):
                     parsed = json.loads(script_content)
                     if "models" in parsed:
                         models = parsed["models"]
+                        # Ensure models is a dict {name: id or name} for models.json
+                        if isinstance(models, list):
+                            # Convert list to dict format {name: name}
+                            models_dict = {name: name for name in models}
+                        elif isinstance(models, dict):
+                            # Already in correct format
+                            models_dict = models
+                        else:
+                            # If it's neither list nor dict, use empty dict
+                            models_dict = {}
+
                         # Save models to models.json
                         with open("models.json", "w", encoding="utf-8") as f:
-                            json.dump(models, f, indent=2)
-                        logger.info(f"Updated {len(models)} models from script tag")
+                            json.dump(models_dict, f, indent=2)
+                        logger.info(
+                            f"Updated {len(models_dict)} models from script tag"
+                        )
                         return JSONResponse(
                             {
                                 "status": "success",
-                                "message": f"Updated {len(models)} models",
-                                "count": len(models),
+                                "message": f"Updated {len(models_dict)} models",
+                                "count": len(models_dict),
                             }
                         )
                 except json.JSONDecodeError:
@@ -1047,7 +1082,7 @@ async def list_models():
     """Return available models in OpenAI schema."""
     try:
         models_list = []
-        for model_name, _model_id in MODEL_NAME_TO_ID_MAP.items():
+        for model_name in MODEL_NAME_TO_ID_MAP.keys():  # Iterate over keys
             # Try to determine if it's an image model
             try:
                 with open("models.json", "r", encoding="utf-8") as f:
@@ -1200,6 +1235,18 @@ async def console():
 @app.get("/v1/health")
 def v1_health():
     return health()
+
+
+def run_server():
+    import os
+
+    import uvicorn
+
+    uvicorn.run(
+        app,
+        host=os.getenv("XSA_BRIDGE_HOST", "127.0.0.1"),
+        port=int(os.getenv("PORT", "5102")),
+    )
 
 
 if __name__ == "__main__":

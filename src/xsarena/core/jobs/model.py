@@ -26,17 +26,6 @@ except Exception:  # pragma: no cover
 def map_exception_to_error_code(exception: Exception) -> str:
     """Map common exceptions to standardized error codes."""
     error_map = {
-        # Network/Transport errors
-        aiohttp.ClientError: "transport_unavailable",
-        aiohttp.ClientConnectorError: "transport_unavailable",
-        aiohttp.ServerTimeoutError: "transport_timeout",
-        requests.ConnectionError: "transport_unavailable",
-        requests.Timeout: "transport_timeout",
-        ConnectionError: "transport_unavailable",
-        # API/Authentication errors
-        aiohttp.ClientResponseError: "api_error",
-        # Quota/Rate limit errors (often have specific status codes)
-        # We'll check status codes in the exception handling
         # Configuration errors
         KeyError: "invalid_config",  # When config keys are missing
         ValueError: "invalid_config",  # When config values are invalid
@@ -45,6 +34,29 @@ def map_exception_to_error_code(exception: Exception) -> str:
         UnicodeDecodeError: "encoding_error",
         json.JSONDecodeError: "json_error",
     }
+
+    # Add aiohttp-specific mappings only if aiohttp is available
+    if aiohttp is not None:
+        error_map.update(
+            {
+                aiohttp.ClientError: "transport_unavailable",
+                aiohttp.ClientConnectorError: "transport_unavailable",
+                aiohttp.ServerTimeoutError: "transport_timeout",
+                aiohttp.ClientResponseError: "api_error",
+            }
+        )
+
+    # Add requests-specific mappings only if requests is available
+    if requests is not None:
+        error_map.update(
+            {
+                requests.ConnectionError: "transport_unavailable",
+                requests.Timeout: "transport_timeout",
+            }
+        )
+
+    # Always include the base ConnectionError
+    error_map[ConnectionError] = "transport_unavailable"
 
     # Check if it's a specific HTTP error with status code
     if hasattr(exception, "status") and isinstance(exception.status, int):

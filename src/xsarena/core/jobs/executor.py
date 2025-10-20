@@ -160,7 +160,7 @@ class JobExecutor:
             resume_event.set()  # Initially not paused
 
             # Get repetition threshold from job spec or session state, or use default
-            repetition_threshold = 0.8  # default value
+            repetition_threshold = 0.35  # default value (matches state.py)
 
             # First check if session state has the value
             if "session_state" in job.meta and job.meta["session_state"]:

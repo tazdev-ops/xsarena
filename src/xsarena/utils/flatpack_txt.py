@@ -69,6 +69,10 @@ PRESET_DEFAULT_EXCLUDE = [
     "pipelines/**",
     "*.egg-info/**",
     ".ipynb_checkpoints/**",
+    "repo_flat.txt",
+    "xsa_snapshot*.txt",
+    "xsa_debug_report*.txt",
+    "snapshot_chunks/**",
 ]
 
 # Preset includes for author core
@@ -90,7 +94,7 @@ PRESET_AUTHOR_CORE_INCLUDE = [
     "src/xsarena/core/jobs/scheduler.py",
     "src/xsarena/core/jobs/store.py",
     "directives/base/zero2hero.md",
-    "directives/style.lossless.md",
+    "directives/_rules/rules.merged.md",
     "directives/system/plan_from_seeds.md",
 ]
 

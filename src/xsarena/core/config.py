@@ -5,7 +5,7 @@ from typing import Any, Dict, Optional
 
 import yaml
 from dotenv import load_dotenv
-from pydantic import BaseModel, ValidationError, field_validator
+from pydantic import BaseModel, ValidationError, field_validator, model_validator
 from rich.console import Console
 
 load_dotenv()
@@ -25,6 +25,44 @@ class Config(BaseModel):
     base_url: str = "http://127.0.0.1:5102/v1"  # Default to v2 bridge port
     timeout: int = 300
     redaction_enabled: bool = False
+
+    @model_validator(mode='after')
+    def validate_config(self):
+        """Validate configuration values."""
+        errors = []
+        
+        # Validate backend
+        if self.backend not in ('bridge', 'openrouter', 'null'):
+            errors.append(f"Invalid backend: {self.backend}")
+        
+        # Validate model
+        if self.backend == 'openrouter' and not self.api_key:
+            errors.append("OpenRouter backend requires api_key")
+        
+        # Validate base_url format
+        if self.base_url and not self.base_url.startswith(('http://', 'https://')):
+            errors.append(f"Invalid base_url format: {self.base_url}")
+        
+        # Validate numeric ranges
+        if self.window_size < 1 or self.window_size > 1000:
+            errors.append(f"window_size must be between 1-1000, got {self.window_size}")
+        
+        if self.anchor_length < 50 or self.anchor_length > 1000:
+            errors.append(f"anchor_length must be between 50-1000, got {self.anchor_length}")
+        
+        if self.repetition_threshold < 0 or self.repetition_threshold > 1:
+            errors.append(f"repetition_threshold must be between 0-1, got {self.repetition_threshold}")
+        
+        if self.max_retries < 0 or self.max_retries > 10:
+            errors.append(f"max_retries must be between 0-10, got {self.max_retries}")
+        
+        if self.timeout < 1 or self.timeout > 3600:
+            errors.append(f"timeout must be between 1-3600 seconds, got {self.timeout}")
+        
+        if errors:
+            raise ValueError("Configuration validation failed:\n" + "\n".join(errors))
+        
+        return self
 
     @field_validator("base_url")
     @classmethod

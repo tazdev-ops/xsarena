@@ -1,32 +1,5 @@
-# Default snapshot verification policy (CLI flags override this file)
-
-disallow_globs:
-  - books/**
-  - review/**
-  - .xsarena/**
-  - tools/**
-  - directives/**
-require:
-  - README.md
-  - pyproject.toml
-
+disallow_globs: ["books/**", "review/**", ".xsarena/**"]
+require: ["README.md", "pyproject.toml"]
 max_per_file: 180000
 total_max: 2500000
-
-fail_on:
-  - oversize
-  - disallowed
-  - secrets
-
-# Optional: store typical presets for documentation/reference
-presets:
-  minimal:
-    preset: "ultra-tight"
-    total_max: 2500000
-    max_per_file: 180000
-    repo_map: false
-  author_core:
-    preset: "author-core"
-    total_max: 4000000
-    max_per_file: 200000
-    repo_map: false
+fail_on: ["secrets", "oversize", "disallowed", "binary", "missing_required"]

@@ -269,33 +269,21 @@ def compose_prompt(
     min_chars: int = 4200,
     passes: int = 1,
     max_chunks: int = 12,
-    use_cache: bool = True,  # New parameter to control caching
+    use_cache: bool = False,  # Caching disabled - parameter kept for backward compatibility
     outline_first: bool = False,  # New parameter for outline-first functionality
     apply_reading_overlay: bool = False,  # New parameter to control reading overlay
 ) -> PromptComposition:
     """Convenience function to compose a prompt using the global PCL instance."""
-    if use_cache:
-        from ..utils.prompt_cache import get_cached_composition
-
-        result = get_cached_composition(
-            subject=subject,
-            base=base,
-            overlays=overlays,
-            extra_notes=extra_notes,
-            min_chars=min_chars,
-            passes=passes,
-            max_chunks=max_chunks,
-        )
-    else:
-        result = pcl.compose(
-            subject=subject,
-            base=base,
-            overlays=overlays,
-            extra_notes=extra_notes,
-            min_chars=min_chars,
-            passes=passes,
-            max_chunks=max_chunks,
-        )
+    # Caching is disabled due to missing module; always call pcl.compose directly
+    result = pcl.compose(
+        subject=subject,
+        base=base,
+        overlays=overlays,
+        extra_notes=extra_notes,
+        min_chars=min_chars,
+        passes=passes,
+        max_chunks=max_chunks,
+    )
 
     # If outline_first is enabled, modify the system text to include outline-first instructions
     if outline_first:

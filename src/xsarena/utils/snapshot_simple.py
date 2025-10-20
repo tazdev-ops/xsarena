@@ -795,9 +795,9 @@ def write_pro_snapshot(
 
 def get_rules_digest() -> str:
     """Get canonical rules digest."""
-    rules_file = ROOT / "rules.merged.md"
+    rules_file = ROOT / "directives/_rules/rules.merged.md"
     if not rules_file.exists():
-        return "Rules Digest: (rules.merged.md not found)\\n"
+        return "Rules Digest: (directives/_rules/rules.merged.md not found)\\n"
 
     try:
         content, truncated = safe_read_text(rules_file, 10000)  # Read first 10000 chars
@@ -805,9 +805,11 @@ def get_rules_digest() -> str:
         first_200_lines = "\\n".join(lines[:200])
         digest = sha256_bytes(first_200_lines.encode("utf-8"))
 
-        return f"Rules Digest (SHA256 of first 200 lines of rules.merged.md):\\n{digest}\\nFirst 200 lines preview:\\n{first_200_lines}\\n"
+        return f"Rules Digest (SHA256 of first 200 lines of directives/_rules/rules.merged.md):\\n{digest}\\nFirst 200 lines preview:\\n{first_200_lines}\\n"
     except Exception as e:
-        return f"Rules Digest: (Error reading rules.merged.md: {e})\\n"
+        return (
+            f"Rules Digest: (Error reading directives/_rules/rules.merged.md: {e})\\n"
+        )
 
 
 def get_review_artifacts() -> str:

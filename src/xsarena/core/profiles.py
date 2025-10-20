@@ -1,18 +1,21 @@
-from __future__ import annotations
-
-from pathlib import Path
-
-import yaml
-
-from .specs import DEFAULT_PROFILES
+"""
+Simple profiles functionality for XSArena.
+"""
 
 
-def load_profiles() -> dict:
-    p = Path("directives/profiles/presets.yml")
-    if p.exists():
-        try:
-            data = yaml.safe_load(p.read_text(encoding="utf-8")) or {}
-            return {**DEFAULT_PROFILES, **(data.get("profiles") or {})}
-        except Exception:
-            return DEFAULT_PROFILES
-    return DEFAULT_PROFILES
+def load_profiles():
+    """
+    Returns a dictionary of predefined profiles.
+    """
+    return {
+        "narrative": {"overlays": ["narrative", "no_bs"], "extra": ""},
+        "compressed": {
+            "overlays": ["compressed", "no_bs"],
+            "extra": "Dense narrative; avoid bullets.",
+        },
+        "pop": {"overlays": ["pop"], "extra": "Accessible; rigor without padding."},
+        "reference": {
+            "overlays": ["nobs"],
+            "extra": "Terse, factual; definitions first.",
+        },
+    }

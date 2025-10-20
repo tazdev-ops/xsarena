@@ -1,6 +1,9 @@
-# CLI Agent Rules & Guidelines for XSArena Project
+# AI Agent Rules
+
+This document contains the rules and guidelines for AI agents working with the XSArena project.
 
 ## Purpose & Role
+
 You are an AI assistant operating as a CLI agent for the XSArena project. You are being operated by a person who has next to no programming knowledge, but will provide you with plans/codes which a higher computational power AI chatbot provides. You have to implement them. You may also ask the operator to redirect your questions, problems, reports, etc to the higher AI for help. In such case try to provide the latest snapshot of problematic codes as higher AI does not have access to your latest codes.
 
 ## Core Responsibilities
@@ -28,7 +31,7 @@ When the command "snapshot" is given by operator, you shall:
 - Exclude binaries, CLI prompting instructions, images, downloaded modules, etc.
 - Use the `xsarena ops snapshot create --mode author-core` command for consistent output (configurable via .snapshotinclude and .snapshotignore files)
 - Use 'xsarena ops snapshot create --mode author-core --with-git --with-jobs' for a comprehensive debugging snapshot.
-- A separate chunking script exists: `chunk_with_message.sh` which can split any file into 100KB chunks with the message "Say \"received.\" after this message. DO nothing else." appended to each chunk
+- A separate chunking script exists: `chunk_with_message.sh` which can split any file into 100KB chunks with the message \"Say \\\"received.\\\" after this message. DO nothing else.\" appended to each chunk
 
 ### 4. File & Code Management
 - Always identify and work with relevant code files (`.py`, `.sh`, `.json`, `.toml`, `.md`, `.txt`)
@@ -191,7 +194,7 @@ EOF
 - **If it gets listy**: /out.passes 0
 - **If too short**: /out.minchars 4800; /out.passes 2
 - **One-liner macro**:
-  - Save: /macro.save z2h.go "/z2h \"${1}\" --out=./books/${1|slug}.final.md --max=12 --min=4200"
+  - Save: /macro.save z2h.go "/z2h \\"${1}\\" --out=./books/${1|slug}.final.md --max=12 --min=4200"
   - Use: /macro.run z2h.go "Your Topic"
 
 ## Final Notes
@@ -199,130 +202,3 @@ EOF
 - Feel free to add or ask about anything that would improve the development process
 - Always prioritize maintaining the integrity of the codebase
 - When in doubt, generate a snapshot and consult with the higher AI
-
-## Project-Keeping Rules (Added via ONE ORDER)
-
-### Preflight for any change:
-- Always run: xsarena fix run; xsarena backend ping; xsarena doctor run
-- Work on a feature branch (ops/sync-<stamp> or feat/<topic>); never on main
-
-### Cleanup (TTL + ephemeral):
-- Any helper/probe must start with a header on the first line: # XSA-EPHEMERAL ttl=3d
-- Preferred locations: review/ or .xsarena/tmp/ (never repo root)
-- Run regular sweeps:
-  - xsarena clean sweep            # dry
-  - xsarena clean sweep --apply    # weekly
-- Snapshot artifacts must not be committed:
-  - Ignore: snapshot_chunks/, xsa_min_snapshot*.txt, review/, .xsarena/tmp/
-
-### Content layout (enforced):
-- books/finals: *.final.md, *.manual.en.md
-- books/outlines: *.outline.md
-- books/flashcards: *flashcards*.md
-- books/archive: tiny (<64B), duplicates, obsolete
-- directives/_rules/rules.merged.md is canonical; sources in directives/_rules/sources/
-- directives/roles: role.*.md; directives/quickref: agent_quickref*.md; directives/prompts: prompt_*.txt
-
-### Docs/help drift:
-- If any src/xsarena/cli/*.py changes, regenerate help:
-  - bash scripts/gen_docs.sh
-  - If help changed, commit with: docs: update CLI help
-
-### Snapshot discipline:
-- Use only `xsarena ops snapshot create --mode author-core` command
-- Default location: $HOME/xsa_min_snapshot.txt
-- Do not commit snapshot outputs; delete after sending
-
-### Jobs/run discipline:
-- Prefer narrative + no_bs; avoid compressed unless explicitly chosen
-- Use descriptive lengths: standard, long, very-long, max; spans: medium, long, book
-- For resuming, use tail-anchor continue; only use until-end when you trust the model to emit NEXT: [END]
-
-## Reporting Policy
-
-### Reporting levels (use the right level for the request):
-- Minimal: `xsarena report quick [--book <path>]` (default level for most requests)
-- Focused: `xsarena report job <job_id> [--book <path>]` (when a specific run failed or regressed)
-- Full: `xsarena report full [--book <path>]` (only when asked)
-
-### Best practices:
-- Always attach a short human summary in report.md:
-  - Expected vs Actual, Command used, any manual tweaks, time/branch.
-- Use quick when:
-  - You need help interpreting quality/continuation issues; include the book path for a head/tail sample.
-- Use job when:
-  - A run failed, retried, or stalled; include the job id.
-- Use full only when:
-  - You're asked for recipes or directives context or a deeper dive is required.
-
-## Adaptive Ops Rules
-
-### Adaptive inspection and fixing
-- Always run `xsarena adapt inspect` after large edits or pull/rebase; read plan in review/adapt_plan_*.json
-- Only run `xsarena adapt fix --apply` on a feature branch; commit with chore(adapt): safe fixes
-- If wiring warnings appear (main.py missing a command import/register), do NOT auto-patch; open an intent and ask for guidance (xsarena ops intent-new "Wire command: X")
-- If help docs are missing: run scripts/gen_docs.sh; commit with docs: update CLI help
-- If adapt detects risky changes or unrecognized drift, escalate:
-  - `xsarena ops handoff --book <final.md>`
-  - `xsarena report quick --book <final.md>`
-
-## Reporting and Git Policy
-
-### Reporting
-- `xsarena report quick --book <final.md>` - Generate diagnostic bundle with book sample
-- Snapshots only via `xsarena ops snapshot create --mode author-core` (to $HOME/xsa_min_snapshot.txt)
-
-### Git policy
-- Feature branches: feat/<topic>, fix/<topic>, chore/<topic>, ops/<topic>
-- Conventional commits: feat:, fix:, chore:, docs:, refactor:, test:, build:, ci:
-- Run `scripts/prepush_check.sh` before push (lint/format/tests/help drift; no ephemeral in diff)
-
-### Adapt learning
-- `xsarena adapt suppress-add <check> [--pattern "..."]` - Suppress expected/benign warnings
-- `xsarena adapt suppress-ls` - List current suppressions
-- `xsarena adapt suppress-clear <check>|all` - Clear suppressions
-- Suppressions stored in `.xsarena/ops/pointers.json`
-
-## Memory Policy
-
-### ONE ORDER handling
-- After I paste a ONE ORDER, save it to review/one_order_<ts>.md and append to directives/_rules/sources/ORDERS_LOG.md, then run: bash scripts/merge_session_rules.sh
-
-## Snapshot Policy
-
-### Size constraint and presets
-- Normal snapshot (~400-800KB): `xsarena ops snapshot create --mode normal --out ~/repo_flat.txt`
-  - Includes essential core files, key documentation, and configuration
-  - Use for general debugging and context sharing
-- Maximal snapshot (~1.3MB): `xsarena ops snapshot create --mode maximal --out ~/xsa_maximal.txt`
-  - Includes all source code, documentation, and configuration files
-  - Use for comprehensive analysis and detailed debugging
-- Always specify output path: Use `--out ~/filename.txt` to save to home directory
-  - This keeps project directory clean and provides consistent location for snapshots
-- If snapshot exceeds desired size, use `--mode ultra-tight` for minimal context
-
-### Best practices learned from experience
-- Verify before sharing: Use `xsarena ops snapshot verify --file ~/filename.txt --fail-on disallowed --fail-on secrets` to check for issues before sharing
-- Choose appropriate preset: Select preset based on the complexity of the issue being debugged
-- Default to home directory: Always save snapshots to ~ to avoid cluttering project directory
-- Check for sensitive content: Ensure no API keys or secrets are included in shared snapshots
-
-### Chunking process (our secret shortcut)
-- When a snapshot exceeds 100KB, split it into chunks with the message "I will send the rest in the next message. Do nothing until I say continue. Just say received." appended to each chunk
-- Use the chunking process when sharing large snapshots to avoid size limits
-- The chunking process should maintain the file structure and boundaries in each chunk
-
-### Anti-recursion check
-- After creating a snapshot, verify it doesn't include previous snapshots in the output
-- Check snapshot content for recursive inclusion of snapshot files
-- Look for patterns like xsa_min_snapshot*.txt or similar in the output tree/file list
-
-## Low AI Reliability Considerations
-
-### Context and Instruction Issues
-- Lower AI is unreliable and sometimes available when context runs out
-- Instructions from lower AI may include problems or contradictions
-- Always verify implementation completeness using `xsarena checklist status`
-- When lower AI gives instructions, cross-reference with established patterns
-- If lower AI instructions conflict with working implementations, prioritize working code
-- Use `docs/IMPLEMENTATION_CHECKLIST.md` as authoritative reference for completed work

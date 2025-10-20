@@ -11,15 +11,44 @@ from typing import List, Optional
 import typer
 import yaml
 
-from ..core.profiles import load_profiles
+try:
+    from ..core.profiles import load_profiles
+except ImportError:
+    # Fallback if profiles module doesn't exist
+    def load_profiles():
+        return {}
+
+
 from ..core.prompt import compose_prompt
-from ..core.specs import DEFAULT_PROFILES, LENGTH_PRESETS, SPAN_PRESETS
+from ..core.specs import DEFAULT_PROFILES
 from ..core.state import SessionState
 from ..core.v2_orchestrator.orchestrator import Orchestrator
 from ..core.v2_orchestrator.specs import LengthPreset, RunSpecV2, SpanPreset
 from ..utils.directives import find_directive
-from ..utils.text import slugify
 from .context import CLIContext
+
+# Local fallbacks
+LENGTH_PRESETS = {
+    "standard": {"min": 4200, "passes": 1},
+    "long": {"min": 5800, "passes": 3},
+    "very-long": {"min": 6200, "passes": 4},
+    "max": {"min": 6800, "passes": 5},
+}
+
+SPAN_PRESETS = {"medium": 12, "long": 24, "book": 40}
+
+
+def slugify(s, default="book"):
+    """Convert string to a URL-friendly slug."""
+    import re
+
+    # Replace non-alphanumeric characters with underscores
+    slug = re.sub(r"[^a-zA-Z0-9]", "_", s)
+    # Strip leading/trailing underscores
+    slug = slug.strip("_")
+    # Return default if empty after processing
+    return slug if slug else default
+
 
 app = typer.Typer(
     help="Unified runner: compose/plan/continue with descriptive presets."
@@ -103,11 +132,16 @@ def run_book(
         raise typer.Exit(2)
 
     if profile:
-        prof = load_profiles().get(profile)
-        if not prof:
+        try:
+            prof = load_profiles().get(profile)
+            if not prof:
+                typer.echo(f"Error: profile '{profile}' not found")
+                raise typer.Exit(2)
+            overlays = prof["overlays"]
+            extra_note = prof["extra"]
+        except ImportError:
+            typer.echo(f"Error: could not load profiles module for profile '{profile}'")
             raise typer.Exit(2)
-        overlays = prof["overlays"]
-        extra_note = prof["extra"]
 
     # Create the new RunSpecV2 and use the new orchestrator system
     length_preset = LengthPreset(length)
@@ -195,11 +229,23 @@ def run_book(
             target_out = f"./books/{slug}.final.md"
         resumable = orchestrator.job_runner.find_resumable_job_by_output(target_out)
         if resumable and not (resume or overwrite):
-            typer.echo(f"Resumable job exists for {target_out}: {resumable}", err=True)
-            typer.echo(
-                "Use --resume to continue or --overwrite to start fresh.", err=True
-            )
-            raise typer.Exit(2)
+            # In non-TTY mode, default to resume if resumable job exists and resume is None
+            import sys
+
+            if resume is None and not sys.stdin.isatty():
+                # Prepare job for resume in non-TTY mode
+                from ..core.jobs.model import JobManager
+
+                job_runner = JobManager()
+                job_id = job_runner.prepare_job_for_resume(resumable)
+            else:
+                typer.echo(
+                    f"Resumable job exists for {target_out}: {resumable}", err=True
+                )
+                typer.echo(
+                    "Use --resume to continue or --overwrite to start fresh.", err=True
+                )
+                raise typer.Exit(2)
     except Exception:
         # If anything goes wrong here, don't block the run; just proceed
         pass
@@ -364,11 +410,23 @@ def run_from_recipe(
     try:
         resumable = orchestrator.job_runner.find_resumable_job_by_output(out_path)
         if resumable and not (resume or overwrite):
-            typer.echo(f"Resumable job exists for {out_path}: {resumable}", err=True)
-            typer.echo(
-                "Use --resume to continue or --overwrite to start fresh.", err=True
-            )
-            raise typer.Exit(2)
+            # In non-TTY mode, default to resume if resumable job exists and resume is None
+            import sys
+
+            if resume is None and not sys.stdin.isatty():
+                # Prepare job for resume in non-TTY mode
+                from ..core.jobs.model import JobManager
+
+                job_runner = JobManager()
+                job_id = job_runner.prepare_job_for_resume(resumable)
+            else:
+                typer.echo(
+                    f"Resumable job exists for {out_path}: {resumable}", err=True
+                )
+                typer.echo(
+                    "Use --resume to continue or --overwrite to start fresh.", err=True
+                )
+                raise typer.Exit(2)
     except Exception:
         # If anything goes wrong here, don't block the run; just proceed
         pass
@@ -845,15 +903,27 @@ def run_replay(
             run_spec.out_path
         )
         if resumable and not (resume or overwrite):
-            typer.echo(
-                f"Resumable job exists for {run_spec.out_path}: {resumable}", err=True
-            )
-            typer.echo(
-                "Use --resume to continue or --overwrite to start fresh.", err=True
-            )
-            raise typer.Exit(2)
+            # In non-TTY mode, default to resume if resumable job exists and resume is None
+            import sys
+
+            if resume is None and not sys.stdin.isatty():
+                # Prepare job for resume in non-TTY mode
+                from ..core.jobs.model import JobManager
+
+                job_runner = JobManager()
+                job_id = job_runner.prepare_job_for_resume(resumable)
+            else:
+                typer.echo(
+                    f"Resumable job exists for {run_spec.out_path}: {resumable}",
+                    err=True,
+                )
+                typer.echo(
+                    "Use --resume to continue or --overwrite to start fresh.", err=True
+                )
+                raise typer.Exit(2)
     except Exception:
         # If anything goes wrong here, don't block the run; just proceed
+        pass
         pass
 
     # Submit job using the orchestrator with the original system text from manifest
@@ -962,11 +1032,21 @@ def run_continue(
     try:
         resumable = orchestrator.job_runner.find_resumable_job_by_output(str(p))
         if resumable and not (resume or overwrite):
-            typer.echo(f"Resumable job exists for {str(p)}: {resumable}", err=True)
-            typer.echo(
-                "Use --resume to continue or --overwrite to start fresh.", err=True
-            )
-            raise typer.Exit(2)
+            # In non-TTY mode, default to resume if resumable job exists and resume is None
+            import sys
+
+            if resume is None and not sys.stdin.isatty():
+                # Prepare job for resume in non-TTY mode
+                from ..core.jobs.model import JobManager
+
+                job_runner = JobManager()
+                job_id = job_runner.prepare_job_for_resume(resumable)
+            else:
+                typer.echo(f"Resumable job exists for {str(p)}: {resumable}", err=True)
+                typer.echo(
+                    "Use --resume to continue or --overwrite to start fresh.", err=True
+                )
+                raise typer.Exit(2)
     except Exception:
         # If anything goes wrong here, don't block the run; just proceed
         pass
