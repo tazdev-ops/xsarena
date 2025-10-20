@@ -97,10 +97,7 @@ class CLIContext:
             if cfg.repetition_threshold != 0.35:
                 session_state.repetition_threshold = cfg.repetition_threshold
 
-        # Normalize base URL shape
-        final_base_url = base_cfg.base_url
-        if final_base_url and not final_base_url.rstrip("/").endswith("/v1"):
-            base_cfg.base_url = final_base_url.rstrip("/") + "/v1"
+        # Base URL normalization is handled by Config model validators only
 
         # Build engine using the final state
         backend = create_backend(
@@ -117,11 +114,7 @@ class CLIContext:
         )
 
     def rebuild_engine(self):
-        # self-heal base_url shape
-        if self.config.base_url and not self.config.base_url.rstrip("/").endswith(
-            "/v1"
-        ):
-            self.config.base_url = self.config.base_url.rstrip("/") + "/v1"
+        # Base URL normalization handled centrally in Config model validators
 
         self.engine = Engine(
             create_backend(
@@ -143,12 +136,7 @@ class CLIContext:
     def fix(self) -> list[str]:
         """Attempt self-fixes: base_url shape, backend validity, engine rebuild."""
         notes: list[str] = []
-        # normalize base_url
-        if self.config.base_url and not self.config.base_url.rstrip("/").endswith(
-            "/v1"
-        ):
-            self.config.base_url = self.config.base_url.rstrip("/") + "/v1"
-            notes.append("Normalized base_url to end with /v1")
+        # base_url normalization removed (Config validators are the source of truth)
 
         # fallback backend if invalid
         if self.state.backend not in ("bridge", "openrouter", "lmarena", "lmarena-ws"):

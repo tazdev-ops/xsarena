@@ -334,13 +334,13 @@ def snapshot_report():
         try:
             with tempfile.NamedTemporaryFile(delete=False, suffix=".txt") as tf:
                 tmp_path = Path(tf.name)
-            # Build with no size caps to get true sizes
+            # Build with no effective size caps to get true sizes
             flatten_txt(
                 out_path=tmp_path,
                 include=inc,
                 exclude=PRESET_DEFAULT_EXCLUDE,
-                max_bytes_per_file=100_000_000,  # Very large cap to avoid limiting
-                total_max_bytes=100_000_000,    # Very large cap to avoid limiting
+                max_bytes_per_file=1_000_000_000,  # Very large cap (1GB) to avoid limiting
+                total_max_bytes=1_000_000_000,    # Very large cap (1GB) to avoid limiting
                 use_git_tracked=False,
                 include_untracked=False,
                 redact=True,

@@ -118,6 +118,7 @@ def run_book(
         out_path=out,
         system_text=prompt_parts["system"],
         user_text=prompt_parts["user"],
+        generate_plan=bool(plan),
     )
 
     # Submit the job

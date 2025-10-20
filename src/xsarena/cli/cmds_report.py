@@ -5,7 +5,7 @@ from pathlib import Path
 import typer
 
 from ..core.jobs.model import JobManager
-from ..utils.snapshot_simple import write_pro_snapshot
+from ..utils.snapshot.writers import write_pro_snapshot
 
 app = typer.Typer(help="Diagnostic reports for quick handoff or later analysis.")
 

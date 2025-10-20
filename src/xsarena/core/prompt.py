@@ -179,17 +179,32 @@ class PromptCompositionLayer:
                     "Goal: pedagogical manual from foundations to practice with steady depth; no early wrap-ups."
                 )
         elif base == "reference":
-            parts.append(
-                "Goal: tight reference handbook; definitions first; terse, unambiguous rules and examples."
-            )
+            ref_path = _directives_root() / "base" / "reference.md"
+            if ref_path.exists():
+                try:
+                    parts.append(ref_path.read_text(encoding="utf-8").strip())
+                except Exception:
+                    parts.append("Goal: tight reference handbook; definitions first; terse, unambiguous rules and examples.")
+            else:
+                parts.append("Goal: tight reference handbook; definitions first; terse, unambiguous rules and examples.")
         elif base == "pop":
-            parts.append(
-                "Goal: accessible, accurate narrative explainer with vignettes; keep rigor without academic padding."
-            )
+            pop_path = _directives_root() / "base" / "pop.md"
+            if pop_path.exists():
+                try:
+                    parts.append(pop_path.read_text(encoding="utf-8").strip())
+                except Exception:
+                    parts.append("Goal: accessible, accurate narrative explainer with vignettes; keep rigor without academic padding.")
+            else:
+                parts.append("Goal: accessible, accurate narrative explainer with vignettes; keep rigor without academic padding.")
         elif base == "nobs":
-            parts.append(
-                "Goal: no‑bullshit manual; only what changes decisions or understanding; tight prose."
-            )
+            nobs_path = _directives_root() / "base" / "nobs.md"
+            if nobs_path.exists():
+                try:
+                    parts.append(nobs_path.read_text(encoding="utf-8").strip())
+                except Exception:
+                    parts.append("Goal: no‑bullshit manual; only what changes decisions or understanding; tight prose.")
+            else:
+                parts.append("Goal: no‑bullshit manual; only what changes decisions or understanding; tight prose.")
 
         # Apply overlays
         for overlay_key in overlays:
@@ -269,12 +284,11 @@ def compose_prompt(
     min_chars: int = 4200,
     passes: int = 1,
     max_chunks: int = 12,
-    use_cache: bool = False,  # Caching disabled - parameter kept for backward compatibility
     outline_first: bool = False,  # New parameter for outline-first functionality
     apply_reading_overlay: bool = False,  # New parameter to control reading overlay
 ) -> PromptComposition:
     """Convenience function to compose a prompt using the global PCL instance."""
-    # Caching is disabled due to missing module; always call pcl.compose directly
+    # Always call pcl.compose directly
     result = pcl.compose(
         subject=subject,
         base=base,
