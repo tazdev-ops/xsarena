@@ -238,7 +238,7 @@ class Orchestrator:
             session_state, "output_min_chars", resolved["min_length"]
         )
 
-        # compose system_text here as you already do:
+        # compose system_text with dynamic options:
         comp = compose_prompt(
             subject=run_spec.subject,
             base="zero2hero",
@@ -247,6 +247,7 @@ class Orchestrator:
             min_chars=resolved["min_length"],
             passes=resolved["passes"],
             max_chunks=resolved["chunks"],
+            outline_first=(bool(run_spec.generate_plan) or getattr(session_state, "outline_first_enabled", False)),
             apply_reading_overlay=getattr(session_state, "reading_overlay_on", False),
         )
         system_text = comp.system_text
@@ -261,68 +262,21 @@ class Orchestrator:
             or f"./books/{run_spec.subject.replace(' ', '_')}.final.md"
         )
 
-        # Check if output file already exists and prompt user if running in TTY
-        import sys
-
-        if Path(out_path).exists() and sys.stdin.isatty():
-            print(f"Output file already exists: {out_path}")
-            response = input("Resume (R) or Overwrite (O)? [R/O]: ").strip().upper()
-            if response == "O":
-                # User chose to overwrite, so don't resume
-                job_id = self.job_runner.submit(
-                    run_spec, backend_type, system_text, session_state
-                )
-                print(f"[run] submitted (overwrite) → {job_id}")
-            elif response == "R":
-                # User chose to resume, check for existing job
-                existing = self.job_runner.find_resumable_job_by_output(out_path)
-                if existing:
-                    job = self.job_runner.load(existing)
-                    if job.state == "RUNNING":
-                        job_id = job.id
-                        print(f"[run] existing RUNNING job → {job_id}")
-                    else:
-                        job_id = self.job_runner.prepare_job_for_resume(existing)
-                        print(f"[run] resuming job → {job_id}")
-                else:
-                    # No existing job found, submit a new one
-                    job_id = self.job_runner.submit(
-                        run_spec, backend_type, system_text, session_state
-                    )
-                    print(f"[run] submitted → {job_id}")
+        # Non-interactive, resume-safe scheduling (no TTY prompts)
+        existing = self.job_runner.find_resumable_job_by_output(out_path)
+        if existing:
+            job = self.job_runner.load(existing)
+            if job.state == "RUNNING":
+                job_id = job.id
+                print(f"[run] existing RUNNING job → {job_id}")
             else:
-                # Default to resume behavior if user doesn't enter O
-                existing = self.job_runner.find_resumable_job_by_output(out_path)
-                if existing:
-                    job = self.job_runner.load(existing)
-                    if job.state == "RUNNING":
-                        job_id = job.id
-                        print(f"[run] existing RUNNING job → {job_id}")
-                    else:
-                        job_id = self.job_runner.prepare_job_for_resume(existing)
-                        print(f"[run] resuming job → {job_id}")
-                else:
-                    # No existing job found, submit a new one
-                    job_id = self.job_runner.submit(
-                        run_spec, backend_type, system_text, session_state
-                    )
-                    print(f"[run] submitted → {job_id}")
+                job_id = self.job_runner.prepare_job_for_resume(existing)
+                print(f"[run] resuming job → {job_id}")
         else:
-            # File doesn't exist or not in TTY, proceed with normal resume logic
-            existing = self.job_runner.find_resumable_job_by_output(out_path)
-            if existing:
-                job = self.job_runner.load(existing)
-                if job.state == "RUNNING":
-                    job_id = job.id
-                    print(f"[run] existing RUNNING job → {job_id}")
-                else:
-                    job_id = self.job_runner.prepare_job_for_resume(existing)
-                    print(f"[run] resuming job → {job_id}")
-            else:
-                job_id = self.job_runner.submit(
-                    run_spec, backend_type, system_text, session_state
-                )
-                print(f"[run] submitted → {job_id}")
+            job_id = self.job_runner.submit(
+                run_spec, backend_type, system_text, session_state
+            )
+            print(f"[run] submitted → {job_id}")
 
         # Save run manifest with all required information
         self._save_run_manifest(
@@ -404,69 +358,21 @@ class Orchestrator:
         # NEW: resume-safe scheduling for continue operations
         out_path = file_path  # For continue, the file_path is the output path
 
-        # Check if output file already exists and prompt user if running in TTY
-        import sys
-
-        if Path(out_path).exists() and sys.stdin.isatty():
-            print(f"Output file already exists: {out_path}")
-            response = input("Resume (R) or Overwrite (O)? [R/O]: ").strip().upper()
-            if response == "O":
-                # User chose to overwrite, so don't resume
-                job_id = self.job_runner.submit_continue(
-                    run_spec, file_path, until_end, system_text, session_state
-                )
-                print(f"[run] submitted (overwrite) → {job_id}")
-            elif response == "R":
-                # User chose to resume, check for existing job
-                existing = self.job_runner.find_resumable_job_by_output(out_path)
-                if existing:
-                    job = self.job_runner.load(existing)
-                    if job.state == "RUNNING":
-                        job_id = job.id
-                        print(f"[run] existing RUNNING job → {job_id}")
-                    else:
-                        job_id = self.job_runner.prepare_job_for_resume(existing)
-                        print(f"[run] resuming job → {job_id}")
-                else:
-                    # No existing job found, submit a new continue job
-                    job_id = self.job_runner.submit_continue(
-                        run_spec, file_path, until_end, system_text, session_state
-                    )
-                    print(f"[run] submitted → {job_id}")
+        # Non-interactive, resume-safe scheduling (no TTY prompts)
+        existing = self.job_runner.find_resumable_job_by_output(out_path)
+        if existing:
+            job = self.job_runner.load(existing)
+            if job.state == "RUNNING":
+                job_id = job.id
+                print(f"[run] existing RUNNING job → {job_id}")
             else:
-                # Default to resume behavior if user doesn't enter O
-                existing = self.job_runner.find_resumable_job_by_output(out_path)
-                if existing:
-                    job = self.job_runner.load(existing)
-                    if job.state == "RUNNING":
-                        job_id = job.id
-                        print(f"[run] existing RUNNING job → {job_id}")
-                    else:
-                        job_id = self.job_runner.prepare_job_for_resume(existing)
-                        print(f"[run] resuming job → {job_id}")
-                else:
-                    # No existing job found, submit a new continue job
-                    job_id = self.job_runner.submit_continue(
-                        run_spec, file_path, until_end, system_text, session_state
-                    )
-                    print(f"[run] submitted → {job_id}")
+                job_id = self.job_runner.prepare_job_for_resume(existing)
+                print(f"[run] resuming job → {job_id}")
         else:
-            # File doesn't exist or not in TTY, proceed with normal resume logic
-            existing = self.job_runner.find_resumable_job_by_output(out_path)
-            if existing:
-                job = self.job_runner.load(existing)
-                if job.state == "RUNNING":
-                    job_id = job.id
-                    print(f"[run] existing RUNNING job → {job_id}")
-                else:
-                    job_id = self.job_runner.prepare_job_for_resume(existing)
-                    print(f"[run] resuming job → {job_id}")
-            else:
-                # Submit job to the new system with the composed system_text and session state
-                job_id = self.job_runner.submit_continue(
-                    run_spec, file_path, until_end, system_text, session_state
-                )
-                print(f"[run] submitted → {job_id}")
+            job_id = self.job_runner.submit_continue(
+                run_spec, file_path, until_end, system_text, session_state
+            )
+            print(f"[run] submitted → {job_id}")
 
         # Save run manifest with all required information
         self._save_run_manifest(

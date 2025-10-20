@@ -49,40 +49,7 @@ PRESET_DEFAULT_EXCLUDE = [
     "snapshot_chunks/**",
 ]
 
-PRESET_AUTHOR_CORE_INCLUDE = [
-    "README.md",
-    "COMMANDS_REFERENCE.md",
-    "pyproject.toml",
-    "src/xsarena/cli/main.py",
-    "src/xsarena/cli/registry.py",
-    "src/xsarena/cli/context.py",
-    "src/xsarena/cli/cmds_run.py",
-    "src/xsarena/cli/cmds_authoring.py",
-    "src/xsarena/cli/cmds_snapshot.py",
-    "src/xsarena/core/prompt.py",
-    "src/xsarena/core/prompt_runtime.py",
-    "src/xsarena/core/config.py",
-    "src/xsarena/core/state.py",
-    "src/xsarena/core/engine.py",
-    "src/xsarena/core/v2_orchestrator/orchestrator.py",
-    "src/xsarena/core/v2_orchestrator/specs.py",
-    "src/xsarena/core/jobs/model.py",
-    "src/xsarena/core/jobs/executor.py",
-    "src/xsarena/core/jobs/scheduler.py",
-    "src/xsarena/core/jobs/store.py",
-    "src/xsarena/core/backends/__init__.py",
-    "src/xsarena/core/backends/bridge_v2.py",
-    "src/xsarena/utils/flatpack_txt.py",
-    "src/xsarena/utils/snapshot_simple.py",
-    "src/xsarena/utils/secrets_scanner.py",
-    "directives/base/zero2hero.md",
-    "directives/system/plan_from_seeds.md",
-    "directives/_rules/rules.merged.md",
-    "docs/USAGE.md",
-    "docs/ARCHITECTURE.md",
-    "docs/OPERATING_MODEL.md",
-    "docs/COMMANDS_CHEATSHEET.md",
-]
+# Corrected Snapshot Presets using Glob Patterns
 
 PRESET_ULTRA_TIGHT_INCLUDE = [
     "README.md",
@@ -90,82 +57,34 @@ PRESET_ULTRA_TIGHT_INCLUDE = [
     "pyproject.toml",
     "src/xsarena/cli/main.py",
     "src/xsarena/cli/registry.py",
-    "src/xsarena/cli/context.py",
-    "src/xsarena/cli/cmds_run.py",
-    "src/xsarena/cli/cmds_authoring.py",
-    "src/xsarena/cli/cmds_snapshot.py",
-    "src/xsarena/core/prompt.py",
-    "src/xsarena/core/prompt_runtime.py",
-    "src/xsarena/core/config.py",
-    "src/xsarena/core/state.py",
-    "src/xsarena/core/engine.py",
     "src/xsarena/core/v2_orchestrator/orchestrator.py",
     "src/xsarena/core/v2_orchestrator/specs.py",
     "src/xsarena/core/jobs/model.py",
-    "src/xsarena/core/jobs/executor.py",
-    "src/xsarena/core/jobs/scheduler.py",
-    "src/xsarena/core/jobs/store.py",
-    "src/xsarena/core/backends/__init__.py",
-    "src/xsarena/core/backends/bridge_v2.py",
-    "src/xsarena/utils/flatpack_txt.py",
-    "src/xsarena/utils/snapshot_simple.py",
-    "src/xsarena/utils/secrets_scanner.py",
-    "directives/base/zero2hero.md",
-    "directives/system/plan_from_seeds.md",
+    "src/xsarena/core/jobs/executor_core.py",
     "directives/_rules/rules.merged.md",
+    "docs/ARCHITECTURE.md",
+]
+
+PRESET_AUTHOR_CORE_INCLUDE = PRESET_ULTRA_TIGHT_INCLUDE + [
+    "src/xsarena/cli/**/*.py",
+    "src/xsarena/core/prompt.py",
+    "src/xsarena/core/config.py",
+    "src/xsarena/core/state.py",
+    "docs/USAGE.md",
+    "directives/base/zero2hero.md",
+]
+
+PRESET_TIGHT_500K_INCLUDE = [
+    "README.md",
+    "COMMANDS_REFERENCE.md",
+    "pyproject.toml",
+    "src/xsarena/**/*.py",
+    "directives/**/*.md",
+    "directives/**/*.yml",
     "docs/USAGE.md",
     "docs/ARCHITECTURE.md",
     "docs/OPERATING_MODEL.md",
     "docs/COMMANDS_CHEATSHEET.md",
-]
-
-# A new preset tuned to produce a ~500–550 KB flat pack in typical repos
-# (final size depends on repo shape; budgets below enforce the target).
-PRESET_TIGHT_500K_INCLUDE = [
-    # Core docs/metadata
-    "README.md",
-    "COMMANDS_REFERENCE.md",
-    "pyproject.toml",
-    # CLI and context
-    "src/xsarena/cli/main.py",
-    "src/xsarena/cli/registry.py",
-    "src/xsarena/cli/context.py",
-    # Core authoring & orchestrator
-    "src/xsarena/core/prompt.py",
-    "src/xsarena/core/prompt_runtime.py",
-    "src/xsarena/core/config.py",
-    "src/xsarena/core/state.py",
-    "src/xsarena/core/engine.py",
-    "src/xsarena/core/v2_orchestrator/orchestrator.py",
-    "src/xsarena/core/v2_orchestrator/specs.py",
-    # Jobs (model + executor + scheduler + store)
-    "src/xsarena/core/jobs/model.py",
-    "src/xsarena/core/jobs/executor_core.py",
-    "src/xsarena/core/jobs/scheduler.py",
-    "src/xsarena/core/jobs/store.py",
-    "src/xsarena/core/jobs/chunk_processor.py",
-    "src/xsarena/core/jobs/processing/*.py",
-    # Backends (factory + bridge transport + circuit breaker)
-    "src/xsarena/core/backends/__init__.py",
-    "src/xsarena/core/backends/bridge_v2.py",
-    "src/xsarena/core/backends/circuit_breaker.py",
-    "src/xsarena/core/backends/transport.py",
-    # Bridge API (just the server; omit HTML and handlers if needed)
-    "src/xsarena/bridge_v2/api_server.py",
-    # Utils (flat pack + snapshot + health/metrics used by verify)
-    "src/xsarena/utils/flatpack_txt.py",
-    "src/xsarena/utils/snapshot_simple.py",
-    "src/xsarena/utils/snapshot/**/*.py",
-    "src/xsarena/utils/helpers.py",
-    "src/xsarena/utils/secrets_scanner.py",
-    "src/xsarena/utils/metrics.py",
-    # Directives essential to authoring
-    "directives/base/zero2hero.md",
-    "directives/system/plan_from_seeds.md",
-    "directives/_rules/rules.merged.md",
-    # Key docs
-    "docs/USAGE.md",
-    "docs/OPERATING_MODEL.md",
 ]
 
 PRESET_NORMAL_INCLUDE = [
@@ -403,27 +322,15 @@ def snapshot_report():
     This helps pick a mode that fits target budgets (e.g., ~500–550 KB).
     """
     modes = [
-        ("minimal", PRESET_AUTHOR_CORE_INCLUDE[:0]),  # include list resolved below
+        ("minimal", PRESET_ULTRA_TIGHT_INCLUDE),
         ("ultra-tight", PRESET_ULTRA_TIGHT_INCLUDE),
         ("author-core", PRESET_AUTHOR_CORE_INCLUDE),
         ("tight-500k", PRESET_TIGHT_500K_INCLUDE),
         ("normal", PRESET_NORMAL_INCLUDE),
     ]
-    # For minimal we reuse a small subset of ultra-tight for consistency
-    minimal_inc = [
-        "README.md",
-        "COMMANDS_REFERENCE.md",
-        "pyproject.toml",
-        "src/xsarena/cli/main.py",
-        "src/xsarena/cli/registry.py",
-        "src/xsarena/cli/context.py",
-        "src/xsarena/core/prompt.py",
-        "src/xsarena/core/prompt_runtime.py",
-        "src/xsarena/core/v2_orchestrator/orchestrator.py",
-    ]
     results = []
     for name, inc_list in modes:
-        inc = minimal_inc if name == "minimal" else inc_list
+        inc = inc_list
         try:
             with tempfile.NamedTemporaryFile(delete=False, suffix=".txt") as tf:
                 tmp_path = Path(tf.name)
