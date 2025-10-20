@@ -7,8 +7,8 @@ import zipfile
 from pathlib import Path
 from typing import Optional
 
-from ..helpers import is_binary_sample, safe_read_bytes, safe_read_text
 from ...core.redact import redact_snapshot_content
+from ..helpers import is_binary_sample, safe_read_bytes
 from .builders import (
     build_git_context,
     build_jobs_summary,

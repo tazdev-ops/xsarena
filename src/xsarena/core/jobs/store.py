@@ -11,7 +11,6 @@ from ...utils.helpers import load_json_with_error_handling
 from ...utils.io import atomic_write
 from .model import JobV3
 
-
 # No need for load_json wrapper since load_json_with_error_handling now returns data directly
 
 
@@ -63,7 +62,7 @@ class JobStore:
             raise ValueError(f"Invalid JSON in job file {job_path}: {str(e)}")
         except Exception as e:
             raise ValueError(f"Error reading job file {job_path}: {str(e)}")
-        
+
         if not isinstance(data, dict):
             raise ValueError(f"Invalid job.json structure @ {job_path}")
         return JobV3(**data)

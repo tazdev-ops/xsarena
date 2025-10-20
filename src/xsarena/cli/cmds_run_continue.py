@@ -14,7 +14,6 @@ except ImportError:
         return {}
 
 
-from ..core.prompt import compose_prompt
 from ..core.specs import DEFAULT_PROFILES
 from ..core.v2_orchestrator.orchestrator import Orchestrator
 from ..core.v2_orchestrator.specs import LengthPreset, RunSpecV2, SpanPreset
@@ -85,10 +84,14 @@ def run_continue(
     )
 
     if follow:
-        job_id = asyncio.run(orch.run_continue(run_spec, str(file_path), until_end=until_end, priority=5))
+        job_id = asyncio.run(
+            orch.run_continue(run_spec, str(file_path), until_end=until_end, priority=5)
+        )
         typer.echo(f"Continue job submitted: {job_id}")
         typer.echo("Following job to completion...")
     else:
-        job_id = asyncio.run(orch.run_continue(run_spec, str(file_path), until_end=until_end, priority=5))
+        job_id = asyncio.run(
+            orch.run_continue(run_spec, str(file_path), until_end=until_end, priority=5)
+        )
         typer.echo(f"Continue job submitted: {job_id}")
         typer.echo(f"Run 'xsarena ops jobs follow {job_id}' to monitor progress")

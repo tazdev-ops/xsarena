@@ -10,7 +10,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import List
 
-from ..helpers import is_binary_sample, safe_read_bytes, safe_read_text
+from ..helpers import safe_read_text
 from .config import ROOT
 
 

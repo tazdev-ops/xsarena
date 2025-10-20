@@ -10,8 +10,8 @@ from typing import List, Optional, Tuple
 import typer
 
 from xsarena.utils.flatpack_txt import flatten_txt
-from xsarena.utils.snapshot_simple import write_pro_snapshot
 from xsarena.utils.secrets_scanner import SecretsScanner
+from xsarena.utils.snapshot_simple import write_pro_snapshot
 
 # --- New, Refined Presets ---
 
@@ -55,16 +55,38 @@ PRESET_AUTHOR_CORE_INCLUDE = [
 
 # Sensible global excludes (can be extended via env)
 PRESET_DEFAULT_EXCLUDE = [
-    ".git/**", "venv/**", ".venv/**", "__pycache__/**", "*.pyc",
-    ".pytest_cache/**", ".mypy_cache/**", ".ruff_cache/**", ".cache/**",
-    "dist/**", "build/**", "logs/**", ".xsarena/jobs/**", ".xsarena/tmp/**",
-    "books/**", "review/**", "tests/**", "examples/**", "*.egg-info/**",
-    ".ipynb_checkpoints/**", "repo_flat.txt", "xsa_snapshot*.txt",
-    "xsa_snapshot*.zip", "xsa_debug_report*.txt", "snapshot_chunks/**",
-    "**/_preview/**", "**/_mixer/**", # Exclude temporary directive directories
+    ".git/**",
+    "venv/**",
+    ".venv/**",
+    "__pycache__/**",
+    "*.pyc",
+    ".pytest_cache/**",
+    ".mypy_cache/**",
+    ".ruff_cache/**",
+    ".cache/**",
+    "dist/**",
+    "build/**",
+    "logs/**",
+    ".xsarena/jobs/**",
+    ".xsarena/tmp/**",
+    "books/**",
+    "review/**",
+    "tests/**",
+    "examples/**",
+    "*.egg-info/**",
+    ".ipynb_checkpoints/**",
+    "repo_flat.txt",
+    "xsa_snapshot*.txt",
+    "xsa_snapshot*.zip",
+    "xsa_debug_report*.txt",
+    "snapshot_chunks/**",
+    "**/_preview/**",
+    "**/_mixer/**",  # Exclude temporary directive directories
 ]
 
-app = typer.Typer(help="Generate an intelligent, minimal, and configurable project snapshot.")
+app = typer.Typer(
+    help="Generate an intelligent, minimal, and configurable project snapshot."
+)
 
 
 @app.command(
@@ -72,7 +94,9 @@ app = typer.Typer(help="Generate an intelligent, minimal, and configurable proje
     help="Create a flat snapshot, ideal for chatbot uploads. Use --mode ultra-tight for the leanest version.",
 )
 def snapshot_create(
-    mode: str = typer.Option("author-core", "--mode", help="ultra-tight | author-core | custom"),
+    mode: str = typer.Option(
+        "author-core", "--mode", help="ultra-tight | author-core | custom"
+    ),
     out: str = typer.Option("~/repo_flat.txt", "--out", "-o", help="Output .txt path"),
     include: List[str] = typer.Option(
         None,
@@ -80,12 +104,20 @@ def snapshot_create(
         "-I",
         help="Extra include glob(s) (used in custom mode or appended to preset)",
     ),
-    exclude: List[str] = typer.Option(None, "--exclude", "-X", help="Extra exclude glob(s)"),
-    git_tracked: bool = typer.Option(False, "--git-tracked", help="Enumerate files from git ls-files"),
-    max_per_file: int = typer.Option(180_000, "--max-per-file", help="Max bytes per file"),
+    exclude: List[str] = typer.Option(
+        None, "--exclude", "-X", help="Extra exclude glob(s)"
+    ),
+    git_tracked: bool = typer.Option(
+        False, "--git-tracked", help="Enumerate files from git ls-files"
+    ),
+    max_per_file: int = typer.Option(
+        180_000, "--max-per-file", help="Max bytes per file"
+    ),
     total_max: int = typer.Option(2_500_000, "--total-max", help="Total max bytes"),
     redact: bool = typer.Option(True, "--redact/--no-redact", help="Apply redaction"),
-    repo_map: bool = typer.Option(True, "--repo-map/--no-repo-map", help="Add repo map header"),
+    repo_map: bool = typer.Option(
+        True, "--repo-map/--no-repo-map", help="Add repo map header"
+    ),
 ):
     """
     Flatten curated files into a single .txt. Uses glob-based presets and budgets.
@@ -100,15 +132,20 @@ def snapshot_create(
         inc = list(PRESET_AUTHOR_CORE_INCLUDE)
     elif mode_lower == "custom":
         if not include:
-            typer.echo("Error: --mode=custom requires at least one --include (-I)", err=True)
+            typer.echo(
+                "Error: --mode=custom requires at least one --include (-I)", err=True
+            )
             raise typer.Exit(code=1)
         inc = list(include)
     else:
-        typer.echo(f"Error: Unknown mode '{mode}'. Choose: ultra-tight | author-core | custom", err=True)
+        typer.echo(
+            f"Error: Unknown mode '{mode}'. Choose: ultra-tight | author-core | custom",
+            err=True,
+        )
         raise typer.Exit(code=1)
 
     if mode_lower != "custom" and include:
-        inc.extend(include) # Append extra includes to presets
+        inc.extend(include)  # Append extra includes to presets
 
     # Resolve excludes (preset + CLI + env override)
     final_excludes = list(PRESET_DEFAULT_EXCLUDE) + (exclude or [])
@@ -137,7 +174,9 @@ def snapshot_create(
         try:
             text = outp.read_text(encoding="utf-8", errors="replace")
             entries = _parse_flatpack_boundaries(text)
-            typer.echo(f"✓ Snapshot → {out_path} | files embedded: {len(entries)} | bytes: {outp.stat().st_size:,}")
+            typer.echo(
+                f"✓ Snapshot → {out_path} | files embedded: {len(entries)} | bytes: {outp.stat().st_size:,}"
+            )
         except Exception:
             typer.echo(f"✓ Snapshot → {out_path}")
 
@@ -158,7 +197,7 @@ def snapshot_report():
         typer.echo("\nSnapshot Mode Size Report\n")
         typer.echo(f"{'Mode':<14} {'Size (bytes)':>12}")
         typer.echo("-" * 28)
-        
+
         # Test ultra-tight preset
         flatten_txt(
             out_path=tmp_path,
@@ -173,7 +212,7 @@ def snapshot_report():
         )
         ultra_tight_size = tmp_path.stat().st_size
         typer.echo(f"{'ultra-tight':<14} {ultra_tight_size:>12,}")
-        
+
         # Test author-core preset
         flatten_txt(
             out_path=tmp_path,
@@ -188,7 +227,7 @@ def snapshot_report():
         )
         author_core_size = tmp_path.stat().st_size
         typer.echo(f"{'author-core':<14} {author_core_size:>12,}")
-        
+
         typer.echo("\nTip: Use 'xsarena ops snapshot create' to build a snapshot pack.")
     except Exception as e:
         typer.echo(f"Report failed: {e}", err=True)
@@ -199,7 +238,9 @@ def snapshot_report():
 
 @app.command("debug-report", help="Generate a verbose snapshot for debugging.")
 def snapshot_debug_report(
-    out: str = typer.Option("~/xsa_debug_report.txt", "--out", "-o", help="Output file"),
+    out: str = typer.Option(
+        "~/xsa_debug_report.txt", "--out", "-o", help="Output file"
+    ),
 ):
     typer.echo("Generating verbose debug report. This may take a moment...")
     try:
@@ -266,18 +307,49 @@ def _parse_flatpack_boundaries(text: str) -> List[Tuple[str, int, bool]]:
 
 @app.command("verify")
 def snapshot_verify(
-    snapshot_file: Optional[str] = typer.Option(None, "--file", "-f", help="Verify a built flat pack. If omitted, preflight verify."),
-    mode: str = typer.Option("author-core", "--mode", help="Mode to preflight (ignored if --file is provided)"),
-    include: List[str] = typer.Option(None, "--include", "-I", help="Extra include patterns (preflight)"),
-    exclude: List[str] = typer.Option(None, "--exclude", "-X", help="Extra exclude patterns (preflight)"),
+    snapshot_file: Optional[str] = typer.Option(
+        None,
+        "--file",
+        "-f",
+        help="Verify a built flat pack. If omitted, preflight verify.",
+    ),
+    mode: str = typer.Option(
+        "author-core",
+        "--mode",
+        help="Mode to preflight (ignored if --file is provided)",
+    ),
+    include: List[str] = typer.Option(
+        None, "--include", "-I", help="Extra include patterns (preflight)"
+    ),
+    exclude: List[str] = typer.Option(
+        None, "--exclude", "-X", help="Extra exclude patterns (preflight)"
+    ),
     git_tracked: bool = typer.Option(False, "--git-tracked"),
-    max_per_file: int = typer.Option(200_000, "--max-per-file", help="Per-file budget (bytes)"),
-    total_max: int = typer.Option(4_000_000, "--total-max", help="Total budget (bytes, preflight only)"),
-    disallow: List[str] = typer.Option(PRESET_DEFAULT_EXCLUDE, "--disallow", help="Disallow these globs."),
-    fail_on: List[str] = typer.Option(["secrets", "oversize", "disallowed", "binary", "missing_required"],"--fail-on", help="Fail on these categories."),
-    require: List[str] = typer.Option(["README.md", "pyproject.toml"], "--require", help="Paths that must be present"),
-    redaction_expected: bool = typer.Option(False, "--redaction-expected/--no-redaction-expected", help="Postflight: warn/fail if no [REDACTED_*] markers appear."),
-    policy: Optional[str] = typer.Option(None, "--policy", help="Optional policy .yml."),
+    max_per_file: int = typer.Option(
+        200_000, "--max-per-file", help="Per-file budget (bytes)"
+    ),
+    total_max: int = typer.Option(
+        4_000_000, "--total-max", help="Total budget (bytes, preflight only)"
+    ),
+    disallow: List[str] = typer.Option(
+        PRESET_DEFAULT_EXCLUDE, "--disallow", help="Disallow these globs."
+    ),
+    fail_on: List[str] = typer.Option(
+        ["secrets", "oversize", "disallowed", "binary", "missing_required"],
+        "--fail-on",
+        help="Fail on these categories.",
+    ),
+    require: List[str] = typer.Option(
+        ["README.md", "pyproject.toml"], "--require", help="Paths that must be present"
+    ),
+    redaction_expected: bool = typer.Option(
+        False,
+        "--redaction-expected/--no-redaction-expected",
+        help="Postflight: warn/fail if no [REDACTED_*] markers appear.",
+    ),
+    policy: Optional[str] = typer.Option(
+        None, "--policy", help="Optional policy .yml."
+    ),
     json_output: bool = typer.Option(False, "--json", help="Output in JSON format"),
     quiet: bool = typer.Option(False, "--quiet", help="Suppress narrative output"),
 ):
@@ -288,6 +360,7 @@ def snapshot_verify(
     if policy:
         try:
             import yaml
+
             data = yaml.safe_load(Path(policy).read_text(encoding="utf-8")) or {}
             disallow = data.get("disallow_globs", disallow) or disallow
             require = data.get("require", require) or require
@@ -298,10 +371,16 @@ def snapshot_verify(
             typer.echo(f"[verify] Warning: could not load policy: {e}")
 
     violations = {
-        "secrets": [], "oversize": [], "disallowed": [], "binary": [], "missing_required": []
+        "secrets": [],
+        "oversize": [],
+        "disallowed": [],
+        "binary": [],
+        "missing_required": [],
     }
 
-    def _print_summary(total_files: int, total_bytes: int, largest: List[Tuple[str, int]]):
+    def _print_summary(
+        total_files: int, total_bytes: int, largest: List[Tuple[str, int]]
+    ):
         if not json_output:
             typer.echo(f"[verify] files: {total_files}, bytes: {total_bytes:,}")
             if largest and not quiet:
@@ -313,8 +392,11 @@ def snapshot_verify(
         to_fail = {k for k in violations if violations[k] and k in set(fail_on)}
         if json_output:
             result = {
-                "total_files": total_files, "total_bytes": total_bytes, "violations": violations,
-                "categories_to_fail": sorted(to_fail), "status": "FAIL" if to_fail else "OK",
+                "total_files": total_files,
+                "total_bytes": total_bytes,
+                "violations": violations,
+                "categories_to_fail": sorted(to_fail),
+                "status": "FAIL" if to_fail else "OK",
             }
             typer.echo(json.dumps(result))
         else:
@@ -333,7 +415,8 @@ def snapshot_verify(
     if snapshot_file:
         p = Path(snapshot_file)
         if not p.exists():
-            typer.echo(f"[verify] file not found: {snapshot_file}"); raise typer.Exit(2)
+            typer.echo(f"[verify] file not found: {snapshot_file}")
+            raise typer.Exit(2)
         text = p.read_text(encoding="utf-8", errors="replace")
         entries = _parse_flatpack_boundaries(text)
         total_bytes = 0
@@ -341,23 +424,32 @@ def snapshot_verify(
         for rel, approx_bytes, is_bin in entries:
             total_bytes += approx_bytes
             largest.append((rel, approx_bytes))
-            if approx_bytes > max_per_file: violations["oversize"].append(f"{rel} ({approx_bytes} > {max_per_file})")
-            if _glob_any(rel, disallow): violations["disallowed"].append(rel)
-            if is_bin: violations["binary"].append(rel)
+            if approx_bytes > max_per_file:
+                violations["oversize"].append(
+                    f"{rel} ({approx_bytes} > {max_per_file})"
+                )
+            if _glob_any(rel, disallow):
+                violations["disallowed"].append(rel)
+            if is_bin:
+                violations["binary"].append(rel)
         largest.sort(key=lambda t: t[1], reverse=True)
         if redaction_expected and "[REDACTED_" not in text:
             violations.setdefault("redaction", []).append("no redaction markers found")
         _print_summary(len(entries), total_bytes, largest)
         present = {rel for rel, _, _ in entries}
         for req in require or []:
-            if not any(fnmatch.fnmatch(r, req) for r in present): violations["missing_required"].append(req)
+            if not any(fnmatch.fnmatch(r, req) for r in present):
+                violations["missing_required"].append(req)
         _fail_if_needed(len(entries), total_bytes)
 
     # Preflight logic
-    if mode == "ultra-tight": base_includes = PRESET_ULTRA_TIGHT_INCLUDE
-    elif mode == "author-core": base_includes = PRESET_AUTHOR_CORE_INCLUDE
-    else: base_includes = []
-    
+    if mode == "ultra-tight":
+        base_includes = PRESET_ULTRA_TIGHT_INCLUDE
+    elif mode == "author-core":
+        base_includes = PRESET_AUTHOR_CORE_INCLUDE
+    else:
+        base_includes = []
+
     final_includes = base_includes + (include or [])
     final_excludes = PRESET_DEFAULT_EXCLUDE + (exclude or [])
 
@@ -368,34 +460,45 @@ def snapshot_verify(
         for p in Path(".").glob(pat):
             if p.is_file():
                 included_files.add(p.resolve())
-    
+
     excluded_files = set()
     for p in included_files:
         if _glob_any(_posix_path(p), final_excludes):
             excluded_files.add(p)
-            
+
     final_set = included_files - excluded_files
     posix_map = {_posix_path(p): p for p in final_set}
 
-    total_bytes = 0; largest = []; scanner = SecretsScanner()
+    total_bytes = 0
+    largest = []
+    scanner = SecretsScanner()
     for rel, p in posix_map.items():
         sz = p.stat().st_size
         total_bytes += sz
         largest.append((rel, sz))
-        if sz > max_per_file: violations["oversize"].append(f"{rel} ({sz} > {max_per_file})")
-        if _glob_any(rel, disallow): violations["disallowed"].append(rel)
-        if _is_binary_quick(p): violations["binary"].append(rel)
+        if sz > max_per_file:
+            violations["oversize"].append(f"{rel} ({sz} > {max_per_file})")
+        if _glob_any(rel, disallow):
+            violations["disallowed"].append(rel)
+        if _is_binary_quick(p):
+            violations["binary"].append(rel)
         try:
             findings = scanner.scan_file(p)
-            if findings: violations["secrets"].append(f"{rel} [{findings[0].get('type','secret')}]")
-        except Exception: pass
-    
+            if findings:
+                violations["secrets"].append(
+                    f"{rel} [{findings[0].get('type','secret')}]"
+                )
+        except Exception:
+            pass
+
     largest.sort(key=lambda t: t[1], reverse=True)
     _print_summary(len(posix_map), total_bytes, largest)
-    if total_bytes > total_max: violations["oversize"].append(f"[total] {total_bytes:,} > {total_max:,}")
-    
+    if total_bytes > total_max:
+        violations["oversize"].append(f"[total] {total_bytes:,} > {total_max:,}")
+
     rels = list(posix_map.keys())
     for req in require or []:
-        if not any(fnmatch.fnmatch(r, req) for r in rels): violations["missing_required"].append(req)
-        
+        if not any(fnmatch.fnmatch(r, req) for r in rels):
+            violations["missing_required"].append(req)
+
     _fail_if_needed(len(posix_map), total_bytes)

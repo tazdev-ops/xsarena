@@ -39,10 +39,10 @@ def get_project_root() -> Path:
 def base_from_config_url(url: str) -> str:
     """
     Extract the base URL by stripping trailing /v1 if present.
-    
+
     Args:
         url: The full URL that may end with /v1
-        
+
     Returns:
         The base URL with /v1 stripped if present
     """

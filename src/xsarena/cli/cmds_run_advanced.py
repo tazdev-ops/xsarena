@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import asyncio
-import json
 from pathlib import Path
 from typing import List, Optional
 
@@ -79,8 +78,12 @@ def run_from_recipe(
     # Build the run spec with only supported fields
     run_spec = RunSpecV2(
         subject=subject,
-        length=LengthPreset(length) if length in ["standard", "long", "very-long", "max"] else LengthPreset.STANDARD,
-        span=SpanPreset(span) if span in ["medium", "long", "book"] else SpanPreset.MEDIUM,
+        length=LengthPreset(length)
+        if length in ["standard", "long", "very-long", "max"]
+        else LengthPreset.STANDARD,
+        span=SpanPreset(span)
+        if span in ["medium", "long", "book"]
+        else SpanPreset.MEDIUM,
         overlays=overlays,
         extra_files=extra_files,
         out_path=recipe.get("out_path", out),
@@ -235,7 +238,9 @@ def run_replay(
     """
     Replay a job from a run manifest.
     """
-    typer.echo("Not implemented for v0.3 manifests yet. Use: xsarena ops jobs clone and rerun.")
+    typer.echo(
+        "Not implemented for v0.3 manifests yet. Use: xsarena ops jobs clone and rerun."
+    )
     raise typer.Exit(2)
 
 

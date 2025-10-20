@@ -1,8 +1,6 @@
 """
 Unified settings commands for XSArena.
 """
-import os
-import time
 from pathlib import Path
 
 import typer
@@ -52,7 +50,7 @@ def capture_ids():
 
     # Compute base URL from config
     base = _load_base_url()
-    
+
     try:
         session_id, message_id = capture_bridge_ids(base)
         typer.echo(f"Captured session_id: {session_id}")

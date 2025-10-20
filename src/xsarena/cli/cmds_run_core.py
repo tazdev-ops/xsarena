@@ -14,7 +14,6 @@ except ImportError:
         return {}
 
 
-from ..core.prompt import compose_prompt
 from ..core.specs import DEFAULT_PROFILES
 from ..core.v2_orchestrator.orchestrator import Orchestrator
 from ..core.v2_orchestrator.specs import LengthPreset, RunSpecV2, SpanPreset

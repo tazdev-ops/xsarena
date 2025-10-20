@@ -321,9 +321,7 @@ def config_check(
 @app.command("config-capture-ids")
 def config_capture_ids(ctx: typer.Context):
     """Capture bridge session and message IDs from LMArena."""
-    import time
-
-    import requests
+    from ..utils.helpers import capture_bridge_ids
 
     # Get the CLI context to access the configuration
     cli = ctx.obj
@@ -343,80 +341,42 @@ def config_capture_ids(ctx: typer.Context):
     except KeyboardInterrupt:
         raise typer.Exit(1)
 
-    # Send start capture command to bridge
-    start_url = f"{base}/internal/start_id_capture"
     try:
-        response = requests.post(
-            start_url, timeout=10
-        )
-        if response.status_code == 200:
-            typer.echo("✓ ID capture started. Please click 'Retry' in your browser.")
-        else:
-            typer.echo(
-                f"✗ Failed to start ID capture: {response.status_code} - {response.text}"
+        session_id, message_id = capture_bridge_ids(base)
+        
+        # IDs found, update config file
+        config_path = Path(".xsarena/config.yml")
+        config_path.parent.mkdir(parents=True, exist_ok=True)
+
+        # Load existing config if it exists
+        existing_config = {}
+        if config_path.exists():
+            with open(config_path, "r", encoding="utf-8") as f:
+                existing_config = yaml.safe_load(f) or {}
+
+        # Update the bridge section with the new IDs
+        if "bridge" not in existing_config:
+            existing_config["bridge"] = {}
+        existing_config["bridge"]["session_id"] = session_id
+        existing_config["bridge"]["message_id"] = message_id
+
+        # Save the updated config
+        with open(config_path, "w", encoding="utf-8") as f:
+            yaml.safe_dump(
+                existing_config,
+                f,
+                default_flow_style=False,
+                sort_keys=False,
             )
-            raise typer.Exit(1)
-    except requests.exceptions.RequestException as e:
-        typer.echo(f"✗ Failed to connect to bridge: {e}")
+
+        typer.echo("✓ Successfully captured and saved IDs:")
+        typer.echo(f"  Session ID: {session_id}")
+        typer.echo(f"  Message ID: {message_id}")
+        typer.echo(f"  Config saved to: {config_path}")
+        return
+    except Exception as e:
+        typer.echo(f"✗ Error capturing IDs: {e}")
         raise typer.Exit(1)
-
-    # Poll for captured IDs
-    cfg_url = f"{base}/internal/config"
-    timeout = 30  # seconds
-    start_time = time.time()
-
-    while time.time() - start_time < timeout:
-        try:
-            response = requests.get(cfg_url, timeout=5)
-            if response.status_code == 200:
-                data = response.json()
-                bridge_config = data.get("bridge", {})
-                session_id = bridge_config.get("session_id")
-                message_id = bridge_config.get("message_id")
-
-                if session_id and message_id:
-                    # IDs found, update config file
-                    config_path = Path(".xsarena/config.yml")
-                    config_path.parent.mkdir(parents=True, exist_ok=True)
-
-                    # Load existing config if it exists
-                    existing_config = {}
-                    if config_path.exists():
-                        with open(config_path, "r", encoding="utf-8") as f:
-                            existing_config = yaml.safe_load(f) or {}
-
-                    # Update the bridge section with the new IDs
-                    if "bridge" not in existing_config:
-                        existing_config["bridge"] = {}
-                    existing_config["bridge"]["session_id"] = session_id
-                    existing_config["bridge"]["message_id"] = message_id
-
-                    # Save the updated config
-                    with open(config_path, "w", encoding="utf-8") as f:
-                        yaml.safe_dump(
-                            existing_config,
-                            f,
-                            default_flow_style=False,
-                            sort_keys=False,
-                        )
-
-                    typer.echo("✓ Successfully captured and saved IDs:")
-                    typer.echo(f"  Session ID: {session_id}")
-                    typer.echo(f"  Message ID: {message_id}")
-                    typer.echo(f"  Config saved to: {config_path}")
-                    return
-        except requests.exceptions.RequestException:
-            pass  # Continue polling
-
-        time.sleep(1)
-
-    typer.echo("✗ Timeout: Failed to capture IDs within 30 seconds.")
-    typer.echo("Possible causes:")
-    typer.echo("  - Bridge is not running")
-    typer.echo("  - Userscript is not installed or active")
-    typer.echo("  - LMArena tab is not properly activated")
-    typer.echo("  - Cloudflare verification may be required")
-    raise typer.Exit(1)
 
 
 # --- Backend Commands ---

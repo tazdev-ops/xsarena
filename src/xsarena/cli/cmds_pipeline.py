@@ -27,7 +27,7 @@ def pipeline_run(
     try:
         data = load_yaml_or_json(file)
         if not isinstance(data, dict):
-            typer.echo(f"Failed to load pipeline: invalid data structure")
+            typer.echo("Failed to load pipeline: invalid data structure")
             raise typer.Exit(1)
     except FileNotFoundError:
         typer.echo(f"Failed to load pipeline: file not found - {file}")

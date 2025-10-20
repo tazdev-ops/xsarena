@@ -90,7 +90,7 @@ def gen_help():
     # Get help for ops subcommands
     ops_subcommands = [
         "jobs",
-        "service", 
+        "service",
         "snapshot",
         "health",  # replacing deprecated "doctor"
     ]
@@ -103,7 +103,9 @@ def gen_help():
                 text=True,
                 check=True,
             )
-            (docs_dir / f"_help_ops_{cmd.replace('-', '_')}.txt").write_text(result.stdout)
+            (docs_dir / f"_help_ops_{cmd.replace('-', '_')}.txt").write_text(
+                result.stdout
+            )
         except subprocess.CalledProcessError:
             # Some commands might not have --help or might require arguments
             continue

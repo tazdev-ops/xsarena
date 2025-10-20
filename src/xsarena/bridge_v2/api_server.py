@@ -62,9 +62,9 @@ if not cors_origins:
     # Default to localhost origins only for safety unless explicitly configured
     cors_origins = [
         "http://localhost",
-        "http://127.0.0.1", 
+        "http://127.0.0.1",
         "http://localhost:5102",
-        "http://127.0.0.1:5102"
+        "http://127.0.0.1:5102",
     ]
 elif cors_origins == ["*"]:
     # Only if explicitly set to "*" in config, allow all origins
