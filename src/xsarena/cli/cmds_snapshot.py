@@ -512,7 +512,9 @@ def snapshot_txt(
     DEPRECATED: Use 'create' command instead.
     Flatten curated files into a single .txt with strict includes/excludes for chatbot upload.
     """
-    typer.echo("⚠️  Warning: 'txt' command is deprecated. Use 'create' command instead.")
+    typer.echo(
+        "⚠️  Warning: 'txt' command is deprecated. Use 'create' command instead."
+    )
     from ..utils.flatpack_txt import flatten_txt
 
     preset = (preset or "author-core").lower()
