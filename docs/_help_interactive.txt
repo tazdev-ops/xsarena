@@ -1,6 +1,6 @@
 Warning: Unknown config keys in .xsarena/config.yml: bridge
 
- Usage: xsarena interactive [OPTIONS] COMMAND [ARGS]...
+ Usage: python -m xsarena interactive [OPTIONS] COMMAND [ARGS]...
 
  Interactive authoring session
 

@@ -1,5 +1,5 @@
 
- Usage: xsarena [OPTIONS] COMMAND [ARGS]...
+ Usage: python -m xsarena [OPTIONS] COMMAND [ARGS]...
 
  XSArena — AI-powered writing and coding studio
 
@@ -19,6 +19,7 @@
 │ version                                                                      │
 │ run           Run a book or recipe in authoring mode                         │
 │ interactive   Interactive authoring session                                  │
+│ settings      Unified settings interface (configuration + controls)          │
 │ author        Core content creation workflows.                               │
 │ analyze       Analysis, reporting, and evidence-based tools.                 │
 │ study         Study aids, learning tools, and practice drills.               │

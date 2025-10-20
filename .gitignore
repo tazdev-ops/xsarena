@@ -12,6 +12,7 @@ dist/
 # Virtual Environment
 venv/
 .venv/
+xsarena_env/
 
 # Tooling Caches
 .pytest_cache/
@@ -35,11 +36,21 @@ logs/
 review/
 directives/_mixer/
 directives/_preview/
+.xsarena/snapshots/
+.xsarena/jobs/
+.xsarena/session_state.json
+.xsarena/tmp/
+
+# Temporary state files in ops
+.xsarena/ops/queue.json
+.xsarena/ops/c2_queue.json
+.xsarena/ops/c2_status.json
 
 # Snapshot and report artifacts
 snapshot_chunks/
 xsa_min_snapshot*.txt
 xsa_snapshot*.txt
+xsa_debug_report.txt
 xsa_snapshot.zip
 repo_flat.txt
 *.tar.gz
@@ -50,6 +61,10 @@ repo_flat.txt
 # Generated artifacts
 snapshot.txt
 directives/_rules/rules.merged.md
+repo_flat.txt
+xsa_snapshot.txt
+xsa_snapshot.zip
+
 # Python build artifacts and cache
 __pycache__/
 *.pyc

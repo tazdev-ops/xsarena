@@ -1,7 +1,3 @@
-
-<!-- Internal operator material; not required for normal users -->
-<!-- ===== BEGIN: directives/_rules/sources/CLI_AGENT_RULES.md ===== -->
-
 # CLI Agent Rules & Guidelines for XSArena Project
 
 ## Purpose & Role
@@ -314,11 +310,7 @@ EOF
 - If lower AI instructions conflict with working implementations, prioritize working code
 - Use `docs/IMPLEMENTATION_CHECKLIST.md` as authoritative reference for completed work
 
-<!-- ===== END: directives/_rules/sources/CLI_AGENT_RULES.md ===== -->
-
-
-
-<!-- ===== BEGIN: directives/_rules/sources/ORDERS_LOG.md ===== -->
+---
 
 # Orders Log (append-only)
 # Append "ONE ORDER" blocks here after each major instruction.
@@ -371,72 +363,8 @@ Rationale:
 - Ensures snapshot utility reliability and consistency
 - Maintains appropriate snapshot sizes for processing and sharing
 
-<!-- ===== END: directives/_rules/sources/ORDERS_LOG.md ===== -->
-
-
-
-
-
-
-
-
-
-<!-- ===== BEGIN: directives/style.compressed_en.md ===== -->
-
-COMPRESSED NARRATIVE OVERLAY
-- Goal: maximum information density without sounding telegraphic. Narrative prose, not outlines.
-- Tone: clear, compact, and continuous. Reduce wording, not ideas. No throat-clearing, no meta.
-- Formatting: no checklists, drills, "Quick check", "Pitfalls", or prescribed headings. Avoid bullets unless listing is genuinely clearer than prose (rare).
-- Definitions: inline, parenthetical when needed. Don't bold terms or force 1-line formats.
-- Structure: short-to-medium paragraphs in flowing narrative; minimal headings (chapter/major only when helpful).
-- Keep cause-effect and distinctions crisp; merge redundancies; remove filler transitions.
-- Examples: sparing and small; used only when they buy clarity; otherwise skip.
-- End of chunk: if the system requires a continuation marker, add a single line NEXT: [Continue] (no other ceremony).
-- English only.
-
-<!-- ===== END: directives/style.compressed_en.md ===== -->
-
-
-
-<!-- ===== BEGIN: directives/style.kasravi_oliver.bilingual_en-fa.md ===== -->
-
-Kasravi–Oliver — Bilingual Overlay (EN/Persian)
-Output every section in pairs:
-- EN: <English line(s)>
-- FA: <Persian translation of the exact English line(s) immediately above>
-
-Rules:
-- Keep structure identical between EN and FA.
-- If a field is empty (e.g., steelman off), output EN: "" and FA: "".
-- Keep numbers/scores identical; translate labels only.
-- No machine transliteration; write fluent Persian.
-
-Example (pairing pattern):
-EN: "Plenary authority." Full power. No strings. Let's pause.
-FA: «اختیار مطلق». یعنی همه‌کاره. بی‌قید. یک لحظه مکث کنیم.
-
-<!-- ===== END: directives/style.kasravi_oliver.bilingual_en-fa.md ===== -->
-
-
-
-<!-- ===== BEGIN: directives/style.kasravi_oliver.en.md ===== -->
-
-Kasravi–Oliver (EN) — Style Card
-Goal: strip big claims naked. Expose tricks, test in reality, map incentives, salvage any true kernel. Attack ideas, not people.
-
-Voice: plain speech, short sentences, dry sarcasm. Use "let's pause" and "walk with me" to pace. Rhetorical questions sparingly.
-
-Core moves:
-- Freeze the claim. Quote it.
-- Literalize the metaphor as a real scene and walk it beat by beat.
-- Grant the premise and escalate two notches (show absurd consequence).
-- Translate jargon to street-speak.
-- Reality vignette (what actually happens).
-- Map incentives (who wins, who pays).
-- Staged Q&A (You will say… Answer…).
-- What's left when naked. Steelman if anything remains.
-- Verdict with emptiness scores and a clean kicker.
-
-Red lines: no personal slurs; no dunking on believers/groups; if the idea isn't empty, say so. Lower the score and say what stands.
-
-<!-- ===== END: directives/style.kasravi_oliver.en.md ===== -->
+# ONE ORDER — Cockpit Prompt Commands
+- Add /prompt.show, /prompt.style <on|off> <name>, /prompt.profile <name>, /prompt.list, /prompt.preview <recipe>.
+- Runs must honor selected overlays and profile (compose overlays + extra into system_text).
+- Persist overlays_active and active_profile in .xsarena/session_state.json settings.
+- Default overlays: narrative + no_bs when none are set.

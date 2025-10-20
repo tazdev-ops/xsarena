@@ -1,40 +1,29 @@
-# Agent Shortcuts and Modes
+# Handy Shortcuts (Macros)
 
-This document contains quick reference shortcuts and command modes for the CLI agent.
+Save keystrokes by adding macros with the built-in utility.
 
-## Text Shortcuts & Modes
-See CLI_AGENT_RULES.md Appendix — Text Shortcuts & Modes for the complete list of available shortcuts.
+Bridge
+- xsarena utils macros add bridge-up 'xsarena ops service start-bridge-v2'
+- xsarena utils macros add connect 'xsarena ops service connect'
 
-## Common Commands Reference
+Authoring lanes
+- xsarena utils macros add run-dry 'xsarena run book "{SUBJECT}" --dry-run'
+- xsarena utils macros add simulate 'xsarena dev simulate "{SUBJECT}" --length standard --span medium'
 
-### Startup & Context
-- `STARTUP` - Initialize context and show project overview
-- `SNAPSHOT` - Create project snapshot
-- `HYGIENE` - Safe cleanup of temporary files
-- `HEALTH` - Run health checks
+Snapshots
+- xsarena utils macros add snap-txt 'xsarena ops snapshot txt --preset ultra-tight --total-max 2500000 --max-per-file 180000 --no-repo-map'
 
-### Modes
-- `MODE: SAFE` - Conservative changes only
-- `MODE: LEARN_MANUAL` - Process manual instructions
-- `MODE: INGEST_ACT` - Process arbitrary text input
-- `STOP_ON_LOOP` - Enforce anti-loop behavior
+Analysis
+- xsarena utils macros add qa 'xsarena analyze continuity ./books/*.final.md && xsarena analyze coverage --outline outline.md --book ./books/*.final.md'
 
-### Runbooks
-- `RUNBOOK: MASTERY` - Long comprehensive book generation settings
-- `RUNBOOK: LOSSLESS-FIRST` - Corpus to synthesis to book pipeline
 
-## Suggestion-Reviewing Process (New Addition)
-When giving suggestions that may be reusable in the future:
-1. First add the suggestion to this shortcuts ecosystem (as appropriate)
-2. Then implement the suggestion with proper verification
-3. Follow the 5-step verification process:
-   - Verify suggestions against actual codebase
-   - Validate fixes are appropriate for current structure
-   - Test fixes if possible before recommending
-   - Document problem and solution clearly
-   - Prioritize by impact and feasibility
+Notes
+- Replace {SUBJECT} as needed when you invoke macros; some shells require quoting.
+- Macros are stored in .xsarena/macros.json; delete entries there to remove macros.
 
-## Quick Reference Commands
-- `REPORT: SUCCESS` - Success report format
-- `REPORT: BLOCKED` - Blocked report format
-- `REPORT: RISK` - Risk assessment report format
+Append to your orders (CLI will merge/improve)
+- If you've implemented ops service connect, mention it in USAGE and OPERATIONS.
+- If you added ops snapshot verify, cross-link it from USAGE and TROUBLESHOOTING.
+- If you implemented the directive root helper and Python-only rules merge, note them briefly in ARCHITECTURE.
+
+This gives you a practical "done/not done" checklist, plus runnable scripts for Unix and Windows, and a JSON plan that your agent can consume. It stays lean while catching the biggest failure modes fast.

@@ -71,5 +71,6 @@ XSArena is organized into semantic command groups:
 
 - [Getting Started](./docs/getting_started.md) - Installation and first steps
 - [Workflows](./docs/workflows.md) - Zero-to-hero workflows and recipes
+- [EPUB Translation](./docs/EPUB_TRANSLATION.md) - Complete guide to translating EPUB books
 - [Configuration](./docs/configuration.md) - Settings and persistence
 - [Full docs](./docs/) - Complete documentation directory

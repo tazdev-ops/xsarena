@@ -15,7 +15,6 @@ from ..core.v2_orchestrator.orchestrator import Orchestrator
 from ..core.v2_orchestrator.specs import LengthPreset, RunSpecV2, SpanPreset
 from .context import CLIContext
 from .dispatch import dispatch_command
-from .registry import app
 
 
 class InteractiveSession:
@@ -125,6 +124,9 @@ class InteractiveSession:
 
             self._command_busy = True
             try:
+                # Import the app here to avoid circular imports
+                from .registry import app
+
                 # Dispatch the command to the Typer app in a background thread
                 loop = asyncio.get_event_loop()
                 exit_code = await loop.run_in_executor(

@@ -1,35 +1,50 @@
 # Documentation Index
 
+## Start Here
+- [README_FOR_AI.md](../README_FOR_AI.md) - Quick start for AI agents
+- [PROJECT_CHARTER.md](PROJECT_CHARTER.md) - Project purpose and goals
+- [ONBOARDING_AI.md](ONBOARDING_AI.md) - AI operator onboarding guide
+
 ## Core Documentation
-- [README.md](../README.md) - Canonical user manual (exhaustive)
-- [CONCEPT.md](CONCEPT.md) - Core concepts and human-focused workflow
-- [CLI_AGENT_RULES.md](../CLI_AGENT_RULES.md) - Complete operating rules and appendices
 - [ARCHITECTURE.md](ARCHITECTURE.md) - System architecture and components overview
+- [OPERATING_MODEL.md](OPERATING_MODEL.md) - Operating procedures and guidelines
+- [USAGE.md](USAGE.md) - Usage instructions and examples
 - [PROJECT_MAP.md](PROJECT_MAP.md) - Project structure and component overview
 
+## Protocols & Rules
+- [COLLAB_PROTOCOL.md](COLLAB_PROTOCOL.md) - Collaboration protocols
+- [AGENT_RULEBOOK.md](AGENT_RULEBOOK.md) - Agent operating rules
+- [SNAPSHOT_RULEBOOK.md](SNAPSHOT_RULEBOOK.md) - Snapshot procedures and policies
+- [C2_PROTOCOL.md](C2_PROTOCOL.md) - Command and control protocols
+
+## Reference
+- [JARGON.md](JARGON.md) - Glossary of terms
+- [OPERATIONS.md](OPERATIONS.md) - Operational procedures
+- [README.md](../README.md) - Canonical user manual (exhaustive)
+
 ## Quick Reference
-- [docs/SHORTCUTS.md](SHORTCUTS.md) - Agent shortcuts and modes
-- [docs/RUNBOOKS.md](RUNBOOKS.md) - Copy-paste workflows
-- [docs/PROFILES.md](PROFILES.md) - Style and quality profiles
+- [SHORTCUTS.md](SHORTCUTS.md) - Agent shortcuts and modes
+- [RUNBOOKS.md](RUNBOOKS.md) - Copy-paste workflows
+- [PROFILES.md](PROFILES.md) - Style and quality profiles
 
 ## Operations
-- [docs/SNAPSHOT_POLICY.md](SNAPSHOT_POLICY.md) - Canonical snapshot procedures
-- [docs/TROUBLESHOOTING.md](TROUBLESHOOTING.md) - Problem resolution
-- [docs/HANDOFF.md](HANDOFF.md) - Communication template for higher AI
+- [SNAPSHOT_POLICY.md](SNAPSHOT_POLICY.md) - Canonical snapshot procedures
+- [TROUBLESHOOTING.md](TROUBLESHOOTING.md) - Problem resolution
+- [HANDOFF.md](HANDOFF.md) - Communication template for higher AI
 
 ## Task Management
-- [docs/INBOX.md](INBOX.md) - Prioritized tasks
-- [docs/OUTBOX.md](OUTBOX.md) - Results tracking
-- [docs/CONTEXT.md](CONTEXT.md) - Current state of the world
+- [INBOX.md](INBOX.md) - Prioritized tasks
+- [OUTBOX.md](OUTBOX.md) - Results tracking
+- [CONTEXT.md](CONTEXT.md) - Current state of the world
 
 ## Continuity
-- [docs/AGENT_JOURNAL.md](AGENT_JOURNAL.md) - Session logging system
-- [docs/KNOWN_ISSUES.md](KNOWN_ISSUES.md) - Known issues and workarounds
-- [docs/INDEX.md](INDEX.md) - This file (documentation map)
+- [AGENT_JOURNAL.md](AGENT_JOURNAL.md) - Session logging system
+- [KNOWN_ISSUES.md](KNOWN_ISSUES.md) - Known issues and workarounds
+- [INDEX.md](INDEX.md) - This file (documentation map)
 
 ## Internal Section
-- [docs/INTERNAL_AGENT_NOTES.md](INTERNAL_AGENT_NOTES.md) - Internal operator material; not required for normal users
+- [INTERNAL_AGENT_NOTES.md](INTERNAL_AGENT_NOTES.md) - Internal operator material; not required for normal users
 
 ## Sync & Maintenance
-- [docs/SYNC_MATRIX.md](SYNC_MATRIX.md) - Sync whitelist and policies
+- [SYNC_MATRIX.md](SYNC_MATRIX.md) - Sync whitelist and policies
 - [scripts/sync_pass.sh](../scripts/sync_pass.sh) - Sync validation script

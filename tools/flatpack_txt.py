@@ -1,4 +1,9 @@
 #!/usr/bin/env python3
+"""
+DEPRECATED: Use 'xsarena ops snapshot ...' instead
+
+XSArena Flatpack Utility - Legacy tool for flattening repos into single text files
+"""
 from __future__ import annotations
 
 import argparse

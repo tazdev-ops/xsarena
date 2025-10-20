@@ -15,7 +15,10 @@ app = typer.Typer(help="Jobs manager (list, monitor, control jobs)")
 
 
 @app.command("ls")
-def ls():
+def ls(
+    json_output: bool = typer.Option(False, "--json", help="Output in JSON format"),
+    quiet: bool = typer.Option(False, "--quiet", help="Suppress status summary"),
+):
     """List all jobs (with totals)."""
     job_runner = JobManager()
     jobs: list[JobV3] = job_runner.list_jobs()
@@ -27,18 +30,48 @@ def ls():
 
     settings = get_project_settings()
 
-    typer.echo(
-        f"Jobs: {len(jobs)} | Running: {status.get('running_jobs',0)}/{settings.concurrency.total} | Queued: {status.get('queued_jobs',0)} | Quiet: {status.get('is_quiet_time', False)}"
-    )
-    typer.echo(
-        f"  Concurrency: Total: {settings.concurrency.total}, Bridge: {settings.concurrency.bridge}, OpenRouter: {settings.concurrency.openrouter}"
-    )
-    if not jobs:
-        return
-    # Sort by creation time, newest first
-    jobs.sort(key=lambda j: j.created_at, reverse=True)
-    for j in jobs:
-        typer.echo(f"{j.id}  {j.state:<10} {j.updated_at}  {j.name}")
+    if json_output:
+        # Output as JSON array
+        jobs_list = []
+        for job in jobs:
+            jobs_list.append(
+                {
+                    "id": job.id,
+                    "state": job.state,
+                    "updated_at": job.updated_at,
+                    "name": job.name,
+                }
+            )
+
+        result = {
+            "jobs": jobs_list,
+            "summary": {
+                "total": len(jobs),
+                "running": status.get("running_jobs", 0),
+                "queued": status.get("queued_jobs", 0),
+                "quiet_time": status.get("is_quiet_time", False),
+                "concurrency": {
+                    "total": settings.concurrency.total,
+                    "bridge": settings.concurrency.bridge,
+                    "openrouter": settings.concurrency.openrouter,
+                },
+            },
+        }
+        typer.echo(json.dumps(result))
+    else:
+        if not quiet:
+            typer.echo(
+                f"Jobs: {len(jobs)} | Running: {status.get('running_jobs',0)}/{settings.concurrency.total} | Queued: {status.get('queued_jobs',0)} | Quiet: {status.get('is_quiet_time', False)}"
+            )
+            typer.echo(
+                f"  Concurrency: Total: {settings.concurrency.total}, Bridge: {settings.concurrency.bridge}, OpenRouter: {settings.concurrency.openrouter}"
+            )
+        if not jobs:
+            return
+        # Sort by creation time, newest first
+        jobs.sort(key=lambda j: j.created_at, reverse=True)
+        for j in jobs:
+            typer.echo(f"{j.id}  {j.state:<10} {j.updated_at}  {j.name}")
 
 
 @app.command("log")
@@ -52,13 +85,20 @@ def log(job_id: str):
 
 
 @app.command("summary")
-def summary(job_id: str):
+def summary(
+    job_id: str,
+    json_output: bool = typer.Option(False, "--json", help="Output in JSON format"),
+    quiet: bool = typer.Option(False, "--quiet", help="Suppress narrative output"),
+):
     """Show a summary of a specific job."""
     job_runner = JobManager()
     try:
         job = job_runner.load(job_id)
     except FileNotFoundError:
-        typer.echo(f"Error: Job '{job_id}' not found.")
+        if json_output:
+            typer.echo(json.dumps({"error": f"Job '{job_id}' not found"}))
+        else:
+            typer.echo(f"Error: Job '{job_id}' not found.")
         raise typer.Exit(1)
 
     events_path = Path(".xsarena") / "jobs" / job_id / "events.jsonl"
@@ -81,14 +121,31 @@ def summary(job_id: str):
             except json.JSONDecodeError:
                 continue
 
-    typer.echo(f"Job:     {job.id}")
-    typer.echo(f"State:   {job.state}")
-    typer.echo(f"Name:    {job.name}")
-    typer.echo(f"Created: {job.created_at}")
-    typer.echo(f"Updated: {job.updated_at}")
-    typer.echo(
-        f"Chunks: {chunks}  Retries: {retries}  Failovers: {failovers}  Watchdogs: {stalls}"
-    )
+    if json_output:
+        result = {
+            "id": job.id,
+            "state": job.state,
+            "name": job.name,
+            "created_at": job.created_at,
+            "updated_at": job.updated_at,
+            "stats": {
+                "chunks": chunks,
+                "retries": retries,
+                "failovers": failovers,
+                "stalls": stalls,
+            },
+        }
+        typer.echo(json.dumps(result))
+    else:
+        if not quiet:
+            typer.echo(f"Job:     {job.id}")
+            typer.echo(f"State:   {job.state}")
+            typer.echo(f"Name:    {job.name}")
+            typer.echo(f"Created: {job.created_at}")
+            typer.echo(f"Updated: {job.updated_at}")
+        typer.echo(
+            f"Chunks: {chunks}  Retries: {retries}  Failovers: {failovers}  Watchdogs: {stalls}"
+        )
 
 
 @app.command("resume")

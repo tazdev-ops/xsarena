@@ -30,7 +30,9 @@ MODEL_NAME_TO_ID_MAP = {}
 MODEL_ENDPOINT_MAP = {}
 last_activity_time = datetime.now()
 cloudflare_verified = False  # Track Cloudflare verification status per request
-REFRESHING_BY_REQUEST: dict[str, bool] = {}  # Per-request Cloudflare refresh status
+REFRESHING_BY_REQUEST: dict[
+    str, int
+] = {}  # Per-request Cloudflare refresh attempt counter
 # Queue for thread-safe communication from background threads to main thread
 command_queue = queue.Queue()
 idle_restart_thread = None
@@ -620,18 +622,30 @@ async def chat_completions(request: Request):
 
                         # Check for Cloudflare detection
                         if isinstance(data, str):
-                            # Check if this looks like a Cloudflare page
-                            if (
-                                "Just a moment..." in data
-                                or "Enable JavaScript and cookies to continue" in data
-                                or "Checking your browser before accessing" in data
-                            ):
-                                if not REFRESHING_BY_REQUEST.get(request_id, False):
+                            # Check if this looks like a Cloudflare page using configurable patterns
+                            cloudflare_patterns = CONFIG.get(
+                                "cloudflare_patterns",
+                                [
+                                    "Just a moment...",
+                                    "Enable JavaScript and cookies to continue",
+                                    "Checking your browser before accessing",
+                                ],
+                            )
+                            if any(pattern in data for pattern in cloudflare_patterns):
+                                max_refresh_attempts = CONFIG.get(
+                                    "max_refresh_attempts", 1
+                                )
+                                current_refresh_attempts = REFRESHING_BY_REQUEST.get(
+                                    request_id, 0
+                                )
+                                if current_refresh_attempts < max_refresh_attempts:
                                     # First time seeing Cloudflare, trigger refresh
                                     logger.info(
-                                        "Detected Cloudflare challenge, sending refresh command"
+                                        f"Detected Cloudflare challenge, sending refresh command (attempt {current_refresh_attempts + 1}/{max_refresh_attempts})"
                                     )
-                                    REFRESHING_BY_REQUEST[request_id] = True
+                                    REFRESHING_BY_REQUEST[request_id] = (
+                                        current_refresh_attempts + 1
+                                    )
                                     await browser_ws.send_json({"command": "refresh"})
                                     # Wait for a short backoff period before retrying
                                     await asyncio.sleep(5.0)  # 5 second backoff
@@ -644,11 +658,11 @@ async def chat_completions(request: Request):
                                     )
                                     continue  # Continue to wait for response again
                                 else:
-                                    # Already tried refreshing, return error
+                                    # Already tried refreshing up to max attempts, return error
                                     error_chunk = {
                                         "error": {
                                             "type": "cloudflare_challenge",
-                                            "message": "Cloudflare security challenge still present after refresh. Please manually refresh the browser.",
+                                            "message": f"Cloudflare security challenge still present after {max_refresh_attempts} refresh attempts. Please manually refresh the browser.",
                                         }
                                     }
                                     yield f"data: {json.dumps(error_chunk)}\n\n"
@@ -709,18 +723,30 @@ async def chat_completions(request: Request):
 
                         # Check for Cloudflare detection
                         if isinstance(data, str):
-                            # Check if this looks like a Cloudflare page
-                            if (
-                                "Just a moment..." in data
-                                or "Enable JavaScript and cookies to continue" in data
-                                or "Checking your browser before accessing" in data
-                            ):
-                                if not REFRESHING_BY_REQUEST.get(request_id, False):
+                            # Check if this looks like a Cloudflare page using configurable patterns
+                            cloudflare_patterns = CONFIG.get(
+                                "cloudflare_patterns",
+                                [
+                                    "Just a moment...",
+                                    "Enable JavaScript and cookies to continue",
+                                    "Checking your browser before accessing",
+                                ],
+                            )
+                            if any(pattern in data for pattern in cloudflare_patterns):
+                                max_refresh_attempts = CONFIG.get(
+                                    "max_refresh_attempts", 1
+                                )
+                                current_refresh_attempts = REFRESHING_BY_REQUEST.get(
+                                    request_id, 0
+                                )
+                                if current_refresh_attempts < max_refresh_attempts:
                                     # First time seeing Cloudflare, trigger refresh
                                     logger.info(
-                                        "Detected Cloudflare challenge, sending refresh command"
+                                        f"Detected Cloudflare challenge, sending refresh command (attempt {current_refresh_attempts + 1}/{max_refresh_attempts})"
                                     )
-                                    REFRESHING_BY_REQUEST[request_id] = True
+                                    REFRESHING_BY_REQUEST[request_id] = (
+                                        current_refresh_attempts + 1
+                                    )
                                     await browser_ws.send_json({"command": "refresh"})
                                     # Wait for a short backoff period before retrying
                                     await asyncio.sleep(5.0)  # 5 second backoff
@@ -735,10 +761,10 @@ async def chat_completions(request: Request):
                                     content_parts = []
                                     continue  # Continue to wait for response again
                                 else:
-                                    # Already tried refreshing, return error
+                                    # Already tried refreshing up to max attempts, return error
                                     raise HTTPException(
                                         status_code=503,
-                                        detail="Cloudflare security challenge still present after refresh. Please manually refresh the browser.",
+                                        detail=f"Cloudflare security challenge still present after {max_refresh_attempts} refresh attempts. Please manually refresh the browser.",
                                     )
 
                         if isinstance(data, dict) and "error" in data:

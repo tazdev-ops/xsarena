@@ -1,0 +1,50 @@
+{
+  "name": "XSArena Smoke Plan",
+  "steps": [
+    {
+      "name": "cli_version",
+      "cmd": ["xsarena", "version"],
+      "expect_contains": ["XSArena v"],
+      "expect_exit": 0
+    },
+    {
+      "name": "cli_help",
+      "cmd": ["xsarena", "--help"],
+      "expect_contains": ["XSArena — AI-powered writing"],
+      "expect_exit": 0
+    },
+    {
+      "name": "settings_show_overrides",
+      "cmd": ["xsarena", "--backend", "bridge", "--model", "default", "--window", "42", "settings", "show"],
+      "expect_contains": ["Backend:", "Model:", "Window Size:"],
+      "expect_exit": 0
+    },
+    {
+      "name": "bridge_health",
+      "cmd": ["bash", "-lc", "curl -s http://127.0.0.1:5102/v1/health | grep -q '\"status\":\"ok\"'"],
+      "expect_exit": 0
+    },
+    {
+      "name": "simulate",
+      "cmd": ["xsarena", "dev", "simulate", "Sanity Subject", "--length", "standard", "--span", "medium"],
+      "expect_contains": ["Simulation completed! Job ID:"],
+      "expect_exit": 0
+    },
+    {
+      "name": "run_dry",
+      "cmd": ["xsarena", "run", "book", "Sanity Subject", "--dry-run"],
+      "expect_contains": ["[DRY RUN] Execution completed"],
+      "expect_exit": 0
+    },
+    {
+      "name": "docs_gen_help",
+      "cmd": ["xsarena", "docs", "gen-help"],
+      "expect_exit": 0
+    },
+    {
+      "name": "snapshot_verify_optional",
+      "cmd": ["bash", "-lc", "xsarena ops snapshot verify --mode minimal --max-per-file 180000 --total-max 2500000 --disallow 'books/**' --disallow 'review/**' --disallow '.xsarena/**' --fail-on oversize --fail-on disallowed >/dev/null 2>&1 || true"],
+      "expect_exit": 0
+    }
+  ]
+}

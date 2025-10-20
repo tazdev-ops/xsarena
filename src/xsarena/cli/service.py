@@ -4,8 +4,13 @@ import os
 import signal
 import subprocess
 import sys
+import time
+import webbrowser
+from pathlib import Path
 
+import requests
 import typer
+import yaml
 
 app = typer.Typer()
 
@@ -129,6 +134,9 @@ Multi-instance Usage Guide:
 def start_bridge_v2(
     port: int = typer.Option(5102, "--port", "-p"),
     host: str = typer.Option("127.0.0.1", "--host"),
+    wait: bool = typer.Option(
+        False, "--wait", help="Wait for health check to pass before returning"
+    ),
 ):
     """Start the bridge v2 (WS + SSE) server."""
     env = os.environ.copy()
@@ -137,6 +145,33 @@ def start_bridge_v2(
     env["PORT"] = str(port)
     try:
         process = subprocess.Popen(cmd, env=env)
+
+        # If --wait flag is provided, poll the health endpoint
+        if wait:
+            typer.echo("Waiting for bridge to be ready...")
+            health_url = f"http://{host}:{port}/v1/health"
+
+            # Wait for the API to be up
+            timeout = 30  # seconds
+            start_time = time.time()
+            while time.time() - start_time < timeout:
+                try:
+                    response = requests.get(health_url, timeout=2)
+                    if response.status_code == 200:
+                        health_data = response.json()
+                        typer.echo("✓ Bridge API is ready")
+                        break
+                except requests.exceptions.RequestException:
+                    pass
+                time.sleep(0.5)
+            else:
+                typer.echo(
+                    "✗ Timeout: Bridge API did not become ready within 30 seconds"
+                )
+                process.terminate()
+                process.wait()
+                raise typer.Exit(code=1)
+
         process.wait()
     except KeyboardInterrupt:
         typer.echo("\nStopping Bridge v2...")
@@ -148,6 +183,162 @@ def start_bridge_v2(
             process.terminate()
             process.wait()
         typer.echo("Bridge v2 stopped")
+
+
+@app.command("connect")
+def connect(
+    port: int = typer.Option(5102, "--port", "-p", help="Port for the bridge server"),
+    host: str = typer.Option("127.0.0.1", "--host", help="Host for the bridge server"),
+):
+    """Connect to the bridge: start it, open consoles, wait for userscript connection."""
+    import subprocess
+    import time
+    import webbrowser
+
+    # Start the bridge process in the background
+    env = os.environ.copy()
+    cmd = [sys.executable, "-m", "xsarena.bridge_v2.api_server"]
+    typer.echo(f"Starting bridge v2 on {host}:{port}")
+    env["PORT"] = str(port)
+
+    process = subprocess.Popen(cmd, env=env)
+
+    # Function to poll health endpoint until API is up
+    def wait_for_api():
+        health_url = f"http://{host}:{port}/v1/health"
+        timeout = 30  # seconds
+        start_time = time.time()
+        typer.echo("Waiting for bridge API to be ready...")
+        while time.time() - start_time < timeout:
+            try:
+                response = requests.get(health_url, timeout=2)
+                if response.status_code == 200:
+                    typer.echo("✓ Bridge API is ready")
+                    return True
+            except requests.exceptions.RequestException:
+                pass
+            time.sleep(0.5)
+        typer.echo("✗ Timeout: Bridge API did not become ready within 30 seconds")
+        return False
+
+    # Wait for API to be ready
+    if not wait_for_api():
+        process.terminate()
+        process.wait()
+        raise typer.Exit(code=1)
+
+    # Open the bridge console in browser
+    console_url = f"http://{host}:{port}/console"
+    typer.echo(f"Opening bridge console: {console_url}")
+    webbrowser.open(console_url)
+
+    # Try to read launch_url from config
+    config_path = Path(".xsarena/config.yml")
+    launch_url = None
+    if config_path.exists():
+        try:
+            with open(config_path, "r", encoding="utf-8") as f:
+                yaml_config = yaml.safe_load(f) or {}
+            bridge_config = yaml_config.get("bridge", {})
+            launch_url = bridge_config.get("launch_url")
+        except Exception:
+            pass
+
+    # If launch_url is provided, open it with bridge parameter
+    if launch_url:
+        browser_url = f"{launch_url}#bridge={port}"
+        typer.echo(f"Opening configured launch URL: {browser_url}")
+        webbrowser.open(browser_url)
+    else:
+        browser_url = f"https://lmarena.ai#bridge={port}"
+        typer.echo(f"Opening default LMArena URL: {browser_url}")
+        webbrowser.open(browser_url)
+        typer.echo(
+            "Note: You can set 'bridge.launch_url' in .xsarena/config.yml to use a custom URL"
+        )
+
+    # Wait for userscript connection
+    health_url = f"http://{host}:{port}/v1/health"
+    timeout = 60  # seconds
+    start_time = time.time()
+    typer.echo("Waiting for userscript connection...")
+
+    while time.time() - start_time < timeout:
+        try:
+            response = requests.get(health_url, timeout=2)
+            if response.status_code == 200:
+                health_data = response.json()
+                if health_data.get("ws_connected", False):
+                    typer.echo("✅ Userscript connected!")
+
+                    # Optionally trigger ID capture
+                    typer.echo("\nTo capture session and message IDs, run:")
+                    typer.echo("  xsarena settings config-capture-ids")
+                    typer.echo("\nOr use the bridge console to monitor connections.")
+
+                    # Keep the process running
+                    try:
+                        process.wait()
+                    except KeyboardInterrupt:
+                        typer.echo("\nStopping Bridge v2...")
+                        process.send_signal(signal.SIGINT)
+                        try:
+                            process.wait(timeout=5)
+                        except subprocess.TimeoutExpired:
+                            typer.echo("Forcefully terminating...")
+                            process.terminate()
+                            process.wait()
+                        typer.echo("Bridge v2 stopped")
+                    return
+        except requests.exceptions.RequestException:
+            pass
+        time.sleep(0.5)
+
+    typer.echo("✗ Timeout: Userscript did not connect within 60 seconds")
+    typer.echo("Please make sure:")
+    typer.echo("  1. Tampermonkey userscript is installed and enabled")
+    typer.echo("  2. LMArena tab is open with #bridge=5102 parameter")
+    typer.echo("  3. Click 'Retry' on a message to activate the connection")
+
+    process.terminate()
+    process.wait()
+    raise typer.Exit(code=1)
+
+
+@app.command("open")
+def open_browser(
+    port: int = typer.Option(5102, "--port", "-p", help="Port for the bridge server"),
+    host: str = typer.Option("127.0.0.1", "--host", help="Host for the bridge server"),
+):
+    """Open the bridge console and configured launch URL in the default browser."""
+    console_url = f"http://{host}:{port}/console"
+    typer.echo(f"Opening bridge console: {console_url}")
+    webbrowser.open(console_url)
+
+    # Try to read launch_url from config
+    config_path = Path(".xsarena/config.yml")
+    launch_url = None
+    if config_path.exists():
+        try:
+            with open(config_path, "r", encoding="utf-8") as f:
+                yaml_config = yaml.safe_load(f) or {}
+            bridge_config = yaml_config.get("bridge", {})
+            launch_url = bridge_config.get("launch_url")
+        except Exception:
+            pass
+
+    # If launch_url is provided, open it with bridge parameter
+    if launch_url:
+        browser_url = f"{launch_url}#bridge={port}"
+        typer.echo(f"Opening configured launch URL: {browser_url}")
+        webbrowser.open(browser_url)
+    else:
+        browser_url = f"https://lmarena.ai#bridge={port}"
+        typer.echo(f"Opening default LMArena URL: {browser_url}")
+        webbrowser.open(browser_url)
+        typer.echo(
+            "Note: You can set 'bridge.launch_url' in .xsarena/config.yml to use a custom URL"
+        )
 
 
 @app.command("start-id-updater")

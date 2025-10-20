@@ -1,18 +1,4 @@
-anchor_length: 300
-api_key: null
-backend: bridge
-base_url: http://127.0.0.1:5102/v1
 bridge:
-  bypass_enabled: false
-  enable_idle_restart: false
-  id_updater_battle_target: a
-  id_updater_last_mode: direct_chat
-  stream_response_timeout_seconds: 360
-  tavern_mode_enabled: true
-continuation_mode: anchor
-max_retries: 3
-model: default
-redaction_enabled: false
-repetition_threshold: 0.8
-timeout: 300
-window_size: 100
+  launch_url: "https://example.com"
+  session_id: "test_session"
+  message_id: "test_message"

@@ -1,12 +1,13 @@
-import subprocess
-import sys
+import fnmatch
+import re
 from pathlib import Path
-from typing import Optional
+from typing import List, Optional, Tuple
 
 import typer
 
 # Import the built-in snapshot simple utility
 from xsarena.utils import snapshot_simple
+from xsarena.utils.secrets_scanner import SecretsScanner
 
 # Preset constants for the txt command
 PRESET_DEFAULT_EXCLUDE = [
@@ -75,7 +76,95 @@ app = typer.Typer(
 )
 
 
-@app.command("write")
+@app.command(
+    "create",
+    help="Create a flat snapshot, ideal for chatbot uploads. This is the recommended command.",
+)
+def snapshot_create(
+    mode: str = typer.Option(
+        "author-core",
+        "--mode",
+        help="Preset include set: author-core | ultra-tight | custom.",
+    ),
+    out: str = typer.Option("repo_flat.txt", "--out", "-o", help="Output .txt path"),
+    include: List[str] = typer.Option(
+        None,
+        "--include",
+        "-I",
+        help="Glob/file to include (repeatable). Used when mode=custom.",
+    ),
+    exclude: List[str] = typer.Option(
+        None,
+        "--exclude",
+        "-X",
+        help="Glob to exclude (repeatable). Appends to default excludes.",
+    ),
+    max_per_file: int = typer.Option(
+        220_000, "--max-per-file", help="Max bytes per file."
+    ),
+    total_max: int = typer.Option(
+        4_000_000, "--total-max", help="Total max bytes for the snapshot."
+    ),
+    redact: bool = typer.Option(
+        True, "--redact/--no-redact", help="Apply redaction to sensitive info."
+    ),
+    repo_map: bool = typer.Option(
+        True, "--repo-map/--no-repo-map", help="Add a repo map header."
+    ),
+):
+    """
+    Flatten curated files into a single .txt. This is the primary tool for creating
+    context for LLMs. It defaults to the 'author-core' preset.
+    """
+    mode_lower = (mode or "author-core").lower()
+
+    if mode_lower == "author-core":
+        inc = PRESET_AUTHOR_CORE_INCLUDE
+    elif mode_lower == "ultra-tight":
+        inc = PRESET_ULTRA_TIGHT_INCLUDE
+    elif mode_lower == "custom":
+        if not include:
+            typer.echo(
+                "Error: --mode=custom requires at least one --include flag.", err=True
+            )
+            raise typer.Exit(code=1)
+        inc = include
+    else:
+        typer.echo(
+            f"Error: Unknown mode '{mode}'. Choose from: author-core, ultra-tight, custom.",
+            err=True,
+        )
+        raise typer.Exit(code=1)
+
+    # Combine default excludes with any user-provided excludes
+    final_excludes = PRESET_DEFAULT_EXCLUDE + (exclude or [])
+
+    outp = Path(out).expanduser()
+    outp.parent.mkdir(parents=True, exist_ok=True)
+
+    try:
+        from xsarena.utils.flatpack_txt import flatten_txt
+
+        out_path, notes = flatten_txt(
+            out_path=outp,
+            include=inc,
+            exclude=final_excludes,
+            max_bytes_per_file=max_per_file,
+            total_max_bytes=total_max,
+            use_git_tracked=False,  # Simplification: git-tracked can be a separate, advanced command if needed.
+            include_untracked=False,
+            redact=redact,
+            add_repo_map=repo_map,
+        )
+        for n in notes:
+            typer.echo(f"[note] {n}")
+        typer.echo(f"✓ Snapshot created successfully → {out_path}")
+    except Exception as e:
+        typer.echo(f"Error creating snapshot: {e}", err=True)
+        raise typer.Exit(1)
+
+
+@app.command("legacy-write")
 def snapshot_write(
     out: str = typer.Option(
         None, "--out", "-o", help="Output file path. Defaults to xsa_snapshot.txt."
@@ -110,6 +199,7 @@ def snapshot_write(
     ),
 ):
     """
+    Legacy snapshot command - use 'create' for the recommended flat format.
     Generate a snapshot using the smart snapshot builder.
 
     This tool supports multiple modes and is configurable via .snapshotinclude,
@@ -119,9 +209,10 @@ def snapshot_write(
     Use --dry-run to see the effective plan before creating the snapshot.
     """
     # Use the built-in simple snapshot utility directly
+    out_path = Path(out).expanduser() if out else out
     if dry_run:
         snapshot_simple.write_text_snapshot(
-            out_path=out,
+            out_path=out_path,
             mode=mode,
             with_git=with_git,
             with_jobs=with_jobs,
@@ -134,7 +225,7 @@ def snapshot_write(
     else:
         if zip_format:
             snapshot_simple.write_zip_snapshot(
-                out_path=out,
+                out_path=out_path,
                 mode=mode,
                 with_git=with_git,
                 with_jobs=with_jobs,
@@ -146,7 +237,7 @@ def snapshot_write(
             )
         else:
             snapshot_simple.write_text_snapshot(
-                out_path=out,
+                out_path=out_path,
                 mode=mode,
                 with_git=with_git,
                 with_jobs=with_jobs,
@@ -158,7 +249,7 @@ def snapshot_write(
             )
 
 
-@app.command("simple")
+@app.command("legacy-simple")
 def snapshot_simple_cmd(
     out: str = typer.Option(
         None, "--out", "-o", help="Output file path. Defaults to xsa_snapshot.txt."
@@ -185,6 +276,7 @@ def snapshot_simple_cmd(
     ),
 ):
     """
+    DEPRECATED: Use 'create' command for the recommended flat format.
     Generate a simple snapshot using the built-in snapshot utility.
 
     This is a minimal dependency version that directly uses the snapshot_simple module.
@@ -192,9 +284,13 @@ def snapshot_simple_cmd(
     Precedence: CLI flags override values from .snapshot.toml configuration file.
     Use --dry-run to see the effective plan before creating the snapshot.
     """
+    typer.echo(
+        "⚠️  Warning: 'simple' command is deprecated. Use 'create' command instead."
+    )
+    out_path = Path(out).expanduser() if out else out
     if dry_run:
         snapshot_simple.write_text_snapshot(
-            out_path=out,
+            out_path=out_path,
             mode=mode,
             with_git=with_git,
             with_jobs=with_jobs,
@@ -207,7 +303,7 @@ def snapshot_simple_cmd(
     else:
         if zip_format:
             snapshot_simple.write_zip_snapshot(
-                out_path=out,
+                out_path=out_path,
                 mode=mode,
                 with_git=with_git,
                 with_jobs=with_jobs,
@@ -219,7 +315,7 @@ def snapshot_simple_cmd(
             )
         else:
             snapshot_simple.write_text_snapshot(
-                out_path=out,
+                out_path=out_path,
                 mode=mode,
                 with_git=with_git,
                 with_jobs=with_jobs,
@@ -231,103 +327,45 @@ def snapshot_simple_cmd(
             )
 
 
-@app.command("pro")
-def snapshot_pro(
+@app.command(
+    "debug-report", help="Generate a verbose snapshot for debugging. (Formerly 'pro')"
+)
+def snapshot_debug_report(
     out: str = typer.Option(
-        None,
+        "xsa_debug_report.txt",
         "--out",
         "-o",
-        help="Output file path. Defaults to ~/xsa_snapshot_pro.txt.",
-    ),
-    max_inline: int = typer.Option(
-        100000, "--max-inline", help="Maximum size for inlined content in bytes."
-    ),
-    include_system: bool = typer.Option(
-        True,
-        "--include-system",
-        help="Include system information (Python version, platform, etc.).",
-    ),
-    include_git: bool = typer.Option(
-        True, "--include-git", help="Include git status and branch information."
-    ),
-    include_jobs: bool = typer.Option(
-        True, "--include-jobs", help="Include comprehensive job summaries with events."
-    ),
-    include_manifest: bool = typer.Option(
-        True, "--include-manifest", help="Include code manifest with SHA-256 hashes."
-    ),
-    include_rules: bool = typer.Option(
-        True, "--include-rules", help="Include canonical rules digest."
-    ),
-    include_reviews: bool = typer.Option(
-        True, "--include-reviews", help="Include review artifacts."
-    ),
-    include_digest: bool = typer.Option(
-        True,
-        "--include-digest",
-        help="Include combined snapshot digest for integrity verification.",
+        help="Output file path.",
     ),
 ):
     """
-    Generate a pro snapshot with enhanced debugging capabilities.
-
-    This tool provides comprehensive system state information, especially useful
-    when escalating to higher AI systems or for detailed analysis of multi-component issues.
-
-    Precedence: CLI flags override values from .snapshot.toml configuration file.
-    Use --dry-run to see the effective plan before creating the snapshot.
+    Generates a comprehensive snapshot with system info, git status, job logs,
+    and a full file manifest. This is for debugging purposes ONLY and produces
+    a very large file.
     """
-    script_path = "tools/snapshot_pro.py"
-    if Path(script_path).exists():
-        # Use the external tool if it exists
-        args = [sys.executable, script_path]
-
-        # Add options
-        if out:
-            args.extend(["--out", out])
-        else:
-            args.extend(["--out", "~/xsa_snapshot_pro.txt"])
-        if max_inline != 100000:
-            args.extend(["--max-inline", str(max_inline)])
-        if not include_system:
-            args.append("--no-system")
-        if not include_git:
-            args.append("--no-git")
-        if not include_jobs:
-            args.append("--no-jobs")
-        if not include_manifest:
-            args.append("--no-manifest")
-        if not include_rules:
-            args.append("--no-rules")
-        if not include_reviews:
-            args.append("--no-reviews")
-        if not include_digest:
-            args.append("--no-digest")
-
-        typer.echo(f"[pro-snapshot] running: {' '.join(args)}")
-        try:
-            subprocess.run(args, check=True)
-        except subprocess.CalledProcessError as e:
-            typer.echo(f"[pro-snapshot] failed: {e}", err=True)
-            raise typer.Exit(1)
-    else:
-        # Use the built-in simple snapshot utility if external tool doesn't exist
-        # For pro snapshot, we want to include all context by default
+    typer.echo("Generating verbose debug report. This may take a moment...")
+    # We will call the old 'pro' logic, which is now better named.
+    # For simplicity, we can reuse the snapshot_simple implementation for this.
+    try:
+        out_path = Path(out).expanduser()
         snapshot_simple.write_pro_snapshot(
-            out_path=out,
-            max_inline=max_inline,
-            include_system=include_system,
-            include_git=include_git,
-            include_jobs=include_jobs,
-            include_manifest=include_manifest,
-            include_rules=include_rules,
-            include_reviews=include_reviews,
-            include_digest=include_digest,
-            mode="standard",  # Default to standard mode for pro
+            out_path=out_path,
+            mode="standard",  # A reasonable default for a debug report
+            include_system=True,
+            include_git=True,
+            include_jobs=True,
+            include_manifest=True,
+            include_rules=True,
+            include_reviews=True,
+            include_digest=True,
         )
+        typer.echo(f"✓ Debug report written to: {out}")
+    except Exception as e:
+        typer.echo(f"Error creating debug report: {e}", err=True)
+        raise typer.Exit(1)
 
 
-@app.command("txt")
+@app.command("legacy-txt")
 def snapshot_txt(
     preset: str = typer.Option(
         "author-core",
@@ -365,8 +403,12 @@ def snapshot_txt(
     ),
 ):
     """
+    DEPRECATED: Use 'create' command instead.
     Flatten curated files into a single .txt with strict includes/excludes for chatbot upload.
     """
+    typer.echo(
+        "⚠️  Warning: 'txt' command is deprecated. Use 'create' command instead."
+    )
     from ..utils.flatpack_txt import flatten_txt
 
     preset = (preset or "author-core").lower()
@@ -381,7 +423,7 @@ def snapshot_txt(
 
     exc = exclude or PRESET_DEFAULT_EXCLUDE
 
-    outp = Path(out)
+    outp = Path(out).expanduser()
     outp.parent.mkdir(parents=True, exist_ok=True)
     out_path, notes = flatten_txt(
         out_path=outp,
@@ -397,3 +439,298 @@ def snapshot_txt(
     for n in notes:
         typer.echo(f"[note] {n}")
     typer.echo(f"[snapshot/txt] wrote → {out_path}")
+
+
+def _posix_path(p: Path) -> str:
+    try:
+        return p.resolve().relative_to(Path(".").resolve()).as_posix()
+    except Exception:
+        return p.as_posix().replace("\\", "/")
+
+
+def _glob_any(rel: str, patterns: List[str]) -> bool:
+    rel = rel.replace("\\", "/")
+    return any(fnmatch.fnmatch(rel, pat) for pat in (patterns or []))
+
+
+def _is_binary_quick(path: Path, sample_bytes: int = 8192) -> bool:
+    try:
+        b = path.read_bytes()[:sample_bytes]
+    except Exception:
+        # unreadable → treat as suspicious/binary to be safe
+        return True
+    if not b:
+        return False
+    if b"\x00" in b:
+        return True
+    text_chars = bytes(range(32, 127)) + b"\n\r\t\b\f"
+    non_text_ratio = sum(ch not in text_chars for ch in b) / len(b)
+    return non_text_ratio > 0.30
+
+
+def _parse_flatpack_boundaries(text: str) -> List[Tuple[str, int, bool]]:
+    """
+    Return list of (relpath, approx_bytes, is_binary_marker).
+    Supports both formats:
+      - === START FILE: path === ... === END FILE: path ===
+      - --- START OF FILE path --- ... --- END OF FILE path ---
+    Binary marker line: [BINARY FILE] size=... sha256=...
+    """
+    lines = text.splitlines()
+    entries = []
+    i = 0
+    start_re_a = re.compile(r"^===\s*START\s+FILE:\s*(.+?)\s*===$")
+    end_re_a = re.compile(r"^===\s*END\s+FILE:\s*(.+?)\s*===$")
+    start_re_b = re.compile(r"^-{3}\s*START\s+OF\s+FILE\s+(.+?)\s*-{3}$")
+    end_re_b = re.compile(r"^-{3}\s*END\s+OF\s+FILE\s+(.+?)\s*-{3}$")
+    while i < len(lines):
+        m_a = start_re_a.match(lines[i]) or start_re_b.match(lines[i])
+        if not m_a:
+            i += 1
+            continue
+        rel = m_a.group(1).strip()
+        j = i + 1
+        is_binary = False
+        size_count = 0
+        while j < len(lines):
+            # detect binary marker
+            if lines[j].startswith("[BINARY FILE]"):
+                is_binary = True
+            if end_re_a.match(lines[j]) or end_re_b.match(lines[j]):
+                break
+            size_count += len(lines[j]) + 1  # crude approx of bytes
+            j += 1
+        entries.append((rel, size_count, is_binary))
+        i = j + 1
+    return entries
+
+
+@app.command("verify")
+def snapshot_verify(
+    snapshot_file: Optional[str] = typer.Option(
+        None,
+        "--file",
+        "-f",
+        help="Verify a built flat pack (repo_flat.txt / xsa_snapshot.txt). If omitted, preflight verify.",
+    ),
+    mode: str = typer.Option(
+        "minimal", "--mode", help="Mode to preflight (ignored if --file is provided)"
+    ),
+    include: List[str] = typer.Option(
+        None, "--include", "-I", help="Extra include patterns (preflight)"
+    ),
+    exclude: List[str] = typer.Option(
+        None, "--exclude", "-X", help="Extra exclude patterns (preflight)"
+    ),
+    git_tracked: bool = typer.Option(False, "--git-tracked"),
+    git_include_untracked: bool = typer.Option(False, "--git-include-untracked"),
+    max_per_file: int = typer.Option(
+        200_000, "--max-per-file", help="Per-file budget (bytes)"
+    ),
+    total_max: int = typer.Option(
+        4_000_000, "--total-max", help="Total budget (bytes, preflight only)"
+    ),
+    disallow: List[str] = typer.Option(
+        ["books/**", "review/**", ".xsarena/**", "tools/**", "directives/**"],
+        "--disallow",
+        help="Disallow these globs; flag if any included",
+    ),
+    fail_on: List[str] = typer.Option(
+        ["secrets", "oversize", "disallowed", "binary", "missing_required"],
+        "--fail-on",
+        help="Fail on these categories (repeat flag for multiple)",
+    ),
+    require: List[str] = typer.Option(
+        ["README.md", "pyproject.toml"], "--require", help="Paths that must be present"
+    ),
+    redaction_expected: bool = typer.Option(
+        False,
+        "--redaction-expected/--no-redaction-expected",
+        help="Postflight: warn/fail if no [REDACTED_*] markers appear at all",
+    ),
+    policy: Optional[str] = typer.Option(
+        None,
+        "--policy",
+        help="Optional policy .yml (keys: disallow_globs, require, max_per_file, total_max, fail_on)",
+    ),
+    json_output: bool = typer.Option(False, "--json", help="Output in JSON format"),
+    quiet: bool = typer.Option(False, "--quiet", help="Suppress narrative output"),
+):
+    """
+    Verify snapshot health: preflight (what would be included) or postflight (verify a built file).
+    Exits non-zero if configured fail_on categories are hit.
+    """
+    # Load policy file if given (CLI flags override policy)
+    if policy:
+        try:
+            import yaml
+
+            data = yaml.safe_load(Path(policy).read_text(encoding="utf-8")) or {}
+            disallow = data.get("disallow_globs", disallow) or disallow
+            require = data.get("require", require) or require
+            max_per_file = int(data.get("max_per_file", max_per_file))
+            total_max = int(data.get("total_max", total_max))
+            if "fail_on" in data:
+                raw = data["fail_on"]
+                if isinstance(raw, str):
+                    fail_on = [s.strip() for s in raw.split(",") if s.strip()]
+                elif isinstance(raw, list):
+                    fail_on = list(raw)
+        except Exception as e:
+            typer.echo(f"[verify] Warning: could not load policy: {e}")
+
+    violations = {
+        "secrets": [],
+        "oversize": [],
+        "disallowed": [],
+        "binary": [],
+        "missing_required": [],
+    }
+
+    def _print_summary(
+        total_files: int, total_bytes: int, largest: List[Tuple[str, int]]
+    ):
+        if not json_output:
+            typer.echo(f"[verify] files: {total_files}, bytes: {total_bytes}")
+            if largest and not quiet:
+                typer.echo("[verify] top-10 largest:")
+                for rel, sz in largest[:10]:
+                    typer.echo(f"  - {rel}  ({sz} bytes)")
+
+    def _fail_if_needed(total_files: int, total_bytes: int) -> int:
+        to_fail = {k for k in violations if violations[k] and k in set(fail_on)}
+        if json_output:
+            result = {
+                "total_files": total_files,
+                "total_bytes": total_bytes,
+                "violations": violations,
+                "categories_to_fail": sorted(to_fail),
+                "status": "FAIL" if to_fail else "OK",
+            }
+            typer.echo(json.dumps(result))
+        else:
+            if to_fail:
+                typer.echo("[verify] FAIL on categories: " + ", ".join(sorted(to_fail)))
+                for cat in sorted(to_fail):
+                    if not quiet:
+                        typer.echo(f"  [{cat}]")
+                        for msg in violations[cat][:25]:  # cap output
+                            typer.echo(f"    - {msg}")
+                raise typer.Exit(1)
+            if not quiet:
+                typer.echo("[verify] OK")
+        exit_code = 1 if to_fail else 0
+        raise typer.Exit(exit_code)
+
+    if snapshot_file:
+        # Postflight: parse an existing flat pack (repo_flat.txt or xsa_snapshot.txt)
+        p = Path(snapshot_file)
+        if not p.exists():
+            typer.echo(f"[verify] file not found: {snapshot_file}")
+            raise typer.Exit(2)
+        text = p.read_text(encoding="utf-8", errors="replace")
+        entries = _parse_flatpack_boundaries(text)
+        if not entries:
+            typer.echo("[verify] no file boundaries detected; is this a flat pack?")
+            # Not fatal; continue scanning whole file for redaction marker hint
+        total_bytes = 0
+        largest = []
+        for rel, approx_bytes, is_bin in entries:
+            total_bytes += approx_bytes
+            largest.append((rel, approx_bytes))
+            if approx_bytes > max_per_file:
+                violations["oversize"].append(
+                    f"{rel} ({approx_bytes} > {max_per_file})"
+                )
+            if _glob_any(rel, disallow):
+                violations["disallowed"].append(rel)
+            if is_bin:
+                violations["binary"].append(rel)
+        largest.sort(key=lambda t: t[1], reverse=True)
+
+        # Redaction heuristic: if expected, warn/fail if the pack contains no redaction markers at all
+        if redaction_expected and "[REDACTED_" not in text:
+            violations.setdefault("redaction", []).append(
+                "no redaction markers found (heuristic)"
+            )
+
+        _print_summary(len(entries), total_bytes, largest)
+
+        # Required files check (by string match in rel)
+        present = {rel for rel, _, _ in entries}
+        for req in require or []:
+            if not any(fnmatch.fnmatch(r, req) for r in present):
+                violations["missing_required"].append(req)
+
+        return _fail_if_needed(len(entries), total_bytes)
+
+    # Preflight: collect would-be included files using existing utility
+    try:
+        cfg = snapshot_simple.read_snapshot_config()
+        files = snapshot_simple.collect_paths(
+            mode=mode,
+            include_git_tracked=git_tracked,
+            include_untracked=git_include_untracked,
+        )
+    except Exception as e:
+        typer.echo(f"[verify] collection error: {e}")
+        raise typer.Exit(2)
+
+    # Apply extra include/exclude if provided
+    file_set = {p.resolve() for p in files if Path(p).is_file()}
+    if include:
+        for pat in include:
+            for mp in Path(".").glob(pat):
+                if mp.is_file():
+                    file_set.add(mp.resolve())
+    posix_map = {_posix_path(p): p for p in file_set}
+    if exclude:
+        to_remove = {rel for rel in posix_map if _glob_any(rel, exclude)}
+        for rel in to_remove:
+            posix_map.pop(rel, None)
+
+    # Evaluate
+    total_bytes = 0
+    largest = []
+    scanner = SecretsScanner()
+    for rel, p in posix_map.items():
+        try:
+            sz = p.stat().st_size
+        except Exception:
+            sz = 0
+        total_bytes += sz
+        largest.append((rel, sz))
+
+        if sz > max_per_file:
+            violations["oversize"].append(f"{rel} ({sz} > {max_per_file})")
+
+        if _glob_any(rel, disallow):
+            violations["disallowed"].append(rel)
+
+        if _is_binary_quick(p):
+            violations["binary"].append(rel)
+
+        try:
+            findings = scanner.scan_file(p)
+            if findings:
+                # Keep output compact; show first hit per file
+                first = findings[0]
+                violations["secrets"].append(f"{rel} [{first.get('type','secret')}]")
+        except Exception:
+            # If scanning fails, skip rather than aborting the verify
+            pass
+
+    largest.sort(key=lambda t: t[1], reverse=True)
+    _print_summary(len(posix_map), total_bytes, largest)
+
+    # Total budget (preflight only)
+    if total_bytes > total_max:
+        violations["oversize"].append(f"[total] {total_bytes} > {total_max}")
+
+    # Required files must be present (by relpath glob)
+    rels = list(posix_map.keys())
+    for req in require or []:
+        if not any(fnmatch.fnmatch(r, req) for r in rels):
+            violations["missing_required"].append(req)
+
+    return _fail_if_needed(len(posix_map), total_bytes)

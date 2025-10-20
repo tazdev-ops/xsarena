@@ -93,12 +93,15 @@ System health, jobs, services, and configuration.
   - `xsarena ops health read` - Read startup plan; attempt merge; print sources found
   - `xsarena ops health init` - One-time helper: create a minimal rules baseline if merged rules and sources are missing
 - `xsarena ops snapshot` - Snapshot management
-  - `xsarena ops snapshot write` - Generate a snapshot using the smart snapshot builder
-  - `xsarena ops snapshot pro` - Generate a pro snapshot with enhanced debugging capabilities
-  - `xsarena ops snapshot txt` - Flatten curated files into a single .txt with strict includes/excludes for chatbot upload
-    - `xsarena ops snapshot txt --preset author-core --total-max 4000000 --max-per-file 200000 --no-repo-map` - Author core preset (recommended)
-    - `xsarena ops snapshot txt --preset ultra-tight --total-max 2500000 --max-per-file 180000 --no-repo-map` - Ultra-tight preset (minimal)
-    - `xsarena ops snapshot txt -I README.md -I src/xsarena/core/prompt.py --out repo_flat.txt` - Custom includes
+  - `xsarena ops snapshot create` - Create a flat snapshot, ideal for chatbot uploads (recommended)
+    - `xsarena ops snapshot create --mode author-core --total-max 4000000 --max-per-file 200000` - Author core preset (recommended)
+    - `xsarena ops snapshot create --mode ultra-tight --total-max 2500000 --max-per-file 180000` - Ultra-tight preset (minimal)
+    - `xsarena ops snapshot create --mode custom -I README.md -I src/xsarena/core/prompt.py --out repo_flat.txt` - Custom includes
+  - `xsarena ops snapshot debug-report` - Generate a verbose snapshot for debugging (formerly 'pro')
+  - `xsarena ops snapshot legacy-write` - Legacy snapshot command (deprecated)
+  - `xsarena ops snapshot legacy-txt` - Legacy flat pack command (deprecated)
+  - `xsarena ops snapshot legacy-simple` - Legacy simple command (deprecated)
+  - `xsarena ops snapshot verify` - Verify snapshot health: preflight or postflight
 - `xsarena ops debug` - Debugging commands
 - `xsarena ops directives` - Directive tools (index)
 - `xsarena ops booster` - Interactively engineer and improve prompts

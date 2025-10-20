@@ -1,10 +1,11 @@
 """Plugin and profile discovery system for XSArena."""
 
 from importlib.metadata import entry_points
-from pathlib import Path
 from typing import Any, Dict, List
 
 import yaml
+
+from .project_paths import get_project_root
 
 
 def discover_profiles() -> Dict[str, Any]:
@@ -16,8 +17,9 @@ def discover_profiles() -> Dict[str, Any]:
 
     profiles.update(DEFAULT_PROFILES)
 
-    # Load from directives/profiles/presets.yml
-    presets_path = Path("directives/profiles/presets.yml")
+    # Load from directives/profiles/presets.yml using project root resolution
+    project_root = get_project_root()
+    presets_path = project_root / "directives" / "profiles" / "presets.yml"
     if presets_path.exists():
         try:
             data = yaml.safe_load(presets_path.read_text(encoding="utf-8")) or {}
@@ -34,34 +36,39 @@ def discover_overlays() -> Dict[str, str]:
     """Discover overlays from directives/style.*.md files."""
     overlays = {}
 
-    # Look for style overlay files
-    for style_file in Path("directives").glob("style.*.md"):
-        try:
-            content = style_file.read_text(encoding="utf-8")
-            # Parse OVERLAY: header if present
-            lines = content.splitlines()
-            overlay_name = style_file.stem.replace(
-                "style.", ""
-            )  # Extract name from filename
+    # Look for style overlay files using project root resolution
+    project_root = get_project_root()
+    directives_path = project_root / "directives"
+    if directives_path.exists():
+        for style_file in directives_path.glob("style.*.md"):
+            try:
+                content = style_file.read_text(encoding="utf-8")
+                # Parse OVERLAY: header if present
+                lines = content.splitlines()
+                overlay_name = style_file.stem.replace(
+                    "style.", ""
+                )  # Extract name from filename
 
-            # Look for OVERLAY: header
-            overlay_content = []
-            for line in lines:
-                if line.startswith("OVERLAY:"):
-                    # Extract content after OVERLAY: header
-                    overlay_content.append(line[8:].strip())  # Remove "OVERLAY:" part
-                elif (
-                    overlay_content
-                ):  # If we've found the header, continue adding content
-                    overlay_content.append(line)
+                # Look for OVERLAY: header
+                overlay_content = []
+                for line in lines:
+                    if line.startswith("OVERLAY:"):
+                        # Extract content after OVERLAY: header
+                        overlay_content.append(
+                            line[8:].strip()
+                        )  # Remove "OVERLAY:" part
+                    elif (
+                        overlay_content
+                    ):  # If we've found the header, continue adding content
+                        overlay_content.append(line)
 
-            if overlay_content:
-                overlays[overlay_name] = "\n".join(overlay_content).strip()
-            else:
-                # Use entire content if no OVERLAY: header
-                overlays[overlay_name] = content.strip()
-        except Exception:
-            continue  # Skip files that can't be read
+                if overlay_content:
+                    overlays[overlay_name] = "\n".join(overlay_content).strip()
+                else:
+                    # Use entire content if no OVERLAY: header
+                    overlays[overlay_name] = content.strip()
+            except Exception:
+                continue  # Skip files that can't be read
 
     return overlays
 
@@ -70,7 +77,8 @@ def discover_roles() -> Dict[str, str]:
     """Discover roles from directives/roles/*.md files."""
     roles = {}
 
-    roles_dir = Path("directives/roles")
+    project_root = get_project_root()
+    roles_dir = project_root / "directives" / "roles"
     if roles_dir.exists():
         for role_file in roles_dir.glob("*.md"):
             try:

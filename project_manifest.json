@@ -1,0 +1,27 @@
+{
+  "name": "XSArena",
+  "purpose": "Local-first authoring and analysis with a bridge-first, reproducible pipeline",
+  "docs": {
+    "start_here": "README_FOR_AI.md",
+    "charter": "docs/PROJECT_CHARTER.md",
+    "protocol": "docs/COLLAB_PROTOCOL.md",
+    "jargon": "docs/JARGON.md",
+    "onboarding": "docs/ONBOARDING_AI.md",
+    "architecture": "docs/ARCHITECTURE.md",
+    "operating_model": "docs/OPERATING_MODEL.md",
+    "usage": "docs/USAGE.md",
+    "operations": "docs/OPERATIONS.md",
+    "agent_rulebook": "docs/AGENT_RULEBOOK.md",
+    "snapshot_rules": "docs/SNAPSHOT_RULEBOOK.md",
+    "c2_protocol": "docs/C2_PROTOCOL.md"
+  },
+  "c2": {
+    "queue": ".xsarena/ops/c2_queue.json",
+    "status": ".xsarena/ops/c2_status.json",
+    "reports": "review/reports/"
+  },
+  "defaults": {
+    "bridge_url": "http://127.0.0.1:5102/v1",
+    "snapshot_minimal_preset": "ultra-tight"
+  }
+}

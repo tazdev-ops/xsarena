@@ -1,5 +1,6 @@
 """Configuration and backend management commands for XSArena."""
 
+import json
 from pathlib import Path
 from typing import Optional
 
@@ -265,7 +266,10 @@ def config_import(
 
 
 @app.command("config-check")
-def config_check():
+def config_check(
+    json_output: bool = typer.Option(False, "--json", help="Output in JSON format"),
+    quiet: bool = typer.Option(False, "--quiet", help="Suppress narrative output"),
+):
     """Validate configuration and show any issues."""
     try:
         # Load config with validation
@@ -273,29 +277,44 @@ def config_check():
 
         # Check for config file and validate its keys
         config_path = Path(".xsarena/config.yml")
+        unknown_keys = {}
         if config_path.exists():
             with open(config_path, "r", encoding="utf-8") as f:
                 file_config = yaml.safe_load(f) or {}
 
             # Validate the file config keys
             unknown_keys = Config.validate_config_keys(file_config)
-            if unknown_keys:
-                typer.echo(
-                    "[yellow]Warning: Unknown config keys in .xsarena/config.yml:[/yellow]"
-                )
-                for key, suggestions in unknown_keys.items():
-                    if suggestions:
-                        typer.echo(
-                            f"  [yellow]{key}[/yellow] (did you mean: {', '.join(suggestions[:2])}?)"
-                        )
-                    else:
-                        typer.echo(f"  [yellow]{key}[/yellow]")
 
-        typer.echo("✓ Configuration is valid")
-        typer.echo(f"  Base URL normalized to: {config.base_url}")
+        if json_output:
+            result = {
+                "valid": True,
+                "normalized_base_url": config.base_url,
+                "unknown_config_keys": unknown_keys,
+            }
+            typer.echo(json.dumps(result))
+        else:
+            if unknown_keys:
+                if not quiet:
+                    typer.echo(
+                        "[yellow]Warning: Unknown config keys in .xsarena/config.yml:[/yellow]"
+                    )
+                    for key, suggestions in unknown_keys.items():
+                        if suggestions:
+                            typer.echo(
+                                f"  [yellow]{key}[/yellow] (did you mean: {', '.join(suggestions[:2])}?)"
+                            )
+                        else:
+                            typer.echo(f"  [yellow]{key}[/yellow]")
+
+            if not quiet:
+                typer.echo("✓ Configuration is valid")
+                typer.echo(f"  Base URL normalized to: {config.base_url}")
 
     except Exception as e:
-        typer.echo(f"[red]✗ Configuration validation failed:[/red] {e}")
+        if json_output:
+            typer.echo(json.dumps({"valid": False, "error": str(e)}))
+        else:
+            typer.echo(f"[red]✗ Configuration validation failed:[/red] {e}")
         raise typer.Exit(1)
 
 

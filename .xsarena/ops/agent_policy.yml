@@ -1,0 +1,20 @@
+# Agent policy (lean defaults). CLI flags override this file.
+disallow_globs:
+  - books/**
+  - review/**
+  - .xsarena/**
+require:
+  - README.md
+  - pyproject.toml
+max_per_file: 180000
+total_max: 2500000
+fail_on:
+  - oversize
+  - disallowed
+  - secrets
+
+# Optional: quiet hours / concurrency hint (informational; not enforced by verify)
+quiet_hours:
+  enabled: false
+concurrency:
+  total: 2

@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 """
+DEPRECATED: Use 'xsarena ops snapshot ...' instead
+
 XSArena Snapshot Utility
 
 - Configuration-driven via .snapshot.toml with modes: minimal, standard, full

@@ -138,6 +138,8 @@ dev_app_group.add_typer(pipeline_app, name="pipeline")
 dev_app_group.command("simulate")(dev_simulate)
 app.add_typer(dev_app_group)
 
+from .cmds_settings import app as config_app
+
 ops_app = typer.Typer(
     name="ops", help="System health, jobs, services, and configuration."
 )
@@ -154,6 +156,9 @@ ops_app.add_typer(snapshot_app, name="snapshot")
 ops_app.add_typer(metrics_app, name="metrics")
 ops_app.add_typer(upgrade_app, name="upgrade")
 ops_app.add_typer(adapt_app, name="adapt", help="Adaptive inspection and safe fixes")
+ops_app.add_typer(
+    config_app, name="config", help="Configuration and backend management"
+)
 app.add_typer(ops_app)
 
 project_app_group = typer.Typer(

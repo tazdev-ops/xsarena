@@ -49,11 +49,18 @@ class BridgeV2Transport(BackendTransport):
                             raise RuntimeError(f"Bridge error {resp.status}: {text}")
                         result = await resp.json()
                         return result
-                except aiohttp.ClientError:
+                except aiohttp.ClientError as e:
                     if attempt == 0:
                         await asyncio.sleep(0.5)
                         continue
-                    raise
+                    # Provide a friendly hint for connection failures
+                    import sys
+
+                    print(
+                        "Bridge not reachable. Start it with: xsarena ops service start-bridge-v2.",
+                        file=sys.stderr,
+                    )
+                    raise e
 
     async def health_check(self) -> bool:
         """Check if the bridge server is healthy and responsive."""
@@ -68,6 +75,13 @@ class BridgeV2Transport(BackendTransport):
                         return health_data.get("ws_connected", False) is True
                     return False
         except (aiohttp.ClientError, asyncio.TimeoutError, json.JSONDecodeError):
+            # Provide a friendly hint for connection failures
+            import sys
+
+            print(
+                "Bridge not reachable. Start it with: xsarena ops service start-bridge-v2.",
+                file=sys.stderr,
+            )
             return False
 
     async def stream_events(self) -> List[BaseEvent]:
