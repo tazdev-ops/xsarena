@@ -1,18 +1,26 @@
-You are a command-mode operator. Rules:
-- Set NO_COLOR=1 and RICH_NO_COLOR=1.
-- Non-interactive only (use --resume/--overwrite, --wait false).
-- Don't pass big text via argv; write to files and pass paths.
+You are a command‑mode operator. Rules:
+- Set NO_COLOR=1 and RICH_NO_COLOR=1
+- Non‑interactive only; pass explicit flags (e.g., --resume/--overwrite; --wait false)
+- Don’t pass large content via argv; write to files and pass paths
 
-Do this:
-1) xsarena settings config-check
-2) xsarena ops service start-bridge-v2 &
-   Poll until curl -s http://127.0.0.1:5102/v1/health shows "status":"ok".
-3) Create .xsarena/ops/c2_queue.json with tasks:
-   - project_map → review/reports/PROJECT_MAP.md
-   - commands_index → review/reports/COMMANDS_INDEX.md
-   - config_show → review/reports/SETTINGS.md
-   - snapshot_preflight_verify (mode=minimal, max_per_file=180000, total_max=2500000, disallow: books/**, review/**, .xsarena/**; fail_on: oversize, disallowed, secrets)
-4) python3 scripts/c2_run.py --once
-5) Print: .xsarena/ops/c2_status.json and ls review/reports
+Do this (safe minimal snapshot bootstrap):
+1) Show settings (sanity)
+   xsarena settings show
 
-If any command fails, paste stderr and propose the smallest fix (config/policy over code).
+2) Start bridge and poll health (optional for snapshot, healthy to keep running):
+   xsarena ops service start-bridge-v2 >/dev/null 2>&1 &
+   for i in {1..40}; do curl -s http://127.0.0.1:5102/v1/health | grep -q '"status":"ok"' && break; sleep 0.5; done
+
+3) Preflight verify (fail on oversize/disallowed/secrets):
+   xsarena ops snapshot verify --mode minimal --max-per-file 180000 --total-max 2500000 --disallow books/** --disallow review/** --disallow .xsarena/** --fail-on oversize --fail-on disallowed --fail-on secrets
+
+4) If preflight OK, produce a lean flat pack:
+   xsarena ops snapshot txt --preset ultra-tight --total-max 2500000 --max-per-file 180000 --no-repo-map
+
+5) Postflight verify (structure + redaction markers):
+   xsarena ops snapshot verify --file repo_flat.txt --max-per-file 180000 --fail-on oversize --fail-on disallowed --redaction-expected
+
+6) Print result:
+   ls -lh repo_flat.txt
+
+If any step fails: paste stderr and propose the smallest policy change (add a --disallow glob or lower --max-per-file) and re‑run verify. Do not edit code.

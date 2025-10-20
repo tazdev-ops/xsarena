@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
-"""
-DEPRECATED: Use 'xsarena ops snapshot ...' instead
+# DEPRECATED: Use `xsarena ops snapshot` commands instead (txt/write/verify).
+# This script remains for legacy compatibility and will be removed in a future release.
 
+"""
 XSArena Snapshot Utility
 
 - Configuration-driven via .snapshot.toml with modes: minimal, standard, full

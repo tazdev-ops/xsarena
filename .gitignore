@@ -65,10 +65,28 @@ repo_flat.txt
 xsa_snapshot.txt
 xsa_snapshot.zip
 
-# Python build artifacts and cache
-__pycache__/
-*.pyc
-*.egg-info/
+# Snapshot output files
+debug_report.txt
+xsarena_final_snapshot.txt
+xsarena_snapshot*.txt
 
-# Virtual environment
-venv/
+# Local venvs and caches
+xsarena_env/**
+.venv/**
+venv/**
+__pycache__/**
+*.pyc
+
+# Project artifacts (don't commit)
+.xsarena/**
+review/**
+books/**
+logs/**
+
+# Snapshots
+repo_flat.txt
+xsa_snapshot.txt
+xsa_snapshot.zip
+
+# OS cruft
+.DS_Store

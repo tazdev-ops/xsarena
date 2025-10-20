@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
-"""
-DEPRECATED: Use 'xsarena ops snapshot ...' instead
+# DEPRECATED ENTRYPOINT: The supported CLI is `xsarena ops snapshot txt`.
+# This file hosts implementation details; prefer the CLI for user workflows.
 
+"""
 XSArena Flatpack Utility - Legacy tool for flattening repos into single text files
 """
 from __future__ import annotations
