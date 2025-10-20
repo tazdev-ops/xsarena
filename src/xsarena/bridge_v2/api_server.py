@@ -18,15 +18,13 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+
 # Import from new modules
 from .handlers import (
     CONFIG,
     MODEL_NAME_TO_ID_MAP,
-    MODEL_ENDPOINT_MAP,
     _internal_ok,
     chat_completions_handler,
-    format_openai_chunk,
-    format_openai_finish_chunk,
     load_config,
     load_model_endpoint_map,
     load_model_map,
@@ -261,36 +259,6 @@ async def console():
 @app.get("/v1/health")
 def v1_health():
     return health()
-
-
-def format_openai_chunk(content, model, request_id):
-    """Format content as an OpenAI-compatible chunk for streaming."""
-    import json
-    import time
-
-    chunk = {
-        "id": request_id,
-        "object": "chat.completion.chunk",
-        "created": int(time.time()),
-        "model": model,
-        "choices": [{"index": 0, "delta": {"content": content}, "finish_reason": None}],
-    }
-    return f"data: {json.dumps(chunk)}\n\n"
-
-
-def format_openai_finish_chunk(model, request_id, reason="stop"):
-    """Format a finish chunk for OpenAI-compatible streaming."""
-    import json
-    import time
-
-    chunk = {
-        "id": request_id,
-        "object": "chat.completion.chunk",
-        "created": int(time.time()),
-        "model": model,
-        "choices": [{"index": 0, "delta": {}, "finish_reason": reason}],
-    }
-    return f"data: {json.dumps(chunk)}\n\n"
 
 
 def run_server():
