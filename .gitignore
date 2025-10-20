@@ -1,95 +1,77 @@
-# Python build artifacts and caches
-__pycache__/
-*.pyc
-*.pyo
-*.pyd
-*.so
-build/
-dist/
-*.egg-info/
-.eggs/
-
-# Virtual Environment
-venv/
-.venv/
-xsarena_env/
-
-# Tooling Caches
-.pytest_cache/
-.mypy_cache/
-.ruff_cache/
-
-# IDE and Editor Files
-.idea/
-.vscode/
-*.swp
-*.swo
+# Additional snapshot and artifact files (comprehensive)
 *.bak
-
-# OS-specific files
-.DS_Store
-Thumbs.db
-
-# User-generated content and output
 books/
-logs/
-review/
+books/**
+build/
+debug_report.txt
 directives/_mixer/
 directives/_preview/
-.xsarena/snapshots/
-.xsarena/jobs/
-.xsarena/session_state.json
-.xsarena/tmp/
-
-# Temporary state files in ops
-.xsarena/ops/queue.json
-.xsarena/ops/c2_queue.json
-.xsarena/ops/c2_status.json
-
+directives/_rules/rules.merged.md
+dist/
+.DS_Store
+*.egg-info/
+.eggs/
+.env
+# Generated artifacts
+.idea/
+# IDE and Editor Files
+# Local configuration (if any, secrets should never be committed)
+# Local venvs and caches
+logs/
+logs/**
+model_endpoint_map.json
+models.json
+.mypy_cache/
+# OS cruft
+# OS-specific files
+# Project artifacts (don't commit)
+*.pyc
+__pycache__/
+__pycache__/**
+*.pyd
+*.pyo
+.pytest_cache/
+# Python build artifacts and caches
+repo_flat.txt
+review/
+review/**
+.ruff_cache/
 # Snapshot and report artifacts
 snapshot_chunks/
-repo_flat.txt
-xsa_snapshot*.txt
-xsa_snapshot*.zip
-xsa_debug_report*.txt
-*.tar.gz
-
-# Local configuration (if any, secrets should never be committed)
-.env
-
-# Generated artifacts
+# Snapshot output files
 snapshot.txt
-directives/_rules/rules.merged.md
-repo_flat.txt
+*.so
+*.swo
+*.swp
+*.tar.gz
+# Temporary state files in ops
+Thumbs.db
+# Tooling Caches
+# User-generated content and output
+.venv/
+.venv/**
+venv/
+venv/**
+# Virtual Environment
+.vscode/
+xsa_debug_report*.txt
+.xsarena/**
+xsarena_env/
+xsarena_env/**
+xsarena_final_snapshot.txt
+.xsarena/jobs/
+.xsarena/ops/c2_queue.json
+.xsarena/ops/c2_status.json
+.xsarena/ops/queue.json
+.xsarena/session_state.json
+.xsarena/snapshots/
+xsarena_snapshot*.txt
+.xsarena/tmp/
+xsa_snapshot*.txt
 xsa_snapshot.txt
+xsa_snapshot*.zip
 xsa_snapshot.zip
 
-# Snapshot output files
-debug_report.txt
-xsarena_final_snapshot.txt
-xsarena_snapshot*.txt
+# deduped on 2025-10-20
 
-# Local venvs and caches
-xsarena_env/**
-.venv/**
-venv/**
-__pycache__/**
-*.pyc
-
-# Project artifacts (don't commit)
-.xsarena/**
-review/**
-books/**
-logs/**
-
-# Additional snapshot and artifact files (comprehensive)
-repo_flat.txt
-xsa_snapshot*.txt
-xsa_debug_report*.txt
-snapshot_chunks/
-.xsarena/jobs/
-models.json
-model_endpoint_map.json
-
-# OS cruft
-.DS_Store
+# deduped on 2025-10-20
