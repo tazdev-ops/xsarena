@@ -14,6 +14,7 @@ Preflight (before any change)
 - Git/workspace
   - Working tree clean or on a topic branch
   - No uncommitted critical files (code/docs)
+  - Check that irrelevant files that probably must be ignored are not accidentally committed
 - Config & bridge
   - xsarena settings config-check → base URL normalized to http://127.0.0.1:5102/v1
   - If the task needs the bridge: ensure it's running and userscript is connected

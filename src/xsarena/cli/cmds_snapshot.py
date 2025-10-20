@@ -1,4 +1,5 @@
 import fnmatch
+import json
 import re
 from pathlib import Path
 from typing import List, Optional, Tuple
@@ -71,6 +72,95 @@ PRESET_ULTRA_TIGHT_INCLUDE = [
     "directives/system/plan_from_seeds.md",
 ]
 
+PRESET_NORMAL_INCLUDE = [
+    "README.md",
+    "README_FOR_AI.md",
+    "COMMANDS_REFERENCE.md",
+    "MODULES.md",
+    "CHANGELOG.md",
+    "pyproject.toml",
+    "recipe.example.yml",
+    "recipe.schema.json",
+    "src/xsarena/__init__.py",
+    "src/xsarena/cli/main.py",
+    "src/xsarena/cli/registry.py",
+    "src/xsarena/cli/context.py",
+    "src/xsarena/cli/cmds_run.py",
+    "src/xsarena/cli/cmds_snapshot.py",
+    "src/xsarena/cli/cmds_authoring.py",
+    "src/xsarena/cli/cmds_jobs.py",
+    "src/xsarena/core/__init__.py",
+    "src/xsarena/core/config.py",
+    "src/xsarena/core/state.py",
+    "src/xsarena/core/engine.py",
+    "src/xsarena/core/prompt.py",
+    "src/xsarena/core/prompt_runtime.py",
+    "src/xsarena/core/v2_orchestrator/orchestrator.py",
+    "src/xsarena/core/v2_orchestrator/specs.py",
+    "src/xsarena/core/jobs/model.py",
+    "src/xsarena/core/jobs/executor.py",
+    "src/xsarena/core/jobs/scheduler.py",
+    "src/xsarena/core/jobs/store.py",
+    "src/xsarena/core/backends/__init__.py",
+    "src/xsarena/core/backends/bridge_v2.py",
+    "src/xsarena/modes/bilingual.py",
+    "src/xsarena/modes/chad.py",
+    "src/xsarena/utils/snapshot_simple.py",
+    "src/xsarena/utils/flatpack_txt.py",
+    "src/xsarena/utils/secrets_scanner.py",
+    "src/xsarena/bridge_v2/api_server.py",
+    "directives/base/*.md",
+    "directives/system/*.md",
+    "directives/_rules/rules.merged.md",
+    "docs/ARCHITECTURE.md",
+    "docs/USAGE.md",
+    "docs/OPERATING_MODEL.md",
+    "docs/SNAPSHOT_RULEBOOK.md",
+    "docs/COMMANDS_CHEATSHEET.md",
+    "docs/Bridge.md",
+    "docs/PROJECT_MAP.md",
+    ".xsarena/config.yml",
+]
+
+PRESET_MAXIMAL_INCLUDE = [
+    "README.md",
+    "README_FOR_AI.md",
+    "COMMANDS_REFERENCE.md",
+    "MODULES.md",
+    "CHANGELOG.md",
+    "CONTRIBUTING.md",
+    "pyproject.toml",
+    "recipe.example.yml",
+    "recipe.schema.json",
+    "models.json",
+    "xsarena_cli.py",
+    "xsarena_doctor.py",
+    "src/xsarena/__init__.py",
+    "src/xsarena/cli/*.py",
+    "src/xsarena/core/*.py",
+    "src/xsarena/core/backends/*.py",
+    "src/xsarena/core/jobs/*.py",
+    "src/xsarena/core/v2_orchestrator/*.py",
+    "src/xsarena/core/autopilot/*.py",
+    "src/xsarena/modes/*.py",
+    "src/xsarena/utils/*.py",
+    "src/xsarena/bridge_v2/*.py",
+    "src/xsarena/coder/*.py",
+    "directives/**/*.md",
+    "directives/**/*.yml",
+    "directives/**/*.json",
+    "docs/**/*.md",
+    "data/**/*.json",
+    "data/**/*.yml",
+    "recipes/**/*.yml",
+    ".xsarena/config.yml",
+    ".xsarena/session_state.json",
+    "scripts/**/*.py",
+    "scripts/**/*.sh",
+    "review/**/*.md",
+    "books/**/*.md",
+]
+
 app = typer.Typer(
     help="Generate an intelligent, minimal, and configurable project snapshot."
 )
@@ -82,9 +172,9 @@ app = typer.Typer(
 )
 def snapshot_create(
     mode: str = typer.Option(
-        "author-core",
+        "normal",
         "--mode",
-        help="Preset include set: author-core | ultra-tight | custom.",
+        help="Preset include set: author-core | ultra-tight | normal | maximal | custom.",
     ),
     out: str = typer.Option("repo_flat.txt", "--out", "-o", help="Output .txt path"),
     include: List[str] = typer.Option(
@@ -116,12 +206,16 @@ def snapshot_create(
     Flatten curated files into a single .txt. This is the primary tool for creating
     context for LLMs. It defaults to the 'author-core' preset.
     """
-    mode_lower = (mode or "author-core").lower()
+    mode_lower = (mode or "normal").lower()
 
     if mode_lower == "author-core":
         inc = PRESET_AUTHOR_CORE_INCLUDE
     elif mode_lower == "ultra-tight":
         inc = PRESET_ULTRA_TIGHT_INCLUDE
+    elif mode_lower == "normal":
+        inc = PRESET_NORMAL_INCLUDE
+    elif mode_lower == "maximal":
+        inc = PRESET_MAXIMAL_INCLUDE
     elif mode_lower == "custom":
         if not include:
             typer.echo(
@@ -131,7 +225,7 @@ def snapshot_create(
         inc = include
     else:
         typer.echo(
-            f"Error: Unknown mode '{mode}'. Choose from: author-core, ultra-tight, custom.",
+            f"Error: Unknown mode '{mode}'. Choose from: author-core, ultra-tight, normal, maximal, custom.",
             err=True,
         )
         raise typer.Exit(code=1)
@@ -139,6 +233,9 @@ def snapshot_create(
     # Combine default excludes with any user-provided excludes
     final_excludes = PRESET_DEFAULT_EXCLUDE + (exclude or [])
 
+    # Set default to home directory if no output path provided
+    if out is None:
+        out = "~/repo_flat.txt"
     outp = Path(out).expanduser()
     outp.parent.mkdir(parents=True, exist_ok=True)
 
@@ -161,13 +258,13 @@ def snapshot_create(
         typer.echo(f"✓ Snapshot created successfully → {out_path}")
     except Exception as e:
         typer.echo(f"Error creating snapshot: {e}", err=True)
-        raise typer.Exit(1)
+        raise typer.Exit(1) from e
 
 
 @app.command("legacy-write")
 def snapshot_write(
     out: str = typer.Option(
-        None, "--out", "-o", help="Output file path. Defaults to xsa_snapshot.txt."
+        "xsa_snapshot.txt", "--out", "-o", help="Output file path."
     ),
     mode: Optional[str] = typer.Option(
         None, "--mode", help="Snapshot breadth: minimal, standard, core_logic, or max."
@@ -208,8 +305,11 @@ def snapshot_write(
     Precedence: CLI flags override values from .snapshot.toml configuration file.
     Use --dry-run to see the effective plan before creating the snapshot.
     """
+    # Set default to home directory if no output path provided
+    if out is None:
+        out = "~/xsa_snapshot.txt"
     # Use the built-in simple snapshot utility directly
-    out_path = Path(out).expanduser() if out else out
+    out_path = Path(out).expanduser()
     if dry_run:
         snapshot_simple.write_text_snapshot(
             out_path=out_path,
@@ -252,7 +352,7 @@ def snapshot_write(
 @app.command("legacy-simple")
 def snapshot_simple_cmd(
     out: str = typer.Option(
-        None, "--out", "-o", help="Output file path. Defaults to xsa_snapshot.txt."
+        "xsa_snapshot.txt", "--out", "-o", help="Output file path."
     ),
     mode: Optional[str] = typer.Option(
         None, "--mode", help="Snapshot breadth: minimal, standard, core_logic, or max."
@@ -287,7 +387,10 @@ def snapshot_simple_cmd(
     typer.echo(
         "⚠️  Warning: 'simple' command is deprecated. Use 'create' command instead."
     )
-    out_path = Path(out).expanduser() if out else out
+    # Set default to home directory if no output path provided
+    if out is None:
+        out = "~/xsa_snapshot.txt"
+    out_path = Path(out).expanduser()
     if dry_run:
         snapshot_simple.write_text_snapshot(
             out_path=out_path,
@@ -344,6 +447,9 @@ def snapshot_debug_report(
     a very large file.
     """
     typer.echo("Generating verbose debug report. This may take a moment...")
+    # Set default to home directory if no output path provided
+    if out is None:
+        out = "~/xsa_debug_report.txt"
     # We will call the old 'pro' logic, which is now better named.
     # For simplicity, we can reuse the snapshot_simple implementation for this.
     try:
@@ -362,7 +468,7 @@ def snapshot_debug_report(
         typer.echo(f"✓ Debug report written to: {out}")
     except Exception as e:
         typer.echo(f"Error creating debug report: {e}", err=True)
-        raise typer.Exit(1)
+        raise typer.Exit(1) from e
 
 
 @app.command("legacy-txt")
@@ -406,9 +512,7 @@ def snapshot_txt(
     DEPRECATED: Use 'create' command instead.
     Flatten curated files into a single .txt with strict includes/excludes for chatbot upload.
     """
-    typer.echo(
-        "⚠️  Warning: 'txt' command is deprecated. Use 'create' command instead."
-    )
+    typer.echo("⚠️  Warning: 'txt' command is deprecated. Use 'create' command instead.")
     from ..utils.flatpack_txt import flatten_txt
 
     preset = (preset or "author-core").lower()
@@ -423,6 +527,9 @@ def snapshot_txt(
 
     exc = exclude or PRESET_DEFAULT_EXCLUDE
 
+    # Set default to home directory if no output path provided
+    if out is None:
+        out = "~/repo_flat.txt"
     outp = Path(out).expanduser()
     outp.parent.mkdir(parents=True, exist_ok=True)
     out_path, notes = flatten_txt(
@@ -674,7 +781,7 @@ def snapshot_verify(
         )
     except Exception as e:
         typer.echo(f"[verify] collection error: {e}")
-        raise typer.Exit(2)
+        raise typer.Exit(2) from e
 
     # Apply extra include/exclude if provided
     file_set = {p.resolve() for p in files if Path(p).is_file()}

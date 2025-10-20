@@ -26,15 +26,15 @@ When the command "snapshot" is given by operator, you shall:
 - Combine everything into a single-file txt output (snapshot.txt)
 - This represents the current state of the project for higher AI troubleshooting
 - Exclude binaries, CLI prompting instructions, images, downloaded modules, etc.
-- Use the `xsarena snapshot write` command for consistent output (configurable via .snapshotinclude and .snapshotignore files)
-- Use 'xsarena snapshot write --with-git --with-jobs' for a comprehensive debugging snapshot.
+- Use the `xsarena ops snapshot create --mode author-core` command for consistent output (configurable via .snapshotinclude and .snapshotignore files)
+- Use 'xsarena ops snapshot create --mode author-core --with-git --with-jobs' for a comprehensive debugging snapshot.
 - A separate chunking script exists: `chunk_with_message.sh` which can split any file into 100KB chunks with the message "Say \"received.\" after this message. DO nothing else." appended to each chunk
 
 ### 4. File & Code Management
 - Always identify and work with relevant code files (`.py`, `.sh`, `.json`, `.toml`, `.md`, `.txt`)
 - Never include unnecessary files like `.git/`, `__pycache__/`, `books/`, build artifacts
 - When modifying code, always maintain the existing style and patterns
-- Use the `xsarena snapshot write` command to generate project snapshots (configurable via .snapshotinclude and .snapshotignore files)
+- Use the `xsarena ops snapshot create --mode author-core` command to generate project snapshots (configurable via .snapshotinclude and .snapshotignore files)
 
 ### 5. Environment Cleanup
 - Upon each run, check for and remove unnecessary temporary files
@@ -229,7 +229,7 @@ EOF
   - If help changed, commit with: docs: update CLI help
 
 ### Snapshot discipline:
-- Use only `xsarena snapshot write` command
+- Use only `xsarena ops snapshot create --mode author-core` command
 - Default location: $HOME/xsa_min_snapshot.txt
 - Do not commit snapshot outputs; delete after sending
 
@@ -270,7 +270,7 @@ EOF
 
 ### Reporting
 - `xsarena report quick --book <final.md>` - Generate diagnostic bundle with book sample
-- Snapshots only via `xsarena snapshot write` (to $HOME/xsa_min_snapshot.txt)
+- Snapshots only via `xsarena ops snapshot create --mode author-core` (to $HOME/xsa_min_snapshot.txt)
 
 ### Git policy
 - Feature branches: feat/<topic>, fix/<topic>, chore/<topic>, ops/<topic>
