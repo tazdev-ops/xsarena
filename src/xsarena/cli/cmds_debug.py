@@ -23,8 +23,9 @@ def show_state(ctx: typer.Context):
     typer.echo(f"  Backend: {state.backend}")
     typer.echo(f"  Model: {state.model}")
     typer.echo(f"  Window Size: {state.window_size}")
-    typer.echo(f"  Current Job ID: {state.current_job_id}")
-    typer.echo(f"  Job Queue Length: {len(state.job_queue)}")
+    typer.echo(f"  Current Job ID: {getattr(state, 'current_job_id', 'N/A')}")
+    jq = getattr(state, "job_queue", [])
+    typer.echo(f"  Job Queue Length: {len(jq) if isinstance(jq, (list, tuple)) else 0}")
     typer.echo(f"  Redaction Enabled: {state.settings.get('redaction_enabled', False)}")
 
 

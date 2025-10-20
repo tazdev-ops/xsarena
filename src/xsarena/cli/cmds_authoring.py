@@ -347,10 +347,12 @@ def lossless_enhance_structure(
 def style_narrative(ctx: typer.Context, enable: bool = typer.Argument(True)):
     """Enable or disable the narrative/pedagogy overlay for the session."""
     cli: CLIContext = ctx.obj
+    overlays = set(getattr(cli.state, "overlays_active", []))
     if enable:
-        cli.state.overlays_active.add("narrative")
+        overlays.add("narrative")
     else:
-        cli.state.overlays_active.discard("narrative")
+        overlays.discard("narrative")
+    cli.state.overlays_active = list(overlays)
     cli.save()
     status = "ON" if enable else "OFF"
     typer.echo(f"Narrative overlay set to: {status}")
@@ -360,10 +362,12 @@ def style_narrative(ctx: typer.Context, enable: bool = typer.Argument(True)):
 def style_nobs(ctx: typer.Context, enable: bool = typer.Argument(True)):
     """Enable or disable the no-bullshit (no-bs) language overlay."""
     cli: CLIContext = ctx.obj
+    overlays = set(getattr(cli.state, "overlays_active", []))
     if enable:
-        cli.state.overlays_active.add("no_bs")
+        overlays.add("no_bs")
     else:
-        cli.state.overlays_active.discard("no_bs")
+        overlays.discard("no_bs")
+    cli.state.overlays_active = list(overlays)
     cli.save()
     status = "ON" if enable else "OFF"
     typer.echo(f"No-BS overlay set to: {status}")

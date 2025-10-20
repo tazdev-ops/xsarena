@@ -3,7 +3,7 @@
 from enum import Enum
 from typing import Any, Dict, List, Optional
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class LengthPreset(str, Enum):
@@ -63,10 +63,7 @@ class RunSpecV2(BaseModel):
         None, description="Specific message ID for bridge"
     )
 
-    class Config:
-        """Configuration for the model."""
-
-        extra = "forbid"  # Forbid extra fields to catch typos
+    model_config = ConfigDict(extra="forbid")  # Forbid extra fields to catch typos
 
     def resolved(self) -> Dict[str, Any]:
         """Resolve presets to actual values."""
