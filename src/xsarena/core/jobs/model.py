@@ -128,7 +128,7 @@ class JobV3(BaseModel):
     progress: Dict[str, Any] = {}  # Track progress like chunks completed, tokens used
 
 
-from .executor import JobExecutor
+from .executor_core import JobExecutor
 from .store import JobStore
 
 
@@ -401,18 +401,22 @@ class JobManager:
             # Check every 2 seconds
             await asyncio.sleep(2.0)
 
-        # Print final status
+        import logging
+
+        logger = logging.getLogger(__name__)
+
+        # Log final status
         if job.state == "DONE":
-            print("[run] Job completed successfully")
+            logger.info(f"[run] Job {job_id} completed successfully")
         elif job.state == "FAILED":
             # Try to get more detailed error information from events
             error_message = self._get_last_error_message(job_id)
             if error_message:
-                print(f"[run] Job failed: {error_message}")
+                logger.error(f"[run] Job {job_id} failed: {error_message}")
             else:
-                print("[run] Job failed")
+                logger.error(f"[run] Job {job_id} failed")
         elif job.state == "CANCELLED":
-            print("[run] Job cancelled")
+            logger.info(f"[run] Job {job_id} cancelled")
 
     def _get_last_error_message(self, job_id: str) -> str:
         """Get the last error message from job events."""

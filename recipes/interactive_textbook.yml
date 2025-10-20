@@ -1,0 +1,27 @@
+# Interactive Textbook
+task: book.zero2hero
+subject: "${SUBJECT}"
+styles: [narrative, hands_on]
+
+system_text: |
+  Create interactive textbook with:
+  1. Chapter opening hook
+  2. Core concepts (simple → complex)
+  3. Worked examples (step-by-step)
+  4. Practice problems (3 per concept)
+  5. "Try this" moments
+  6. Common mistakes
+  7. Chapter summary checklist
+  8. Self-assessment questions
+
+  Use callouts: 💡 Tip, ⚠️ Warning, 🔍 Deep Dive
+
+io:
+  output: file
+  outPath: "./books/textbooks/${SUBJECT|slug}_interactive.md"
+
+max_chunks: 30
+continuation:
+  mode: anchor
+  minChars: 5000
+  pushPasses: 3

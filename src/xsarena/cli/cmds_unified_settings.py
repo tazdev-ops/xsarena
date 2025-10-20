@@ -35,7 +35,8 @@ def capture_ids():
         import requests
     except ImportError:
         typer.echo(
-            "Error: 'requests' library is required for capture-ids but is not installed."
+            "Error: 'requests' library is required for capture-ids but is not installed.\n"
+            "Run 'pip install requests' or 'pip install -e \".[dev]\"' to install dependencies."
         )
         raise typer.Exit(1)
 
@@ -47,7 +48,10 @@ def capture_ids():
             raise typer.Exit(1)
         typer.echo("Started ID capture process...")
     except requests.exceptions.ConnectionError:
-        typer.echo("Error: Could not connect to bridge server at http://localhost:5102")
+        typer.echo(
+            "Error: Could not connect to bridge server at http://localhost:5102\n"
+            "Make sure the bridge server is running. Start it with 'xsarena ops service start-bridge-v2'"
+        )
         raise typer.Exit(1)
     except Exception as e:
         typer.echo(f"Error starting ID capture: {e}")
@@ -111,5 +115,9 @@ def capture_ids():
 
         time.sleep(2)  # Wait 2 seconds before next poll
 
-    typer.echo("Timeout: Failed to capture IDs within 90 seconds.")
+    typer.echo(
+        "Timeout: Failed to capture IDs within 90 seconds.\n"
+        "Make sure the bridge is connected to a model page with the userscript installed.\n"
+        "Add '#bridge=5102' to the model URL and ensure the userscript is enabled."
+    )
     raise typer.Exit(1)

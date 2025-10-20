@@ -10,6 +10,7 @@ from .cmds_docs import app as docs_app
 from .cmds_health import app as health_app
 from .cmds_interactive import app as interactive_app
 from .cmds_jobs import app as jobs_app
+from .cmds_report import app as report_app
 from .cmds_run import app as run_app
 from .cmds_snapshot import app as snapshot_app
 from .cmds_tools import app as tools_app
@@ -118,6 +119,15 @@ ops_app.add_typer(snapshot_app, name="snapshot")
 ops_app.add_typer(
     config_app, name="config", help="Configuration and backend management"
 )
+# Import and register the new command groups
+from .cmds_handoff import app as handoff_app
+from .cmds_orders import app as orders_app
+from .cmds_report import app as report_app
+
+app.add_typer(report_app, name="report", help="Create diagnostic reports")
+ops_app.add_typer(handoff_app, name="handoff", help="Prepare higher-AI handoffs")
+ops_app.add_typer(orders_app, name="orders", help="Manage ONE ORDER log")
+
 app.add_typer(ops_app)
 
 # --- Additional Semantic Groups ---

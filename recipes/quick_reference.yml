@@ -1,0 +1,25 @@
+# Quick Reference Card
+task: book.reference
+subject: "${SUBJECT} Quick Reference"
+styles: [no_bs]
+
+system_text: |
+  Ultra-compact reference.
+
+  Per topic:
+  1. One-line definition
+  2. Syntax/usage
+  3. One example
+  4. One gotcha
+
+  No prose. Dense. Bullets OK.
+
+io:
+  output: file
+  outPath: "./books/refs/${SUBJECT|slug}_ref.md"
+
+max_chunks: 8
+continuation:
+  mode: anchor
+  minChars: 3000
+  pushPasses: 1

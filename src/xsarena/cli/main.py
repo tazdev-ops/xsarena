@@ -14,6 +14,13 @@ def _version():
 
 def run():
     """Run the CLI application."""
+    # Simple logging setup
+    import logging
+
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    )
     app()
 
 

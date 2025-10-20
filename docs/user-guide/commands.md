@@ -98,9 +98,6 @@ System health, jobs, services, and configuration.
     - `xsarena ops snapshot create --mode author-core --total-max 4000000 --max-per-file 200000` - Author core preset (alternative)
     - `xsarena ops snapshot create --mode custom -I README.md -I src/xsarena/core/prompt.py --out repo_flat.txt` - Custom includes
   - `xsarena ops snapshot debug-report` - Generate a verbose snapshot for debugging (formerly 'pro')
-  - `xsarena ops snapshot legacy-write` - Legacy snapshot command (deprecated)
-  - `xsarena ops snapshot legacy-txt` - Legacy flat pack command (deprecated)
-  - `xsarena ops snapshot legacy-simple` - Legacy simple command (deprecated)
   - `xsarena ops snapshot verify` - Verify snapshot health: preflight or postflight
 - `xsarena ops debug` - Debugging commands
 - `xsarena ops directives` - Directive tools (index)

@@ -1,1 +1,1 @@
-{ "model": "from-session", "output_min_chars": 4500 }
+{ "model": "from-session-test", "output_min_chars": 5000 }

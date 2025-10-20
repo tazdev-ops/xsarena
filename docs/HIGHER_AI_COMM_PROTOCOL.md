@@ -1,37 +1,77 @@
-# Communication Rules for Higher AI
+# Higher AI Communication Protocols v1
 
-1) Use the Canonical Rules File
-- Reference directives/_rules/rules.merged.md — the canonical, merged source that includes:
-  - CLI agent rules and guidelines
-  - Orders log
-  - Style directives
-  - Role definitions
+This document describes the three-agent communication protocols for the User ↔ CLI Agent ↔ Higher AI flow.
 
-2) Communication Protocol
-1. xsarena boot read        # Read current startup plan
-2. xsarena adapt inspect    # Check for any system drift
-3. xsarena report quick --book <relevant_file>  # Generate a diagnostic bundle when needed
+## Overview
 
-3) For Complex Instructions
-- Use the "ONE ORDER" format (see canonical rules)
-- Append major instructions to directives/_rules/sources/ORDERS_LOG.md
-- Run bash scripts/merge_session_rules.sh to update the merged rules
-- Use xsarena checklist status to verify implementation completeness
+The communication protocols provide structured ways to:
+- Generate diagnostic reports (`report`)
+- Prepare clean handoff packages for higher AI (`handoff`)
+- Manage orders and directives (`orders`)
 
-4) Verification Commands
-- xsarena checklist status
-- xsarena boot read
-- xsarena snapshot write
-- xsarena report quick
+## Commands
 
-5) Low AI Reliability Note
-- The lower AI (CLI agent) can be unreliable and may lose context. Always:
-  - Cross‑reference with docs/IMPLEMENTATION_CHECKLIST.md
-  - Verify with xsarena checklist status
-  - Treat directives/_rules/rules.merged.md as authoritative
+### Report Commands
 
-6) Emergency Procedures
-- If instructions conflict:
-  - xsarena checklist status
-  - Re‑read canonical rules (directives/_rules/rules.merged.md)
-  - xsarena snapshot write to capture state before changes
+Generate diagnostic reports for analysis or handoff:
+
+```bash
+# Quick diagnostic report with optional book and job info
+xsarena report quick [--book <path>] [--job <id>]
+
+# Detailed job-specific report
+xsarena report job <job_id>
+
+# Full debug report with pro snapshot
+xsarena report full [--book <path>]
+```
+
+### Handoff Commands
+
+Prepare packages for higher AI with clean context:
+
+```bash
+# Prepare a handoff package with snapshot and brief
+xsarena ops handoff prepare [--book <path>] [--job <id>] [--note <text>]
+
+# Add notes to the latest handoff request
+xsarena ops handoff note <text>
+
+# Show the latest handoff package details
+xsarena ops handoff show
+```
+
+### Orders Commands
+
+Manage ONE ORDER directives:
+
+```bash
+# Create a new order with title and optional body
+xsarena ops orders new "Title" [--body <path>]
+
+# List recent orders
+xsarena ops orders ls
+```
+
+## Examples
+
+Quick report with book:
+```bash
+xsarena report quick --book books/my_book.md
+```
+
+Prepare handoff for debugging:
+```bash
+xsarena ops handoff prepare --note "Job stuck in retry loop" --job abc123
+```
+
+Create a new order:
+```bash
+xsarena ops orders new "Fix authentication flow"
+```
+
+## File Locations
+
+- Reports: `review/report_*.md`
+- Handoffs: `review/handoff/handoff_*/`
+- Orders: `directives/_rules/sources/ORDERS_LOG.md`

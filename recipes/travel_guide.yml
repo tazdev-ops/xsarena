@@ -1,0 +1,42 @@
+# Travel Guide Recipe
+task: book.narrative
+subject: "${DESTINATION} Travel Guide"
+styles: [storytelling, visual]
+
+system_text: |
+  Create an insider's travel guide:
+
+  Structure:
+  1. Getting there & around (practical logistics)
+  2. Neighborhoods guide (character of each area)
+  3. Top experiences (not just sights - experiences)
+  4. Food & drink (where locals go)
+  5. Hidden gems (off-beaten-path)
+  6. Day trips & itineraries (3/5/7 day plans)
+  7. Practical tips (money, safety, customs)
+  8. Seasonal considerations
+  9. Budget breakdowns (budget/mid/luxury)
+
+  Style:
+  - First-person observations
+  - Vivid descriptions (sights, sounds, smells)
+  - Honest pros/cons
+  - Specific recommendations (not generic)
+  - Current as of [DATE]
+  - Include local phrases
+
+  Avoid:
+  - Generic "must-see" lists
+  - Outdated information
+  - Hotel/restaurant shilling
+
+io:
+  output: file
+  outPath: "./books/travel/${DESTINATION|slug}_guide.md"
+
+max_chunks: 20
+
+continuation:
+  mode: anchor
+  minChars: 4000
+  pushPasses: 2

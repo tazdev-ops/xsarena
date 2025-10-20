@@ -1,0 +1,16 @@
+# Standard Book Recipe
+task: book.zero2hero
+subject: "${SUBJECT}"
+styles: [narrative, no_bs]
+
+io:
+  output: file
+  outPath: "./books/${SUBJECT|slug}.final.md"
+
+max_chunks: 24
+
+continuation:
+  mode: anchor
+  minChars: 4500
+  pushPasses: 2
+  repeatWarn: true

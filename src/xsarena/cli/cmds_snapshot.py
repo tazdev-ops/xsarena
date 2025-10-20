@@ -215,7 +215,7 @@ app = typer.Typer(
 )
 def snapshot_create(
     mode: str = typer.Option(
-        "normal",
+        "minimal",
         "--mode",
         help="Preset include set: author-core | ultra-tight | normal | maximal | custom.",
     ),
@@ -249,9 +249,16 @@ def snapshot_create(
     Flatten curated files into a single .txt. This is the primary tool for creating
     context for LLMs. It defaults to the 'author-core' preset.
     """
-    mode_lower = (mode or "normal").lower()
+    mode_lower = (mode or "minimal").lower()
 
-    if mode_lower == "author-core":
+    # Load presets from external config
+    from xsarena.core.snapshot_config import load_snapshot_presets
+
+    presets, _ = load_snapshot_presets()
+
+    if mode_lower in presets:
+        inc = presets[mode_lower].get("include", [])
+    elif mode_lower == "author-core":
         inc = PRESET_AUTHOR_CORE_INCLUDE
     elif mode_lower == "ultra-tight":
         inc = PRESET_ULTRA_TIGHT_INCLUDE
@@ -268,7 +275,7 @@ def snapshot_create(
         inc = include
     else:
         typer.echo(
-            f"Error: Unknown mode '{mode}'. Choose from: author-core, ultra-tight, normal, maximal, custom.",
+            f"Error: Unknown mode '{mode}'. Choose from: author-core, ultra-tight, normal, maximal, custom, or configured presets.",
             err=True,
         )
         raise typer.Exit(code=1)
@@ -339,15 +346,7 @@ def snapshot_write(
     ),
 ):
     """
-    DEPRECATED: Use 'create' command instead.
-    Legacy snapshot command - use 'create' for the recommended flat format.
-    Generate a snapshot using the smart snapshot builder.
-
-    This tool supports multiple modes and is configurable via .snapshotinclude,
-    .snapshotignore, or .snapshot.toml/.snapshot.json files.
-
-    Precedence: CLI flags override values from .snapshot.toml configuration file.
-    Use --dry-run to see the effective plan before creating the snapshot.
+    Create a normal snapshot (text or zip). Prefer --zip for sharing.
     """
     # Change output to .zip if zip_format is True and using default filename or .txt extension
     if zip_format:
@@ -394,87 +393,6 @@ def snapshot_write(
             )
 
 
-@app.command("legacy-simple", hidden=True)
-def snapshot_simple_cmd(
-    out: str = typer.Option(
-        "xsa_snapshot.txt", "--out", "-o", help="Output file path."
-    ),
-    mode: Optional[str] = typer.Option(
-        None, "--mode", help="Snapshot breadth: minimal, standard, core_logic, or max."
-    ),
-    with_git: bool = typer.Option(
-        False, "--with-git", help="Include git status information."
-    ),
-    with_jobs: bool = typer.Option(
-        False, "--with-jobs", help="Include a summary of recent jobs."
-    ),
-    with_manifest: bool = typer.Option(
-        False, "--with-manifest", help="Include a code manifest of src/."
-    ),
-    dry_run: bool = typer.Option(
-        False,
-        "--dry-run",
-        help="Show what would be included without creating the file.",
-    ),
-    zip_format: bool = typer.Option(
-        False, "--zip", help="Write output as a .zip file with manifest."
-    ),
-):
-    """
-    DEPRECATED: Use 'create' command for the recommended flat format.
-    Generate a simple snapshot using the built-in snapshot utility.
-
-    This is a minimal dependency version that directly uses the snapshot_simple module.
-
-    Precedence: CLI flags override values from .snapshot.toml configuration file.
-    Use --dry-run to see the effective plan before creating the snapshot.
-    """
-    typer.echo(
-        "⚠️  Warning: 'simple' command is deprecated. Use 'create' command instead."
-    )
-    # Set default to home directory if no output path provided
-    if out is None:
-        out = "~/xsa_snapshot.txt"
-    out_path = Path(out).expanduser()
-    if dry_run:
-        snapshot_simple.write_text_snapshot(
-            out_path=out_path,
-            mode=mode,
-            with_git=with_git,
-            with_jobs=with_jobs,
-            with_manifest=with_manifest,
-            git_tracked=False,  # Not using git-tracked mode for simple
-            git_include_untracked=False,  # Not including untracked for simple
-            include_system=False,
-            dry_run=True,
-        )
-    else:
-        if zip_format:
-            snapshot_simple.write_zip_snapshot(
-                out_path=out_path,
-                mode=mode,
-                with_git=with_git,
-                with_jobs=with_jobs,
-                with_manifest=with_manifest,
-                git_tracked=False,
-                git_include_untracked=False,
-                include_system=False,
-                dry_run=False,
-            )
-        else:
-            snapshot_simple.write_text_snapshot(
-                out_path=out_path,
-                mode=mode,
-                with_git=with_git,
-                with_jobs=with_jobs,
-                with_manifest=with_manifest,
-                git_tracked=False,
-                git_include_untracked=False,
-                include_system=False,
-                dry_run=False,
-            )
-
-
 @app.command(
     "debug-report", help="Generate a verbose snapshot for debugging. (Maximal snapshot)"
 )
@@ -511,82 +429,6 @@ def snapshot_debug_report(
     except Exception as e:
         typer.echo(f"Error creating debug report: {e}", err=True)
         raise typer.Exit(1) from e
-
-
-@app.command("legacy-txt", hidden=True)
-def snapshot_txt(
-    preset: str = typer.Option(
-        "author-core",
-        "--preset",
-        help="Preset include set: author-core|ultra-tight|custom",
-    ),
-    out: str = typer.Option("~/repo_flat.txt", "--out", "-o", help="Output .txt path"),
-    include: list[str] = typer.Option(
-        None,
-        "--include",
-        "-I",
-        help="Glob/file to include (repeatable). Only used when preset=custom",
-    ),
-    exclude: list[str] = typer.Option(
-        None,
-        "--exclude",
-        "-X",
-        help="Glob to exclude (repeatable). If empty, uses a strict default exclude set",
-    ),
-    max_per_file: int = typer.Option(
-        220_000, "--max-per-file", help="Max bytes per file"
-    ),
-    total_max: int = typer.Option(4_000_000, "--total-max", help="Total max bytes"),
-    git_tracked: bool = typer.Option(
-        False, "--git-tracked", help="Use git ls-files as baseline"
-    ),
-    git_include_untracked: bool = typer.Option(
-        False, "--git-include-untracked", help="Also include untracked files"
-    ),
-    redact: bool = typer.Option(
-        True, "--redact/--no-redact", help="Apply redaction to embedded text"
-    ),
-    repo_map: bool = typer.Option(
-        False, "--repo-map/--no-repo-map", help="Add a tiny repo map header"
-    ),
-):
-    """
-    DEPRECATED: Use 'create' command instead.
-    Flatten curated files into a single .txt with strict includes/excludes for chatbot upload.
-    """
-    typer.echo(
-        "⚠️  Warning: 'txt' command is deprecated. Use 'create' command instead."
-    )
-    from ..utils.flatpack_txt import flatten_txt
-
-    preset = (preset or "author-core").lower()
-    if preset == "author-core":
-        inc = PRESET_AUTHOR_CORE_INCLUDE.copy()
-    elif preset == "ultra-tight":
-        inc = PRESET_ULTRA_TIGHT_INCLUDE.copy()
-    else:
-        if not include:
-            raise typer.Exit(code=2)
-        inc = include
-
-    exc = exclude or PRESET_DEFAULT_EXCLUDE
-
-    outp = Path(out).expanduser()
-    outp.parent.mkdir(parents=True, exist_ok=True)
-    out_path, notes = flatten_txt(
-        out_path=outp,
-        include=inc,
-        exclude=exc,
-        max_bytes_per_file=max_per_file,
-        total_max_bytes=total_max,
-        use_git_tracked=git_tracked,
-        include_untracked=git_include_untracked,
-        redact=redact,
-        add_repo_map=repo_map,
-    )
-    for n in notes:
-        typer.echo(f"[note] {n}")
-    typer.echo(f"[snapshot/txt] wrote → {out_path}")
 
 
 def _posix_path(p: Path) -> str:
@@ -679,7 +521,7 @@ def snapshot_verify(
         4_000_000, "--total-max", help="Total budget (bytes, preflight only)"
     ),
     disallow: List[str] = typer.Option(
-        ["books/**", "review/**", ".xsarena/**", "tools/**", "directives/**"],
+        ["books/**", "review/**", ".xsarena/**", "tools/**"],
         "--disallow",
         help="Disallow these globs; flag if any included",
     ),

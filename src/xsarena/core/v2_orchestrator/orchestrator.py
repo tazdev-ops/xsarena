@@ -19,7 +19,7 @@ from .specs import RunSpecV2
 class Orchestrator:
     """Main orchestrator that manages the entire run process."""
 
-    def __init__(self, transport: Optional[BackendTransport] = None):
+    def __init__(self, transport: Optional[BackendTransport] = None) -> None:
         self.transport = transport
         self.fsm = AutopilotFSM()
         self._job_runner = None  # Lazy initialization to avoid circular import

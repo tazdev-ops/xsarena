@@ -1,0 +1,28 @@
+# Cookbook / How-To Collection
+task: book.reference
+subject: "${SUBJECT} Cookbook"
+styles: [cookbook]
+
+system_text: |
+  Create recipe collection for ${SUBJECT}.
+
+  Each recipe:
+  - Descriptive name
+  - Problem it solves
+  - Prerequisites
+  - Step-by-step
+  - Expected result
+  - Variations
+  - Troubleshooting
+
+  Organize by difficulty or category.
+
+io:
+  output: file
+  outPath: "./books/cookbooks/${SUBJECT|slug}_cookbook.md"
+
+max_chunks: 20
+continuation:
+  mode: anchor
+  minChars: 4000
+  pushPasses: 2

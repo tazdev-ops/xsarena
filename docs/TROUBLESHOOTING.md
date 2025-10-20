@@ -1,28 +1,70 @@
-# Troubleshooting
+# Troubleshooting Guide
 
-## The bridge won't connect
-- Ensure it's running:
-  - xsarena ops service start-bridge-v2
-- Health endpoint:
-  - curl http://127.0.0.1:5102/v1/health
-- Open your model page with #bridge=5102 and click "Retry"
-- If /internal endpoints are gated, set X-Internal-Token in tools that call them
+## Jobs
 
-## Commands say "Bridge not reachable"
-- Your base_url should be http://127.0.0.1:5102/v1
-- Start the bridge first; then retry the command
+### Job stuck in RUNNING
+**Diagnose:**
+```bash
+xsarena ops jobs summary <job_id>
+xsarena ops jobs tail <job_id>
+```
 
-## Resume duplicated content
-- Use "next" hints for fine control:
-  - xsarena ops jobs next JOB_ID "Continue with <section>"
-- Adjust SessionState anchor_length; consider raising to 360–420 if continuity is weak
+**Fix:**
+1. Cancel: `xsarena ops jobs cancel <job_id>`
+2. Check bridge: `curl http://localhost:5102/health`
+3. Restart bridge if needed
+4. Resume job or restart
 
-## Hangs/loops on micro-extends
-- Lower output_push_max_passes or min_chars
-- Ensure repetition_threshold is reasonable (0.32–0.40 is a typical range)
+### Job fails with "transport_unavailable"
+**Cause:** Bridge not connected
 
-## Cloudflare page blocks responses
-- The bridge attempts one refresh; if it still fails, complete the challenge in the browser tab and retry
+**Fix:**
+1. Restart bridge: `xsarena ops service start-bridge-v2`
+2. Check Firefox tab has `#bridge=5102` in URL
+3. Click retry on any message
+4. Run: `xsarena ops health fix-run`
 
-## Large files cause "argument list too long"
-- Avoid passing entire files via shell args; prefer the Python helper pattern (see docs/USAGE.md translation section)
+### Repetitive output
+**Cause:** Repetition threshold too high or model looping
+
+**Fix:**
+1. Lower threshold: `xsarena settings set --repetition-threshold 0.25`
+2. Enable warning: `xsarena settings set --repetition-warn`
+3. Send next hint: `xsarena ops jobs next <job_id> "Continue with X"`
+
+## Bridge
+
+### "Browser client not connected"
+**Check:**
+1. Firefox tab open with model page
+2. URL has `#bridge=5102`
+3. Userscript installed and enabled
+4. Bridge server running: `curl http://localhost:5102/health`
+
+## Output Quality
+
+### Output too short
+**Fix:**
+1. Increase: `xsarena settings set --output-min-chars 6000`
+2. More passes: `xsarena settings set --output-push-max-passes 5`
+3. Use longer span: `--span book`
+
+### Too many bullet points
+**Fix:**
+1. Enable narrative: `xsarena author style-narrative on`
+2. Use profile: `--profile clinical-masters`
+
+## Diagnostic Commands
+
+```bash
+# Health check
+xsarena ops health quick
+xsarena ops health fix-run
+
+# Job info
+xsarena ops jobs ls --json
+xsarena ops jobs follow <id>
+
+# Config check
+xsarena settings show
+```

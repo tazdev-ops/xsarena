@@ -14,7 +14,7 @@ console = Console()
 
 
 class Config(BaseModel):
-    backend: str = "openrouter"  # Default to API-based backend; bridge is optional for advanced use
+    backend: str = "bridge"  # Default to browser-based bridge; API backends are optional for advanced use
     model: str = "default"
     window_size: int = 100
     anchor_length: int = 300
@@ -33,15 +33,21 @@ class Config(BaseModel):
 
         # Validate backend
         if self.backend not in ("bridge", "openrouter", "null"):
-            errors.append(f"Invalid backend: {self.backend}")
+            errors.append(
+                f"Invalid backend: {self.backend}. Valid options are: bridge, openrouter, null"
+            )
 
         # Validate model
         if self.backend == "openrouter" and not self.api_key:
-            errors.append("OpenRouter backend requires api_key")
+            errors.append(
+                "OpenRouter backend requires api_key. Set OPENROUTER_API_KEY environment variable or configure in .xsarena/config.yml"
+            )
 
         # Validate base_url format
         if self.base_url and not self.base_url.startswith(("http://", "https://")):
-            errors.append(f"Invalid base_url format: {self.base_url}")
+            errors.append(
+                f"Invalid base_url format: {self.base_url}. Must start with http:// or https://"
+            )
 
         # Validate numeric ranges
         if self.window_size < 1 or self.window_size > 1000:
@@ -112,7 +118,7 @@ class Config(BaseModel):
         """
         # Start with defaults
         config_dict: Dict[str, Any] = {
-            "backend": "openrouter",  # Default to API-based backend; bridge is optional for advanced use
+            "backend": "bridge",  # Default to browser-based bridge; API backends are optional for advanced use
             "model": "default",
             "window_size": 100,
             "anchor_length": 300,

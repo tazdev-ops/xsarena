@@ -74,10 +74,6 @@ PRESET_DEFAULT_EXCLUDE = [
     "snapshot_chunks/**",
     "*.egg-info/**",
     ".ipynb_checkpoints/**",
-    "repo_flat.txt",
-    "xsa_snapshot*.txt",
-    "xsa_debug_report*.txt",
-    "snapshot_chunks/**",
 ]
 
 # Preset includes for author core

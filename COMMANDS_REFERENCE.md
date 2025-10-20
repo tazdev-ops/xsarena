@@ -87,6 +87,13 @@ System health, jobs, services, and configuration.
 - `xsarena ops service` - Service management
 - `xsarena ops jobs` - Job management
 - `xsarena ops health` - System health, maintenance, and self-healing operations
+- `xsarena ops handoff` - Prepare higher-AI handoffs
+  - `xsarena ops handoff prepare` - Build snapshot and brief for higher AI handoff
+  - `xsarena ops handoff note` - Add notes to the latest handoff request
+  - `xsarena ops handoff show` - Show the latest handoff package details
+- `xsarena ops orders` - Manage ONE ORDER log
+  - `xsarena ops orders new` - Create a new order with title and body
+  - `xsarena ops orders ls` - List recent orders
   - `xsarena ops health fix-run` - Self-heal common configuration/state issues
   - `xsarena ops health sweep` - Purge ephemeral artifacts by TTL
   - `xsarena ops health scan-secrets` - Scan for secrets (API keys, passwords, etc.) in working tree
@@ -99,9 +106,6 @@ System health, jobs, services, and configuration.
     - `xsarena ops snapshot create --mode author-core --total-max 4000000 --max-per-file 200000` - Author core preset (alternative)
     - `xsarena ops snapshot create --mode custom -I README.md -I src/xsarena/core/prompt.py --out repo_flat.txt` - Custom includes
   - `xsarena ops snapshot debug-report` - Generate a verbose snapshot for debugging (formerly 'pro')
-  - `xsarena ops snapshot legacy-write` - Legacy snapshot command (deprecated)
-  - `xsarena ops snapshot legacy-txt` - Legacy flat pack command (deprecated)
-  - `xsarena ops snapshot legacy-simple` - Legacy simple command (deprecated)
   - `xsarena ops snapshot verify` - Verify snapshot health: preflight or postflight
 - `xsarena ops debug` - Debugging commands
 - `xsarena ops directives` - Directive tools (index)
@@ -120,6 +124,10 @@ Essential commands available at the top level.
 - `xsarena run` - Run a book or recipe in authoring mode (alias for `xsarena author run`)
 - `xsarena interactive` - Interactive authoring session (alias for `xsarena author interactive`)
 - `xsarena settings` - Unified settings interface (configuration + controls)
+- `xsarena report` - Create diagnostic reports
+  - `xsarena report quick` - Generate quick diagnostic report
+  - `xsarena report job` - Generate detailed job-specific report
+  - `xsarena report full` - Generate full debug report with pro snapshot
 
 ### Deprecated Commands
 
