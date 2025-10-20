@@ -9,16 +9,11 @@ logger = logging.getLogger(__name__)
 
 
 async def apply_lossless_metrics_and_compression(
-    content: str,
-    job: JobV3,
-    chunk_idx: int,
-    job_store,
-    transport,
-    session_state=None
+    content: str, job: JobV3, chunk_idx: int, job_store, transport, session_state=None
 ) -> str:
     """
     Apply lossless metrics computation and optional compression pass.
-    
+
     Args:
         content: Content to analyze and potentially compress
         job: The current job object
@@ -26,7 +21,7 @@ async def apply_lossless_metrics_and_compression(
         job_store: Job store for logging
         transport: Backend transport for compression API calls
         session_state: Session state for configuration
-    
+
     Returns:
         Potentially compressed content
     """
@@ -64,7 +59,7 @@ async def apply_lossless_metrics_and_compression(
     needs_compress = enforce and (
         ld < target_density or fr > max_adverbs_k or asl > max_sent_len
     )
-    
+
     if needs_compress:
         compress_prompt = (
             "Lossless compression pass: Rewrite the EXACT content below to higher density.\n"

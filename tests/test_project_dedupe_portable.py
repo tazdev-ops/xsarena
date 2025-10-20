@@ -41,7 +41,6 @@ def test_dedupe_by_hash_uses_pathlib_stat():
 
                     # Run the dedupe function with apply_changes=False (dry-run)
                     from typer.testing import CliRunner
-
                     from xsarena.cli.main import app
 
                     runner = CliRunner()

@@ -5,8 +5,8 @@ import logging
 
 from ...backends.transport import BackendTransport
 from ...chunking import jaccard_ngrams
-from ..model import JobV3
 from ..helpers import drain_next_hint, strip_next_lines
+from ..model import JobV3
 
 logger = logging.getLogger(__name__)
 
@@ -23,11 +23,11 @@ async def perform_micro_extension(
     control_queues: dict,
     resume_events: dict,
     job_store,
-    ctl_lock = None,  # Accept the lock as a parameter
+    ctl_lock=None,  # Accept the lock as a parameter
 ) -> str:
     """
     Perform micro-extensions to extend content if too short.
-    
+
     Args:
         content: The content to potentially extend
         min_chars: Minimum character count required
@@ -41,7 +41,7 @@ async def perform_micro_extension(
         resume_events: Resume events for job management
         job_store: Job store for logging
         ctl_lock: Control lock for thread safety
-    
+
     Returns:
         Extended content
     """
@@ -66,27 +66,22 @@ async def perform_micro_extension(
                         )
                         resume_events[job.id].clear()
                     elif cmd == "resume":
-                        job_store._log_event(
-                            job.id, {"type": "job_resumed"}
-                        )
+                        job_store._log_event(job.id, {"type": "job_resumed"})
                         resume_events[job.id].set()
                     elif cmd == "cancel":
-                        job_store._log_event(
-                            job.id, {"type": "job_cancelled"}
-                        )
+                        job_store._log_event(job.id, {"type": "job_cancelled"})
                         job.state = "CANCELLED"
                         from datetime import datetime
-                        job.updated_at = datetime.now().strftime(
-                            "%Y-%m-%dT%H:%M:%S"
-                        )
+
+                        job.updated_at = datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
                         job_store.save(job)
                         return "CANCELLED"
                 except asyncio.QueueEmpty:
                     break  # No more control messages to process
 
             # Drain any 'next' hints that have accumulated for this extend
-            from ...prompt_runtime import build_chunk_prompt
             from asyncio import Lock
+
             async with Lock():  # Using a temporary lock since we don't have the actual one
                 hint_now = await drain_next_hint(job.id, control_queues)
 
@@ -99,6 +94,7 @@ async def perform_micro_extension(
 
             # Get a local anchor from the current chunk content using centralized service
             from ....anchor_service import create_anchor
+
             local_anchor = await create_anchor(
                 extended_content,
                 use_semantic=False,
@@ -108,10 +104,9 @@ async def perform_micro_extension(
 
             if local_anchor or hint_now:
                 from ....anchor_service import build_anchor_continue_prompt
+
                 extend_prompt = (
-                    hint_now
-                    if hint_now
-                    else build_anchor_continue_prompt(local_anchor)
+                    hint_now if hint_now else build_anchor_continue_prompt(local_anchor)
                 )
                 if hint_now:
                     job_store._log_event(
@@ -206,9 +201,7 @@ async def perform_micro_extension(
                             )
                             break
                     else:
-                        low_growth_count = (
-                            0  # Reset counter when growth is good
-                        )
+                        low_growth_count = 0  # Reset counter when growth is good
 
                     prev_length = current_length
 
@@ -217,7 +210,11 @@ async def perform_micro_extension(
                         break
 
                 except Exception as extend_e:
-                    from ..model import get_user_friendly_error_message, map_exception_to_error_code
+                    from ..model import (
+                        get_user_friendly_error_message,
+                        map_exception_to_error_code,
+                    )
+
                     extend_error_code = map_exception_to_error_code(extend_e)
                     extend_user_message = get_user_friendly_error_message(
                         extend_error_code

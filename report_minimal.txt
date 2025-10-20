@@ -618,7 +618,7 @@ roles_app.command("list")(roles_list)
 roles_app.command("show")(roles_show)
 app.add_typer(roles_app)
 
-overlays_app = typer.Typer(name="overlays", help="Manage overlays") 
+overlays_app = typer.Typer(name="overlays", help="Manage overlays")
 overlays_app.command("list")(overlays_list)
 overlays_app.command("show")(overlays_show)
 app.add_typer(overlays_app)
@@ -3159,7 +3159,7 @@ async def chat_completions(request: Request):
     global last_activity_time
     # Update last activity time
     last_activity_time = datetime.now()
-    
+
     # Call the handler from the handlers module
     return await chat_completions_handler(request, browser_ws, response_channels, REFRESHING_BY_REQUEST, cloudflare_verified)
 
@@ -3803,4 +3803,3 @@ SEEDS>>>
 
 ```
 === END FILE: directives/system/plan_from_seeds.md ===
-

@@ -1,12 +1,13 @@
 """CLI commands for the Coder mode."""
 import asyncio
+
 import typer
-from pathlib import Path
 
 from ..modes.coder import CoderMode
 from .context import CLIContext
 
 app = typer.Typer(help="Coding assistance tools")
+
 
 @app.command("edit")
 def coder_edit(
@@ -21,10 +22,10 @@ def coder_edit(
     mode = CoderMode(cli.engine)
 
     async def run():
-        with open(file_path, 'r', encoding='utf-8') as f:
+        with open(file_path, "r", encoding="utf-8") as f:
             content = f.read()
         result = await mode.edit_code(content, instruction, line_start, line_end)
-        with open(file_path, 'w', encoding='utf-8') as f:
+        with open(file_path, "w", encoding="utf-8") as f:
             f.write(result)
         typer.echo(f"Code edited in {file_path}")
 
@@ -41,7 +42,7 @@ def coder_review(
     mode = CoderMode(cli.engine)
 
     async def run():
-        with open(file_path, 'r', encoding='utf-8') as f:
+        with open(file_path, "r", encoding="utf-8") as f:
             content = f.read()
         result = await mode.review_code(content)
         typer.echo(result)
@@ -59,7 +60,7 @@ def coder_explain(
     mode = CoderMode(cli.engine)
 
     async def run():
-        with open(file_path, 'r', encoding='utf-8') as f:
+        with open(file_path, "r", encoding="utf-8") as f:
             content = f.read()
         result = await mode.explain_code(content)
         typer.echo(result)

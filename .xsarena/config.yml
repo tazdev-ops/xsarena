@@ -23,7 +23,7 @@ snapshot_presets:
       - README.md
       - COMMANDS_REFERENCE.md
       - pyproject.toml
-      - src/xsarena/** 
+      - src/xsarena/**
       - docs/USAGE.md
       - docs/OPERATING_MODEL.md
     exclude: []

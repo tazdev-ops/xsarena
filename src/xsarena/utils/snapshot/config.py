@@ -2,7 +2,6 @@
 Configuration handling for XSArena snapshot utility.
 """
 
-import json
 from pathlib import Path
 from typing import Dict
 

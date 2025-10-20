@@ -7,31 +7,10 @@ Text or Zip output; truncates large files per max_size; optional redact.
 """
 
 # Re-export functions from the new modules to maintain backward compatibility
-from .snapshot.config import read_snapshot_config
-from .snapshot.collectors import collect_paths, collect_git_files
-from .snapshot.builders import (
-    build_git_context, 
-    build_jobs_summary, 
-    build_manifest, 
-    build_system_info, 
-    get_rules_digest, 
-    get_review_artifacts, 
-    ts_utc, 
-    rel_posix
-)
-from .snapshot.writers import write_text_snapshot, write_zip_snapshot, write_pro_snapshot
-from .helpers import is_binary_sample, safe_read_bytes, safe_read_text
 
 # Import remaining functions that are not in the new modules
 import hashlib
-import json
-import os
-import platform
-import subprocess
-import zipfile
-from datetime import datetime, timezone
-from pathlib import Path, PurePosixPath
-from typing import Dict, List, Optional, Set, Tuple
+from pathlib import Path
 
 try:
     import tomllib  # Python 3.11+

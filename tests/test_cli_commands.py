@@ -1,6 +1,5 @@
 """Smoke tests for CLI commands to ensure they can be invoked without crashing."""
 from typer.testing import CliRunner
-
 from xsarena.cli.main import app
 
 runner = CliRunner()

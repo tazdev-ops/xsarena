@@ -6,7 +6,6 @@ from unittest.mock import patch
 
 import pytest
 from pydantic import ValidationError
-
 from xsarena.bridge_v2.payload_converter import convert_openai_to_lmarena_payload
 from xsarena.core.backends.bridge_v2 import BridgeV2Transport, OpenRouterTransport
 from xsarena.core.config import Config

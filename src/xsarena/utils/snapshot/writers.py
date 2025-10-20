@@ -3,14 +3,21 @@ Snapshot writing logic for XSArena snapshot utility.
 """
 
 import hashlib
-import json
 import zipfile
-from datetime import datetime, timezone
 from pathlib import Path
 from typing import Optional
 
-from ..helpers import is_binary_sample, safe_read_bytes, safe_read_text
-from .builders import build_git_context, build_jobs_summary, build_manifest, build_system_info, get_rules_digest, get_review_artifacts, ts_utc, rel_posix
+from ..helpers import is_binary_sample, safe_read_bytes
+from .builders import (
+    build_git_context,
+    build_jobs_summary,
+    build_manifest,
+    build_system_info,
+    get_review_artifacts,
+    get_rules_digest,
+    rel_posix,
+    ts_utc,
+)
 from .collectors import collect_paths
 
 
@@ -29,6 +36,7 @@ def write_text_snapshot(
 ) -> None:
     """Write a text snapshot with optional context sections and file contents."""
     from .config import read_snapshot_config
+
     cfg = read_snapshot_config()
     if max_size is None:
         max_size = cfg.get("max_size", 262144)
@@ -94,6 +102,7 @@ def write_text_snapshot(
                     # Apply redaction if enabled
                     if redact and cfg.get("redact", True):
                         from ..redact import redact_snapshot_content
+
                         text = redact_snapshot_content(text)
                     f_out.write(text)
             except Exception as e:
@@ -118,6 +127,7 @@ def write_zip_snapshot(
 ) -> None:
     """Write a zip snapshot with embedded files."""
     from .config import read_snapshot_config
+
     cfg = read_snapshot_config()
     if max_size is None:
         max_size = cfg.get("max_size", 262144)
@@ -190,6 +200,7 @@ def write_zip_snapshot(
                     # Apply redaction if enabled
                     if redact and cfg.get("redact", True):
                         from ..redact import redact_snapshot_content
+
                         text = redact_snapshot_content(text)
                     z.writestr(rp, text)
             except Exception as e:
@@ -215,6 +226,7 @@ def write_pro_snapshot(
     """Write a pro snapshot with enhanced debugging capabilities."""
 
     from .config import read_snapshot_config
+
     cfg = read_snapshot_config()
     max_size = cfg.get("max_size", 262144)
 
@@ -273,6 +285,7 @@ def write_pro_snapshot(
                 # Apply redaction if enabled
                 if redact and cfg.get("redact", True):
                     from ..redact import redact_snapshot_content
+
                     text = redact_snapshot_content(text)
                 content_parts.append(text)
         except Exception as e:

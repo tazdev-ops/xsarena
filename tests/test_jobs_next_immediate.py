@@ -4,7 +4,6 @@ import tempfile
 from pathlib import Path
 
 import pytest
-
 from xsarena.core.jobs.model import JobManager
 
 

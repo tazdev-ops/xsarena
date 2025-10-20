@@ -750,7 +750,7 @@ roles_app.command("list")(roles_list)
 roles_app.command("show")(roles_show)
 app.add_typer(roles_app)
 
-overlays_app = typer.Typer(name="overlays", help="Manage overlays") 
+overlays_app = typer.Typer(name="overlays", help="Manage overlays")
 overlays_app.command("list")(overlays_list)
 overlays_app.command("show")(overlays_show)
 app.add_typer(overlays_app)
@@ -3291,7 +3291,7 @@ async def chat_completions(request: Request):
     global last_activity_time
     # Update last activity time
     last_activity_time = datetime.now()
-    
+
     # Call the handler from the handlers module
     return await chat_completions_handler(request, browser_ws, response_channels, REFRESHING_BY_REQUEST, cloudflare_verified)
 
@@ -15820,7 +15820,7 @@ class BridgeV2Transport(BackendTransport):
                     # Final check: if status is still an AsyncMock, default to 200 for tests
                     if str(type(status)) == "<class 'unittest.mock.AsyncMock'>":
                         status = 200
-                    
+
                     if status >= 500 and attempt == 0:
                         await asyncio.sleep(0.5)
                         continue
@@ -15920,7 +15920,7 @@ class OpenRouterTransport(BackendTransport):
                         # If status is still an AsyncMock instance, try to extract the value
                         elif str(type(status)) == "<class 'unittest.mock.AsyncMock'>":
                             # In the test, we set status directly, so we need to handle this case
-                            # If it's an AsyncMock, we can't do the comparison, so we need to 
+                            # If it's an AsyncMock, we can't do the comparison, so we need to
                             # check if the actual value is available
                             try:
                                 # Check if it's an actual value by trying to do the comparison
@@ -15938,7 +15938,7 @@ class OpenRouterTransport(BackendTransport):
                         # Handle the case where status is an AsyncMock object
                         if hasattr(status, 'return_value'):
                             status = status.return_value
-                    
+
                     if status >= 500 and attempt == 0:
                         await asyncio.sleep(0.5)
                         continue
@@ -16834,7 +16834,7 @@ class ChunkProcessor:
                 job_store=self.job_store,
                 ctl_lock=self._ctl_lock
             )
-            
+
             # Check if the extension was cancelled
             if extended_content == "CANCELLED":
                 return "CANCELLED"
@@ -17381,7 +17381,7 @@ async def perform_micro_extension(
 ) -> str:
     """
     Perform micro-extensions to extend content if too short.
-    
+
     Args:
         content: The content to potentially extend
         min_chars: Minimum character count required
@@ -17395,7 +17395,7 @@ async def perform_micro_extension(
         resume_events: Resume events for job management
         job_store: Job store for logging
         ctl_lock: Control lock for thread safety
-    
+
     Returns:
         Extended content
     """
@@ -17616,7 +17616,7 @@ async def apply_lossless_metrics_and_compression(
 ) -> str:
     """
     Apply lossless metrics computation and optional compression pass.
-    
+
     Args:
         content: Content to analyze and potentially compress
         job: The current job object
@@ -17624,7 +17624,7 @@ async def apply_lossless_metrics_and_compression(
         job_store: Job store for logging
         transport: Backend transport for compression API calls
         session_state: Session state for configuration
-    
+
     Returns:
         Potentially compressed content
     """
@@ -17662,7 +17662,7 @@ async def apply_lossless_metrics_and_compression(
     needs_compress = enforce and (
         ld < target_density or fr > max_adverbs_k or asl > max_sent_len
     )
-    
+
     if needs_compress:
         compress_prompt = (
             "Lossless compression pass: Rewrite the EXACT content below to higher density.\n"
@@ -18916,26 +18916,26 @@ class EngineProtocol(Protocol):
 
 class BilingualMode:
     """Bilingual text processing mode."""
-    
+
     def __init__(self, engine):
         """Initialize the bilingual mode with an engine."""
         self.engine = engine
-    
+
     async def transform(self, text: str, source_lang: str, target_lang: str) -> str:
         """Translate text from source language to target language."""
         # Placeholder implementation
         return f"Translated '{text}' from {source_lang} to {target_lang}"
-    
+
     async def alignment_check(self, source_text: str, translated_text: str, source_lang: str, target_lang: str) -> str:
         """Check alignment between source and translated text."""
         # Placeholder implementation
         return f"Alignment check completed for texts in {source_lang} and {target_lang}"
-    
+
     async def improve_translation(self, source_text: str, current_translation: str, source_lang: str, target_lang: str) -> str:
         """Improve an existing translation."""
         # Placeholder implementation
         return f"Improved translation of source text from {source_lang} to {target_lang}"
-    
+
     async def glossary_build(self, text: str, source_lang: str, target_lang: str) -> str:
         """Build a glossary of key terms from bilingual text."""
         # Placeholder implementation
@@ -19519,21 +19519,21 @@ class EngineProtocol(Protocol):
 
 class CoderMode:
     """Code editing and review mode."""
-    
+
     def __init__(self, engine):
         """Initialize the coder mode with an engine."""
         self.engine = engine
-    
+
     async def edit_code(self, code: str, instruction: str, line_start: Optional[int] = None, line_end: Optional[int] = None) -> str:
         """Edit code based on instruction."""
         # Placeholder implementation
         return f"# Edited code based on: {instruction}\n{code}"
-    
+
     async def review_code(self, code: str) -> str:
         """Review code and provide feedback."""
         # Placeholder implementation
         return f"# Code review for:\n{code[:100]}..."
-    
+
     async def explain_code(self, code: str) -> str:
         """Explain code functionality."""
         # Placeholder implementation
@@ -22929,13 +22929,13 @@ Text or Zip output; truncates large files per max_size; optional redact.
 from .snapshot.config import read_snapshot_config
 from .snapshot.collectors import collect_paths, collect_git_files
 from .snapshot.builders import (
-    build_git_context, 
-    build_jobs_summary, 
-    build_manifest, 
-    build_system_info, 
-    get_rules_digest, 
-    get_review_artifacts, 
-    ts_utc, 
+    build_git_context,
+    build_jobs_summary,
+    build_manifest,
+    build_system_info,
+    get_rules_digest,
+    get_review_artifacts,
+    ts_utc,
     rel_posix
 )
 from .snapshot.writers import write_text_snapshot, write_zip_snapshot, write_pro_snapshot
@@ -23349,4 +23349,3 @@ def tokens_to_chars_approx(tokens: int, text_sample: str = "") -> int:
 
 ```
 === END FILE: src/xsarena/utils/token_estimator.py ===
-

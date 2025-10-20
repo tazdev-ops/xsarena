@@ -14,6 +14,7 @@ def _get_chad_mode(cli):
     """Get ChadMode with error handling for missing dependencies."""
     try:
         from ..modes.chad import ChadMode
+
         return ChadMode(cli.engine)
     except ImportError:
         typer.echo(

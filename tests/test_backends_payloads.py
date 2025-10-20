@@ -4,14 +4,13 @@
 from unittest.mock import patch
 
 import pytest
-
 from xsarena.core.backends.bridge_v2 import BridgeV2Transport, OpenRouterTransport
 
 
 @pytest.mark.asyncio
 async def test_bridge_backend_payload():
     """Test BridgeV2Transport payload construction."""
-    from unittest.mock import AsyncMock, MagicMock
+    from unittest.mock import AsyncMock
 
     transport = BridgeV2Transport(base_url="http://test:8080/v1")
 
@@ -36,12 +35,14 @@ async def test_bridge_backend_payload():
     mock_post_context.__aenter__.return_value = mock_response
     mock_session.post.return_value = mock_post_context
 
-    with patch("aiohttp.ClientSession", return_value=mock_session) as mock_session_constructor:
+    with patch(
+        "aiohttp.ClientSession", return_value=mock_session
+    ) as mock_session_constructor:
         await transport.send(payload)
 
         # Verify the session was created
         mock_session_constructor.assert_called_once()
-        
+
         # Verify the call was made correctly
         mock_session.post.assert_called_once()
         call_args = mock_session.post.call_args

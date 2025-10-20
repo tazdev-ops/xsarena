@@ -1,19 +1,15 @@
 # src/xsarena/bridge_v2/api_server.py
-import asyncio
-import hmac
 import json
 import logging
 import os
-import sys
 import time
-import uuid
 from contextlib import asynccontextmanager
 from datetime import datetime
 
 import uvicorn
-from fastapi import FastAPI, HTTPException, Request, WebSocket, WebSocketDisconnect
+from fastapi import FastAPI, HTTPException, Request, WebSocket
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse, StreamingResponse
+from fastapi.responses import JSONResponse
 
 from . import job_service as job_service_module
 
@@ -23,12 +19,26 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 # Import from new modules
-from .formatters import format_openai_chunk, format_openai_finish_chunk, add_content_filter_explanation
-from .handlers import CONFIG, MODEL_NAME_TO_ID_MAP, MODEL_ENDPOINT_MAP, _internal_ok, load_config, load_model_map, load_model_endpoint_map, chat_completions_handler, update_available_models_handler, update_id_capture_handler
-from .websocket import browser_ws, response_channels, last_activity_time, cloudflare_verified, REFRESHING_BY_REQUEST, websocket_endpoint, start_idle_restart_thread, stop_idle_restart_thread
-
-
-from .payload_converter import convert_openai_to_lmarena_payload
+from .handlers import (
+    CONFIG,
+    MODEL_NAME_TO_ID_MAP,
+    _internal_ok,
+    chat_completions_handler,
+    load_config,
+    load_model_endpoint_map,
+    load_model_map,
+    update_available_models_handler,
+    update_id_capture_handler,
+)
+from .websocket import (
+    REFRESHING_BY_REQUEST,
+    browser_ws,
+    cloudflare_verified,
+    response_channels,
+    start_idle_restart_thread,
+    stop_idle_restart_thread,
+    websocket_endpoint,
+)
 
 
 @asynccontextmanager
@@ -69,9 +79,15 @@ async def chat_completions(request: Request):
     global last_activity_time
     # Update last activity time
     last_activity_time = datetime.now()
-    
+
     # Call the handler from the handlers module
-    return await chat_completions_handler(request, browser_ws, response_channels, REFRESHING_BY_REQUEST, cloudflare_verified)
+    return await chat_completions_handler(
+        request,
+        browser_ws,
+        response_channels,
+        REFRESHING_BY_REQUEST,
+        cloudflare_verified,
+    )
 
 
 @app.post("/internal/start_id_capture")
@@ -222,9 +238,6 @@ def health():
         "last_activity": last_activity_iso,
         "version": CONFIG.get("version", "unknown"),
     }
-
-
-
 
 
 # Console endpoint - serves static HTML

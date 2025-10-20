@@ -13,12 +13,11 @@ from ..backends.transport import BackendTransport, BaseEvent
 from ..prompt_runtime import build_chunk_prompt
 from .helpers import drain_next_hint, strip_next_lines
 from .model import JobV3, get_user_friendly_error_message, map_exception_to_error_code
-from .store import JobStore
 
 # Import from new modules
-from .processing.anchor_builder import build_anchor_continue_prompt
 from .processing.extension_handler import perform_micro_extension
 from .processing.metrics_tracker import apply_lossless_metrics_and_compression
+from .store import JobStore
 
 
 class ChunkProcessor:
@@ -197,9 +196,9 @@ class ChunkProcessor:
                 control_queues=self.control_queues,
                 resume_events=self.resume_events,
                 job_store=self.job_store,
-                ctl_lock=self._ctl_lock
+                ctl_lock=self._ctl_lock,
             )
-            
+
             # Check if the extension was cancelled
             if extended_content == "CANCELLED":
                 return "CANCELLED"
@@ -212,7 +211,7 @@ class ChunkProcessor:
                     chunk_idx=chunk_idx,
                     job_store=self.job_store,
                     transport=transport,
-                    session_state=session_state
+                    session_state=session_state,
                 )
             except Exception:
                 # Metrics must never break the run
@@ -275,11 +274,18 @@ class ChunkProcessor:
             control_queues=self.control_queues,
             resume_events=self.resume_events,
             job_store=self.job_store,
-            ctl_lock=self._ctl_lock
+            ctl_lock=self._ctl_lock,
         )
         return extended_content
 
-    async def _build_user_prompt(self, chunk_idx: int, job: JobV3, session_state: Optional["SessionState"] = None, next_hint: str = None, anchor: str = None) -> str:
+    async def _build_user_prompt(
+        self,
+        chunk_idx: int,
+        job: JobV3,
+        session_state: Optional["SessionState"] = None,
+        next_hint: str = None,
+        anchor: str = None,
+    ) -> str:
         """Build the user prompt for the chunk."""
         # Pass next_hint if present; only use anchor if next_hint is None
         hint_to_use = next_hint if next_hint is not None else anchor
@@ -291,7 +297,9 @@ class ChunkProcessor:
             anchor=anchor,
         )
 
-    async def _apply_lossless_metrics(self, content: str, job: JobV3, chunk_idx: int, transport, session_state=None) -> str:
+    async def _apply_lossless_metrics(
+        self, content: str, job: JobV3, chunk_idx: int, transport, session_state=None
+    ) -> str:
         """Apply lossless metrics computation and optional compression pass."""
         return await apply_lossless_metrics_and_compression(
             content=content,
@@ -299,5 +307,5 @@ class ChunkProcessor:
             chunk_idx=chunk_idx,
             job_store=self.job_store,
             transport=transport,
-            session_state=session_state
+            session_state=session_state,
         )

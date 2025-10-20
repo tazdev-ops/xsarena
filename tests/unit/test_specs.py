@@ -1,6 +1,5 @@
 """Tests for run specifications."""
 import pytest
-
 from xsarena.core.v2_orchestrator.specs import LengthPreset, RunSpecV2, SpanPreset
 
 

@@ -4,7 +4,6 @@ import tempfile
 from pathlib import Path
 
 import pytest
-
 from xsarena.core.anchor_service import anchor_from_text
 
 

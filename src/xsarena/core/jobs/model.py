@@ -139,6 +139,7 @@ class JobManager:
         self.job_store = JobStore()
         # Import JobExecutor locally to avoid circular import
         from .executor_core import JobExecutor
+
         self.executor = JobExecutor(self.job_store)
         self.event_handlers: List[Callable[[BaseEvent], Awaitable[None]]] = []
         # Add control_queues attribute for compatibility with tests

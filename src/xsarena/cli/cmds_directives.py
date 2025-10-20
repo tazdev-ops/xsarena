@@ -8,7 +8,7 @@ import yaml
 from rich.console import Console
 from rich.table import Table
 
-from ..utils.discovery import list_roles, list_overlays
+from ..utils.discovery import list_overlays, list_roles
 
 app = typer.Typer(help="Directive utilities")
 console = Console()
@@ -93,11 +93,7 @@ def roles_list():
     table.add_column("Preview", style="green")
 
     for role in roles:
-        table.add_row(
-            role["name"],
-            role["source"],
-            role["content_preview"]
-        )
+        table.add_row(role["name"], role["source"], role["content_preview"])
 
     console.print(table)
 
@@ -116,11 +112,7 @@ def overlays_list():
     table.add_column("Preview", style="green")
 
     for overlay in overlays:
-        table.add_row(
-            overlay["name"],
-            overlay["source"],
-            overlay["content_preview"]
-        )
+        table.add_row(overlay["name"], overlay["source"], overlay["content_preview"])
 
     console.print(table)
 
@@ -131,14 +123,16 @@ def roles_show(name: str):
     roles = list_roles()
     # Handle both cases: with and without extension
     role_name = name
-    if name.endswith('.md'):
+    if name.endswith(".md"):
         role_name = name[:-3]  # Remove .md extension
     role = next((r for r in roles if r["name"] == role_name), None)
     if not role:
         console.print(f"[red]Role '{name}' not found.[/red]")
         return
 
-    console.print(f"[bold blue]Role: {name}[/bold blue]")  # Use original name for display
+    console.print(
+        f"[bold blue]Role: {name}[/bold blue]"
+    )  # Use original name for display
     console.print(role["content_preview"])
 
 
@@ -148,12 +142,14 @@ def overlays_show(name: str):
     overlays = list_overlays()
     # Handle both cases: with and without extension
     overlay_name = name
-    if name.endswith('.md'):
+    if name.endswith(".md"):
         overlay_name = name[:-3]  # Remove .md extension
     overlay = next((o for o in overlays if o["name"] == overlay_name), None)
     if not overlay:
         console.print(f"[red]Overlay '{name}' not found.[/red]")
         return
 
-    console.print(f"[bold blue]Overlay: {name}[/bold blue]")  # Use original name for display
+    console.print(
+        f"[bold blue]Overlay: {name}[/bold blue]"
+    )  # Use original name for display
     console.print(overlay["content_preview"])

@@ -153,6 +153,7 @@ def build_system_info() -> str:
     info.append(f"Working Directory: {str(ROOT)}")
     try:
         import os
+
         info.append(f"User: {os.getlogin()}")
     except OSError:
         info.append("User: N/A")
@@ -168,6 +169,7 @@ def get_rules_digest() -> str:
 
     try:
         from ..helpers import safe_read_text
+
         content, truncated = safe_read_text(rules_file, 10000)  # Read first 10000 chars
         lines = content.splitlines()
         first_200_lines = "\n".join(lines[:200])
@@ -175,9 +177,7 @@ def get_rules_digest() -> str:
 
         return f"Rules Digest (SHA256 of first 200 lines of directives/_rules/rules.merged.md):\n{digest}\nFirst 200 lines preview:\n{first_200_lines}\n"
     except Exception as e:
-        return (
-            f"Rules Digest: (Error reading directives/_rules/rules.merged.md: {e})\n"
-        )
+        return f"Rules Digest: (Error reading directives/_rules/rules.merged.md: {e})\n"
 
 
 def get_review_artifacts() -> str:
@@ -191,6 +191,7 @@ def get_review_artifacts() -> str:
         if item.is_file():
             try:
                 from ..helpers import safe_read_text
+
                 content, truncated = safe_read_text(
                     item, 5000
                 )  # Limit to first 5000 chars

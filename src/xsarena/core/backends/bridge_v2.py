@@ -42,7 +42,7 @@ class BridgeV2Transport(BackendTransport):
                         f"{self.base_url}/chat/completions", json=modified_payload
                     )
                     # Handle the case where resp might be a mock object in tests
-                    if hasattr(resp, 'status'):
+                    if hasattr(resp, "status"):
                         status = resp.status
                         # Check if status is an AsyncMock object (which would cause the TypeError)
                         if str(type(status)) == "<class 'unittest.mock.AsyncMock'>":
@@ -50,7 +50,7 @@ class BridgeV2Transport(BackendTransport):
                             # if we set it directly. But if it does, we need to handle it.
                             # In our test, we set mock_response.status = 200, so this should not be an AsyncMock
                             # Let's try to get the return value in case it was set as a method
-                            if hasattr(status, 'return_value'):
+                            if hasattr(status, "return_value"):
                                 status = status.return_value
                             else:
                                 # If status is an AsyncMock object itself, we need to handle this differently
@@ -58,21 +58,21 @@ class BridgeV2Transport(BackendTransport):
                                 # Let's get the actual value from the mock
                                 status = 200  # Default to success for tests
                         # If status is still an AsyncMock object, get its return value
-                        elif hasattr(status, 'return_value'):
+                        elif hasattr(status, "return_value"):
                             status = status.return_value
                     else:
                         # Handle the case where resp might be a mock object in tests
-                        status = getattr(resp, 'status', None)
+                        status = getattr(resp, "status", None)
                         if status is None:
                             # This could be a mock object, try to get the actual response
                             status = resp.status
                         # Handle the case where status is an AsyncMock object
-                        if hasattr(status, 'return_value'):
+                        if hasattr(status, "return_value"):
                             status = status.return_value
                     # Final check: if status is still an AsyncMock, default to 200 for tests
                     if str(type(status)) == "<class 'unittest.mock.AsyncMock'>":
                         status = 200
-                    
+
                     if status >= 500 and attempt == 0:
                         await asyncio.sleep(0.5)
                         continue
@@ -80,8 +80,10 @@ class BridgeV2Transport(BackendTransport):
                         text = (await resp.text())[:300]
                         raise RuntimeError(f"Bridge error {status}: {text}")
                     result = await resp.json()
-                    if hasattr(resp, 'close') and callable(resp.close):
-                        await resp.close() if asyncio.iscoroutinefunction(resp.close) else resp.close()
+                    if hasattr(resp, "close") and callable(resp.close):
+                        await resp.close() if asyncio.iscoroutinefunction(
+                            resp.close
+                        ) else resp.close()
                     return result
                 except aiohttp.ClientError as e:
                     if attempt == 0:
@@ -164,44 +166,46 @@ class OpenRouterTransport(BackendTransport):
                         json=payload,
                     )
                     # Handle the case where response might be a mock object in tests
-                    if hasattr(response, 'status'):
+                    if hasattr(response, "status"):
                         status = response.status
                         # If status is an AsyncMock object, get its return value
-                        if hasattr(status, 'return_value'):
+                        if hasattr(status, "return_value"):
                             status = status.return_value
                         # If status is still an AsyncMock instance, try to extract the value
                         elif str(type(status)) == "<class 'unittest.mock.AsyncMock'>":
                             # In the test, we set status directly, so we need to handle this case
-                            # If it's an AsyncMock, we can't do the comparison, so we need to 
+                            # If it's an AsyncMock, we can't do the comparison, so we need to
                             # check if the actual value is available
                             try:
                                 # Check if it's an actual value by trying to do the comparison
-                                if status >= 200:  # If this doesn't throw an error, it's a real value
+                                if (
+                                    status >= 200
+                                ):  # If this doesn't throw an error, it's a real value
                                     pass  # status is already the correct value
                             except TypeError:
                                 # It's an AsyncMock, need to handle differently
                                 status = 200  # Default for successful tests
                     else:
                         # Handle the case where response might be a mock object in tests
-                        status = getattr(response, 'status', None)
+                        status = getattr(response, "status", None)
                         if status is None:
                             # This could be a mock object, try to get the actual response
                             status = response.status
                         # Handle the case where status is an AsyncMock object
-                        if hasattr(status, 'return_value'):
+                        if hasattr(status, "return_value"):
                             status = status.return_value
-                    
+
                     if status >= 500 and attempt == 0:
                         await asyncio.sleep(0.5)
                         continue
                     if status != 200:
                         text = (await response.text())[:300]
-                        raise RuntimeError(
-                            f"OpenRouter error {status}: {text}"
-                        )
+                        raise RuntimeError(f"OpenRouter error {status}: {text}")
                     result = await response.json()
-                    if hasattr(response, 'close') and callable(response.close):
-                        await response.close() if asyncio.iscoroutinefunction(response.close) else response.close()
+                    if hasattr(response, "close") and callable(response.close):
+                        await response.close() if asyncio.iscoroutinefunction(
+                            response.close
+                        ) else response.close()
                     return result
             except aiohttp.ClientError:
                 if attempt == 0:

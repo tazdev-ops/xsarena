@@ -7,12 +7,9 @@ import logging
 import time
 import uuid
 from collections import deque
-from contextlib import asynccontextmanager
-from datetime import datetime
 from pathlib import Path
 
-import yaml
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import HTTPException, Request
 from fastapi.responses import JSONResponse, StreamingResponse
 
 from .payload_converter import convert_openai_to_lmarena_payload
@@ -112,7 +109,13 @@ def load_model_endpoint_map():
         MODEL_ENDPOINT_MAP = {}
 
 
-async def chat_completions_handler(request: Request, browser_ws, response_channels, REFRESHING_BY_REQUEST, cloudflare_verified):
+async def chat_completions_handler(
+    request: Request,
+    browser_ws,
+    response_channels,
+    REFRESHING_BY_REQUEST,
+    cloudflare_verified,
+):
     """Handle chat completions requests."""
     if not browser_ws:
         raise HTTPException(status_code=503, detail="Userscript client not connected.")

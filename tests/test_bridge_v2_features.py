@@ -39,13 +39,13 @@ def test_bridge_role_normalization():
     ):
         result = asyncio.run(
             convert_openai_to_lmarena_payload(
-                openai_data, 
-                "session123", 
-                "msg123", 
+                openai_data,
+                "session123",
+                "msg123",
                 "test-model",
                 {"test-model": "test-id"},  # model_name_to_id_map
                 {},  # model_endpoint_map
-                {"tavern_mode_enabled": False, "bypass_enabled": False}  # config
+                {"tavern_mode_enabled": False, "bypass_enabled": False},  # config
             )
         )
 
@@ -87,9 +87,9 @@ def test_bridge_tavern_merge():
     ):
         result = asyncio.run(
             convert_openai_to_lmarena_payload(
-                openai_data, 
-                "session123", 
-                "msg123", 
+                openai_data,
+                "session123",
+                "msg123",
                 "test-model",
                 {"test-model": "test-id"},  # model_name_to_id_map
                 {},  # model_endpoint_map
@@ -98,7 +98,7 @@ def test_bridge_tavern_merge():
                     "bypass_enabled": False,
                     "id_updater_last_mode": "direct_chat",
                     "id_updater_battle_target": "a",
-                }  # config
+                },  # config
             )
         )
 
@@ -140,9 +140,9 @@ def test_bridge_bypass_injection():
     ):
         result = asyncio.run(
             convert_openai_to_lmarena_payload(
-                openai_data, 
-                "session123", 
-                "msg123", 
+                openai_data,
+                "session123",
+                "msg123",
                 "test-model",
                 {"test-model": "test-id"},  # model_name_to_id_map
                 {},  # model_endpoint_map
@@ -151,7 +151,7 @@ def test_bridge_bypass_injection():
                     "bypass_enabled": True,
                     "id_updater_last_mode": "direct_chat",
                     "id_updater_battle_target": "a",
-                }  # config
+                },  # config
             )
         )
 
@@ -194,9 +194,9 @@ def test_bridge_participant_positions():
     ):
         result = asyncio.run(
             convert_openai_to_lmarena_payload(
-                openai_data, 
-                "session123", 
-                "msg123", 
+                openai_data,
+                "session123",
+                "msg123",
                 "test-model",
                 {"test-model": "test-id"},  # model_name_to_id_map
                 {},  # model_endpoint_map
@@ -205,7 +205,7 @@ def test_bridge_participant_positions():
                     "bypass_enabled": False,
                     "id_updater_last_mode": "direct_chat",
                     "id_updater_battle_target": "a",
-                }  # config
+                },  # config
             )
         )
 
@@ -243,9 +243,9 @@ def test_bridge_participant_positions():
     ):
         result_battle = asyncio.run(
             convert_openai_to_lmarena_payload(
-                openai_data_battle, 
-                "session123", 
-                "msg123", 
+                openai_data_battle,
+                "session123",
+                "msg123",
                 "test-model",
                 {"test-model": "test-id"},  # model_name_to_id_map
                 {},  # model_endpoint_map
@@ -254,7 +254,7 @@ def test_bridge_participant_positions():
                     "bypass_enabled": False,
                     "id_updater_last_mode": "battle",
                     "id_updater_battle_target": "b",
-                }  # config
+                },  # config
             )
         )
 
@@ -267,10 +267,15 @@ def test_bridge_participant_positions():
 def test_bridge_config_hot_reload():
     """Test that config is reloaded per request via internal endpoint."""
     from unittest.mock import patch
+
     # This tests that the internal reload endpoint works
     # Need to provide the internal token for authentication
-    with patch("xsarena.bridge_v2.handlers.CONFIG", {"internal_api_token": "test-token"}):
-        response = client.post("/internal/reload", headers={"x-internal-token": "test-token"})
+    with patch(
+        "xsarena.bridge_v2.handlers.CONFIG", {"internal_api_token": "test-token"}
+    ):
+        response = client.post(
+            "/internal/reload", headers={"x-internal-token": "test-token"}
+        )
         assert response.status_code == 200
         data = response.json()
         assert data["ok"] is True
@@ -280,9 +285,14 @@ def test_bridge_config_hot_reload():
 def test_bridge_internal_config_health():
     """Test both internal config and health endpoints."""
     from unittest.mock import patch
+
     # Test /internal/config endpoint
-    with patch("xsarena.bridge_v2.handlers.CONFIG", {"internal_api_token": "test-token"}):
-        response = client.get("/internal/config", headers={"x-internal-token": "test-token"})
+    with patch(
+        "xsarena.bridge_v2.handlers.CONFIG", {"internal_api_token": "test-token"}
+    ):
+        response = client.get(
+            "/internal/config", headers={"x-internal-token": "test-token"}
+        )
         assert response.status_code == 200
         data = response.json()
         assert "bridge" in data
@@ -324,9 +334,9 @@ def test_bridge_first_message_guard():
     ):
         result = asyncio.run(
             convert_openai_to_lmarena_payload(
-                openai_data, 
-                "session123", 
-                "msg123", 
+                openai_data,
+                "session123",
+                "msg123",
                 "test-model",
                 {"test-model": "test-id"},  # model_name_to_id_map
                 {},  # model_endpoint_map
@@ -335,7 +345,7 @@ def test_bridge_first_message_guard():
                     "bypass_enabled": False,
                     "id_updater_last_mode": "direct_chat",
                     "id_updater_battle_target": "a",
-                }  # config
+                },  # config
             )
         )
 

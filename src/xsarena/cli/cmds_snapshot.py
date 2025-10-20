@@ -1,3 +1,4 @@
+import contextlib
 import fnmatch
 import json
 import os
@@ -5,14 +6,13 @@ import re
 import tempfile
 from pathlib import Path
 from typing import List, Optional, Tuple
-import contextlib
 
 import typer
 
 # Import the built-in snapshot simple utility
 from xsarena.utils import snapshot_simple
-from xsarena.utils.secrets_scanner import SecretsScanner
 from xsarena.utils.flatpack_txt import flatten_txt
+from xsarena.utils.secrets_scanner import SecretsScanner
 
 # Preset constants for the txt command
 PRESET_DEFAULT_EXCLUDE = [
@@ -341,13 +341,25 @@ def snapshot_create(
         raise typer.Exit(code=1)
 
     # Heuristic defaults for budgets per mode (only if user did not override)
-    if mode_lower == "tight-500k" and total_max == 4_000_000 and max_per_file == 220_000:
+    if (
+        mode_lower == "tight-500k"
+        and total_max == 4_000_000
+        and max_per_file == 220_000
+    ):
         total_max = 550_000
         max_per_file = 45_000
-    elif mode_lower == "ultra-tight" and total_max == 4_000_000 and max_per_file == 220_000:
+    elif (
+        mode_lower == "ultra-tight"
+        and total_max == 4_000_000
+        and max_per_file == 220_000
+    ):
         total_max = 300_000
         max_per_file = 40_000
-    elif mode_lower == "author-core" and total_max == 4_000_000 and max_per_file == 220_000:
+    elif (
+        mode_lower == "author-core"
+        and total_max == 4_000_000
+        and max_per_file == 220_000
+    ):
         total_max = 300_000
         max_per_file = 40_000
     elif mode_lower == "minimal" and total_max == 4_000_000 and max_per_file == 220_000:
@@ -391,11 +403,11 @@ def snapshot_report():
     This helps pick a mode that fits target budgets (e.g., ~500–550 KB).
     """
     modes = [
-        ("minimal", PRESET_AUTHOR_CORE_INCLUDE[:0], 180_000, 30_000),        # include list resolved below
-        ("ultra-tight", PRESET_ULTRA_TIGHT_INCLUDE, 300_000, 40_000),
-        ("author-core", PRESET_AUTHOR_CORE_INCLUDE, 300_000, 40_000),
-        ("tight-500k", PRESET_TIGHT_500K_INCLUDE, 550_000, 45_000),
-        ("normal", PRESET_NORMAL_INCLUDE, 800_000, 60_000),
+        ("minimal", PRESET_AUTHOR_CORE_INCLUDE[:0]),  # include list resolved below
+        ("ultra-tight", PRESET_ULTRA_TIGHT_INCLUDE),
+        ("author-core", PRESET_AUTHOR_CORE_INCLUDE),
+        ("tight-500k", PRESET_TIGHT_500K_INCLUDE),
+        ("normal", PRESET_NORMAL_INCLUDE),
     ]
     # For minimal we reuse a small subset of ultra-tight for consistency
     minimal_inc = [
@@ -410,18 +422,18 @@ def snapshot_report():
         "src/xsarena/core/v2_orchestrator/orchestrator.py",
     ]
     results = []
-    for (name, inc_list, total_max, max_per_file) in modes:
+    for name, inc_list in modes:
         inc = minimal_inc if name == "minimal" else inc_list
         try:
             with tempfile.NamedTemporaryFile(delete=False, suffix=".txt") as tf:
                 tmp_path = Path(tf.name)
-            # Build with repo_map disabled to focus on code
+            # Build with no size caps to get true sizes
             flatten_txt(
                 out_path=tmp_path,
                 include=inc,
                 exclude=PRESET_DEFAULT_EXCLUDE,
-                max_bytes_per_file=max_per_file,
-                total_max_bytes=total_max,
+                max_bytes_per_file=100_000_000,  # Very large cap to avoid limiting
+                total_max_bytes=100_000_000,    # Very large cap to avoid limiting
                 use_git_tracked=False,
                 include_untracked=False,
                 redact=True,
@@ -436,7 +448,7 @@ def snapshot_report():
                 os.unlink(str(tmp_path))
 
     # Print a compact table
-    typer.echo("\nSnapshot Mode Size Report\n")
+    typer.echo("\nSnapshot Mode Size Report (No Size Caps)\n")
     typer.echo(f"{'Mode':<14} {'Size (bytes)':>12}")
     typer.echo("-" * 28)
     for name, sz in results:
@@ -444,7 +456,9 @@ def snapshot_report():
             typer.echo(f"{name:<14} {sz:>12,}")
         else:
             typer.echo(f"{name:<14} {sz:>12}")
-    typer.echo("\nTip: Use 'xsarena ops snapshot create --mode tight-500k' for a ~500–550 KB pack.")
+    typer.echo(
+        "\nTip: Use 'xsarena ops snapshot create --mode tight-500k' for a ~500–550 KB pack."
+    )
 
 
 @app.command(

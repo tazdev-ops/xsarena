@@ -1,6 +1,5 @@
 def test_snapshot_txt_author_core_cli(tmp_path, monkeypatch):
     from typer.testing import CliRunner
-
     from xsarena.cli.registry import app as cli_app
 
     runner = CliRunner()
