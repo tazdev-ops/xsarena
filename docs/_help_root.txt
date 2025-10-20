@@ -1,19 +1,16 @@
 
- Usage: python -m xsarena [OPTIONS] COMMAND [ARGS]...
+ Usage: xsarena [OPTIONS] COMMAND [ARGS]...
 
  XSArena — AI-powered writing and coding studio
 
 ╭─ Options ────────────────────────────────────────────────────────────────────╮
-│ --backend                   TEXT     Backend to use (bridge or openrouter)   │
-│                                      [default: bridge]                       │
-│ --model                     TEXT     Model to use [default: default]         │
-│ --window                    INTEGER  Window size for history [default: 100]  │
-│ --install-completion                 Install completion for the current      │
-│                                      shell.                                  │
-│ --show-completion                    Show completion for the current shell,  │
-│                                      to copy it or customize the             │
-│                                      installation.                           │
-│ --help                               Show this message and exit.             │
+│ --backend                   TEXT  Override backend for this invocation       │
+│ --model                     TEXT  Override model for this invocation         │
+│ --base-url                  TEXT  Override bridge base URL                   │
+│ --install-completion              Install completion for the current shell.  │
+│ --show-completion                 Show completion for the current shell, to  │
+│                                   copy it or customize the installation.     │
+│ --help                            Show this message and exit.                │
 ╰──────────────────────────────────────────────────────────────────────────────╯
 ╭─ Commands ───────────────────────────────────────────────────────────────────╮
 │ version                                                                      │
@@ -21,12 +18,7 @@
 │ interactive   Interactive authoring session                                  │
 │ settings      Unified settings interface (configuration + controls)          │
 │ author        Core content creation workflows.                               │
-│ analyze       Analysis, reporting, and evidence-based tools.                 │
-│ study         Study aids, learning tools, and practice drills.               │
-│ dev           Coding agent, simulation, and automation pipelines.            │
 │ ops           System health, jobs, services, and configuration.              │
-│ project       Project management and initialization.                         │
-│ directives    Manage directives, profiles, and endpoints.                    │
 │ utils         General utility commands.                                      │
 │ docs          Documentation generation commands                              │
 ╰──────────────────────────────────────────────────────────────────────────────╯

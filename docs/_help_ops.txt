@@ -1,0 +1,16 @@
+
+ Usage: xsarena ops [OPTIONS] COMMAND [ARGS]...
+
+ System health, jobs, services, and configuration.
+
+╭─ Options ────────────────────────────────────────────────────────────────────╮
+│ --help          Show this message and exit.                                  │
+╰──────────────────────────────────────────────────────────────────────────────╯
+╭─ Commands ───────────────────────────────────────────────────────────────────╮
+│ service    Service management commands.                                      │
+│ jobs       Jobs manager (list, monitor, control jobs)                        │
+│ health     System health, maintenance, and self-healing operations           │
+│ snapshot   Generate an intelligent, minimal, and configurable project        │
+│            snapshot.                                                         │
+│ config     Configuration and backend management                              │
+╰──────────────────────────────────────────────────────────────────────────────╯

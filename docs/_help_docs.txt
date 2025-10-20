@@ -1,0 +1,12 @@
+
+ Usage: xsarena docs [OPTIONS] COMMAND [ARGS]...
+
+ Documentation generation commands
+
+╭─ Options ────────────────────────────────────────────────────────────────────╮
+│ --help          Show this message and exit.                                  │
+╰──────────────────────────────────────────────────────────────────────────────╯
+╭─ Commands ───────────────────────────────────────────────────────────────────╮
+│ gen-help   Generate help documentation by running xsarena --help and         │
+│            subcommand --help.                                                │
+╰──────────────────────────────────────────────────────────────────────────────╯

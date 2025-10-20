@@ -1,0 +1,11 @@
+
+ Usage: xsarena utils [OPTIONS] COMMAND [ARGS]...
+
+ General utility commands.
+
+╭─ Options ────────────────────────────────────────────────────────────────────╮
+│ --help          Show this message and exit.                                  │
+╰──────────────────────────────────────────────────────────────────────────────╯
+╭─ Commands ───────────────────────────────────────────────────────────────────╮
+│ tools   Utility tools like chapter export and checklist extraction.          │
+╰──────────────────────────────────────────────────────────────────────────────╯

@@ -1,6 +1,5 @@
-Warning: Unknown config keys in .xsarena/config.yml: bridge
 
- Usage: python -m xsarena run [OPTIONS] COMMAND [ARGS]...
+ Usage: xsarena run [OPTIONS] COMMAND [ARGS]...
 
  Run a book or recipe in authoring mode
 
@@ -16,6 +15,8 @@ Warning: Unknown config keys in .xsarena/config.yml: bridge
 │ replay        Replay a job from a run manifest, warning if directive digests │
 │               drift.                                                         │
 │ continue                                                                     │
+│ write         Golden-path alias for 'run book' with narrative + no_bs        │
+│               overlays.                                                      │
 │ template      Run a structured directive from the library (optionally        │
 │               JSON-validated if a schema exists).                            │
 ╰──────────────────────────────────────────────────────────────────────────────╯

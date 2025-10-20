@@ -1,0 +1,35 @@
+
+ Usage: xsarena author [OPTIONS] COMMAND [ARGS]...
+
+ Core content creation workflows.
+
+╭─ Options ────────────────────────────────────────────────────────────────────╮
+│ --help          Show this message and exit.                                  │
+╰──────────────────────────────────────────────────────────────────────────────╯
+╭─ Commands ───────────────────────────────────────────────────────────────────╮
+│ ingest-ack                   Ingest a large document in 'acknowledge' mode   │
+│                              with 'OK i/N' handshake loop.                   │
+│ ingest-synth                 Ingest a large document in 'synthesis' mode     │
+│                              with rolling update loop.                       │
+│ ingest-style                 Ingest a large document in 'style' mode with    │
+│                              rolling style profile update loop.              │
+│ ingest-run                   Ingest a large document and create a dense      │
+│                              synthesis (alias for synth mode).               │
+│ lossless-ingest              Ingest and synthesize information from text.    │
+│ lossless-rewrite             Rewrite text while preserving all meaning.      │
+│ lossless-run                 Perform a comprehensive lossless processing     │
+│                              run.                                            │
+│ lossless-improve-flow        Improve the flow and transitions in text.       │
+│ lossless-break-paragraphs    Break dense paragraphs into more readable       │
+│                              chunks.                                         │
+│ lossless-enhance-structure   Enhance text structure with appropriate         │
+│                              headings and formatting.                        │
+│ style-narrative              Enable or disable the narrative/pedagogy        │
+│                              overlay for the session.                        │
+│ style-nobs                   Enable or disable the no-bullshit (no-bs)       │
+│                              language overlay.                               │
+│ style-reading                Enable or disable the further reading overlay   │
+│                              for the session.                                │
+│ style-show                   Show currently active overlays.                 │
+│ post-process                 Post-processing tools (aliases to utils tools)  │
+╰──────────────────────────────────────────────────────────────────────────────╯
