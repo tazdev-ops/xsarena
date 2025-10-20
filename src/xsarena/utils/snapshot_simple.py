@@ -225,7 +225,7 @@ def read_snapshot_config() -> Dict:
     config_path = ROOT / ".snapshot.toml"
     if config_path.exists() and tomllib:
         try:
-            data = tomllib.loads(config_path.read_bytes())
+            data = tomllib.loads(config_path.read_text(encoding="utf-8"))
             # Update modes separately since it's a nested structure
             if "modes" in data:
                 cfg["modes"].update(data.pop("modes", {}))

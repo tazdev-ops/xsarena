@@ -1,229 +1,39 @@
-# Snapshot configuration for XSArena
-default_mode = "core_logic"
-max_size = 262144       # 256 KB per file
-redact = true
-
-[context]
-git = true
-jobs = true
-manifest = true
-
-[modes.minimal]
-include = [
-  ".snapshot.toml",
-  "README.md",
-  "COMMANDS_REFERENCE.md",
-  "pyproject.toml",
-  "src/xsarena/**",
-]
-exclude = [
-  ".git/**",
-  ".svn/**",
-  ".hg/**",
-  ".idea/**",
-  ".vscode/**",
-  "venv/**",
-  ".venv/**",
-  "__pycache__/**",
-  ".pytest_cache/**",
-  ".mypy_cache/**",
-  ".ruff_cache/**",
-  ".cache/**",
-  "*.pyc",
-  "*.pyo",
-  "*.pyd",
-  "*.o",
-  "*.a",
-  "*.so",
-  "*.dll",
-  "*.dylib",
-  "*.log",
-  "logs/**",
-  ".xsarena/**",
-  "*.egg-info/**",
-  ".ipynb_checkpoints/**"
-]
-
-[modes.standard]
-include = [
-  ".snapshot.toml",
-  "README.md",
-  "COMMANDS_REFERENCE.md",
-  "pyproject.toml",
-  "src/xsarena/**",
-  "docs/**",
-  "data/schemas/**",
-  "directives/manifest.yml",
-  "directives/profiles/presets.yml",
-  "directives/modes.catalog.json",
-]
-exclude = [
-  ".git/**",
-  ".svn/**",
-  ".hg/**",
-  ".idea/**",
-  ".vscode/**",
-  "venv/**",
-  ".venv/**",
-  "__pycache__/**",
-  ".pytest_cache/**",
-  ".mypy_cache/**",
-  ".ruff_cache/**",
-  ".cache/**",
-  "*.pyc",
-  "*.pyo",
-  "*.pyd",
-  "*.o",
-  "*.a",
-  "*.so",
-  "*.dll",
-  "*.dylib",
-  "*.log",
-  "logs/**",
-  ".xsarena/**",
-  "*.egg-info/**",
-  ".ipynb_checkpoints/**",
-  # Explicitly omit non-architectural or generated content
-  "books/**",
-  "review/**",
-  "recipes/**",
-  "tests/**",
-  "packaging/**",
-  "pipelines/**",
-  "examples/**",
-  "directives/_preview/**",
-  "directives/_mixer/**",
-  "directives/quickref/**",
-  "directives/roles/**",
-  "directives/prompt/**",
-  "directives/style/**",
-]
-
-[modes.full]
-include = [
-  "README.md",
-  "COMMANDS_REFERENCE.md",
-  "pyproject.toml",
-  "src/**",
-  "docs/**",
-  "directives/**",
-  "data/**",
-  "recipes/**",
-  "tests/**",
-  "tools/**",
-  "scripts/**",
-  "books/**",
-  "packaging/**",
-  "pipelines/**",
-  "examples/**",
-  "review/**",
-]
-exclude = [
-  ".git/**",
-  "venv/**",
-  ".venv/**",
-  "__pycache__/**",
-  ".pytest_cache/**",
-  ".mypy_cache/**",
-  ".ruff_cache/**",
-  ".cache/**",
-  "*.pyc",
-  "*.pyo",
-  "*.pyd",
-  "*.o",
-  "*.a",
-  "*.so",
-  "*.dll",
-  "*.dylib",
-  "*.log",
-  "logs/**",
-  "*.egg-info/**",
-  ".ipynb_checkpoints/**",
-]
+max_size = 180000  # per file cap for write_text_snapshot
 
 [modes.tight]
 include = [
+  ".snapshot.toml",
   "README.md",
   "COMMANDS_REFERENCE.md",
   "pyproject.toml",
   "src/xsarena/cli/main.py",
   "src/xsarena/cli/registry.py",
   "src/xsarena/cli/context.py",
-  "src/xsarena/core/prompt.py",
-  "src/xsarena/core/prompt_runtime.py",
-  "src/xsarena/core/v2_orchestrator/orchestrator.py",
-  "src/xsarena/core/v2_orchestrator/specs.py",
-  "src/xsarena/core/jobs/model.py",
-  "src/xsarena/core/jobs/executor.py",
-  "src/xsarena/core/jobs/scheduler.py",
-  "src/xsarena/core/jobs/store.py"
-]
-exclude = [
-  ".git/**","venv/**",".venv/**","__pycache__/**",".pytest_cache/**",".mypy_cache/**",".ruff_cache/**",".cache/**",
-  "*.pyc","logs/**",".xsarena/**","*.egg-info/**",".ipynb_checkpoints/**",
-  "docs/**","examples/**","tests/**","tools/**","pipelines/**","packaging/**",
-  "review/**","books/**","directives/**","src/xsarena/bridge_v2/static/**"
-]
-
-[modes.core_logic]
-# This mode includes only the essential architectural components.
-include = [
-  # Project Definition & High-Level Overview
-  ".snapshot.toml",
-  "README.md",
-  "pyproject.toml",
-
-  # Core Application Entry & Routing
-  "src/xsarena/cli/main.py",
-  "src/xsarena/cli/registry.py",
-  "src/xsarena/cli/context.py",
-
-  # Key User Workflows
   "src/xsarena/cli/cmds_run.py",
-  "src/xsarena/cli/interactive_session.py",  # <-- ADDED: Essential interactive mode logic
-
-  # Core Orchestration & Job Logic
-  "src/xsarena/core/v2_orchestrator/orchestrator.py",
-  "src/xsarena/core/v2_orchestrator/specs.py",
-  "src/xsarena/core/jobs/model.py",
-  "src/xsarena/core/jobs/executor.py",
-  "src/xsarena/core/jobs/scheduler.py",
-
-  # Core Prompting & State Management
-  "src/xsarena/core/prompt.py",
   "src/xsarena/core/config.py",
   "src/xsarena/core/state.py",
-
-  # Backend Communication Layer (Client & Server)
-  "src/xsarena/core/backends/__init__.py",
-  "src/xsarena/core/backends/bridge_v2.py",
-  "src/xsarena/bridge_v2/api_server.py",  # <-- ADDED: The critical bridge server implementation
+  "src/xsarena/core/jobs/model.py",
+  "src/xsarena/core/jobs/executor.py",
+  "src/xsarena/core/jobs/scheduler.py",
+  "src/xsarena/core/jobs/store.py",
+  "docs/USAGE.md",
+  "docs/OPERATING_MODEL.md",
 ]
-# We can reuse the same excellent exclude list.
 exclude = [
-  ".git/**",
-  ".svn/**",
-  ".hg/**",
-  ".idea/**",
-  ".vscode/**",
-  "venv/**",
-  ".venv/**",
-  "__pycache__/**",
-  ".pytest_cache/**",
-  ".mypy_cache/**",
-  ".ruff_cache/**",
-  ".cache/**",
-  "*.pyc",
-  "*.pyo",
-  "*.pyd",
-  "*.o",
-  "*.a",
-  "*.so",
-  "*.dll",
-  "*.dylib",
-  "*.log",
-  "logs/**",
-  ".xsarena/**",
-  "*.egg-info/**",
-  ".ipynb_checkpoints/**"
+  ".git/**", ".svn/**", ".hg/**", ".idea/**", ".vscode/**",
+  "venv/**", ".venv/**", "__pycache__/**",
+  ".pytest_cache/**", ".mypy_cache/**", ".ruff_cache/**", ".cache/**",
+  "*.pyc", "*.pyo", "*.pyd", "*.log", "logs/**",
+  ".xsarena/**", "*.egg-info/**", ".ipynb_checkpoints/**",
+  "books/**", "review/**", "tests/**", "examples/**", "packaging/**", "pipelines/**", "tools/**", "scripts/**",
+  "repo_flat.txt", "xsa_snapshot*.txt", "xsa_snapshot*.zip", "xsa_debug_report*.txt", "snapshot_chunks/**"
 ]
+
+[modes.minimal]
+# keep existing defaults (from code), or add here if you want to override
+
+[modes.standard]
+# keep existing defaults (from code), or add here if you want to override
+
+[modes.full]
+# keep existing defaults (from code), or add here if you want to override
