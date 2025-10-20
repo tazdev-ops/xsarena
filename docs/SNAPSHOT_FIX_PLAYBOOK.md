@@ -1,41 +1,45 @@
-# Snapshot Fix Playbook (only if necessary)
+# Snapshot Fix Playbook & Deprecation Notes
 
-Use this only when policy/config can't solve your issue (e.g., hard crash). Keep changes surgical; don't expand scope.
+## Legacy Snapshot Scripts (DEPRECATED as of Snapshot Reform 2025-10-21)
 
-1) TOML parsing crash (TypeError: str expected by tomllib.loads)
-- Symptom: xsarena ops snapshot write — crashes when .snapshot.toml exists.
-- Root cause: tomllib.loads expects bytes; code calls read_text.
-- Surgical fix (guidance):
-  - File: xsarena/utils/snapshot_simple.py, read_snapshot_config()
-  - Ensure the TOML is read as bytes:
-    data = tomllib.loads(config_path.read_bytes())
-  - Or:
-    with open(config_path, "rb") as f:
-        data = tomllib.load(f)
+The following legacy snapshot scripts are now deprecated in favor of the new standardized `xsarena ops snapshot` commands:
 
-2) mode=max NameError (exclude_patterns not set)
-- Symptom: collect_paths("max") raises NameError on exclude_patterns.
-- Surgical fix:
-  - File: xsarena/utils/snapshot_simple.py, collect_paths()
-  - When mode == "max", set:
-    include_patterns = ["**/*"]; exclude_patterns = []
+- `create_snapshot.sh` - Shell script for creating snapshots
+- `simple_snapshot.py` - Python script for basic snapshots  
+- `tools/flatpack_txt.py` - Python utility for flat pack creation
+- `scripts/repo_snapshot.sh` - Repository snapshot script
 
-3) Best-effort git context (builder shouldn't crash in non-git dirs)
-- Symptom: write tries to gather git info and errors out.
-- Surgical fix:
-  - File: xsarena/utils/snapshot_simple.py, build_git_context()
-  - Wrap subprocess calls in try/except and return a friendly string ("Git: (Not a git repository)") on failure.
+### Migration Path
+All functionality from these scripts is now available through the new standardized commands:
 
-4) Binary/text handling clarity
-- If builder emits undecodable text:
-  - File: xsarena/utils/snapshot_simple.py, write_text_snapshot/write_zip_snapshot()
-  - Ensure is_binary_sample(b) detection remains as the gate. If binary, write a metadata line "[BINARY FILE] size=… sha256=…".
+1. **Shareable (ultra-tight, txt)**
+   - Preflight: `xsarena ops snapshot verify --mode author-core --policy .xsarena/ops/snapshot_policy.yml --quiet`
+   - Produce: `xsarena ops snapshot create --mode ultra-tight --total-max 2500000 --max-per-file 180000 --out ~/repo_flat.txt --no-repo-map`
+   - Postflight: `xsarena ops snapshot verify --file ~/repo_flat.txt --max-per-file 180000 --fail-on oversize --fail-on secrets --redaction-expected --quiet`
 
-5) Redaction toggle safety
-- If redaction can't be applied for some reason, it should not crash; fallback to unredacted text or warn clearly.
-  - Keep any redaction errors non-fatal; proceed with unredacted text + note in output.
+2. **Debug bundle (pro)**
+   - Produce: `xsarena ops snapshot debug-report --out ~/xsa_debug_report.txt`
 
-Post-fix acceptance
-- Minimal and maximal flows run without exceptions.
-- Verify preflight or postflight returns "OK" under the policy you set.
-- No secrets leaked (txt redaction on; verify preflight passes "secrets" check).
+### TTL Status
+- These legacy scripts are marked as **XSA-EPHEMERAL ttl=7d**
+- They will be removed from the repository in a future release
+- All new snapshot workflows should use the `xsarena ops snapshot` commands exclusively
+
+### If verify fails (playbook)
+- **oversize**: Lower max_per_file or total_max; switch to ultra-tight; add -X excludes temporarily.
+- **disallowed**: Add explicit excludes to policy, or pass -X on the verify prefight; re-run preflight.
+- **secrets**: `xsarena ops health scan-secrets --path .` ; remove/rotate; keep redaction on; rebuild.
+- **missing_required**: Add README.md/pyproject.toml; re-run preflight.
+- **binary**: Exclude offending binaries (policy); or let debug-report handle as metadata.
+
+## Cleanup discipline (prevent recursion and drift)
+- Before any snapshot/report:
+  - Remove stale files:
+    - Project root: repo_flat.txt, xsa_*snapshot*.txt(.tar.gz), situation_report*.txt/part*
+    - snapshot_chunks/ contents (remove dir if empty)
+    - $HOME: xsa_min_snapshot*.txt, xsa_snapshot_pro*.txt(.tar.gz), situation_report.*.txt/part*
+- Ephemeral TTL sweeps:
+  - `xsarena ops health sweep --dry` (audit)
+  - `xsarena ops health sweep --apply` (scheduled)
+- Never commit snapshots or job artifacts:
+  - Ensure .gitignore covers: snapshot_chunks/, xsa_min_snapshot*.txt, review/, .xsarena/tmp/
