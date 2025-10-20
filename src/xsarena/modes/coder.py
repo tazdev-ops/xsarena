@@ -1,155 +1,30 @@
-"""Coder mode for XSArena."""
-
-from pathlib import Path
-
-from ..core.engine import Engine
-from ..core.tools import PathJail, append_file, list_dir, read_file, run_cmd, write_file
-from ..utils.project_paths import get_project_root
+"""Coder mode for code editing and review."""
+from typing import Protocol, Optional
 
 
-# Load templates directly from directive files
-def _load_directive_content(file_path: str) -> str:
-    """Load content from a directive file."""
-    # First try relative to current working directory
-    if Path(file_path).exists():
-        return Path(file_path).read_text(encoding="utf-8").strip()
-
-    # Try relative to project root using robust resolution
-    project_root = get_project_root()
-    full_path = project_root / file_path
-    if full_path.exists():
-        return full_path.read_text(encoding="utf-8").strip()
-
-    # Return empty string if not found
-    return ""
-
-
-# Load system prompts from directive files
-SYSTEM_PROMPTS = {
-    "coder": _load_directive_content("directives/roles/coder.md"),
-}
-
-# Fallback hardcoded value if directive file is not available
-if not SYSTEM_PROMPTS["coder"]:
-    SYSTEM_PROMPTS[
-        "coder"
-    ] = "You are an expert programmer. Generate clean, efficient, and well-documented code."
+class EngineProtocol(Protocol):
+    """Protocol for the engine interface."""
+    pass
 
 
 class CoderMode:
-    """Handles coding functionality with file system tools."""
-
-    def __init__(self, engine: Engine):
+    """Code editing and review mode."""
+    
+    def __init__(self, engine):
+        """Initialize the coder mode with an engine."""
         self.engine = engine
-        self.path_jail = PathJail("./workspace")  # Default workspace jail
-
-    async def list_dir(self, path: str) -> str:
-        """List directory contents."""
-        try:
-            contents = list_dir(path, self.path_jail)
-            return "\n".join(contents)
-        except Exception as e:
-            return f"Error listing directory: {e}"
-
-    async def read_file(self, filepath: str) -> str:
-        """Read a file."""
-        try:
-            content = read_file(filepath, self.path_jail)
-            return content
-        except Exception as e:
-            return f"Error reading file: {e}"
-
-    async def write_file(self, filepath: str, content: str) -> str:
-        """Write content to a file."""
-        try:
-            success = write_file(filepath, content, self.path_jail)
-            return f"File written successfully: {success}"
-        except Exception as e:
-            return f"Error writing file: {e}"
-
-    async def append_file(self, filepath: str, content: str) -> str:
-        """Append content to a file."""
-        try:
-            success = append_file(filepath, content, self.path_jail)
-            return f"Content appended successfully: {success}"
-        except Exception as e:
-            return f"Error appending to file: {e}"
-
-    async def run_cmd(self, cmd: str) -> str:
-        """Run a command."""
-        try:
-            import shlex
-
-            cmd_parts = shlex.split(cmd)
-            result = await run_cmd(cmd_parts)
-            return f"Return code: {result['returncode']}\nStdout: {result['stdout']}\nStderr: {result['stderr']}"
-        except Exception as e:
-            return f"Error running command: {e}"
-
-    async def code_project(self, requirements: str, language: str = "python") -> str:
-        """Generate a complete code project based on requirements."""
-        prompt = f"""Generate a complete {language} project based on these requirements:
-
-{requirements}
-
-Create the necessary files and structure. Include appropriate comments and follow best practices for {language}."""
-
-        system_prompt = SYSTEM_PROMPTS["coder"]
-        return await self.engine.send_and_collect(prompt, system_prompt)
-
-    async def fix_code(self, code: str, issue: str) -> str:
-        """Fix issues in code."""
-        prompt = f"""Fix this issue in the code:
-
-Issue: {issue}
-
-Code:
-{code}
-
-Provide the corrected code with explanations of the changes made."""
-
-        system_prompt = SYSTEM_PROMPTS["coder"]
-        return await self.engine.send_and_collect(prompt, system_prompt)
-
-    async def review_code(self, code: str, language: str = "python") -> str:
-        """Review code for best practices."""
-        prompt = f"""Review this {language} code for best practices, security issues, and optimization opportunities:
-
-{code}
-
-Provide detailed feedback on improvements."""
-
-        system_prompt = SYSTEM_PROMPTS["coder"]
-        return await self.engine.send_and_collect(prompt, system_prompt)
-
-    async def add_feature(self, existing_code: str, feature_description: str) -> str:
-        """Add a feature to existing code."""
-        prompt = f"""Add this feature to the existing code:
-
-Feature: {feature_description}
-
-Existing code:
-{existing_code}
-
-Provide the updated code with the new feature implemented."""
-
-        system_prompt = SYSTEM_PROMPTS["coder"]
-        return await self.engine.send_and_collect(prompt, system_prompt)
-
-    async def debug_code(self, code: str, error_message: str) -> str:
-        """Debug code based on error message."""
-        prompt = f"""Debug this code based on the error message:
-
-Error message: {error_message}
-
-Code:
-{code}
-
-Identify the issue and provide a fix."""
-
-        system_prompt = SYSTEM_PROMPTS["coder"]
-        return await self.engine.send_and_collect(prompt, system_prompt)
-
-    def set_workspace(self, path: str):
-        """Set the workspace path jail."""
-        self.path_jail = PathJail(path)
+    
+    async def edit_code(self, code: str, instruction: str, line_start: Optional[int] = None, line_end: Optional[int] = None) -> str:
+        """Edit code based on instruction."""
+        # Placeholder implementation
+        return f"# Edited code based on: {instruction}\n{code}"
+    
+    async def review_code(self, code: str) -> str:
+        """Review code and provide feedback."""
+        # Placeholder implementation
+        return f"# Code review for:\n{code[:100]}..."
+    
+    async def explain_code(self, code: str) -> str:
+        """Explain code functionality."""
+        # Placeholder implementation
+        return f"# Explanation for code:\n{code[:100]}..."

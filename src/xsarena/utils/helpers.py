@@ -3,9 +3,47 @@
 import json
 import os
 from pathlib import Path
-from typing import Any, Dict, Union
+from typing import Any, Dict, Tuple, Union
 
 import yaml
+
+
+def is_binary_sample(b: bytes) -> bool:
+    """Check if bytes look like binary content."""
+    if not b:
+        return False
+    if b.count(0) > 0:
+        return True
+    # Heuristic: if too many non-text bytes
+    text_chars = bytes(range(32, 127)) + b"\n\r\t\b\f"
+    non_text_ratio = sum(ch not in text_chars for ch in b) / len(b)
+    return non_text_ratio > 0.30
+
+
+def safe_read_bytes(p: Path, max_bytes: int) -> Tuple[bytes, bool]:
+    """Safely read bytes from a file with size limit."""
+    try:
+        data = p.read_bytes()
+    except Exception:
+        return b"", False
+    truncated = False
+    if len(data) > max_bytes:
+        data = data[:max_bytes]
+        truncated = True
+    return data, truncated
+
+
+def safe_read_text(p: Path, max_bytes: int) -> Tuple[str, bool]:
+    """Safely read text from a file with size limit."""
+    try:
+        text = p.read_text("utf-8", errors="replace")
+    except Exception:
+        return "[ERROR READING FILE]", False
+    truncated = False
+    if len(text) > max_bytes:
+        text = text[:max_bytes]
+        truncated = True
+    return text, truncated
 
 
 def load_yaml_or_json(path: Union[str, Path]) -> Dict[str, Any]:

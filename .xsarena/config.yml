@@ -1,2 +1,67 @@
 backend: bridge
 model: default
+snapshot_presets:
+  minimal:
+    include:
+      - README.md
+      - COMMANDS_REFERENCE.md
+      - pyproject.toml
+      - src/xsarena/core/prompt.py
+      - src/xsarena/core/prompt_runtime.py
+      - src/xsarena/core/v2_orchestrator/orchestrator.py
+      - src/xsarena/core/v2_orchestrator/specs.py
+      - src/xsarena/core/jobs/model.py
+      - src/xsarena/core/jobs/executor.py
+      - src/xsarena/core/jobs/scheduler.py
+      - src/xsarena/core/jobs/store.py
+      - directives/base/zero2hero.md
+      - directives/system/plan_from_seeds.md
+      - directives/_rules/rules.merged.md
+    exclude: []
+  normal:
+    include:
+      - README.md
+      - COMMANDS_REFERENCE.md
+      - pyproject.toml
+      - src/xsarena/** 
+      - docs/USAGE.md
+      - docs/OPERATING_MODEL.md
+    exclude: []
+  maximal:
+    include:
+      - "**/*"
+    exclude: []
+  default_excludes:
+    - ".git/**"
+    - ".svn/**"
+    - ".hg/**"
+    - ".idea/**"
+    - ".vscode/**"
+    - "venv/**"
+    - ".venv/**"
+    - "__pycache__/**"
+    - ".pytest_cache/**"
+    - ".mypy_cache/**"
+    - ".ruff_cache/**"
+    - ".cache/**"
+    - "*.pyc"
+    - "*.pyo"
+    - "*.pyd"
+    - "*.log"
+    - "logs/**"
+    - ".xsarena/**"
+    - "*.egg-info/**"
+    - ".ipynb_checkpoints/**"
+    - "books/**"
+    - "review/**"
+    - "tests/**"
+    - "examples/**"
+    - "packaging/**"
+    - "pipelines/**"
+    - "tools/**"
+    - "scripts/**"
+    - "repo_flat.txt"
+    - "xsa_snapshot*.txt"
+    - "xsa_snapshot*.zip"
+    - "xsa_debug_report*.txt"
+    - "snapshot_chunks/**"

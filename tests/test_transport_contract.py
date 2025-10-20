@@ -150,19 +150,23 @@ async def test_openrouter_transport_health_check():
 async def test_transport_factory_function():
     """Test the transport factory function."""
     from xsarena.core.backends import create_backend
+    from xsarena.core.backends.circuit_breaker import CircuitBreakerTransport
 
     # Test bridge creation
     bridge_transport = create_backend("bridge")
-    assert isinstance(bridge_transport, BridgeV2Transport)
+    assert isinstance(bridge_transport, CircuitBreakerTransport)
+    assert isinstance(bridge_transport.wrapped_transport, BridgeV2Transport)
 
     # Test openrouter creation (with mock API key)
     openrouter_transport = create_backend("openrouter", api_key="test-key")
-    assert isinstance(openrouter_transport, OpenRouterTransport)
+    assert isinstance(openrouter_transport, CircuitBreakerTransport)
+    assert isinstance(openrouter_transport.wrapped_transport, OpenRouterTransport)
 
     # Test deprecated types
     with pytest.warns(DeprecationWarning):
         deprecated_transport = create_backend("lmarena")
-        assert isinstance(deprecated_transport, BridgeV2Transport)
+        assert isinstance(deprecated_transport, CircuitBreakerTransport)
+        assert isinstance(deprecated_transport.wrapped_transport, BridgeV2Transport)
 
     # Test unsupported type
     with pytest.raises(ValueError, match="Unsupported backend type"):

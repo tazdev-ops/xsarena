@@ -2,6 +2,7 @@ from pathlib import Path
 
 import pytest
 from typer.testing import CliRunner
+
 from xsarena.cli.main import app
 
 runner = CliRunner()
@@ -62,6 +63,8 @@ def test_preview_run_autorun_no_crash(minimal_recipe, monkeypatch):
     assert result.exit_code == 0, f"Command crashed with error: {result.stderr}"
     assert "submitted: mock-job-id-123" in result.stdout
     assert "final → ./books/test_preview_subject.final.md" in result.stdout
+    assert "submitted: mock-job-id-123" in result.stdout
+    assert "final → ./books/test_preview_subject.final.md" in result.stdout
 
 
 def test_prompt_run_smoke(minimal_recipe, monkeypatch):
@@ -89,7 +92,7 @@ def test_prompt_run_smoke(minimal_recipe, monkeypatch):
     result = runner.invoke(
         app,
         [
-            "prompt",
+            "json",
             "run",
             "--system",
             str(minimal_recipe),

@@ -34,7 +34,7 @@ def test_parse_outline():
         items = parse_outline(outline_path)
 
         # Should find all headings
-        assert len(items) == 8  # All headings from the outline
+        assert len(items) == 9  # All headings from the outline
 
         # Check that items have correct properties
         assert items[0].title == "Introduction"
@@ -168,10 +168,10 @@ def test_generate_coverage_report():
     assert "Coverage Report" in report
     assert "outline.md" in report
     assert "book.md" in report
-    assert "Total items: 4" in report
-    assert "Covered: 2" in report
-    assert "Partial: 1" in report
-    assert "Missing: 1" in report
+    assert "- **Total items:** 4" in report
+    assert "- **Covered:** 2" in report
+    assert "- **Partial:** 1" in report
+    assert "- **Missing:** 1" in report
     assert "Introduction" in report
     assert "Background" in report
     assert "Goals" in report

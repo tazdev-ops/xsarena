@@ -1,14 +1,18 @@
 import fnmatch
 import json
+import os
 import re
+import tempfile
 from pathlib import Path
 from typing import List, Optional, Tuple
+import contextlib
 
 import typer
 
 # Import the built-in snapshot simple utility
 from xsarena.utils import snapshot_simple
 from xsarena.utils.secrets_scanner import SecretsScanner
+from xsarena.utils.flatpack_txt import flatten_txt
 
 # Preset constants for the txt command
 PRESET_DEFAULT_EXCLUDE = [
@@ -115,6 +119,55 @@ PRESET_ULTRA_TIGHT_INCLUDE = [
     "docs/COMMANDS_CHEATSHEET.md",
 ]
 
+# A new preset tuned to produce a ~500–550 KB flat pack in typical repos
+# (final size depends on repo shape; budgets below enforce the target).
+PRESET_TIGHT_500K_INCLUDE = [
+    # Core docs/metadata
+    "README.md",
+    "COMMANDS_REFERENCE.md",
+    "pyproject.toml",
+    # CLI and context
+    "src/xsarena/cli/main.py",
+    "src/xsarena/cli/registry.py",
+    "src/xsarena/cli/context.py",
+    # Core authoring & orchestrator
+    "src/xsarena/core/prompt.py",
+    "src/xsarena/core/prompt_runtime.py",
+    "src/xsarena/core/config.py",
+    "src/xsarena/core/state.py",
+    "src/xsarena/core/engine.py",
+    "src/xsarena/core/v2_orchestrator/orchestrator.py",
+    "src/xsarena/core/v2_orchestrator/specs.py",
+    # Jobs (model + executor + scheduler + store)
+    "src/xsarena/core/jobs/model.py",
+    "src/xsarena/core/jobs/executor_core.py",
+    "src/xsarena/core/jobs/scheduler.py",
+    "src/xsarena/core/jobs/store.py",
+    "src/xsarena/core/jobs/chunk_processor.py",
+    "src/xsarena/core/jobs/processing/*.py",
+    # Backends (factory + bridge transport + circuit breaker)
+    "src/xsarena/core/backends/__init__.py",
+    "src/xsarena/core/backends/bridge_v2.py",
+    "src/xsarena/core/backends/circuit_breaker.py",
+    "src/xsarena/core/backends/transport.py",
+    # Bridge API (just the server; omit HTML and handlers if needed)
+    "src/xsarena/bridge_v2/api_server.py",
+    # Utils (flat pack + snapshot + health/metrics used by verify)
+    "src/xsarena/utils/flatpack_txt.py",
+    "src/xsarena/utils/snapshot_simple.py",
+    "src/xsarena/utils/snapshot/**/*.py",
+    "src/xsarena/utils/helpers.py",
+    "src/xsarena/utils/secrets_scanner.py",
+    "src/xsarena/utils/metrics.py",
+    # Directives essential to authoring
+    "directives/base/zero2hero.md",
+    "directives/system/plan_from_seeds.md",
+    "directives/_rules/rules.merged.md",
+    # Key docs
+    "docs/USAGE.md",
+    "docs/OPERATING_MODEL.md",
+]
+
 PRESET_NORMAL_INCLUDE = [
     "README.md",
     "README_FOR_AI.md",
@@ -217,7 +270,7 @@ def snapshot_create(
     mode: str = typer.Option(
         "minimal",
         "--mode",
-        help="Preset include set: author-core | ultra-tight | normal | maximal | custom.",
+        help="Preset include set: author-core | ultra-tight | tight-500k | normal | maximal | custom.",
     ),
     out: str = typer.Option("~/repo_flat.txt", "--out", "-o", help="Output .txt path"),
     include: List[str] = typer.Option(
@@ -256,12 +309,19 @@ def snapshot_create(
 
     presets, _ = load_snapshot_presets()
 
+    # Load presets from external config
+    from xsarena.core.snapshot_config import load_snapshot_presets
+
+    presets, _ = load_snapshot_presets()
+
     if mode_lower in presets:
         inc = presets[mode_lower].get("include", [])
     elif mode_lower == "author-core":
         inc = PRESET_AUTHOR_CORE_INCLUDE
     elif mode_lower == "ultra-tight":
         inc = PRESET_ULTRA_TIGHT_INCLUDE
+    elif mode_lower == "tight-500k":
+        inc = PRESET_TIGHT_500K_INCLUDE
     elif mode_lower == "normal":
         inc = PRESET_NORMAL_INCLUDE
     elif mode_lower == "maximal":
@@ -280,6 +340,24 @@ def snapshot_create(
         )
         raise typer.Exit(code=1)
 
+    # Heuristic defaults for budgets per mode (only if user did not override)
+    if mode_lower == "tight-500k" and total_max == 4_000_000 and max_per_file == 220_000:
+        total_max = 550_000
+        max_per_file = 45_000
+    elif mode_lower == "ultra-tight" and total_max == 4_000_000 and max_per_file == 220_000:
+        total_max = 300_000
+        max_per_file = 40_000
+    elif mode_lower == "author-core" and total_max == 4_000_000 and max_per_file == 220_000:
+        total_max = 300_000
+        max_per_file = 40_000
+    elif mode_lower == "minimal" and total_max == 4_000_000 and max_per_file == 220_000:
+        total_max = 180_000
+        max_per_file = 30_000
+    elif mode_lower == "normal" and total_max == 4_000_000 and max_per_file == 220_000:
+        # Keep normal broader, but closer to ~800k
+        total_max = 800_000
+        max_per_file = 60_000
+
     # Combine default excludes with any user-provided excludes
     final_excludes = PRESET_DEFAULT_EXCLUDE + (exclude or [])
 
@@ -287,8 +365,6 @@ def snapshot_create(
     outp.parent.mkdir(parents=True, exist_ok=True)
 
     try:
-        from xsarena.utils.flatpack_txt import flatten_txt
-
         out_path, notes = flatten_txt(
             out_path=outp,
             include=inc,
@@ -306,6 +382,69 @@ def snapshot_create(
     except Exception as e:
         typer.echo(f"Error creating snapshot: {e}", err=True)
         raise typer.Exit(1) from e
+
+
+@app.command("report", help="Generate a size report for common modes (preflight).")
+def snapshot_report():
+    """
+    Build a temporary flat pack for each mode and report the on-disk sizes.
+    This helps pick a mode that fits target budgets (e.g., ~500–550 KB).
+    """
+    modes = [
+        ("minimal", PRESET_AUTHOR_CORE_INCLUDE[:0], 180_000, 30_000),        # include list resolved below
+        ("ultra-tight", PRESET_ULTRA_TIGHT_INCLUDE, 300_000, 40_000),
+        ("author-core", PRESET_AUTHOR_CORE_INCLUDE, 300_000, 40_000),
+        ("tight-500k", PRESET_TIGHT_500K_INCLUDE, 550_000, 45_000),
+        ("normal", PRESET_NORMAL_INCLUDE, 800_000, 60_000),
+    ]
+    # For minimal we reuse a small subset of ultra-tight for consistency
+    minimal_inc = [
+        "README.md",
+        "COMMANDS_REFERENCE.md",
+        "pyproject.toml",
+        "src/xsarena/cli/main.py",
+        "src/xsarena/cli/registry.py",
+        "src/xsarena/cli/context.py",
+        "src/xsarena/core/prompt.py",
+        "src/xsarena/core/prompt_runtime.py",
+        "src/xsarena/core/v2_orchestrator/orchestrator.py",
+    ]
+    results = []
+    for (name, inc_list, total_max, max_per_file) in modes:
+        inc = minimal_inc if name == "minimal" else inc_list
+        try:
+            with tempfile.NamedTemporaryFile(delete=False, suffix=".txt") as tf:
+                tmp_path = Path(tf.name)
+            # Build with repo_map disabled to focus on code
+            flatten_txt(
+                out_path=tmp_path,
+                include=inc,
+                exclude=PRESET_DEFAULT_EXCLUDE,
+                max_bytes_per_file=max_per_file,
+                total_max_bytes=total_max,
+                use_git_tracked=False,
+                include_untracked=False,
+                redact=True,
+                add_repo_map=False,
+            )
+            size = tmp_path.stat().st_size
+            results.append((name, size))
+        except Exception as e:
+            results.append((name, f"ERROR: {e}"))
+        finally:
+            with contextlib.suppress(Exception):
+                os.unlink(str(tmp_path))
+
+    # Print a compact table
+    typer.echo("\nSnapshot Mode Size Report\n")
+    typer.echo(f"{'Mode':<14} {'Size (bytes)':>12}")
+    typer.echo("-" * 28)
+    for name, sz in results:
+        if isinstance(sz, int):
+            typer.echo(f"{name:<14} {sz:>12,}")
+        else:
+            typer.echo(f"{name:<14} {sz:>12}")
+    typer.echo("\nTip: Use 'xsarena ops snapshot create --mode tight-500k' for a ~500–550 KB pack.")
 
 
 @app.command(

@@ -128,7 +128,6 @@ class JobV3(BaseModel):
     progress: Dict[str, Any] = {}  # Track progress like chunks completed, tokens used
 
 
-from .executor_core import JobExecutor
 from .store import JobStore
 
 
@@ -138,6 +137,8 @@ class JobManager:
     def __init__(self, project_defaults: Optional[Dict[str, Any]] = None):
         self.defaults = project_defaults or {}
         self.job_store = JobStore()
+        # Import JobExecutor locally to avoid circular import
+        from .executor_core import JobExecutor
         self.executor = JobExecutor(self.job_store)
         self.event_handlers: List[Callable[[BaseEvent], Awaitable[None]]] = []
         # Add control_queues attribute for compatibility with tests

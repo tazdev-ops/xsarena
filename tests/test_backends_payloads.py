@@ -4,13 +4,14 @@
 from unittest.mock import patch
 
 import pytest
+
 from xsarena.core.backends.bridge_v2 import BridgeV2Transport, OpenRouterTransport
 
 
 @pytest.mark.asyncio
 async def test_bridge_backend_payload():
     """Test BridgeV2Transport payload construction."""
-    from unittest.mock import AsyncMock
+    from unittest.mock import AsyncMock, MagicMock
 
     transport = BridgeV2Transport(base_url="http://test:8080/v1")
 
@@ -27,19 +28,23 @@ async def test_bridge_backend_payload():
     mock_response.json.return_value = {
         "choices": [{"message": {"content": "Response"}}]
     }
+    mock_response.close = AsyncMock()  # Add close method for the response
 
-    # Mock the entire session.post call to return the response directly
-    with patch("aiohttp.ClientSession") as MockClientSession:
-        # Create a session mock that returns our post context manager
-        session_instance = AsyncMock()
-        session_instance.post.return_value.__aenter__.return_value = mock_response
-        MockClientSession.return_value.__aenter__.return_value = session_instance
+    # Create a proper mock session that will be returned by ClientSession()
+    mock_session = AsyncMock()
+    mock_post_context = AsyncMock()
+    mock_post_context.__aenter__.return_value = mock_response
+    mock_session.post.return_value = mock_post_context
 
+    with patch("aiohttp.ClientSession", return_value=mock_session) as mock_session_constructor:
         await transport.send(payload)
 
+        # Verify the session was created
+        mock_session_constructor.assert_called_once()
+        
         # Verify the call was made correctly
-        session_instance.post.assert_called_once()
-        call_args = session_instance.post.call_args
+        mock_session.post.assert_called_once()
+        call_args = mock_session.post.call_args
         assert call_args[0][0] == "http://test:8080/v1/chat/completions"
 
         sent_payload = call_args[1]["json"]
@@ -56,8 +61,6 @@ async def test_bridge_backend_error_handling():
     """Test BridgeV2Transport error handling."""
     from unittest.mock import AsyncMock
 
-    import aiohttp
-
     transport = BridgeV2Transport(base_url="http://test:8080/v1")
 
     payload = {"messages": [{"role": "user", "content": "Test message"}]}
@@ -66,11 +69,16 @@ async def test_bridge_backend_error_handling():
     mock_response = AsyncMock()
     mock_response.status = 500
     mock_response.text.return_value = "Internal Server Error"
+    mock_response.close = AsyncMock()  # Add close method for the response
 
-    # Mock the entire session.post call to return the error response directly
-    with patch.object(aiohttp.ClientSession, "post", autospec=True) as mock_post:
-        mock_post.return_value.__aenter__.return_value = mock_response
+    # Create a mock session
+    mock_session = AsyncMock()
+    mock_post_context = AsyncMock()
+    mock_post_context.__aenter__.return_value = mock_response
+    mock_session.post.return_value = mock_post_context
 
+    # Mock the entire session creation
+    with patch("aiohttp.ClientSession", return_value=mock_session):
         with pytest.raises(RuntimeError) as exc_info:
             await transport.send(payload)
 
@@ -92,19 +100,20 @@ async def test_openrouter_backend_payload():
     mock_response.json.return_value = {
         "choices": [{"message": {"content": "Response"}}]
     }
+    mock_response.close = AsyncMock()  # Add close method for the response
 
-    # Mock the entire session.post call to return the response directly
-    with patch("aiohttp.ClientSession") as MockClientSession:
-        # Create a session mock that returns our post context manager
-        session_instance = AsyncMock()
-        session_instance.post.return_value.__aenter__.return_value = mock_response
-        MockClientSession.return_value.__aenter__.return_value = session_instance
+    # Mock the session and its post method properly
+    mock_session = AsyncMock()
+    mock_post_context = AsyncMock()
+    mock_post_context.__aenter__.return_value = mock_response
+    mock_session.post.return_value = mock_post_context
 
+    with patch("aiohttp.ClientSession", return_value=mock_session):
         await transport.send(payload)
 
         # Verify the payload structure
-        session_instance.post.assert_called_once()
-        call_args = session_instance.post.call_args
+        mock_session.post.assert_called_once()
+        call_args = mock_session.post.call_args
 
         # Check URL
         assert call_args[0][0] == "https://openrouter.ai/api/v1/chat/completions"

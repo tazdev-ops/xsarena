@@ -33,7 +33,7 @@ xsarena_bridge.user.js
 .xsarena/ops/pointers.json
 .xsarena/ops/queue.json
 .xsarena/ops/snapshot_policy.yml
-.xsarena/tmp/prompt_cache.json
+
 data/resource_map.en.json
 data/sources_list.en.md
 data/schemas/kasravi_strip.schema.json
@@ -718,7 +718,7 @@ src/xsarena/utils/helpers.py
 src/xsarena/utils/io.py
 src/xsarena/utils/metrics.py
 src/xsarena/utils/project_paths.py
-src/xsarena/utils/prompt_cache.py
+
 src/xsarena/utils/secrets_scanner.py
 src/xsarena/utils/snapshot_simple.py
 src/xsarena/utils/style_lint.py

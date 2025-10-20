@@ -171,8 +171,8 @@ def test_generate_continuity_report():
     # Check that report contains expected elements
     assert "Continuity Report" in report
     assert "book.md" in report
-    assert "Drift issues: 1" in report
-    assert "Reintro issues: 1" in report
+    assert "- **Drift issues:** 1" in report
+    assert "- **Reintro issues:** 1" in report
     assert "Low continuity between 'Introduction' and 'Main Content'" in report
     assert "Potential re-introduction phrase in 'Section 1'" in report
 

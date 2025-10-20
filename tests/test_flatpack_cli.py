@@ -1,10 +1,11 @@
 def test_snapshot_txt_author_core_cli(tmp_path, monkeypatch):
     from typer.testing import CliRunner
-    from xsarena.cli.main import run as cli_run
+
+    from xsarena.cli.registry import app as cli_app
 
     runner = CliRunner()
     res = runner.invoke(
-        cli_run,
+        cli_app,
         [
             "ops",
             "snapshot",

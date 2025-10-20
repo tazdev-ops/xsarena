@@ -30,6 +30,7 @@ def test_config_model():
         config.backend = "openrouter"
         config.model = "openrouter/auto"
         config.base_url = "https://openrouter.ai/api/v1"
+        config.api_key = "test-api-key-for-testing"  # Add required API key for openrouter backend
 
         # Save config
         config.save_to_file(str(config_path))
@@ -44,5 +45,6 @@ def test_config_model():
         assert loaded_config.backend == "openrouter"
         assert loaded_config.model == "openrouter/auto"
         assert loaded_config.base_url == "https://openrouter.ai/api/v1"
+        assert loaded_config.api_key == "test-api-key-for-testing"
 
         print("✓ Config model test passed")

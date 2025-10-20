@@ -4,6 +4,7 @@ import tempfile
 from pathlib import Path
 
 from typer.testing import CliRunner
+
 from xsarena.cli.main import app
 
 
@@ -36,7 +37,7 @@ def test_roles_overlays_discovery():
             runner = CliRunner()
 
             # Test roles list
-            result = runner.invoke(app, ["roles", "list"])
+            result = runner.invoke(app, ["list", "roles"])
             assert result.exit_code == 0
             assert "role1.md" in result.output
             assert "role2.md" in result.output
@@ -47,7 +48,7 @@ def test_roles_overlays_discovery():
             assert "Role: role1.md" in result.output
 
             # Test overlays list
-            result = runner.invoke(app, ["overlays", "list"])
+            result = runner.invoke(app, ["list", "overlays"])
             assert result.exit_code == 0
             assert "style.test.md" in result.output
             assert "style.another.md" in result.output

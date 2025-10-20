@@ -5,10 +5,22 @@ from pathlib import Path
 
 import typer
 
-from ..modes.chad import ChadMode
 from .context import CLIContext
 
 app = typer.Typer(help="Direct, evidence-based Q&A")
+
+
+def _get_chad_mode(cli):
+    """Get ChadMode with error handling for missing dependencies."""
+    try:
+        from ..modes.chad import ChadMode
+        return ChadMode(cli.engine)
+    except ImportError:
+        typer.echo(
+            "Chad mode not available. Install required dependencies.",
+            err=True,
+        )
+        raise typer.Exit(1)
 
 
 @app.command("ask")
@@ -21,7 +33,7 @@ def chad_ask(
 ):
     """Answer a question based on evidence and context."""
     cli: CLIContext = ctx.obj
-    mode = ChadMode(cli.engine)
+    mode = _get_chad_mode(cli)
 
     context = ""
     if context_file:
@@ -42,7 +54,7 @@ def chad_batch(
 ):
     """Process a batch of questions from a file and save answers."""
     cli: CLIContext = ctx.obj
-    mode = ChadMode(cli.engine)
+    mode = _get_chad_mode(cli)
 
     async def run():
         result = await mode.batch_questions(questions_file, answers_file)
@@ -59,7 +71,7 @@ def chad_check(
 ):
     """Check a claim against provided evidence."""
     cli: CLIContext = ctx.obj
-    mode = ChadMode(cli.engine)
+    mode = _get_chad_mode(cli)
 
     evidence = Path(evidence_file).read_text(encoding="utf-8")
 
@@ -78,7 +90,7 @@ def chad_sources(
 ):
     """Analyze multiple sources to answer a question."""
     cli: CLIContext = ctx.obj
-    mode = ChadMode(cli.engine)
+    mode = _get_chad_mode(cli)
 
     sources = []
     for source_file in source_files:
@@ -98,7 +110,7 @@ def chad_fact_check(
 ):
     """Fact-check a given statement."""
     cli: CLIContext = ctx.obj
-    mode = ChadMode(cli.engine)
+    mode = _get_chad_mode(cli)
 
     async def run():
         result = await mode.fact_check(statement)
@@ -114,7 +126,7 @@ def chad_summarize(
 ):
     """Summarize a list of evidence points."""
     cli: CLIContext = ctx.obj
-    mode = ChadMode(cli.engine)
+    mode = _get_chad_mode(cli)
 
     evidence_list = []
     for evidence_file in evidence_files:
