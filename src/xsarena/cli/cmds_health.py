@@ -239,13 +239,6 @@ def _write(p: Path, s: str):
     p.write_text(s, encoding="utf-8")
 
 
-def _load_yaml(p: Path) -> dict:
-    try:
-        return yaml.safe_load(_read(p)) or {}
-    except Exception:
-        return {}
-
-
 def _load_ptr() -> dict:
     if POINTERS.exists():
         try:
@@ -366,3 +359,40 @@ def boot_init():
         )
         _maybe_merge()
     typer.echo("[boot] init complete.")
+
+
+@app.command("quick")
+def quick_health():
+    """Quick health check - verify core functionality."""
+    import subprocess
+    import sys
+
+    commands_to_test = [
+        [sys.executable, "-m", "xsarena", "--help"],
+        [sys.executable, "-m", "xsarena", "run", "book", "Test", "--dry-run"],
+        [sys.executable, "-m", "xsarena", "ops", "jobs", "ls"],
+    ]
+
+    typer.echo("Running quick health check...")
+    all_passed = True
+
+    for i, cmd in enumerate(commands_to_test, 1):
+        try:
+            result = subprocess.run(cmd, capture_output=True, text=True, timeout=10)
+            if result.returncode == 0:
+                typer.echo(f"✓ Test {i}: PASSED")
+            else:
+                typer.echo(f"✗ Test {i}: FAILED - {result.stderr[:100]}...")
+                all_passed = False
+        except subprocess.TimeoutExpired:
+            typer.echo(f"✗ Test {i}: TIMEOUT")
+            all_passed = False
+        except Exception as e:
+            typer.echo(f"✗ Test {i}: ERROR - {str(e)}")
+            all_passed = False
+
+    if all_passed:
+        typer.echo("\n✓ All health checks PASSED")
+    else:
+        typer.echo("\n✗ Some health checks FAILED")
+        raise typer.Exit(1)

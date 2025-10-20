@@ -3,6 +3,8 @@
 
 import typer
 
+from ..core.config import Config
+
 # Import all command modules
 from .cmds_docs import app as docs_app
 from .cmds_health import app as health_app
@@ -12,10 +14,36 @@ from .cmds_run import app as run_app
 from .cmds_snapshot import app as snapshot_app
 from .cmds_tools import app as tools_app
 from .cmds_unified_settings import app as unified_settings_app
+
+# --- Global CLI context init (ensures ctx.obj is set for all commands)
+from .context import CLIContext
 from .service import app as service_app
 
 # --- Main App ---
 app = typer.Typer(help="XSArena — AI-powered writing and coding studio")
+
+
+# --- Global CLI context init (ensures ctx.obj is set for all commands)
+@app.callback()
+def _init_ctx(
+    ctx: typer.Context,
+    backend: str = typer.Option(
+        None, "--backend", help="Override backend for this invocation"
+    ),
+    model: str = typer.Option(
+        None, "--model", help="Override model for this invocation"
+    ),
+    base_url: str = typer.Option(None, "--base-url", help="Override bridge base URL"),
+):
+    cfg_over = None
+    if any([backend, model, base_url]):
+        cfg_over = Config(
+            backend=backend or "bridge",
+            model=model or "default",
+            base_url=base_url or "http://127.0.0.1:5102/v1",
+        )
+    ctx.obj = CLIContext.load(cfg=cfg_over)
+
 
 # --- Essential Top-Level Commands ---
 app.add_typer(run_app, name="run", help="Run a book or recipe in authoring mode")

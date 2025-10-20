@@ -180,7 +180,7 @@ def snapshot_create(
         "--mode",
         help="Preset include set: author-core | ultra-tight | normal | maximal | custom.",
     ),
-    out: str = typer.Option("repo_flat.txt", "--out", "-o", help="Output .txt path"),
+    out: str = typer.Option("~/repo_flat.txt", "--out", "-o", help="Output .txt path"),
     include: List[str] = typer.Option(
         None,
         "--include",
@@ -237,9 +237,6 @@ def snapshot_create(
     # Combine default excludes with any user-provided excludes
     final_excludes = PRESET_DEFAULT_EXCLUDE + (exclude or [])
 
-    # Set default to home directory if using the default filename
-    if out == "repo_flat.txt":
-        out = "~/repo_flat.txt"
     outp = Path(out).expanduser()
     outp.parent.mkdir(parents=True, exist_ok=True)
 
@@ -265,10 +262,13 @@ def snapshot_create(
         raise typer.Exit(1) from e
 
 
-@app.command("legacy-write", hidden=True)
+@app.command(
+    "write",
+    help="Create a normal snapshot (zip format recommended for most use cases).",
+)
 def snapshot_write(
     out: str = typer.Option(
-        "xsa_snapshot.txt", "--out", "-o", help="Output file path."
+        "~/xsa_snapshot.txt", "--out", "-o", help="Output file path."
     ),
     mode: Optional[str] = typer.Option(
         None, "--mode", help="Snapshot breadth: minimal, standard, core_logic, or max."
@@ -310,12 +310,10 @@ def snapshot_write(
     Precedence: CLI flags override values from .snapshot.toml configuration file.
     Use --dry-run to see the effective plan before creating the snapshot.
     """
-    typer.echo(
-        "⚠️  Warning: 'legacy-write' command is deprecated. Use 'create' command instead."
-    )
-    # Set default to home directory if no output path provided
-    if out is None:
-        out = "~/xsa_snapshot.txt"
+    # Change output to .zip if zip_format is True and using default filename or .txt extension
+    if zip_format:
+        if out == "~/xsa_snapshot.txt" or out.endswith(".txt"):
+            out = "~/xsa_snapshot.zip"
     # Use the built-in simple snapshot utility directly
     out_path = Path(out).expanduser()
     if dry_run:
@@ -439,11 +437,11 @@ def snapshot_simple_cmd(
 
 
 @app.command(
-    "debug-report", help="Generate a verbose snapshot for debugging. (Formerly 'pro')"
+    "debug-report", help="Generate a verbose snapshot for debugging. (Maximal snapshot)"
 )
 def snapshot_debug_report(
     out: str = typer.Option(
-        "xsa_debug_report.txt",
+        "~/xsa_debug_report.txt",
         "--out",
         "-o",
         help="Output file path.",
@@ -455,9 +453,6 @@ def snapshot_debug_report(
     a very large file.
     """
     typer.echo("Generating verbose debug report. This may take a moment...")
-    # Set default to home directory if no output path provided
-    if out is None:
-        out = "~/xsa_debug_report.txt"
     # We will call the old 'pro' logic, which is now better named.
     # For simplicity, we can reuse the snapshot_simple implementation for this.
     try:
@@ -486,7 +481,7 @@ def snapshot_txt(
         "--preset",
         help="Preset include set: author-core|ultra-tight|custom",
     ),
-    out: str = typer.Option("repo_flat.txt", "--out", "-o", help="Output .txt path"),
+    out: str = typer.Option("~/repo_flat.txt", "--out", "-o", help="Output .txt path"),
     include: list[str] = typer.Option(
         None,
         "--include",
@@ -537,9 +532,6 @@ def snapshot_txt(
 
     exc = exclude or PRESET_DEFAULT_EXCLUDE
 
-    # Set default to home directory if no output path provided
-    if out is None:
-        out = "~/repo_flat.txt"
     outp = Path(out).expanduser()
     outp.parent.mkdir(parents=True, exist_ok=True)
     out_path, notes = flatten_txt(

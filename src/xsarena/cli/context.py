@@ -28,8 +28,8 @@ class CLIContext:
         """
         Load CLI context with clear order of precedence:
         1. Start with hardcoded SessionState() defaults
-        2. Load .xsarena/config.yml (project-level defaults)
-        3. Load .xsarena/session_state.json (user's last-used interactive settings) - MUST override config
+        2. Load .xsarena/config.yml (project-level defaults) - SINGLE SOURCE OF TRUTH
+        3. Load .xsarena/session_state.json (user's last-used interactive settings) - PERSISTENCE ONLY, NO OVERRIDES
         4. Apply CLI flags from cfg object (explicit, one-time overrides)
         """
         # Start with hardcoded defaults
@@ -39,8 +39,52 @@ class CLIContext:
         state_path = Path(state_path or "./.xsarena/session_state.json")
         state_path.parent.mkdir(parents=True, exist_ok=True)
 
-        # 2. Load .xsarena/config.yml (project-level defaults)
-        # This represents project-level defaults and overrides hardcoded defaults
+        # 2. Load .xsarena/session_state.json (user's last-used interactive settings)
+        # This file contains persisted state like history, anchors, etc. - LOAD FIRST to preserve
+        if state_path.exists():
+            try:
+                file_session_state = SessionState.load_from_file(str(state_path))
+                # Apply non-config values from session_state.json (history, anchors, etc.)
+                # but preserve config values from config.yml
+                for field_name in file_session_state.__dict__:
+                    if hasattr(session_state, field_name):
+                        # Only apply non-config fields from session_state (history, anchors, etc.)
+                        # Skip configuration fields that should come from config.yml
+                        if field_name in [
+                            "history",
+                            "anchors",
+                            "session_mode",
+                            "settings",
+                            "coverage_hammer_on",
+                            "output_budget_snippet_on",
+                            "output_push_on",
+                            "output_min_chars",
+                            "output_push_max_passes",
+                            "smart_min_enabled",
+                            "outline_first_enabled",
+                            "semantic_anchor_enabled",
+                            "reading_overlay_on",
+                            "lossless_enforce",
+                            "target_density",
+                            "max_adverbs_per_k",
+                            "max_sentence_len",
+                            "active_profile",
+                            "overlays_active",
+                        ]:
+                            setattr(
+                                session_state,
+                                field_name,
+                                getattr(file_session_state, field_name),
+                            )
+            except Exception:
+                # Create backup and continue with defaults if session file is corrupted
+                bak = state_path.with_suffix(f".{int(time.time())}.bak")
+                with contextlib.suppress(Exception):
+                    state_path.rename(bak)
+                # Continue with defaults if session file is corrupted
+
+        # 3. Load .xsarena/config.yml (project-level defaults) - SINGLE SOURCE OF TRUTH
+        # This represents project-level defaults and overrides session state config values
         config_path = Path(".xsarena/config.yml")
         if config_path.exists():
             import yaml
@@ -50,38 +94,18 @@ class CLIContext:
                     config_content = yaml.safe_load(f) or {}
                 persisted_settings = config_content.get("settings", {})
 
-                # Apply config.yml settings, overriding defaults
+                # Apply config.yml settings, overriding session state config values
                 for key, value in persisted_settings.items():
                     if hasattr(session_state, key):
                         setattr(session_state, key, value)
             except Exception:
                 pass  # If config can't be read, continue with current state
 
-        # 3. Load .xsarena/session_state.json (user's last-used interactive settings)
-        # This file represents the user's last-used interactive settings and MUST override project config
-        if state_path.exists():
-            try:
-                file_session_state = SessionState.load_from_file(str(state_path))
-                # Apply values from session_state.json, overriding config.yml settings
-                for field_name in file_session_state.__dict__:
-                    if hasattr(session_state, field_name):
-                        setattr(
-                            session_state,
-                            field_name,
-                            getattr(file_session_state, field_name),
-                        )
-            except Exception:
-                # Create backup and continue with defaults if session file is corrupted
-                bak = state_path.with_suffix(f".{int(time.time())}.bak")
-                with contextlib.suppress(Exception):
-                    state_path.rename(bak)
-                # Continue with defaults if session file is corrupted
-
-        # Load base configuration for backend settings
+        # Load base configuration for backend settings (config.yml is single source of truth)
         base_cfg = Config.load_from_file(".xsarena/config.yml")
 
         # 4. Apply CLI flags from cfg object (explicit, one-time overrides)
-        # This is the highest priority - CLI flags override everything else
+        # This is the highest priority - CLI flags override everything else including config.yml
         if cfg is not None:
             # Only apply non-default values from CLI to avoid overriding user choices with defaults
             if cfg.backend != "bridge":

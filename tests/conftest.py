@@ -1,8 +1,8 @@
 """Pytest configuration for XSArena tests."""
-import pytest
 import tempfile
-import os
 from pathlib import Path
+
+import pytest
 
 
 @pytest.fixture
@@ -16,6 +16,7 @@ def tmp_path():
 def sample_config():
     """Sample configuration for testing."""
     from xsarena.core.config import Config
+
     return Config(
         backend="bridge",
         model="default",
@@ -26,5 +27,5 @@ def sample_config():
         max_retries=3,
         base_url="http://127.0.0.1:5102/v1",
         timeout=300,
-        redaction_enabled=False
+        redaction_enabled=False,
     )

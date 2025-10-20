@@ -32,15 +32,21 @@ class SecretsScanner:
                 r"\b(\+?1[-.\s]?)?\(?([0-9]{3})\)?[-.\s]?([0-9]{3})[-.\s]?([0-9]{4})\b"
             ),
             "github_token": re.compile(r"gh[pousr]_[A-Za-z0-9_]{36,}"),
-            "slack_token": re.compile(r"xox[baprs]-[0-9]{10,13}-[0-9]{10,13}-[A-Za-z0-9]{24,}"),
-            "jwt": re.compile(r"eyJ[A-Za-z0-9_-]{10,}\.eyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}"),
+            "slack_token": re.compile(
+                r"xox[baprs]-[0-9]{10,13}-[0-9]{10,13}-[A-Za-z0-9]{24,}"
+            ),
+            "jwt": re.compile(
+                r"eyJ[A-Za-z0-9_-]{10,}\.eyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}"
+            ),
             "google_api": re.compile(r"AIza[0-9A-Za-z_-]{35}"),
             "stripe_key": re.compile(r"(sk|pk)_(test|live)_[0-9a-zA-Z]{24,}"),
-            "auth_header": re.compile(r"(?i)(authorization|auth):\s*bearer\s+[a-zA-Z0-9_\-\.]{20,}"),
+            "auth_header": re.compile(
+                r"(?i)(authorization|auth):\s*bearer\s+[a-zA-Z0-9_\-\.]{20,}"
+            ),
             "connection_string": re.compile(r"(mongodb|postgres|mysql)://[^\\s\"']+"),
             "url_with_password": re.compile(r"https?://[^:]+:[^ @]+ @"),
         }
-        
+
         # Initialize whitelist
         self.whitelist = set()
         if whitelist_file and Path(whitelist_file).exists():
@@ -75,9 +81,7 @@ class SecretsScanner:
                         "file": str(file_path),
                         "type": pattern_name,
                         "match": match_str,
-                        "line_number": self._find_line_number(
-                            content, match_str
-                        ),
+                        "line_number": self._find_line_number(content, match_str),
                     }
                 )
 

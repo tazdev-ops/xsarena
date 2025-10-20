@@ -1069,6 +1069,66 @@ def run_continue(
         typer.echo(f"[run/continue] done → {p}")
 
 
+@app.command("write")
+def run_write(
+    ctx: typer.Context,
+    subject: str = typer.Argument(...),
+    length: str = typer.Option("long", "--length", help="standard|long|very-long|max"),
+    span: str = typer.Option("book", "--span", help="medium|long|book"),
+    extra_file: List[str] = typer.Option([], "--extra-file", "-E"),
+    out_path: Optional[str] = typer.Option(None, "--out", "-o"),
+    wait: bool = typer.Option(True, "--wait/--no-wait"),
+    plan: bool = typer.Option(False, "--plan", help="Generate an outline first."),
+    window: int = typer.Option(
+        None, "--window", help="Set history window size for this run."
+    ),
+    dry_run: bool = typer.Option(
+        False, "--dry-run", help="Show the composed prompt/spec without running jobs"
+    ),
+    endpoint: str = typer.Option(
+        None, "--endpoint", help="Use settings from endpoints.yml"
+    ),
+    priority: int = typer.Option(
+        5, "--priority", help="Job priority (0=lowest, 5=default, 10=highest)"
+    ),
+    follow: bool = typer.Option(
+        False, "--follow", help="Submit job and follow to completion"
+    ),
+    resume: bool = typer.Option(
+        None,
+        "--resume/--no-resume",
+        help="Resume existing job if found (default: ask if resumable job exists)",
+    ),
+    overwrite: bool = typer.Option(
+        False, "--overwrite", help="Start a new job even if one exists for same output"
+    ),
+):
+    """
+    Golden-path alias for 'run book' with narrative + no_bs overlays.
+    """
+    # Call the existing run_book function with the same parameters
+    # This command defaults to using narrative + no_bs overlays (the default in run_book)
+    # unless overridden by an endpoint configuration
+    run_book(
+        ctx=ctx,
+        subject=subject,
+        profile="",
+        length=length,
+        span=span,
+        extra_file=extra_file,
+        out_path=out_path,
+        wait=wait,
+        plan=plan,
+        window=window,
+        dry_run=dry_run,
+        endpoint=endpoint,
+        priority=priority,
+        follow=follow,
+        resume=resume,
+        overwrite=overwrite,
+    )
+
+
 @app.command("template")
 def run_template(
     ctx: typer.Context,

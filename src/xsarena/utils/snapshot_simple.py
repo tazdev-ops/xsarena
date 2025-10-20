@@ -564,7 +564,9 @@ def write_text_snapshot(
     context_str = "\\n\\n".join([p for p in context_parts if p])
 
     # Write output
-    output_path = Path(out_path) if out_path else Path("xsa_snapshot.txt")
+    output_path = (
+        Path(out_path) if out_path else Path("~/xsa_snapshot.txt").expanduser()
+    )
 
     with open(output_path, "w", encoding="utf-8") as f_out:
         f_out.write("# XSArena Built-in Snapshot\\n")
@@ -645,7 +647,9 @@ def write_zip_snapshot(
 
     context_str = "\\n\\n".join([p for p in context_parts if p])
 
-    output_path = Path(out_path) if out_path else Path("xsa_snapshot.zip")
+    output_path = (
+        Path(out_path) if out_path else Path("~/xsa_snapshot.zip").expanduser()
+    )
 
     with zipfile.ZipFile(output_path, "w", compression=zipfile.ZIP_DEFLATED) as z:
         # Create snapshot.txt manifest
@@ -784,7 +788,7 @@ def write_pro_snapshot(
 
     # Write the output
     output_path = (
-        Path(out_path) if out_path else Path("~/xsa_snapshot_pro.txt").expanduser()
+        Path(out_path) if out_path else Path("~/xsa_debug_report.txt").expanduser()
     )
 
     with open(output_path, "w", encoding="utf-8") as f_out:

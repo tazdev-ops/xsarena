@@ -14,7 +14,7 @@ console = Console()
 
 
 class Config(BaseModel):
-    backend: str = "bridge"
+    backend: str = "openrouter"  # Default to API-based backend; bridge is optional for advanced use
     model: str = "default"
     window_size: int = 100
     anchor_length: int = 300
@@ -26,42 +26,46 @@ class Config(BaseModel):
     timeout: int = 300
     redaction_enabled: bool = False
 
-    @model_validator(mode='after')
+    @model_validator(mode="after")
     def validate_config(self):
         """Validate configuration values."""
         errors = []
-        
+
         # Validate backend
-        if self.backend not in ('bridge', 'openrouter', 'null'):
+        if self.backend not in ("bridge", "openrouter", "null"):
             errors.append(f"Invalid backend: {self.backend}")
-        
+
         # Validate model
-        if self.backend == 'openrouter' and not self.api_key:
+        if self.backend == "openrouter" and not self.api_key:
             errors.append("OpenRouter backend requires api_key")
-        
+
         # Validate base_url format
-        if self.base_url and not self.base_url.startswith(('http://', 'https://')):
+        if self.base_url and not self.base_url.startswith(("http://", "https://")):
             errors.append(f"Invalid base_url format: {self.base_url}")
-        
+
         # Validate numeric ranges
         if self.window_size < 1 or self.window_size > 1000:
             errors.append(f"window_size must be between 1-1000, got {self.window_size}")
-        
+
         if self.anchor_length < 50 or self.anchor_length > 1000:
-            errors.append(f"anchor_length must be between 50-1000, got {self.anchor_length}")
-        
+            errors.append(
+                f"anchor_length must be between 50-1000, got {self.anchor_length}"
+            )
+
         if self.repetition_threshold < 0 or self.repetition_threshold > 1:
-            errors.append(f"repetition_threshold must be between 0-1, got {self.repetition_threshold}")
-        
+            errors.append(
+                f"repetition_threshold must be between 0-1, got {self.repetition_threshold}"
+            )
+
         if self.max_retries < 0 or self.max_retries > 10:
             errors.append(f"max_retries must be between 0-10, got {self.max_retries}")
-        
+
         if self.timeout < 1 or self.timeout > 3600:
             errors.append(f"timeout must be between 1-3600 seconds, got {self.timeout}")
-        
+
         if errors:
             raise ValueError("Configuration validation failed:\n" + "\n".join(errors))
-        
+
         return self
 
     @field_validator("base_url")
@@ -108,7 +112,7 @@ class Config(BaseModel):
         """
         # Start with defaults
         config_dict: Dict[str, Any] = {
-            "backend": "bridge",
+            "backend": "openrouter",  # Default to API-based backend; bridge is optional for advanced use
             "model": "default",
             "window_size": 100,
             "anchor_length": 300,

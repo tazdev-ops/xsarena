@@ -1,3 +1,5 @@
+# Archived (stale).
+
 # Project Map (from documentation)
 Generated: 2025-10-14 23:20:48 UTC
 

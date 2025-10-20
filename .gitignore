@@ -48,11 +48,10 @@ directives/_preview/
 
 # Snapshot and report artifacts
 snapshot_chunks/
-xsa_min_snapshot*.txt
-xsa_snapshot*.txt
-xsa_debug_report.txt
-xsa_snapshot.zip
 repo_flat.txt
+xsa_snapshot*.txt
+xsa_snapshot*.zip
+xsa_debug_report*.txt
 *.tar.gz
 
 # Local configuration (if any, secrets should never be committed)
@@ -83,10 +82,14 @@ review/**
 books/**
 logs/**
 
-# Snapshots
+# Additional snapshot and artifact files (comprehensive)
 repo_flat.txt
-xsa_snapshot.txt
-xsa_snapshot.zip
+xsa_snapshot*.txt
+xsa_debug_report*.txt
+snapshot_chunks/
+.xsarena/jobs/
+models.json
+model_endpoint_map.json
 
 # OS cruft
 .DS_Store

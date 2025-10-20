@@ -12,6 +12,7 @@ from typing import Awaitable, Callable, Dict, List, Optional
 
 from ...utils.density import avg_sentence_len, filler_rate, lexical_density
 from ..backends.transport import BackendTransport, BaseEvent
+from .helpers import drain_next_hint, strip_next_lines
 from .model import JobV3, get_user_friendly_error_message, map_exception_to_error_code
 from .store import JobStore
 
@@ -238,7 +239,7 @@ class JobExecutor:
 
                 # Always await hint drain and prefer hint over anchor
                 async with self._ctl_lock:
-                    next_hint = await _drain_next_hint(job.id)
+                    next_hint = await drain_next_hint(job.id, self.control_queues)
 
                 # For chunk_idx > 1, get a local anchor from current file tail
                 anchor = None
@@ -310,7 +311,7 @@ class JobExecutor:
                     )
 
                     # Strip NEXT: lines from content and extract hint
-                    stripped_content, next_hint = await _strip_next_lines(content)
+                    stripped_content, next_hint = await strip_next_lines(content)
 
                     # Record the hint to events.jsonl
                     if next_hint:
@@ -409,7 +410,9 @@ class JobExecutor:
 
                             # Drain any 'next' hints that have accumulated for this extend
                             async with self._ctl_lock:
-                                hint_now = await _drain_next_hint(job.id)
+                                hint_now = await drain_next_hint(
+                                    job.id, self.control_queues
+                                )
 
                             # Wait for resume if paused
                             if not self.resume_events[job.id].is_set():
@@ -474,7 +477,7 @@ class JobExecutor:
                                     )
 
                                     # Strip NEXT lines from extend content
-                                    extend_content, _ = await _strip_next_lines(
+                                    extend_content, _ = await strip_next_lines(
                                         extend_content
                                     )
 

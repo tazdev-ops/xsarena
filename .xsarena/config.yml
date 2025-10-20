@@ -1,4 +1,2 @@
-bridge:
-  launch_url: "https://example.com"
-  session_id: "test_session"
-  message_id: "test_message"
+backend: bridge
+model: default

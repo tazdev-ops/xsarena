@@ -10,17 +10,7 @@ from ..core.pipeline import run_pipeline
 app = typer.Typer()
 
 
-def _load_yaml_or_json(path: str) -> dict:
-    try:
-        import yaml  # type: ignore
-
-        with open(path, "r", encoding="utf-8") as f:
-            return yaml.safe_load(f) or {}
-    except Exception:
-        with open(path, "r", encoding="utf-8") as f:
-            import json
-
-            return json.load(f)
+from ..utils.helpers import load_yaml_or_json
 
 
 @app.command("run")
@@ -35,7 +25,7 @@ def pipeline_run(
         typer.echo(f"Pipeline file not found: {file}")
         raise typer.Exit(1)
     try:
-        data = _load_yaml_or_json(file)
+        data = load_yaml_or_json(file)
     except Exception as e:
         typer.echo(f"Failed to load pipeline: {e}")
         raise typer.Exit(1)

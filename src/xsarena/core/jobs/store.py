@@ -7,16 +7,14 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
+from ...utils.helpers import load_json_with_error_handling
 from ...utils.io import atomic_write
 from .model import JobV3
 
 
 def load_json(path: Path) -> dict:
     """Helper to load JSON with error handling."""
-    try:
-        return json.loads(path.read_text(encoding="utf-8"))
-    except Exception:
-        return {}
+    return load_json_with_error_handling(path)
 
 
 class JobStore:

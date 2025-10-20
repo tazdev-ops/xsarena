@@ -146,7 +146,7 @@ xsarena ops snapshot verify --file ~/project_context.txt --fail-on secrets
 The following legacy commands are deprecated but still available:
 
 - `xsarena ops snapshot legacy-write` - Legacy snapshot command
-- `xsarena ops snapshot legacy-txt` - Legacy flat pack command  
+- `xsarena ops snapshot legacy-txt` - Legacy flat pack command
 - `xsarena ops snapshot legacy-simple` - Legacy simple command
 
 These are hidden by default and should not be used for new projects.

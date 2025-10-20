@@ -417,6 +417,44 @@ def clone(job_id: str, new_name: str = typer.Option("", "--name", "-n")):
         raise typer.Exit(1)
 
 
+@app.command("recent")
+def recent(
+    count: int = typer.Option(5, "--count", "-c", help="Number of recent jobs to show"),
+    json_output: bool = typer.Option(False, "--json", help="Output in JSON format"),
+):
+    """Show recent jobs (most recent first)."""
+    job_runner = JobManager()
+    jobs: list[JobV3] = job_runner.list_jobs()
+
+    if not jobs:
+        if json_output:
+            typer.echo(json.dumps([]))
+        else:
+            typer.echo("No jobs found.")
+        return
+
+    # Sort by creation time, newest first
+    jobs.sort(key=lambda j: j.created_at, reverse=True)
+    recent_jobs = jobs[:count]
+
+    if json_output:
+        jobs_list = []
+        for job in recent_jobs:
+            jobs_list.append(
+                {
+                    "id": job.id,
+                    "state": job.state,
+                    "updated_at": job.updated_at,
+                    "name": job.name,
+                }
+            )
+        typer.echo(json.dumps(jobs_list))
+    else:
+        typer.echo(f"Recent {len(recent_jobs)} job(s):")
+        for j in recent_jobs:
+            typer.echo(f"{j.id}  {j.state:<10} {j.updated_at}  {j.name}")
+
+
 @app.command("rm")
 def rm(job_id: str, yes: bool = typer.Option(False, "--yes")):
     """Remove a specific job directory."""
