@@ -1,4 +1,5 @@
 """Test snapshot functionality."""
+
 import tempfile
 import zipfile
 from pathlib import Path

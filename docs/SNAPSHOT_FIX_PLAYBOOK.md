@@ -5,7 +5,7 @@
 The following legacy snapshot scripts are now deprecated in favor of the new standardized `xsarena ops snapshot` commands:
 
 - `create_snapshot.sh` - Shell script for creating snapshots
-- `simple_snapshot.py` - Python script for basic snapshots  
+- `simple_snapshot.py` - Python script for basic snapshots
 - `tools/flatpack_txt.py` - Python utility for flat pack creation
 - `scripts/repo_snapshot.sh` - Repository snapshot script
 

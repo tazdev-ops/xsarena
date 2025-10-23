@@ -178,6 +178,7 @@ def settings_persist(ctx: typer.Context):
         "semantic_anchor_enabled": getattr(s, "semantic_anchor_enabled", False),
         "active_profile": getattr(s, "active_profile", None),
         "overlays_active": getattr(s, "overlays_active", []),
+        "reading_overlay_on": getattr(s, "reading_overlay_on", False),
     }
 
     # Remove None values to keep config clean

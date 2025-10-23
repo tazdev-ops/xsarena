@@ -10,8 +10,11 @@ from fastapi.testclient import TestClient
 # Add the bridge_v2 module to path for import
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
-# Import the app from bridge_v2.api_server
-from xsarena.bridge_v2.api_server import app, convert_openai_to_lmarena_payload
+# Import the app from bridge_v2.api_server and payload converter
+from xsarena.bridge_v2.api_server import app  # noqa: E402
+from xsarena.bridge_v2.payload_converter import (  # noqa: E402
+    convert_openai_to_lmarena_payload,
+)
 
 client = TestClient(app)
 
@@ -29,11 +32,11 @@ def test_bridge_role_normalization():
     # Mock config
     with (
         patch(
-            "xsarena.bridge_v2.api_server.CONFIG",
+            "xsarena.bridge_v2.handlers.CONFIG",
             {"tavern_mode_enabled": False, "bypass_enabled": False},
         ),
         patch(
-            "xsarena.bridge_v2.api_server.MODEL_NAME_TO_ID_MAP",
+            "xsarena.bridge_v2.handlers.MODEL_NAME_TO_ID_MAP",
             {"test-model": "test-id"},
         ),
     ):
@@ -71,7 +74,7 @@ def test_bridge_tavern_merge():
     # Mock config with tavern mode enabled
     with (
         patch(
-            "xsarena.bridge_v2.api_server.CONFIG",
+            "xsarena.bridge_v2.handlers.CONFIG",
             {
                 "tavern_mode_enabled": True,
                 "bypass_enabled": False,
@@ -80,10 +83,10 @@ def test_bridge_tavern_merge():
             },
         ),
         patch(
-            "xsarena.bridge_v2.api_server.MODEL_NAME_TO_ID_MAP",
+            "xsarena.bridge_v2.handlers.MODEL_NAME_TO_ID_MAP",
             {"test-model": "test-id"},
         ),
-        patch("xsarena.bridge_v2.api_server.MODEL_ENDPOINT_MAP", {}),
+        patch("xsarena.bridge_v2.handlers.MODEL_ENDPOINT_MAP", {}),
     ):
         result = asyncio.run(
             convert_openai_to_lmarena_payload(
@@ -124,7 +127,7 @@ def test_bridge_bypass_injection():
     # Mock config with bypass mode enabled
     with (
         patch(
-            "xsarena.bridge_v2.api_server.CONFIG",
+            "xsarena.bridge_v2.handlers.CONFIG",
             {
                 "tavern_mode_enabled": False,
                 "bypass_enabled": True,
@@ -133,10 +136,10 @@ def test_bridge_bypass_injection():
             },
         ),
         patch(
-            "xsarena.bridge_v2.api_server.MODEL_NAME_TO_ID_MAP",
+            "xsarena.bridge_v2.handlers.MODEL_NAME_TO_ID_MAP",
             {"test-model": "test-id"},
         ),
-        patch("xsarena.bridge_v2.api_server.MODEL_ENDPOINT_MAP", {}),
+        patch("xsarena.bridge_v2.handlers.MODEL_ENDPOINT_MAP", {}),
     ):
         result = asyncio.run(
             convert_openai_to_lmarena_payload(
@@ -178,7 +181,7 @@ def test_bridge_participant_positions():
     # Test direct_chat mode
     with (
         patch(
-            "xsarena.bridge_v2.api_server.CONFIG",
+            "xsarena.bridge_v2.handlers.CONFIG",
             {
                 "tavern_mode_enabled": False,
                 "bypass_enabled": False,
@@ -187,10 +190,10 @@ def test_bridge_participant_positions():
             },
         ),
         patch(
-            "xsarena.bridge_v2.api_server.MODEL_NAME_TO_ID_MAP",
+            "xsarena.bridge_v2.handlers.MODEL_NAME_TO_ID_MAP",
             {"test-model": "test-id"},
         ),
-        patch("xsarena.bridge_v2.api_server.MODEL_ENDPOINT_MAP", {}),
+        patch("xsarena.bridge_v2.handlers.MODEL_ENDPOINT_MAP", {}),
     ):
         result = asyncio.run(
             convert_openai_to_lmarena_payload(
@@ -227,7 +230,7 @@ def test_bridge_participant_positions():
 
     with (
         patch(
-            "xsarena.bridge_v2.api_server.CONFIG",
+            "xsarena.bridge_v2.handlers.CONFIG",
             {
                 "tavern_mode_enabled": False,
                 "bypass_enabled": False,
@@ -236,10 +239,10 @@ def test_bridge_participant_positions():
             },
         ),
         patch(
-            "xsarena.bridge_v2.api_server.MODEL_NAME_TO_ID_MAP",
+            "xsarena.bridge_v2.handlers.MODEL_NAME_TO_ID_MAP",
             {"test-model": "test-id"},
         ),
-        patch("xsarena.bridge_v2.api_server.MODEL_ENDPOINT_MAP", {}),
+        patch("xsarena.bridge_v2.handlers.MODEL_ENDPOINT_MAP", {}),
     ):
         result_battle = asyncio.run(
             convert_openai_to_lmarena_payload(
@@ -318,7 +321,7 @@ def test_bridge_first_message_guard():
     # Mock config
     with (
         patch(
-            "xsarena.bridge_v2.api_server.CONFIG",
+            "xsarena.bridge_v2.handlers.CONFIG",
             {
                 "tavern_mode_enabled": False,
                 "bypass_enabled": False,
@@ -327,10 +330,10 @@ def test_bridge_first_message_guard():
             },
         ),
         patch(
-            "xsarena.bridge_v2.api_server.MODEL_NAME_TO_ID_MAP",
+            "xsarena.bridge_v2.handlers.MODEL_NAME_TO_ID_MAP",
             {"test-model": "test-id"},
         ),
-        patch("xsarena.bridge_v2.api_server.MODEL_ENDPOINT_MAP", {}),
+        patch("xsarena.bridge_v2.handlers.MODEL_ENDPOINT_MAP", {}),
     ):
         result = asyncio.run(
             convert_openai_to_lmarena_payload(

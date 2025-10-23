@@ -20,8 +20,8 @@ response_channels: Dict[str, asyncio.Queue] = {}
 last_activity_time = datetime.now()
 cloudflare_verified = False  # Track Cloudflare verification status per request
 REFRESHING_BY_REQUEST: Dict[
-    str, int
-] = {}  # Per-request Cloudflare refresh attempt counter
+    str, bool
+] = {}  # Per-request Cloudflare refresh attempt flag
 # Queue for thread-safe communication from background threads to main thread
 command_queue = queue.Queue()
 idle_restart_thread = None
@@ -59,6 +59,10 @@ async def websocket_endpoint(websocket: WebSocket, CONFIG):
             request_id = message.get("request_id")
             command = message.get("command")
             data = message.get("data")
+
+            # Update last activity time on message receive
+            global last_activity_time
+            last_activity_time = datetime.now()
 
             if command:
                 # Handle commands from userscript

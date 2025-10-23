@@ -21,6 +21,7 @@ from .context import CLIContext
 
 
 def run_continue(
+    ctx: typer.Context,
     file_path: Path,
     profile: Optional[str] = typer.Option(
         None, "--profile", help="Use a specific profile"
@@ -43,7 +44,6 @@ def run_continue(
     until_end: bool = typer.Option(
         False, "--until-end", help="Continue until end of file"
     ),
-    ctx: typer.Context = typer.Context,
 ) -> str:
     """
     Continue writing from an existing file.
@@ -55,8 +55,6 @@ def run_continue(
         typer.echo(f"Error: File not found: {file_path}", err=True)
         raise typer.Exit(1)
 
-    # Load the file content to get the subject
-    content = file_path.read_text(encoding="utf-8")
     # Extract subject from filename or use a default
     subject = file_path.stem.replace("_", " ").title()
 
@@ -79,8 +77,8 @@ def run_continue(
         extra_files=extra_files,
         out_path=out or str(file_path),
         profile=profile,
-        backend=cli_ctx.cfg.backend,
-        model=cli_ctx.cfg.model,
+        backend=cli_ctx.state.backend,
+        model=cli_ctx.state.model,
     )
 
     if follow:

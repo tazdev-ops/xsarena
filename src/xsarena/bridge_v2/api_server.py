@@ -3,80 +3,51 @@ import json
 import logging
 import os
 import time
-from contextlib import asynccontextmanager
 from datetime import datetime
 
 import uvicorn
 from fastapi import FastAPI, HTTPException, Request, WebSocket
-from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from . import job_service as job_service_module
-
-logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
-)
-logger = logging.getLogger(__name__)
-
-
-# Import from new modules
-from .handlers import (
+from .app_lifecycle import lifespan
+from .config_loaders import (
     CONFIG,
     MODEL_NAME_TO_ID_MAP,
-    _internal_ok,
-    chat_completions_handler,
     load_config,
     load_model_endpoint_map,
     load_model_map,
+)
+from .cors import setup_cors
+from .handlers import _local_internal_ok as _internal_ok
+from .handlers import (
+    chat_completions_handler,
     update_available_models_handler,
     update_id_capture_handler,
 )
 from .websocket import (
     REFRESHING_BY_REQUEST,
     browser_ws,
-    cloudflare_verified,
     response_channels,
-    start_idle_restart_thread,
-    stop_idle_restart_thread,
     websocket_endpoint,
 )
+from .websocket import (
+    last_activity_time as ws_last_activity_time,
+)
 
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
+)
+logger = logging.getLogger(__name__)
 
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    load_config()
-    load_model_map()
-    load_model_endpoint_map()
-    start_idle_restart_thread(CONFIG)  # Start idle restart thread with CONFIG
-    logger.info("Server startup complete. Waiting for userscript connection...")
-    yield
-    stop_idle_restart_thread()  # Stop idle restart thread
-    logger.info("Server shutting down.")
+# Global variable to track last activity time
+last_activity_time = None
 
 
 app = FastAPI(lifespan=lifespan)
 
-# Safer default CORS: localhost-only; make configurable via CONFIG
-cors_origins = CONFIG.get("cors_origins")
-if not cors_origins:
-    # Default to localhost origins only for safety unless explicitly configured
-    cors_origins = [
-        "http://localhost",
-        "http://127.0.0.1",
-        "http://localhost:5102",
-        "http://127.0.0.1:5102",
-    ]
-elif cors_origins == ["*"]:
-    # Only if explicitly set to "*" in config, allow all origins
-    cors_origins = ["*"]
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=cors_origins,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+# Apply CORS middleware using the helper function
+setup_cors(app, cors_origins=CONFIG.get("cors_origins", ["*"]))
 
 
 @app.websocket("/ws")
@@ -88,8 +59,14 @@ async def websocket_endpoint_wrapper(websocket: WebSocket):
 @app.post("/v1/chat/completions")
 async def chat_completions(request: Request):
     global last_activity_time
-    # Update last activity time
+    # Update last activity time for both API and websocket
     last_activity_time = datetime.now()
+    # Update websocket last activity time as well
+
+    # We need to modify the global variable in websocket module
+    import xsarena.bridge_v2.websocket as websocket_module
+
+    websocket_module.last_activity_time = datetime.now()
 
     # Call the handler from the handlers module
     return await chat_completions_handler(
@@ -97,7 +74,6 @@ async def chat_completions(request: Request):
         browser_ws,
         response_channels,
         REFRESHING_BY_REQUEST,
-        cloudflare_verified,
     )
 
 
@@ -167,17 +143,23 @@ async def list_models():
     """Return available models in OpenAI schema."""
     try:
         models_list = []
+        # Load models.json once and cache it
+        models_data = {}
+        try:
+            with open("models.json", "r", encoding="utf-8") as f:
+                models_data = json.load(f)
+        except (FileNotFoundError, json.JSONDecodeError):
+            pass  # If models.json doesn't exist, continue with empty dict
+
         for model_name in MODEL_NAME_TO_ID_MAP:  # Iterate over keys
-            # Try to determine if it's an image model
-            try:
-                with open("models.json", "r", encoding="utf-8") as f:
-                    models_data = json.load(f)
-                model_info = models_data.get(model_name)
-                if model_info and isinstance(model_info, dict):
-                    if model_info.get("type") == "image":
-                        pass
-            except (FileNotFoundError, json.JSONDecodeError):
-                pass  # If models.json doesn't exist, continue with is_image format
+            # Try to determine if it's an image model using cached data
+            model_info = models_data.get(model_name)
+            if (
+                model_info
+                and isinstance(model_info, dict)
+                and model_info.get("type") == "image"
+            ):
+                pass
 
             model_obj = {
                 "id": model_name,
@@ -190,7 +172,7 @@ async def list_models():
         return {"object": "list", "data": models_list}
     except Exception as e:
         logger.error(f"Error listing models: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 @app.post("/internal/reload")
@@ -205,7 +187,7 @@ def internal_reload(request: Request):
             {"ok": True, "reloaded": True, "version": CONFIG.get("version")}
         )
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Reload failed: {e}")
+        raise HTTPException(status_code=500, detail=f"Reload failed: {e}") from e
 
 
 # API endpoints for jobs
@@ -244,11 +226,31 @@ def health():
     except (AttributeError, NameError):
         last_activity_iso = None
 
+    # Get websocket last activity time
+
+    ws_last_activity_iso = (
+        ws_last_activity_time.isoformat() if ws_last_activity_time else None
+    )
+
+    # Use the most recent of API vs websocket last_activity_time
+    last_seen = None
+    if last_activity_iso and ws_last_activity_iso:
+        # Both are available, use the more recent one
+        api_time = datetime.fromisoformat(last_activity_iso)
+        ws_time = datetime.fromisoformat(ws_last_activity_iso)
+        last_seen = api_time if api_time > ws_time else ws_time
+    elif last_activity_iso:
+        # Only API time is available
+        last_seen = datetime.fromisoformat(last_activity_iso)
+    elif ws_last_activity_iso:
+        # Only websocket time is available
+        last_seen = datetime.fromisoformat(ws_last_activity_iso)
+
     return {
         "status": "ok",
         "ts": datetime.now().isoformat(),
         "ws_connected": browser_ws is not None,
-        "last_activity": last_activity_iso,
+        "last_activity": last_seen.isoformat() if last_seen else None,
         "version": CONFIG.get("version", "unknown"),
     }
 
@@ -271,6 +273,32 @@ def v1_health():
     return health()
 
 
+def check_announcement_once():
+    """Check for and display a one-time announcement on startup."""
+    import json
+    from pathlib import Path
+
+    announcement_path = Path(".xsarena/ops/announcement.json")
+    if announcement_path.exists():
+        try:
+            with open(announcement_path, "r", encoding="utf-8") as f:
+                announcement_data = json.load(f)
+
+            # Log the announcement message if present
+            message = announcement_data.get("message", "")
+            if message:
+                logger.info(f"📢 ANNOUNCEMENT: {message}")
+
+            # Delete the file after reading to ensure it's only shown once
+            announcement_path.unlink()
+        except Exception as e:
+            logger.warning(f"Could not read announcement file: {e}")
+
+
+# Check for announcement on module load
+check_announcement_once()
+
+
 def run_server():
     import os
 
@@ -284,8 +312,6 @@ def run_server():
 
 
 if __name__ == "__main__":
-    import os
-
     api_port = int(os.getenv("PORT", "5102"))
     host = os.getenv("XSA_BRIDGE_HOST", "127.0.0.1")
     logger.info("🚀 LMArena Bridge v2.0 API 服务器正在启动...")

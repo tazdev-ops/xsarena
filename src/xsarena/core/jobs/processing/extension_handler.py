@@ -80,9 +80,10 @@ async def perform_micro_extension(
                     break  # No more control messages to process
 
             # Drain any 'next' hints that have accumulated for this extend
-            from asyncio import Lock
-
-            async with Lock():  # Using a temporary lock since we don't have the actual one
+            if ctl_lock is not None:
+                async with ctl_lock:
+                    hint_now = await drain_next_hint(job.id, control_queues)
+            else:
                 hint_now = await drain_next_hint(job.id, control_queues)
 
             # Wait for resume if paused
@@ -179,8 +180,8 @@ async def perform_micro_extension(
                     # Trim whitespace from extend_content before measuring length to avoid false positives
                     trimmed_extend_content = extend_content.strip()
                     min_expected_growth = max(
-                        50, len(trimmed_extend_content) * 0.1
-                    )  # At least 10% of added content or 50 chars
+                        30, len(trimmed_extend_content) * 0.1
+                    )  # At least 10% of added content or 30 chars (lowered to reduce false stalls)
 
                     if growth < min_expected_growth:
                         low_growth_count += 1
@@ -210,7 +211,7 @@ async def perform_micro_extension(
                         break
 
                 except Exception as extend_e:
-                    from ..model import (
+                    from ..errors import (
                         get_user_friendly_error_message,
                         map_exception_to_error_code,
                     )

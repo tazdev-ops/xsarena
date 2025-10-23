@@ -8,6 +8,7 @@ XSArena Flatpack Utility - Legacy tool for flattening repos into single text fil
 from __future__ import annotations
 
 import argparse
+import contextlib
 import fnmatch
 import glob
 import hashlib
@@ -129,10 +130,7 @@ def _expand_includes(includes: Sequence[str]) -> Set[Path]:
 
 def _is_excluded(path: str, exclude_patterns: Sequence[str]) -> bool:
     p = path.replace("\\", "/")
-    for pat in exclude_patterns:
-        if fnmatch.fnmatch(p, pat):
-            return True
-    return False
+    return any(fnmatch.fnmatch(p, pat) for pat in exclude_patterns)
 
 
 def _git_ls_files(args: List[str]) -> Set[Path]:
@@ -226,31 +224,31 @@ def flatten_txt(
         if not _is_excluded(rel, exclude):
             filtered.append(f)
 
-    # Priority order: pinned first, then rest by path
-    pinned = []
-    rest = []
+    # Priority order: pinned files first (only if they pass inclusion rules), then rest by path
+    pinned_files = []
+    rest_files = []
     pinned_set = set(PINNED_FIRST)
     for f in filtered:
         rel = _posix(f.relative_to(base)) if f.is_absolute() else _posix(f)
         if rel in pinned_set:
-            pinned.append(f)
+            pinned_files.append(f)
         else:
-            rest.append(f)
-    rest.sort(
+            rest_files.append(f)
+
+    # Sort pinned files based on their order in PINNED_FIRST
+    pinned_files.sort(
+        key=lambda p: PINNED_FIRST.index(
+            _posix(p.relative_to(base)) if p.is_absolute() else _posix(p)
+        )
+    )
+
+    # Sort rest files alphabetically
+    rest_files.sort(
         key=lambda p: _posix(p.relative_to(base)) if p.is_absolute() else _posix(p)
     )
-    ordered = []
-    # Add pinned in declared order if present
-    for pth in PINNED_FIRST:
-        p = base / pth
-        if p.exists() and p.is_file():
-            ordered.append(p.resolve())
-    # Then add the rest (dedup)
-    seen = {x for x in ordered}
-    for f in rest:
-        if f not in seen:
-            ordered.append(f)
-            seen.add(f)
+
+    # Combine pinned files and rest files
+    ordered = pinned_files + rest_files
 
     # Flatten to buffer with budget
     buf = io.StringIO()
@@ -282,10 +280,8 @@ def flatten_txt(
         footer = f"=== END FILE: {rel} ===\n\n"
         body, truncated = _read_truncated(f, max_bytes_per_file)
         if redact:
-            try:
+            with contextlib.suppress(Exception):
                 body = REDACT(body)
-            except Exception:
-                pass
         section = []
         section.append(header)
         if lang:

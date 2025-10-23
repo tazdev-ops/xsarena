@@ -1,6 +1,10 @@
 """Runtime utilities for prompt construction and management."""
 
-from typing import Optional
+from typing import TYPE_CHECKING, Optional
+
+if TYPE_CHECKING:
+    from .jobs.model import JobV3
+    from .state import SessionState
 
 
 def build_chunk_prompt(

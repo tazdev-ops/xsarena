@@ -1,4 +1,5 @@
 """Utility functions for robust project root resolution."""
+
 import os
 from pathlib import Path
 

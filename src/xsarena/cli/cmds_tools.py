@@ -9,7 +9,9 @@ from ..core.engine import Engine
 from ..core.state import SessionState
 from ..utils.chapter_splitter import export_chapters
 from ..utils.extractors import (
-    extract_checklists_from_file,
+    extract_checklists_from_book as extract_checklists_from_file,
+)
+from ..utils.extractors import (
     generate_checklist_report,
 )
 

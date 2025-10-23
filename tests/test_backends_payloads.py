@@ -1,6 +1,5 @@
 """Tests for backend payload construction and error handling."""
 
-
 from unittest.mock import patch
 
 import pytest

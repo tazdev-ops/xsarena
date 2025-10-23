@@ -18,7 +18,7 @@ class PathJail:
         try:
             target.relative_to(base)
         except ValueError:
-            raise ValueError(f"Path {path} escapes the jail")
+            raise ValueError(f"Path {path} escapes the jail") from None
         return target
 
 
@@ -145,7 +145,7 @@ def get_safe_path(filepath: str, base_dir: str = "./") -> str:
     try:
         target.relative_to(base)
     except ValueError:
-        raise ValueError(f"Path {filepath} escapes the base directory")
+        raise ValueError(f"Path {filepath} escapes the base directory") from None
 
     return str(target)
 

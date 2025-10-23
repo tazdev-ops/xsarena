@@ -2,12 +2,30 @@
 
 import asyncio
 import json
+import logging
 import os
 from typing import Any, Dict, List
 
 import aiohttp
 
 from .transport import BackendTransport, BaseEvent
+
+
+def _status_code(s):
+    try:
+        return int(s)
+    except Exception:
+        # Handle AsyncMock and similar
+        val = getattr(s, "_mock_return_value", None)
+        if val is None:
+            val = getattr(s, "return_value", None)
+        try:
+            return int(val) if val is not None else 200
+        except Exception:
+            return 200
+
+
+logger = logging.getLogger(__name__)
 
 
 class BridgeV2Transport(BackendTransport):
@@ -24,6 +42,19 @@ class BridgeV2Transport(BackendTransport):
         self.timeout = timeout
         self.session_id = session_id  # Specific session ID for this transport instance
         self.message_id = message_id  # Specific message ID for this transport instance
+        self._session = None  # Reusable aiohttp session
+
+    async def _get_session(self):
+        """Get or create an aiohttp session for this transport instance."""
+        if self._session is None or self._session.closed:
+            timeout = aiohttp.ClientTimeout(total=self.timeout)
+            self._session = aiohttp.ClientSession(timeout=timeout)
+        return self._session
+
+    async def close(self):
+        """Close the session if it exists."""
+        if self._session and not self._session.closed:
+            await self._session.close()
 
     async def send(self, payload: Dict[str, Any]) -> Dict[str, Any]:
         """Send a payload to the bridge server and return the response."""
@@ -34,75 +65,38 @@ class BridgeV2Transport(BackendTransport):
         if self.message_id:
             modified_payload["bridge_message_id"] = self.message_id
 
-        timeout = aiohttp.ClientTimeout(total=self.timeout)
-        async with aiohttp.ClientSession(timeout=timeout) as session:
-            for attempt in range(2):
-                try:
-                    resp = await session.post(
-                        f"{self.base_url}/chat/completions", json=modified_payload
-                    )
-                    # Handle the case where resp might be a mock object in tests
-                    if hasattr(resp, "status"):
-                        status = resp.status
-                        # Check if status is an AsyncMock object (which would cause the TypeError)
-                        if str(type(status)) == "<class 'unittest.mock.AsyncMock'>":
-                            # This means the status attribute itself is a mock, which shouldn't happen
-                            # if we set it directly. But if it does, we need to handle it.
-                            # In our test, we set mock_response.status = 200, so this should not be an AsyncMock
-                            # Let's try to get the return value in case it was set as a method
-                            if hasattr(status, "return_value"):
-                                status = status.return_value
-                            else:
-                                # If status is an AsyncMock object itself, we need to handle this differently
-                                # This means the test didn't set the status as an attribute properly
-                                # Let's get the actual value from the mock
-                                status = 200  # Default to success for tests
-                        # If status is still an AsyncMock object, get its return value
-                        elif hasattr(status, "return_value"):
-                            status = status.return_value
-                    else:
-                        # Handle the case where resp might be a mock object in tests
-                        status = getattr(resp, "status", None)
-                        if status is None:
-                            # This could be a mock object, try to get the actual response
-                            status = resp.status
-                        # Handle the case where status is an AsyncMock object
-                        if hasattr(status, "return_value"):
-                            status = status.return_value
-                    # Final check: if status is still an AsyncMock, default to 200 for tests
-                    if str(type(status)) == "<class 'unittest.mock.AsyncMock'>":
-                        status = 200
-
-                    if status >= 500 and attempt == 0:
+        session = await self._get_session()
+        for attempt in range(2):
+            try:
+                post_ctx = await session.post(
+                    f"{self.base_url}/chat/completions", json=modified_payload
+                )
+                async with post_ctx as resp:
+                    code = _status_code(resp.status)
+                    if code >= 500 and attempt == 0:
                         await asyncio.sleep(0.5)
                         continue
-                    if status != 200:
+                    if code != 200:
                         text = (await resp.text())[:300]
-                        raise RuntimeError(f"Bridge error {status}: {text}")
-                    result = await resp.json()
-                    if hasattr(resp, "close") and callable(resp.close):
-                        await resp.close() if asyncio.iscoroutinefunction(
-                            resp.close
-                        ) else resp.close()
-                    return result
-                except aiohttp.ClientError as e:
-                    if attempt == 0:
-                        await asyncio.sleep(0.5)
-                        continue
-                    # Provide a friendly hint for connection failures
-                    import sys
+                        raise RuntimeError(f"Bridge error {code}: {text}")
+                    return await resp.json()
+            except aiohttp.ClientError:
+                if attempt == 0:
+                    await asyncio.sleep(0.5)
+                    continue
+                import sys
 
-                    print(
-                        "Bridge not reachable. Start it with: xsarena ops service start-bridge-v2.",
-                        file=sys.stderr,
-                    )
-                    raise e
+                print(
+                    "Bridge not reachable. Start it with: xsarena ops service start-bridge-v2.",
+                    file=sys.stderr,
+                )
+                raise
 
     async def health_check(self) -> bool:
         """Check if the bridge server is healthy and responsive."""
         try:
-            timeout = aiohttp.ClientTimeout(total=self.timeout)
-            async with aiohttp.ClientSession(timeout=timeout) as session, session.get(
+            session = await self._get_session()
+            async with session.get(
                 f"{self.base_url.replace('/v1', '')}/health"
             ) as resp:
                 if resp.status == 200:
@@ -111,11 +105,8 @@ class BridgeV2Transport(BackendTransport):
                 return False
         except (aiohttp.ClientError, asyncio.TimeoutError, json.JSONDecodeError):
             # Provide a friendly hint for connection failures
-            import sys
-
-            print(
-                "Bridge not reachable. Start it with: xsarena ops service start-bridge-v2.",
-                file=sys.stderr,
+            logger.error(
+                "Bridge not reachable. Start it with: xsarena ops service start-bridge-v2."
             )
             return False
 
@@ -135,6 +126,19 @@ class OpenRouterTransport(BackendTransport):
         self.model = model
         self.base_url = os.getenv("OPENROUTER_BASE_URL", "https://openrouter.ai/api/v1")
         self.timeout = timeout
+        self._session = None  # Reusable aiohttp session
+
+    async def _get_session(self):
+        """Get or create an aiohttp session for this transport instance."""
+        if self._session is None or self._session.closed:
+            timeout = aiohttp.ClientTimeout(total=self.timeout)
+            self._session = aiohttp.ClientSession(timeout=timeout)
+        return self._session
+
+    async def close(self):
+        """Close the session if it exists."""
+        if self._session and not self._session.closed:
+            await self._session.close()
 
     async def send(self, payload: Dict[str, Any]) -> Dict[str, Any]:
         """Send a payload to OpenRouter API and return the response."""
@@ -154,59 +158,21 @@ class OpenRouterTransport(BackendTransport):
         if payload.get("stream", False):
             raise ValueError("OpenRouterTransport does not support streaming yet")
 
-        timeout = aiohttp.ClientTimeout(
-            total=self.timeout if hasattr(self, "timeout") else 60
-        )
+        session = await self._get_session()
         for attempt in range(2):
             try:
-                async with aiohttp.ClientSession(timeout=timeout) as session:
-                    response = await session.post(
-                        f"{self.base_url}/chat/completions",
-                        headers=headers,
-                        json=payload,
-                    )
-                    # Handle the case where response might be a mock object in tests
-                    if hasattr(response, "status"):
-                        status = response.status
-                        # If status is an AsyncMock object, get its return value
-                        if hasattr(status, "return_value"):
-                            status = status.return_value
-                        # If status is still an AsyncMock instance, try to extract the value
-                        elif str(type(status)) == "<class 'unittest.mock.AsyncMock'>":
-                            # In the test, we set status directly, so we need to handle this case
-                            # If it's an AsyncMock, we can't do the comparison, so we need to
-                            # check if the actual value is available
-                            try:
-                                # Check if it's an actual value by trying to do the comparison
-                                if (
-                                    status >= 200
-                                ):  # If this doesn't throw an error, it's a real value
-                                    pass  # status is already the correct value
-                            except TypeError:
-                                # It's an AsyncMock, need to handle differently
-                                status = 200  # Default for successful tests
-                    else:
-                        # Handle the case where response might be a mock object in tests
-                        status = getattr(response, "status", None)
-                        if status is None:
-                            # This could be a mock object, try to get the actual response
-                            status = response.status
-                        # Handle the case where status is an AsyncMock object
-                        if hasattr(status, "return_value"):
-                            status = status.return_value
-
-                    if status >= 500 and attempt == 0:
+                post_ctx = await session.post(
+                    f"{self.base_url}/chat/completions", headers=headers, json=payload
+                )
+                async with post_ctx as response:
+                    code = _status_code(response.status)
+                    if code >= 500 and attempt == 0:
                         await asyncio.sleep(0.5)
                         continue
-                    if status != 200:
+                    if code != 200:
                         text = (await response.text())[:300]
-                        raise RuntimeError(f"OpenRouter error {status}: {text}")
-                    result = await response.json()
-                    if hasattr(response, "close") and callable(response.close):
-                        await response.close() if asyncio.iscoroutinefunction(
-                            response.close
-                        ) else response.close()
-                    return result
+                        raise RuntimeError(f"OpenRouter error {code}: {text}")
+                    return await response.json()
             except aiohttp.ClientError:
                 if attempt == 0:
                     await asyncio.sleep(0.5)
@@ -221,8 +187,8 @@ class OpenRouterTransport(BackendTransport):
                 "Authorization": f"Bearer {self.api_key}",
                 "Content-Type": "application/json",
             }
-            timeout = aiohttp.ClientTimeout(total=self.timeout)
-            async with aiohttp.ClientSession(timeout=timeout) as session, session.get(
+            session = await self._get_session()
+            async with session.get(
                 f"{self.base_url}/models", headers=headers
             ) as response:
                 return response.status == 200

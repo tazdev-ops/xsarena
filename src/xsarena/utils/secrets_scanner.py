@@ -44,7 +44,7 @@ class SecretsScanner:
                 r"(?i)(authorization|auth):\s*bearer\s+[a-zA-Z0-9_\-\.]{20,}"
             ),
             "connection_string": re.compile(r"(mongodb|postgres|mysql)://[^\\s\"']+"),
-            "url_with_password": re.compile(r"https?://[^:]+:[^ @]+ @"),
+            "url_with_password": re.compile(r"https?://[^:]+:[^@\\s]+@"),
         }
 
         # Initialize whitelist
@@ -54,7 +54,7 @@ class SecretsScanner:
 
     def scan_file(self, file_path: Path) -> List[Dict[str, Any]]:
         """Scan a single file for secrets."""
-        findings = []
+        findings: List[Dict[str, Any]] = []
 
         try:
             # Read file content
@@ -100,7 +100,7 @@ class SecretsScanner:
         return any(pattern in match for pattern in self.whitelist)
 
     def scan_directory(
-        self, directory: Path, exclude_patterns: List[str] = None
+        self, directory: Path, exclude_patterns: Optional[List[str]] = None
     ) -> List[Dict[str, Any]]:
         """Scan a directory for secrets."""
         if exclude_patterns is None:

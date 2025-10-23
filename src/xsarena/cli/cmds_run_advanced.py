@@ -6,6 +6,7 @@ from typing import List, Optional
 
 import typer
 import yaml
+from pydantic import BaseModel, ConfigDict, Field
 
 try:
     from ..core.profiles import load_profiles
@@ -15,12 +16,30 @@ except ImportError:
         return {}
 
 
-from ..core.prompt import compose_prompt
 from ..core.specs import DEFAULT_PROFILES
 from ..core.v2_orchestrator.orchestrator import Orchestrator
 from ..core.v2_orchestrator.specs import LengthPreset, RunSpecV2, SpanPreset
 from ..utils.directives import find_directive
 from .context import CLIContext
+
+
+class RecipeV2(BaseModel):
+    """Version 2 recipe specification with typed fields and validation."""
+
+    subject: str = Field(..., description="The subject to generate content about")
+    length: str = Field("standard", description="Length preset for the run")
+    span: str = Field("medium", description="Span preset for the run")
+    overlays: List[str] = Field(
+        default_factory=list, description="Overlay specifications"
+    )
+    extra_files: List[str] = Field(
+        default_factory=list, description="Additional files to include"
+    )
+    out_path: Optional[str] = Field(None, description="Output path for the result")
+    generate_plan: bool = Field(False, description="Generate an outline first")
+
+    model_config = ConfigDict(extra="forbid")  # Forbid extra fields to catch typos
+
 
 # Local fallbacks
 LENGTH_PRESETS = {
@@ -46,12 +65,12 @@ def slugify(s, default="book"):
 
 
 def run_from_recipe(
+    ctx: typer.Context,
     recipe_path: Path,
     out: Optional[str] = typer.Option(None, "--out", "-o", help="Output path"),
     follow: bool = typer.Option(
         False, "--follow", help="Submit job and follow to completion"
     ),
-    ctx: typer.Context = typer.Context,
 ) -> str:
     """
     Run a job from a recipe file.
@@ -65,46 +84,53 @@ def run_from_recipe(
 
     # Load recipe
     recipe_content = recipe_path.read_text(encoding="utf-8")
-    recipe = yaml.safe_load(recipe_content)
+    recipe_data = yaml.safe_load(recipe_content)
 
-    # Extract supported parameters from recipe
-    subject = recipe.get("subject", "Recipe Output")
-    length = recipe.get("length", "standard")
-    span = recipe.get("span", "medium")
-    overlays = recipe.get("overlays", [])
-    extra_files = recipe.get("extra_files", [])
-    generate_plan = recipe.get("generate_plan", False)
+    # Validate recipe using RecipeV2 model
+    try:
+        recipe = RecipeV2.model_validate(recipe_data)
+    except Exception as e:
+        typer.echo(f"Error: Invalid recipe format: {e}", err=True)
+        raise typer.Exit(1)
 
-    # Build the run spec with only supported fields
+    # Build the run spec with validated fields
     run_spec = RunSpecV2(
-        subject=subject,
-        length=LengthPreset(length)
-        if length in ["standard", "long", "very-long", "max"]
-        else LengthPreset.STANDARD,
-        span=SpanPreset(span)
-        if span in ["medium", "long", "book"]
-        else SpanPreset.MEDIUM,
-        overlays=overlays,
-        extra_files=extra_files,
-        out_path=recipe.get("out_path", out),
-        generate_plan=generate_plan,
-        backend=cli_ctx.cfg.backend,
-        model=cli_ctx.cfg.model,
+        subject=recipe.subject,
+        length=(
+            LengthPreset(recipe.length)
+            if recipe.length in ["standard", "long", "very-long", "max"]
+            else LengthPreset.STANDARD
+        ),
+        span=(
+            SpanPreset(recipe.span)
+            if recipe.span in ["medium", "long", "book"]
+            else SpanPreset.MEDIUM
+        ),
+        overlays=recipe.overlays,
+        extra_files=recipe.extra_files,
+        out_path=recipe.out_path or out,
+        generate_plan=recipe.generate_plan,
+        backend=cli_ctx.state.backend,
+        model=cli_ctx.state.model,
     )
 
     if follow:
-        job_id = asyncio.run(orch.run_spec(run_spec, backend_type=cli_ctx.cfg.backend))
+        job_id = asyncio.run(
+            orch.run_spec(run_spec, backend_type=cli_ctx.state.backend)
+        )
         typer.echo(f"Recipe job submitted: {job_id}")
         typer.echo("Following job to completion...")
     else:
-        job_id = asyncio.run(orch.run_spec(run_spec, backend_type=cli_ctx.cfg.backend))
+        job_id = asyncio.run(
+            orch.run_spec(run_spec, backend_type=cli_ctx.state.backend)
+        )
         typer.echo(f"Recipe job submitted: {job_id}")
         typer.echo(f"Run 'xsarena ops jobs follow {job_id}' to monitor progress")
 
 
 def run_lint_recipe(
+    ctx: typer.Context,
     recipe_path: Path,
-    ctx: typer.Context = typer.Context,
 ) -> None:
     """
     Lint a recipe file for syntax errors.
@@ -135,6 +161,7 @@ def run_lint_recipe(
 
 
 def run_from_plan(
+    ctx: typer.Context,
     seeds: List[str] = typer.Argument(..., help="Rough seeds to generate plan from"),
     profile: Optional[str] = typer.Option(
         None, "--profile", help="Use a specific profile"
@@ -153,7 +180,6 @@ def run_from_plan(
     follow: bool = typer.Option(
         False, "--follow", help="Submit job and follow to completion"
     ),
-    ctx: typer.Context = typer.Context,
 ) -> str:
     """
     Plan from rough seeds and run a book.
@@ -161,79 +187,46 @@ def run_from_plan(
     cli_ctx: CLIContext = ctx.obj
     orch = Orchestrator()
 
-    # Combine seeds into a plan prompt
-    seeds_text = "\\n".join(seeds)
-    subject = f"Plan from seeds: {' '.join(seeds[:3])}"  # Use first 3 seeds as subject
+    # Combine seeds into a subject
+    subject = f"Plan from seeds: {' '.join(seeds)}"
 
     # Load profiles
     profiles = {**DEFAULT_PROFILES, **load_profiles()}
 
     # Get profile configuration
     profile_config = profiles.get(profile or "zero2hero", {})
-    base_prompt = profile_config.get("base", "zero2hero")
     overlays = profile_config.get("overlays", [])
 
-    # Map length preset to values
-    length_config = LENGTH_PRESETS.get(length, LENGTH_PRESETS["standard"])
-    min_chars = length_config["min"]
-    passes = length_config["passes"]
-
-    # Map span preset to values
-    max_chunks = SPAN_PRESETS.get(span, SPAN_PRESETS["medium"])
-
-    # Prepare system text from extra files
-    system_text = ""
-    for ef in extra_file:
-        if ef.exists():
-            system_text += (
-                f"\\n\\n{ef.name.upper()}:\\n{ef.read_text(encoding='utf-8')}"
-            )
-
-    # Compose the prompt for planning
-    prompt_parts = compose_prompt(
-        subject=subject,
-        base="plan_from_seeds",
-        overlays=overlays,
-        system_text=system_text,
-        profile=profile_config,
-    )
-
-    # Build the run spec
+    # Build the run spec with generate_plan=True
     run_spec = RunSpecV2(
-        task="plan",
         subject=subject,
         length=LengthPreset(length),
         span=SpanPreset(span),
-        min_length=min_chars,
-        passes=passes,
-        chunks=max_chunks,
-        backend=cli_ctx.cfg.backend,
-        model=cli_ctx.cfg.model,
+        overlays=overlays,
+        extra_files=[str(ef) for ef in extra_file if ef.exists()],
         out_path=out,
-        system_text=prompt_parts["system"],
-        user_text=f"{prompt_parts['user']}\\n\\nSEEDS:\\n{seeds_text}",
+        generate_plan=True,
+        backend=cli_ctx.state.backend,
+        model=cli_ctx.state.model,
     )
 
     # Submit the job
-    job_id = orch.submit(
-        run_spec, system_text=system_text, session_state=cli_ctx.session_state
-    )
+    job_id = asyncio.run(orch.run_spec(run_spec, backend_type=cli_ctx.state.backend))
 
     if follow:
         typer.echo(f"Plan job submitted: {job_id}")
         typer.echo("Following job to completion...")
-        asyncio.run(orch.follow_job(job_id))
     else:
         typer.echo(f"Plan job submitted: {job_id}")
         typer.echo(f"Run 'xsarena ops jobs follow {job_id}' to monitor progress")
 
 
 def run_replay(
+    ctx: typer.Context,
     manifest_path: Path,
     follow: bool = typer.Option(
         False, "--follow", help="Submit job and follow to completion"
     ),
-    ctx: typer.Context = typer.Context,
 ) -> str:
     """
     Replay a job from a run manifest.
@@ -245,6 +238,7 @@ def run_replay(
 
 
 def run_template(
+    ctx: typer.Context,
     template_name: str,
     subject: str,
     profile: Optional[str] = typer.Option(
@@ -264,7 +258,6 @@ def run_template(
     follow: bool = typer.Option(
         False, "--follow", help="Submit job and follow to completion"
     ),
-    ctx: typer.Context = typer.Context,
 ) -> str:
     """
     Run a structured directive from the template library.
@@ -273,63 +266,39 @@ def run_template(
     orch = Orchestrator()
 
     # Find the template directive
-    template_path = find_directive(f"templates/{template_name}")
-    if not template_path or not template_path.exists():
+    tmpl = find_directive(f"templates/{template_name}")
+    if not tmpl:
         typer.echo(f"Error: Template '{template_name}' not found", err=True)
         raise typer.Exit(1)
 
-    # Load template content
-    template_content = template_path.read_text(encoding="utf-8")
+    # Unpack the template
+    prompt_path, _ = tmpl
 
     # Load profiles
     profiles = {**DEFAULT_PROFILES, **load_profiles()}
 
     # Get profile configuration
     profile_config = profiles.get(profile or "zero2hero", {})
-    base_prompt = profile_config.get("base", "zero2hero")
     overlays = profile_config.get("overlays", [])
-
-    # Map length preset to values
-    length_config = LENGTH_PRESETS.get(length, LENGTH_PRESETS["standard"])
-    min_chars = length_config["min"]
-    passes = length_config["passes"]
-
-    # Map span preset to values
-    max_chunks = SPAN_PRESETS.get(span, SPAN_PRESETS["medium"])
-
-    # Prepare system text from extra files and template
-    system_text = template_content
-    for ef in extra_file:
-        if ef.exists():
-            system_text += (
-                f"\\n\\n{ef.name.upper()}:\\n{ef.read_text(encoding='utf-8')}"
-            )
 
     # Build the run spec
     run_spec = RunSpecV2(
-        task="template",
         subject=f"{template_name}: {subject}",
         length=LengthPreset(length),
         span=SpanPreset(span),
-        min_length=min_chars,
-        passes=passes,
-        chunks=max_chunks,
-        backend=cli_ctx.cfg.backend,
-        model=cli_ctx.cfg.model,
+        overlays=overlays,
+        extra_files=[str(prompt_path)] + [str(ef) for ef in extra_file if ef.exists()],
         out_path=out,
-        system_text=system_text,
-        user_text=subject,
+        backend=cli_ctx.state.backend,
+        model=cli_ctx.state.model,
     )
 
     # Submit the job
-    job_id = orch.submit(
-        run_spec, system_text=system_text, session_state=cli_ctx.session_state
-    )
+    job_id = asyncio.run(orch.run_spec(run_spec, backend_type=cli_ctx.state.backend))
 
     if follow:
         typer.echo(f"Template job submitted: {job_id}")
         typer.echo("Following job to completion...")
-        asyncio.run(orch.follow_job(job_id))
     else:
         typer.echo(f"Template job submitted: {job_id}")
         typer.echo(f"Run 'xsarena ops jobs follow {job_id}' to monitor progress")

@@ -35,7 +35,7 @@ def list_profiles():
 @app.command("roles")
 def list_roles():
     """List roles (manifest first; fallback to filesystem)."""
-    man = load_manifest()
+    man = load_manifest(force_refresh=True)
     roles = man.get("roles") or []
     rows = []
     if roles:
@@ -55,7 +55,7 @@ def list_roles():
                     .lstrip("# ")
                     .strip()
                 )
-                rows.append((role_file.stem.replace("role.", ""), first))
+                rows.append((role_file.name, first))  # use filename, not stem
     table = Table(title="Roles")
     table.add_column("Name", style="cyan", no_wrap=True)
     table.add_column("Summary", style="green")
@@ -67,7 +67,7 @@ def list_roles():
 @app.command("overlays")
 def list_overlays():
     """List overlays (manifest first; fallback to filesystem)."""
-    man = load_manifest()
+    man = load_manifest(force_refresh=True)
     overlays = man.get("overlays") or []
     rows = []
     if overlays:

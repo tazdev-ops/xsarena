@@ -111,10 +111,11 @@ class SessionState:
 
         history = []
         for m in state_dict.get("history", []):
-            if "timestamp" in m:
-                timestamp = datetime.fromisoformat(m["timestamp"])
-            else:
-                timestamp = datetime.now()  # Default to now if no timestamp
+            timestamp = (
+                datetime.fromisoformat(m["timestamp"])
+                if "timestamp" in m
+                else datetime.now()
+            )
             history.append(
                 Message(
                     role=m["role"],

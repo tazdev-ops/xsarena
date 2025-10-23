@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import asyncio
+import contextlib
 import random
 
 import typer
@@ -18,9 +19,9 @@ def joy_daily(subject: str):
         from ..core.joy import (
             add_achievement,
             bump_streak,
-            get_state,
+            get_state,  # noqa: F401
             log_event,
-            sparkline,
+            sparkline,  # noqa: F401
         )
     except ImportError:
         typer.echo(
@@ -83,11 +84,9 @@ def joy_achievements():
 
 @app.command("kudos")
 def joy_kudos():
-    try:
-        from ..core.joy import get_state, sparkline
-    except ImportError:
-        # If joy module is not available, just show a simple message
+    with contextlib.suppress(ImportError):
         pass
+        # If joy module is not available, just show a simple message
 
     msgs = [
         "You're on fire! 🔥",

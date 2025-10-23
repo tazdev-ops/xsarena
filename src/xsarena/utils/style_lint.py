@@ -4,6 +4,10 @@ import re
 from pathlib import Path
 from typing import Dict, List, Optional
 
+# Precompiled regex patterns for performance
+BOLD_TERM_PATTERN = re.compile(r"\*\*([^\*]+)\*\*")
+OVERLAY_HEADER_PATTERN = re.compile(r"^OVERLAY:", re.MULTILINE)
+
 
 class LintIssue:
     """Represents a single linting issue."""
@@ -37,9 +41,7 @@ def analyze_style(content: str, file_path: Optional[Path] = None) -> List[LintIs
     issues = []
 
     # Check for term definitions
-    import re
-
-    bold_terms = re.findall(r"\*\*([^\*]+)\*\*", content)
+    bold_terms = BOLD_TERM_PATTERN.findall(content)
     for term in set(bold_terms):
         # For now, we'll just flag all bold terms as potentially undefined
         # A real implementation would check for definitions
@@ -75,7 +77,10 @@ def analyze_style(content: str, file_path: Optional[Path] = None) -> List[LintIs
                     LintIssue(
                         line=str(i - consecutive_bullets + 1),
                         code="STYLE-BULLET-WALL",
-                        message=f"Section '{current_section}' has {consecutive_bullets} consecutive bullet points - potential bullet wall",
+                        message=(
+                            f"Section '{current_section}' has {consecutive_bullets} "
+                            f"consecutive bullet points - potential bullet wall"
+                        ),
                         type="bullet_wall",
                         section=current_section,
                         severity="high",
@@ -105,20 +110,19 @@ def analyze_style(content: str, file_path: Optional[Path] = None) -> List[LintIs
     lines = content.splitlines()
     for i, line in enumerate(lines):
         line_words = len(line.split())
-        if 0 < line_words < 5:  # Very short lines
-            # Check if it's not a heading or list item
-            if not line.strip().startswith(("#", "-", "*", "+")):
-                issues.append(
-                    LintIssue(
-                        line=str(i + 1),
-                        code="STYLE-PARAGRAPH-LENGTH",
-                        message=f"Line length is {line_words} words - too short",
-                        type="paragraph_len",
-                        section="General",
-                        severity="medium",
-                        suggestion="Increase to ~5-15 words per paragraph for better readability",
-                    )
+        # Very short lines that are not headings or list items
+        if 0 < line_words < 5 and not line.strip().startswith(("#", "-", "*", "+")):
+            issues.append(
+                LintIssue(
+                    line=str(i + 1),
+                    code="STYLE-PARAGRAPH-LENGTH",
+                    message=f"Line length is {line_words} words - too short",
+                    type="paragraph_len",
+                    section="General",
+                    severity="medium",
+                    suggestion="Increase to ~5-15 words per paragraph for better readability",
                 )
+            )
 
     # Check for heading density
     all_lines = content.splitlines()
@@ -147,8 +151,8 @@ def lint_directive_file(file_path: Path) -> List[Dict[str, str]]:
         content = file_path.read_text(encoding="utf-8")
         lines = content.splitlines()
 
-        if file_path.parent.name == "style" and not re.search(
-            r"^OVERLAY:", content, re.MULTILINE
+        if file_path.parent.name == "style" and not OVERLAY_HEADER_PATTERN.search(
+            content
         ):
             issues.append(
                 {
@@ -190,7 +194,7 @@ def lint_directive_file(file_path: Path) -> List[Dict[str, str]]:
 
 
 def generate_style_report(
-    issues: List[LintIssue], file_path: str, narrative: str = None
+    issues: List[LintIssue], file_path: str, narrative: Optional[str] = None
 ) -> str:
     """Generate a formatted style report."""
     if not issues:
@@ -206,7 +210,7 @@ def generate_style_report(
     report += "\n\nSummary:\n\n"
 
     # Count issue types
-    issue_counts = {}
+    issue_counts: Dict[str, int] = {}
     for issue in issues:
         issue_type = issue.type or "general"  # Use "general" if type is None
         issue_counts[issue_type] = issue_counts.get(issue_type, 0) + 1

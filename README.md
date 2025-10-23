@@ -8,6 +8,28 @@ XSArena is a human writer workflow tool that bridges to LMArena for long-form co
 - **Start bridge**: `xsarena ops service start-bridge-v2`
 - **First run**: `xsarena run book "Hello World" --length standard --span medium`
 
+## Backend Configuration
+
+### Bridge Setup (Default)
+The default backend connects to a local bridge server:
+- **Default URL**: `http://127.0.0.1:5102/v1`
+- **Start service**: `xsarena ops service start-bridge-v2`
+- **Capture IDs**: Use `xsarena settings capture-ids` or `/capture` in interactive mode
+- **Authentication**: Requires internal token for `/internal/*` endpoints (see below)
+
+### OpenRouter Setup
+To use OpenRouter as a backend:
+- **Environment variable**: `export OPENROUTER_API_KEY=your_api_key_here`
+- **Default URL**: `https://openrouter.ai/api/v1` (override with `OPENROUTER_BASE_URL`)
+- **Test connection**: `xsarena ops config backend-test`
+- **Usage**: `xsarena tools eli5 "Photosynthesis"` or any other command
+
+### Internal Token Authentication
+The bridge uses an internal token for `/internal/*` endpoints:
+- **Environment variable**: `export XSA_INTERNAL_TOKEN=dev-token-change-me`
+- **Config file**: Add `bridge.internal_api_token` in `.xsarena/config.yml`
+- **Default**: `dev-token-change-me` (change for production)
+
 ## Essential Workflows
 
 ### Book Authoring

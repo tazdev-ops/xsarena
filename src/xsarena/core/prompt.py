@@ -2,22 +2,12 @@
 
 from __future__ import annotations
 
-import os
 from dataclasses import dataclass
-from pathlib import Path
 from typing import Any, Dict, List, Optional
 
+from ..utils.discovery import discover_overlays
 from ..utils.project_paths import get_project_root
-
-
-def _directives_root() -> Path:
-    env = os.getenv("XSARENA_DIRECTIVES_ROOT")
-    if env:
-        p = Path(env)
-        if p.exists():
-            return p
-    # Use robust project root resolution
-    return get_project_root() / "directives"
+from .manifest import load_manifest
 
 
 @dataclass
@@ -52,64 +42,25 @@ class PromptCompositionLayer:
         self._load_extended_templates()
 
     def _load_extended_templates(self):
-        """Load richer templates from directive files directly."""
+        """Load richer templates from directive files using discovery."""
+        # Load overlays using discovery utility
+        discovered_overlays = discover_overlays()
 
-        # Load narrative overlay from directive
-        narrative_path = _directives_root() / "style" / "narrative.md"
-        if narrative_path.exists():
-            try:
-                with open(narrative_path, "r", encoding="utf-8") as f:
-                    narrative_content = f.read().strip()
-                    if narrative_content:
-                        self.OVERLAYS["narrative"] = narrative_content
-            except Exception:
-                # Fallback to description if file reading fails
-                self.OVERLAYS[
-                    "narrative"
-                ] = "Teach-before-use narrative. Define terms at first mention."
-        else:
-            # Fallback to description if file doesn't exist
-            self.OVERLAYS[
-                "narrative"
-            ] = "Teach-before-use narrative. Define terms at first mention."
+        # Update overlays with discovered content, keeping fallbacks for missing ones
+        for overlay_name, overlay_content in discovered_overlays.items():
+            if overlay_content.strip():
+                self.OVERLAYS[overlay_name] = overlay_content
 
-        # Load compressed overlay from directive
-        compressed_path = _directives_root() / "style" / "compressed.md"
-        if compressed_path.exists():
-            try:
-                with open(compressed_path, "r", encoding="utf-8") as f:
-                    compressed_content = f.read().strip()
-                    if compressed_content:
-                        self.OVERLAYS["compressed"] = compressed_content
-            except Exception:
-                # Fallback to description if file reading fails
-                self.OVERLAYS[
-                    "compressed"
-                ] = "Compressed narrative. Minimal headings; dense flow."
-        else:
-            # Fallback to description if file doesn't exist
-            self.OVERLAYS[
-                "compressed"
-            ] = "Compressed narrative. Minimal headings; dense flow."
-
-        # Load no_bs overlay from directive
-        no_bs_path = _directives_root() / "style" / "no_bs.md"
-        if no_bs_path.exists():
-            try:
-                with open(no_bs_path, "r", encoding="utf-8") as f:
-                    no_bs_content = f.read().strip()
-                    if no_bs_content:
-                        self.OVERLAYS["no_bs"] = no_bs_content
-            except Exception:
-                # Fallback to description if file reading fails
-                self.OVERLAYS[
-                    "no_bs"
-                ] = "Plain language. No fluff. Concrete nouns; tight sentences."
-        else:
-            # Fallback to description if file doesn't exist
-            self.OVERLAYS[
-                "no_bs"
-            ] = "Plain language. No fluff. Concrete nouns; tight sentences."
+        # Load manifest for additional overlays if available
+        manifest = load_manifest()
+        manifest_overlays = manifest.get("overlays", [])
+        for overlay_info in manifest_overlays:
+            if (
+                isinstance(overlay_info, dict)
+                and "name" in overlay_info
+                and "content" in overlay_info
+            ):
+                self.OVERLAYS[overlay_info["name"]] = overlay_info["content"]
 
     def compose(
         self,
@@ -153,58 +104,87 @@ class PromptCompositionLayer:
         # Build the system text
         parts = []
 
-        # Base intent
-        if base == "zero2hero":
-            # Load the zero2hero template from directive file
+        # Base intent - try to get from manifest first, then fallback to current logic
+        manifest = load_manifest()
+        base_templates = manifest.get("prompts", [])
 
-            zero2hero_path = _directives_root() / "base" / "zero2hero.md"
+        # Look for the base template in the manifest
+        base_template = None
+        for template in base_templates:
+            if isinstance(template, dict) and template.get("name") == base:
+                base_template = template.get("content", "")
+                break
 
-            if zero2hero_path.exists():
-                try:
-                    with open(zero2hero_path, "r", encoding="utf-8") as f:
-                        zero2hero_content = f.read().strip()
-                        # Replace {subject} placeholder with actual subject
-                        zero2hero_content = zero2hero_content.replace(
-                            "{subject}", subject
+        if base_template:
+            # Use the template from manifest, replacing {subject} placeholder
+            base_content = base_template.replace("{subject}", subject)
+            parts.append(base_content)
+        else:
+            # Fallback to original logic if not found in manifest
+            if base == "zero2hero":
+                # Load the zero2hero template from directive file
+                zero2hero_path = (
+                    get_project_root() / "directives" / "base" / "zero2hero.md"
+                )
+
+                if zero2hero_path.exists():
+                    try:
+                        with open(zero2hero_path, "r", encoding="utf-8") as f:
+                            zero2hero_content = f.read().strip()
+                            # Replace {subject} placeholder with actual subject
+                            zero2hero_content = zero2hero_content.replace(
+                                "{subject}", subject
+                            )
+                            parts.append(zero2hero_content)
+                    except Exception:
+                        # Fallback to hardcoded content if file reading fails
+                        parts.append(
+                            "Goal: pedagogical manual from foundations to practice with steady depth; no early wrap-ups."
                         )
-                        parts.append(zero2hero_content)
-                except Exception:
-                    # Fallback to hardcoded content if file reading fails
+                else:
+                    # Fallback to hardcoded content if file doesn't exist
                     parts.append(
                         "Goal: pedagogical manual from foundations to practice with steady depth; no early wrap-ups."
                     )
-            else:
-                # Fallback to hardcoded content if file doesn't exist
-                parts.append(
-                    "Goal: pedagogical manual from foundations to practice with steady depth; no early wrap-ups."
-                )
-        elif base == "reference":
-            ref_path = _directives_root() / "base" / "reference.md"
-            if ref_path.exists():
-                try:
-                    parts.append(ref_path.read_text(encoding="utf-8").strip())
-                except Exception:
-                    parts.append("Goal: tight reference handbook; definitions first; terse, unambiguous rules and examples.")
-            else:
-                parts.append("Goal: tight reference handbook; definitions first; terse, unambiguous rules and examples.")
-        elif base == "pop":
-            pop_path = _directives_root() / "base" / "pop.md"
-            if pop_path.exists():
-                try:
-                    parts.append(pop_path.read_text(encoding="utf-8").strip())
-                except Exception:
-                    parts.append("Goal: accessible, accurate narrative explainer with vignettes; keep rigor without academic padding.")
-            else:
-                parts.append("Goal: accessible, accurate narrative explainer with vignettes; keep rigor without academic padding.")
-        elif base == "nobs":
-            nobs_path = _directives_root() / "base" / "nobs.md"
-            if nobs_path.exists():
-                try:
-                    parts.append(nobs_path.read_text(encoding="utf-8").strip())
-                except Exception:
-                    parts.append("Goal: no‑bullshit manual; only what changes decisions or understanding; tight prose.")
-            else:
-                parts.append("Goal: no‑bullshit manual; only what changes decisions or understanding; tight prose.")
+            elif base == "reference":
+                ref_path = get_project_root() / "directives" / "base" / "reference.md"
+                if ref_path.exists():
+                    try:
+                        parts.append(ref_path.read_text(encoding="utf-8").strip())
+                    except Exception:
+                        parts.append(
+                            "Goal: tight reference handbook; definitions first; terse, unambiguous rules and examples."
+                        )
+                else:
+                    parts.append(
+                        "Goal: tight reference handbook; definitions first; terse, unambiguous rules and examples."
+                    )
+            elif base == "pop":
+                pop_path = get_project_root() / "directives" / "base" / "pop.md"
+                if pop_path.exists():
+                    try:
+                        parts.append(pop_path.read_text(encoding="utf-8").strip())
+                    except Exception:
+                        parts.append(
+                            "Goal: accessible, accurate narrative explainer with vignettes; keep rigor without academic padding."
+                        )
+                else:
+                    parts.append(
+                        "Goal: accessible, accurate narrative explainer with vignettes; keep rigor without academic padding."
+                    )
+            elif base == "nobs":
+                nobs_path = get_project_root() / "directives" / "base" / "nobs.md"
+                if nobs_path.exists():
+                    try:
+                        parts.append(nobs_path.read_text(encoding="utf-8").strip())
+                    except Exception:
+                        parts.append(
+                            "Goal: no‑bullshit manual; only what changes decisions or understanding; tight prose."
+                        )
+                else:
+                    parts.append(
+                        "Goal: no‑bullshit manual; only what changes decisions or understanding; tight prose."
+                    )
 
         # Apply overlays
         for overlay_key in overlays:

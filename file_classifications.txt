@@ -1,0 +1,116 @@
+# Core-critical code (highest priority)
+CORE_CRITICAL_FILES=(
+    # CLI entry surface
+    "src/xsarena/cli/main.py"
+    "src/xsarena/cli/registry.py"
+    "src/xsarena/cli/context.py"
+
+    # Prompt and composition
+    "src/xsarena/core/prompt.py"
+    "src/xsarena/core/prompt_runtime.py"
+    "src/xsarena/core/manifest.py"
+    "src/xsarena/utils/discovery.py"
+    "src/xsarena/utils/project_paths.py"
+
+    # Orchestrator and spec
+    "src/xsarena/core/v2_orchestrator/orchestrator.py"
+    "src/xsarena/core/v2_orchestrator/specs.py"
+
+    # Jobs core
+    "src/xsarena/core/jobs/model.py"
+    "src/xsarena/core/jobs/store.py"
+    "src/xsarena/core/jobs/scheduler.py"
+    "src/xsarena/core/jobs/executor_core.py"
+    "src/xsarena/core/jobs/chunk_processor.py"
+    "src/xsarena/core/jobs/helpers.py"
+    "src/xsarena/core/jobs/errors.py"
+    "src/xsarena/core/jobs/manager.py"
+    "src/xsarena/core/jobs/processing/*"
+    "src/xsarena/core/jobs/resume_handler.py"
+
+    # State and config
+    "src/xsarena/core/state.py"
+    "src/xsarena/core/config.py"
+
+    # Backends/transport
+    "src/xsarena/core/backends/bridge_v2.py"
+
+    # Anchors/continuation
+    "src/xsarena/core/anchor_service.py"
+    "src/xsarena/core/chunking.py"
+
+    # Engine wrapper
+    "src/xsarena/core/engine.py"
+
+    # Bridge server focal points
+    "src/xsarena/bridge_v2/api_server.py"
+    "src/xsarena/bridge_v2/handlers.py"
+    "src/xsarena/bridge_v2/websocket.py"
+    "src/xsarena/bridge_v2/payload_converter.py"
+    "src/xsarena/bridge_v2/streams.py"
+    "src/xsarena/bridge_v2/formatters.py"
+    "src/xsarena/bridge_v2/config_loaders.py"
+    "src/xsarena/bridge_v2/cors.py"
+    "src/xsarena/bridge_v2/app_lifecycle.py"
+    "src/xsarena/bridge_v2/job_service.py"
+
+    # Utilities used by these paths
+    "src/xsarena/utils/helpers.py"
+    "src/xsarena/utils/io.py"
+    "src/xsarena/utils/density.py"
+)
+
+# Supporting metadata and developer docs (medium priority)
+SUPPORTING_FILES=(
+    "README.md"
+    "COMMANDS_REFERENCE.md"
+    "pyproject.toml"
+    "Makefile"
+    "LICENSE"
+    "CHANGELOG.md"
+    "CONTRIBUTING.md"
+    "README_FOR_AI.md"
+    "ROADMAP.md"
+    "SIMPLIFIED_SNAPSHOT_GUIDE.md"
+    "SUPPORT.md"
+    "MODULES.md"
+    "DEPRECATED.md"
+    "DEPRECATIONS.md"
+    "endpoints.example.yml"
+    "project_manifest.json"
+    "recipe.example.yml"
+    "recipe.schema.json"
+)
+
+# Excluded files (never in snapshots)
+EXCLUDED_PATTERNS=(
+    ".git/**"
+    ".vscode/**"
+    ".idea/**"
+    "__pycache__/**"
+    ".pytest_cache/**"
+    ".mypy_cache/**"
+    ".ruff_cache/**"
+    ".cache/**"
+    "venv/**"
+    ".venv/**"
+    "logs/**"
+    "*.log"
+    ".xsarena/**"
+    "books/**"
+    "review/**"
+    "snapshot_chunks/**"
+    "repo_flat.txt"
+    "xsa_snapshot*.txt"
+    "xsa_debug_report*.txt"
+    "xsa_snapshot*.zip"
+    "*.pyc"
+    "*.pyd"
+    "*.pyo"
+    "*.o"
+    "*.a"
+    "*.so"
+    "*.dll"
+    "*.dylib"
+    "*.tar.gz"
+)

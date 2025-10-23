@@ -3,7 +3,7 @@
 import asyncio
 
 import pytest
-from xsarena.core.jobs.model import JobManager
+from xsarena.core.jobs.manager import JobManager
 
 
 def test_control_queue_creation():

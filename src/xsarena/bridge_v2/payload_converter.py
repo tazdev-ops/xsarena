@@ -146,9 +146,12 @@ async def convert_openai_to_lmarena_payload(
             with open("models.json", "r", encoding="utf-8") as f:
                 models_data = json.load(f)
             model_info = models_data.get(model_name)
-            if model_info and isinstance(model_info, dict):
-                if model_info.get("type") == "image":
-                    is_image_request = True
+            if (
+                model_info
+                and isinstance(model_info, dict)
+                and model_info.get("type") == "image"
+            ):
+                is_image_request = True
         except (FileNotFoundError, json.JSONDecodeError):
             pass
 
@@ -165,6 +168,13 @@ async def convert_openai_to_lmarena_payload(
                 ),
             },
         )
+
+    # Apply empty message guard: if any user message has empty content, set it to a single space
+    for msg in final_messages:
+        if msg["role"] == "user" and (
+            not msg["content"] or msg["content"].strip() == ""
+        ):
+            msg["content"] = " "
 
     # If bypass mode is enabled and this is a text model, append a trailing user message
     if bypass_enabled and not is_image_request:

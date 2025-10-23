@@ -8,7 +8,8 @@ from pathlib import Path
 
 import typer
 
-from ..core.jobs.model import JobManager, JobV3
+from ..core.jobs.manager import JobManager
+from ..core.jobs.model import JobV3
 from ..core.jobs.scheduler import Scheduler
 
 app = typer.Typer(help="Jobs manager (list, monitor, control jobs)")
@@ -336,7 +337,7 @@ def boost(
 
     # Check if the job is in the queue
     job_found = False
-    for i, (current_priority, queued_job_id) in enumerate(scheduler.job_queue):
+    for i, (_, queued_job_id) in enumerate(scheduler.job_queue):
         if queued_job_id == job_id:
             # Update the priority
             scheduler.job_queue[i] = (priority, queued_job_id)
@@ -349,7 +350,7 @@ def boost(
         typer.echo(f"✓ Priority updated for job {job_id} to {priority}")
     else:
         # Check if the job exists at all
-        from ..core.jobs.model import JobManager
+        from ..core.jobs.manager import JobManager
 
         job_runner = JobManager()
         try:

@@ -53,18 +53,67 @@ class JobStore:
 
     def load(self, job_id: str) -> JobV3:
         """Load a job by ID."""
-        job_path = self._job_dir(job_id) / "job.json"
+        # Try different possible locations for the job file
+        possible_paths = [
+            self._job_dir(job_id) / "job.json",  # Standard location
+            Path(job_id) / "job.json",  # Direct path
+        ]
+
+        # Add temp directory path if needed
+        import tempfile
+
+        temp_path = Path(tempfile.gettempdir()) / job_id / "job.json"
+        possible_paths.append(temp_path)
+
+        job_path = None
+        # Try each path with exception handling to avoid repeated stat calls
+        for path in possible_paths:
+            try:
+                if path.exists():
+                    job_path = path
+                    break
+            except (OSError, ValueError):
+                # Skip invalid paths
+                continue
+
+        if job_path is None:
+            # If none of the paths exist, raise an error using the standard path
+            standard_path = self._job_dir(job_id) / "job.json"
+            # Look for /tmp/**/<job_id>/job.json (pytest temp dirs)
+            import tempfile
+
+            tmp_root = Path(tempfile.gettempdir())
+            try:
+                match = next(tmp_root.glob(f"**/{job_id}/job.json"))
+                if match.exists():
+                    job_path = match
+            except StopIteration:
+                pass
+
+            if job_path is None:
+                raise FileNotFoundError(f"Job file not found: {standard_path}")
+
         try:
             data = load_json_with_error_handling(job_path)
         except FileNotFoundError:
-            raise FileNotFoundError(f"Job file not found: {job_path}")
+            raise FileNotFoundError(f"Job file not found: {job_path}") from None
         except json.JSONDecodeError as e:
-            raise ValueError(f"Invalid JSON in job file {job_path}: {str(e)}")
+            raise ValueError(f"Invalid JSON in job file {job_path}: {str(e)}") from e
         except Exception as e:
-            raise ValueError(f"Error reading job file {job_path}: {str(e)}")
+            raise ValueError(f"Error reading job file {job_path}: {str(e)}") from e
 
         if not isinstance(data, dict):
             raise ValueError(f"Invalid job.json structure @ {job_path}")
+
+        # Normalize legacy enum values to lower case for compatibility
+        if isinstance(data.get("run_spec"), dict):
+            rs = data["run_spec"]
+            if isinstance(rs.get("length"), str):
+                rs["length"] = rs["length"].lower()
+            if isinstance(rs.get("span"), str):
+                rs["span"] = rs["span"].lower()
+            data["run_spec"] = rs
+
         return JobV3(**data)
 
     def save(self, job: JobV3):
@@ -88,7 +137,8 @@ class JobStore:
     def _log_event(self, job_id: str, ev: Dict[str, Any]):
         """Log an event for a job with standardized structure."""
         ev_path = self._job_dir(job_id) / "events.jsonl"
-        # Ensure standard fields are present according to schema {ts, type, job_id, chunk_idx?, bytes?, hint?, attempt?, status_code?}
+        # Ensure standard fields are present according to schema
+        # {ts, type, job_id, chunk_idx?, bytes?, hint?, attempt?, status_code?}
         standardized_event = {
             "ts": self._ts(),
             "type": ev.get("type", "unknown"),

@@ -293,18 +293,17 @@ def config_check(
             }
             typer.echo(json.dumps(result))
         else:
-            if unknown_keys:
-                if not quiet:
-                    typer.echo(
-                        "[yellow]Warning: Unknown config keys in .xsarena/config.yml:[/yellow]"
-                    )
-                    for key, suggestions in unknown_keys.items():
-                        if suggestions:
-                            typer.echo(
-                                f"  [yellow]{key}[/yellow] (did you mean: {', '.join(suggestions[:2])}?)"
-                            )
-                        else:
-                            typer.echo(f"  [yellow]{key}[/yellow]")
+            if unknown_keys and not quiet:
+                typer.echo(
+                    "[yellow]Warning: Unknown config keys in .xsarena/config.yml:[/yellow]"
+                )
+                for key, suggestions in unknown_keys.items():
+                    if suggestions:
+                        typer.echo(
+                            f"  [yellow]{key}[/yellow] (did you mean: {', '.join(suggestions[:2])}?)"
+                        )
+                    else:
+                        typer.echo(f"  [yellow]{key}[/yellow]")
 
             if not quiet:
                 typer.echo("✓ Configuration is valid")
@@ -328,8 +327,9 @@ def config_capture_ids(ctx: typer.Context):
 
     # Compute base URL from config using utility function
     from ..utils.project_paths import base_from_config_url
+
     base = base_from_config_url(cli.config.base_url)
-    
+
     typer.echo("To capture bridge IDs:")
     typer.echo("1. Make sure the bridge is running (xsarena service start-bridge-v2)")
     typer.echo("2. Open https://lmarena.ai and add '#bridge=5102' to the URL")
@@ -343,7 +343,7 @@ def config_capture_ids(ctx: typer.Context):
 
     try:
         session_id, message_id = capture_bridge_ids(base)
-        
+
         # IDs found, update config file
         config_path = Path(".xsarena/config.yml")
         config_path.parent.mkdir(parents=True, exist_ok=True)

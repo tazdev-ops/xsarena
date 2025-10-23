@@ -1,5 +1,6 @@
 """Plugin and profile discovery system for XSArena."""
 
+from functools import lru_cache
 from importlib.metadata import entry_points
 from typing import Any, Dict, List
 
@@ -8,6 +9,7 @@ import yaml
 from .project_paths import get_project_root
 
 
+@lru_cache(maxsize=1)
 def discover_profiles() -> Dict[str, Any]:
     """Discover profiles from various sources."""
     profiles = {}
@@ -32,6 +34,7 @@ def discover_profiles() -> Dict[str, Any]:
     return profiles
 
 
+@lru_cache(maxsize=1)
 def discover_overlays() -> Dict[str, str]:
     """Discover overlays from directives/style.*.md files."""
     overlays = {}
@@ -73,6 +76,7 @@ def discover_overlays() -> Dict[str, str]:
     return overlays
 
 
+@lru_cache(maxsize=1)
 def discover_roles() -> Dict[str, str]:
     """Discover roles from directives/roles/*.md files."""
     roles = {}
@@ -98,10 +102,11 @@ def discover_plugins() -> List[Dict[str, Any]]:
     try:
         # Look for entry points under "xsarena.plugins"
         eps = entry_points()
-        if hasattr(eps, "select"):  # New API in Python 3.10+
-            plugin_eps = eps.select(group="xsarena.plugins")
-        else:  # Old API
-            plugin_eps = eps.get("xsarena.plugins", [])
+        plugin_eps = (
+            eps.select(group="xsarena.plugins")
+            if hasattr(eps, "select")
+            else eps.get("xsarena.plugins", [])
+        )  # New API in Python 3.10+ vs old API
 
         for ep in plugin_eps:
             try:

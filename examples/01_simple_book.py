@@ -1,6 +1,7 @@
 """
 Generate a simple book programmatically.
 """
+
 import asyncio
 import subprocess
 

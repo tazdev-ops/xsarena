@@ -21,6 +21,7 @@ from .context import CLIContext
 
 
 def run_book(
+    ctx: typer.Context,
     subject: str,
     profile: Optional[str] = typer.Option(
         None, "--profile", help="Use a specific profile"
@@ -40,7 +41,6 @@ def run_book(
     follow: bool = typer.Option(
         False, "--follow", help="Submit job and follow to completion"
     ),
-    ctx: typer.Context = typer.Context,
 ) -> str:
     """
     Generate a book with specified subject.
@@ -58,31 +58,40 @@ def run_book(
     # Convert extra_file paths to strings
     extra_files = [str(ef) for ef in extra_file if ef.exists()]
 
+    # Normalize legacy enum values to lower case for compatibility
+    normalized_length = length.lower() if isinstance(length, str) else length
+    normalized_span = span.lower() if isinstance(span, str) else span
+
     # Build the run spec
     run_spec = RunSpecV2(
         subject=subject,
-        length=LengthPreset(length),
-        span=SpanPreset(span),
+        length=LengthPreset(normalized_length),
+        span=SpanPreset(normalized_span),
         overlays=overlays,
         extra_files=extra_files,
         out_path=out,
         generate_plan=bool(plan),
         profile=profile,
-        backend=cli_ctx.cfg.backend,
-        model=cli_ctx.cfg.model,
+        backend=cli_ctx.state.backend,
+        model=cli_ctx.state.model,
     )
 
     if follow:
-        job_id = asyncio.run(orch.run_spec(run_spec, backend_type=cli_ctx.cfg.backend))
+        job_id = asyncio.run(
+            orch.run_spec(run_spec, backend_type=cli_ctx.state.backend)
+        )
         typer.echo(f"Job submitted: {job_id}")
         typer.echo("Following job to completion...")
     else:
-        job_id = asyncio.run(orch.run_spec(run_spec, backend_type=cli_ctx.cfg.backend))
+        job_id = asyncio.run(
+            orch.run_spec(run_spec, backend_type=cli_ctx.state.backend)
+        )
         typer.echo(f"Job submitted: {job_id}")
         typer.echo(f"Run 'xsarena ops jobs follow {job_id}' to monitor progress")
 
 
 def run_write(
+    ctx: typer.Context,
     subject: str,
     profile: Optional[str] = typer.Option(
         None, "--profile", help="Use a specific profile"
@@ -102,9 +111,8 @@ def run_write(
     follow: bool = typer.Option(
         False, "--follow", help="Submit job and follow to completion"
     ),
-    ctx: typer.Context = typer.Context,
 ) -> str:
     """
     Write content with specified subject (alias for run_book).
     """
-    run_book(subject, profile, length, span, extra_file, out, wait, plan, follow, ctx)
+    run_book(ctx, subject, profile, length, span, extra_file, out, wait, plan, follow)

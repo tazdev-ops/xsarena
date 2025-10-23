@@ -1,4 +1,5 @@
 """Tests for secrets scanner."""
+
 import tempfile
 from pathlib import Path
 

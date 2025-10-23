@@ -212,7 +212,7 @@ class Orchestrator:
     def job_runner(self):
         """Lazy load JobManager to avoid circular import."""
         if self._job_runner is None:
-            from ..jobs.model import JobManager
+            from ..jobs.manager import JobManager
 
             self._job_runner = JobManager()
         return self._job_runner
@@ -222,12 +222,31 @@ class Orchestrator:
     ) -> str:
         """Run a specification through the orchestrator."""
         if not self.transport:
-            # Pass bridge-specific IDs if they are provided in the run spec
+            # Load configuration
+            from ..config import Config
+
+            base_cfg = Config.load_from_file(".xsarena/config.yml")
+
+            # Build transport_kwargs
             transport_kwargs = {}
+
+            # Always add bridge-specific IDs if present on run_spec
             if run_spec.bridge_session_id:
                 transport_kwargs["session_id"] = run_spec.bridge_session_id
             if run_spec.bridge_message_id:
                 transport_kwargs["message_id"] = run_spec.bridge_message_id
+
+            # Add backend-specific configuration
+            if backend_type == "bridge":
+                transport_kwargs["base_url"] = os.getenv(
+                    "XSA_BRIDGE_URL", base_cfg.base_url
+                )
+            elif backend_type == "openrouter":
+                transport_kwargs["api_key"] = base_cfg.api_key
+                transport_kwargs["model"] = (
+                    run_spec.model
+                    or SessionState.load_from_file(".xsarena/session_state.json").model
+                )
 
             self.transport = create_backend(backend_type, **transport_kwargs)
 
@@ -247,7 +266,10 @@ class Orchestrator:
             min_chars=resolved["min_length"],
             passes=resolved["passes"],
             max_chunks=resolved["chunks"],
-            outline_first=(bool(run_spec.generate_plan) or getattr(session_state, "outline_first_enabled", False)),
+            outline_first=(
+                bool(run_spec.generate_plan)
+                or getattr(session_state, "outline_first_enabled", False)
+            ),
             apply_reading_overlay=getattr(session_state, "reading_overlay_on", False),
         )
         system_text = comp.system_text
@@ -279,10 +301,17 @@ class Orchestrator:
             print(f"[run] submitted → {job_id}")
 
         # Save run manifest with all required information
+        # Create a copy of run_spec with resolved values for accurate manifest
+        from copy import deepcopy
+
+        resolved_run_spec = deepcopy(run_spec)
+        resolved_run_spec.model = resolved.get("model", run_spec.model)
+        resolved_run_spec.backend = resolved.get("backend", run_spec.backend)
+
         self._save_run_manifest(
             job_id=job_id,
             system_text=system_text,
-            run_spec=run_spec,
+            run_spec=resolved_run_spec,
             overlays=run_spec.overlays,
             extra_files=run_spec.extra_files,
         )
@@ -313,14 +342,33 @@ class Orchestrator:
         """Run a continue operation from an existing file."""
         # Create a transport if not provided
         if not self.transport:
-            # Pass bridge-specific IDs if they are provided in the run spec
+            # Load configuration
+            from ..config import Config
+
+            base_cfg = Config.load_from_file(".xsarena/config.yml")
+
+            # Build transport_kwargs
             transport_kwargs = {}
+
+            # Always add bridge-specific IDs if present on run_spec
             if run_spec.bridge_session_id:
                 transport_kwargs["session_id"] = run_spec.bridge_session_id
             if run_spec.bridge_message_id:
                 transport_kwargs["message_id"] = run_spec.bridge_message_id
 
-            self.transport = create_backend("bridge", **transport_kwargs)
+            # Add backend-specific configuration
+            if run_spec.backend == "bridge":
+                transport_kwargs["base_url"] = os.getenv(
+                    "XSA_BRIDGE_URL", base_cfg.base_url
+                )
+            elif run_spec.backend == "openrouter":
+                transport_kwargs["api_key"] = base_cfg.api_key
+                transport_kwargs["model"] = (
+                    run_spec.model
+                    or SessionState.load_from_file(".xsarena/session_state.json").model
+                )
+
+            self.transport = create_backend(run_spec.backend, **transport_kwargs)
 
         # Load session state to override run_spec values with dynamic config
         session_state = SessionState.load_from_file(".xsarena/session_state.json")
@@ -375,10 +423,17 @@ class Orchestrator:
             print(f"[run] submitted → {job_id}")
 
         # Save run manifest with all required information
+        # Create a copy of run_spec with resolved values for accurate manifest
+        from copy import deepcopy
+
+        resolved_run_spec = deepcopy(run_spec)
+        resolved_run_spec.model = resolved.get("model", run_spec.model)
+        resolved_run_spec.backend = resolved.get("backend", run_spec.backend)
+
         self._save_run_manifest(
             job_id=job_id,
             system_text=system_text,
-            run_spec=run_spec,
+            run_spec=resolved_run_spec,
             overlays=run_spec.overlays,
             extra_files=run_spec.extra_files,
         )

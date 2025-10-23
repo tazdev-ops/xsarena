@@ -1,0 +1,23 @@
+.PHONY: bridge book dry continue snap verify jobs lint lint-fix snapshot-ultra snapshot-pro
+bridge: ; xsarena ops service start-bridge-v2
+book:   ; xsarena run book "$(SUBJECT)" --length long --span book --dry-run
+dry:    ; xsarena run book "$(SUBJECT)" --dry-run
+continue: ; xsarena run continue "$(BOOK)" --length long --span book --wait false --follow
+snap:   ; xsarena ops snapshot create --mode ultra-tight --total-max 2500000 --max-per-file 180000
+verify: ; xsarena ops snapshot verify
+jobs:   ; xsarena ops jobs ls
+lint:   ; python -m ruff check . --output-format=concise
+lint-fix: ; python -m ruff check . --fix --output-format=concise
+
+# Snapshot Reform targets
+snapshot-ultra: ## Create ultra-tight snapshot (for sharing)
+	@echo "Creating ultra-tight snapshot..."
+	xsarena ops snapshot verify --mode ultra-tight --max-per-file 180000 --total-max 2500000 --fail-on oversize --fail-on disallowed --fail-on binary --fail-on missing_required --quiet && \\
+	xsarena ops snapshot create --mode ultra-tight --total-max 2500000 --max-per-file 180000 --out ~/repo_flat.txt && \\
+	xsarena ops snapshot verify --file ~/repo_flat.txt --max-per-file 180000 --fail-on oversize --fail-on secrets --redaction-expected --quiet
+	@echo "Ultra-tight snapshot created at ~/repo_flat.txt"
+
+snapshot-pro: ## Create debug report (for development)
+	@echo "Creating debug report..."
+	xsarena ops snapshot debug-report --out ~/xsa_debug_report.txt
+	@echo "Debug report created at ~/xsa_debug_report.txt"

@@ -55,19 +55,6 @@ Analysis and evidence-based tools.
 - `xsarena analyze secrets [path]` - Scan for secrets (API keys, passwords, etc.)
 - `xsarena analyze chad` - CHAD analysis tools
 
-### Study
-Study aids, learning tools, and practice drills.
-
-- `xsarena study generate` - Generate study materials
-  - `xsarena study generate flashcards <content_file>` - Generate flashcards from a content file
-  - `xsarena study generate quiz <content_file>` - Generate a quiz from a content file
-  - `xsarena study generate glossary <content_file>` - Create a glossary from a content file with frequency filtering
-  - `xsarena study generate index <content_file>` - Generate an index from a content file with depth control
-  - `xsarena study generate cloze <content_file>` - Create cloze deletions from a content file
-  - `xsarena study generate drill <content_file>` - Generate active recall drills from a content file
-- `xsarena study coach` - Coaching tools
-- `xsarena study joy` - Joy-related tools (hidden)
-
 ### Dev
 Coding agent, git integration, automation pipelines, and simulation.
 
@@ -75,11 +62,11 @@ Coding agent, git integration, automation pipelines, and simulation.
 - `xsarena dev pipeline` - Pipeline management
 - `xsarena dev simulate <subject>` - Run a fast offline simulation
 
-### Project
-Project management and initialization.
+### Study and Project Commands
+Note: Study and project commands exist in the codebase but are not available as top-level commands. They are integrated into other command groups:
 
-- `xsarena project project` - Project-related commands
-- `xsarena project init` - Initialize a new project
+- Study-related functionality is available within other command groups where appropriate
+- Project-related functionality is available within ops and other command groups where appropriate
 
 ### Ops
 System health, jobs, services, and configuration.
@@ -155,6 +142,23 @@ The `xsarena settings` group provides unified access to both configuration and c
   - `--output-push/--no-output-push` - Enable or disable output pushing (utils settings)
 - `xsarena settings persist` - Persist current CLI knobs to .xsarena/config.yml (controls layer) and save config (config layer)
 - `xsarena settings reset` - Reset settings from persisted configuration (controls layer) and reload config (config layer)
+
+## Backend Configuration
+
+### Bridge Backend (Default)
+The default backend connects to a local bridge server:
+- **Default URL**: `http://127.0.0.1:5102/v1`
+- **Start service**: `xsarena ops service start-bridge-v2`
+- **Capture session/message IDs**: `xsarena settings capture-ids` or `/capture` in interactive mode
+- **Internal token**: Set via `XSA_INTERNAL_TOKEN` environment variable or `bridge.internal_api_token` in `.xsarena/config.yml`
+
+### OpenRouter Backend
+To use OpenRouter as a backend:
+- **API Key**: Set via `OPENROUTER_API_KEY` environment variable
+- **Default URL**: `https://openrouter.ai/api/v1`
+- **Override URL**: Set via `OPENROUTER_BASE_URL` environment variable
+- **Test connection**: `xsarena ops config backend-test`
+- **Usage**: Any command that uses the backend will automatically use OpenRouter when configured
 
 ## Jobs Commands
 

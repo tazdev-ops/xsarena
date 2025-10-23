@@ -1,4 +1,5 @@
 """Tests for configuration loading and validation."""
+
 import pytest
 from xsarena.core.config import Config
 

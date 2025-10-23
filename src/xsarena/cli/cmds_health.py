@@ -13,6 +13,7 @@ from typing import Any, Dict, List
 import typer
 import yaml
 
+from ..utils.helpers import load_yaml_or_json as _load_yaml
 from ..utils.secrets_scanner import scan_secrets
 from .context import CLIContext
 
@@ -265,6 +266,10 @@ def _maybe_merge():
         md_files = list(sources_dir.glob("*.md"))
         if md_files:
             merged_content = []
+            # Add banner at the top to mark file as generated
+            merged_content.append(
+                "<!-- AUTO-GENERATED: Do not edit. Sources under directives/_rules/sources/. Regenerate via: xsarena ops health merge-rules -->\n\n"
+            )
             for md_file in sorted(md_files):
                 try:
                     content = md_file.read_text(encoding="utf-8")

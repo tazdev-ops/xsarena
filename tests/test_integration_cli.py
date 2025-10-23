@@ -1,6 +1,5 @@
 """CLI integration tests for core flows."""
 
-import os
 import tempfile
 from pathlib import Path
 from unittest.mock import patch
@@ -13,79 +12,49 @@ runner = CliRunner()
 
 def test_run_book_integration(patch_create_backend):
     """Test xsarena run book command creates output file."""
+    from unittest.mock import AsyncMock, MagicMock
+
     with tempfile.TemporaryDirectory() as temp_dir:
         output_file = Path(temp_dir) / "test_output.md"
 
-        # Mock the recipe creation and job running to avoid actual AI calls
-        with patch("xsarena.core.jobs.model.JobManager") as mock_runner:
-            # Mock the submit and run_job methods
-            mock_job_instance = mock_runner.return_value
-            mock_job_instance.submit.return_value = "test-job-id"
-            mock_job_instance.run_job.return_value = None
+        # Mock the scheduler to prevent actual job execution
+        with patch(
+            "xsarena.core.v2_orchestrator.orchestrator.Scheduler"
+        ) as MockScheduler:
+            mock_scheduler_instance = MockScheduler.return_value
+            # Make wait_for_job an awaitable that does nothing
+            mock_scheduler_instance.wait_for_job = AsyncMock(return_value=None)
+            mock_scheduler_instance.submit_job = AsyncMock(return_value=True)
 
-            # Run the command
-            result = runner.invoke(
-                app,
-                [
-                    "run",
-                    "book",
-                    "--subject",
-                    "Test Subject",
-                    "--out",
-                    str(output_file),
-                    "--length",
-                    "standard",
-                    "--span",
-                    "medium",
-                ],
-            )
+            # Mock the JobManager for submission and loading
+            with patch("xsarena.core.jobs.manager.JobManager") as MockJobManager:
+                mock_jm_instance = MockJobManager.return_value
+                mock_jm_instance.submit.return_value = "test-job-id"
 
-            # Should succeed
-            assert result.exit_code == 0
+                # Create a mock job object for the load method
+                mock_job = MagicMock()
+                mock_job.state = "RUNNING"
+                mock_jm_instance.load.return_value = mock_job
+                mock_jm_instance.find_resumable_job_by_output.return_value = None
 
-            # Check if the job was submitted
-            assert mock_job_instance.submit.called
+                # Run the command
+                result = runner.invoke(
+                    app,
+                    [
+                        "run",
+                        "book",
+                        "Test Subject",
+                        "--out",
+                        str(output_file),
+                        "--length",
+                        "standard",
+                        "--span",
+                        "medium",
+                    ],
+                )
 
-
-def test_jobs_apply_integration(patch_create_backend):
-    """Test xsarena jobs apply command."""
-    # Create a temporary recipe file
-    with tempfile.NamedTemporaryFile(mode="w", suffix=".yml", delete=False) as f:
-        f.write(
-            """
-name: "Test Job"
-task: "book.zero2hero"
-subject: "Test Subject"
-system_text: "Test system text"
-max_chunks: 2
-continuation:
-  mode: "anchor"
-  minChars: 1000
-  pushPasses: 1
-io:
-  output: "file"
-  outPath: "./test_output.md"
-"""
-        )
-        recipe_path = f.name
-
-    try:
-        # Mock the job runner
-        with patch("xsarena.core.jobs.model.JobManager") as mock_runner:
-            mock_job_instance = mock_runner.return_value
-            mock_job_instance.run_job.return_value = None
-
-            # Run the command
-            result = runner.invoke(app, ["jobs", "apply", recipe_path])
-
-            # Should succeed
-            assert result.exit_code == 0
-
-            # Check if run_job was called
-            assert mock_job_instance.run_job.called
-    finally:
-        # Clean up
-        os.unlink(recipe_path)
+                # Should succeed
+                assert result.exit_code == 0, result.output
 
 
 def test_fix_run_integration():

@@ -9,80 +9,9 @@ from typing import List, Optional, Tuple
 
 import typer
 
-from xsarena.utils.flatpack_txt import flatten_txt
+from xsarena.core.snapshot_config import load_snapshot_presets
 from xsarena.utils.secrets_scanner import SecretsScanner
-from xsarena.utils.snapshot_simple import write_pro_snapshot
-
-# --- New, Refined Presets ---
-
-# Ultra-tight preset for quick sharing with AI assistants.
-PRESET_ULTRA_TIGHT_INCLUDE = [
-    "README.md",
-    "COMMANDS_REFERENCE.md",
-    "pyproject.toml",
-    "docs/ARCHITECTURE.md",
-    "docs/USAGE.md",
-    "src/xsarena/cli/main.py",
-    "src/xsarena/cli/registry.py",
-    "src/xsarena/core/v2_orchestrator/orchestrator.py",
-    "src/xsarena/core/jobs/model.py",
-    "src/xsarena/core/jobs/scheduler.py",
-    "src/xsarena/core/config.py",
-    "directives/_rules/rules.merged.md",
-]
-
-# Refined author-core preset. Includes more source code and the directives manifest.
-PRESET_AUTHOR_CORE_INCLUDE = [
-    # Core docs and metadata
-    "README.md",
-    "COMMANDS_REFERENCE.md",
-    "pyproject.toml",
-    # Essential architecture & usage docs
-    "docs/ARCHITECTURE.md",
-    "docs/USAGE.md",
-    "docs/OPERATING_MODEL.md",
-    # All source code
-    "src/xsarena/**/*.py",
-    # Directives MANIFEST, not all the tiny files
-    "directives/manifest.yml",
-    "directives/_rules/rules.merged.md",
-    # Key data schemas/resources
-    "data/schemas/**/*.json",
-    "data/resource_map.en.json",
-    # Project configuration
-    ".xsarena/config.yml",
-]
-
-# Sensible global excludes (can be extended via env)
-PRESET_DEFAULT_EXCLUDE = [
-    ".git/**",
-    "venv/**",
-    ".venv/**",
-    "__pycache__/**",
-    "*.pyc",
-    ".pytest_cache/**",
-    ".mypy_cache/**",
-    ".ruff_cache/**",
-    ".cache/**",
-    "dist/**",
-    "build/**",
-    "logs/**",
-    ".xsarena/jobs/**",
-    ".xsarena/tmp/**",
-    "books/**",
-    "review/**",
-    "tests/**",
-    "examples/**",
-    "*.egg-info/**",
-    ".ipynb_checkpoints/**",
-    "repo_flat.txt",
-    "xsa_snapshot*.txt",
-    "xsa_snapshot*.zip",
-    "xsa_debug_report*.txt",
-    "snapshot_chunks/**",
-    "**/_preview/**",
-    "**/_mixer/**",  # Exclude temporary directive directories
-]
+from xsarena.utils.snapshot.pack_txt import flatten_txt
 
 app = typer.Typer(
     help="Generate an intelligent, minimal, and configurable project snapshot."
@@ -94,9 +23,7 @@ app = typer.Typer(
     help="Create a flat snapshot, ideal for chatbot uploads. Use --mode ultra-tight for the leanest version.",
 )
 def snapshot_create(
-    mode: str = typer.Option(
-        "author-core", "--mode", help="ultra-tight | author-core | custom"
-    ),
+    mode: str = typer.Option("author-core", "--mode", help="Snapshot mode"),
     out: str = typer.Option("~/repo_flat.txt", "--out", "-o", help="Output .txt path"),
     include: List[str] = typer.Option(
         None,
@@ -121,16 +48,16 @@ def snapshot_create(
 ):
     """
     Flatten curated files into a single .txt. Uses glob-based presets and budgets.
-    Tip: 'ultra-tight' is best for AI. 'author-core' is more comprehensive.
+    Tip: 'ultra-tight' is best for AI. 'author-core' is more comprehensive. 'maximal' includes everything for debugging (targets ~1MB).
     """
     mode_lower = (mode or "author-core").lower()
 
+    # Load all presets and default excludes from the single source of truth
+    all_presets, default_excludes = load_snapshot_presets()
+
     # Resolve includes based on mode
-    if mode_lower == "ultra-tight":
-        inc = list(PRESET_ULTRA_TIGHT_INCLUDE)
-    elif mode_lower == "author-core":
-        inc = list(PRESET_AUTHOR_CORE_INCLUDE)
-    elif mode_lower == "custom":
+    selected_preset = all_presets.get(mode_lower, {})
+    if mode_lower == "custom":
         if not include:
             typer.echo(
                 "Error: --mode=custom requires at least one --include (-I)", err=True
@@ -138,22 +65,45 @@ def snapshot_create(
             raise typer.Exit(code=1)
         inc = list(include)
     else:
-        typer.echo(
-            f"Error: Unknown mode '{mode}'. Choose: ultra-tight | author-core | custom",
-            err=True,
-        )
-        raise typer.Exit(code=1)
+        inc = selected_preset.get("include", [])
+        if not inc and mode_lower not in all_presets:
+            typer.echo(
+                f"Error: Unknown mode '{mode}'. Choose from: {', '.join(all_presets.keys())} | custom",
+                err=True,
+            )
+            raise typer.Exit(code=1)
 
     if mode_lower != "custom" and include:
-        inc.extend(include)  # Append extra includes to presets
+        inc.extend(include)  # Append extra CLI includes to presets
 
-    # Resolve excludes (preset + CLI + env override)
-    final_excludes = list(PRESET_DEFAULT_EXCLUDE) + (exclude or [])
+    # Resolve excludes (preset + default + CLI)
+    final_excludes = list(default_excludes)
+    final_excludes.extend(selected_preset.get("exclude", []))
+    if exclude:
+        final_excludes.extend(exclude)
     env_extra = os.getenv("XSA_SNAPSHOT_EXCLUDE", "").strip()
     if env_extra:
         final_excludes += [pat.strip() for pat in env_extra.split(",") if pat.strip()]
 
     outp = Path(out).expanduser()
+    try:
+        if outp.exists():
+            outp.unlink()
+    except Exception:
+        pass
+
+    # Always exclude the output file (relative posix)
+    try:
+        rel_out = (
+            outp.resolve().relative_to(Path(".").resolve())
+            if outp.is_absolute()
+            else outp
+        )
+        rel_out_pat = str(rel_out).replace("\\", "/")
+        final_excludes.append(rel_out_pat)
+    except ValueError:
+        # If the output file is outside the current directory, don't add it to excludes
+        pass
 
     try:
         out_path, notes = flatten_txt(
@@ -198,35 +148,26 @@ def snapshot_report():
         typer.echo(f"{'Mode':<14} {'Size (bytes)':>12}")
         typer.echo("-" * 28)
 
-        # Test ultra-tight preset
-        flatten_txt(
-            out_path=tmp_path,
-            include=PRESET_ULTRA_TIGHT_INCLUDE,
-            exclude=PRESET_DEFAULT_EXCLUDE,
-            max_bytes_per_file=999_999_999,
-            total_max_bytes=999_999_999,
-            use_git_tracked=False,
-            include_untracked=False,
-            redact=True,
-            add_repo_map=False,
-        )
-        ultra_tight_size = tmp_path.stat().st_size
-        typer.echo(f"{'ultra-tight':<14} {ultra_tight_size:>12,}")
+        # Load presets to test sizes
+        all_presets, default_excludes = load_snapshot_presets()
 
-        # Test author-core preset
-        flatten_txt(
-            out_path=tmp_path,
-            include=PRESET_AUTHOR_CORE_INCLUDE,
-            exclude=PRESET_DEFAULT_EXCLUDE,
-            max_bytes_per_file=999_999_999,
-            total_max_bytes=999_999_999,
-            use_git_tracked=False,
-            include_untracked=False,
-            redact=True,
-            add_repo_map=False,
-        )
-        author_core_size = tmp_path.stat().st_size
-        typer.echo(f"{'author-core':<14} {author_core_size:>12,}")
+        # Test all available presets
+        for preset_name in sorted(all_presets.keys()):
+            preset_include = all_presets.get(preset_name, {}).get("include", [])
+            if preset_include:  # Only test if the preset has includes
+                flatten_txt(
+                    out_path=tmp_path,
+                    include=preset_include,
+                    exclude=default_excludes,
+                    max_bytes_per_file=999_999_999,
+                    total_max_bytes=999_999_999,
+                    use_git_tracked=False,
+                    include_untracked=False,
+                    redact=True,
+                    add_repo_map=False,
+                )
+                preset_size = tmp_path.stat().st_size
+                typer.echo(f"{preset_name:<14} {preset_size:>12,}")
 
         typer.echo("\nTip: Use 'xsarena ops snapshot create' to build a snapshot pack.")
     except Exception as e:
@@ -242,14 +183,26 @@ def snapshot_debug_report(
         "~/xsa_debug_report.txt", "--out", "-o", help="Output file"
     ),
 ):
-    typer.echo("Generating verbose debug report. This may take a moment...")
-    try:
-        out_path = Path(out).expanduser()
-        write_pro_snapshot(out_path=out_path, mode="standard")
-        typer.echo(f"✓ Debug report written to: {out}")
-    except Exception as e:
-        typer.echo(f"Error creating debug report: {e}", err=True)
-        raise typer.Exit(1) from e
+    typer.echo(
+        "⚠️  DEPRECATION WARNING: 'xsarena ops snapshot debug-report' is deprecated.",
+        err=True,
+    )
+    typer.echo(
+        "Use 'xsarena ops snapshot create --mode maximal --out ~/xsa_debug_report.txt' instead.",
+        err=True,
+    )
+    # For backward compatibility, call the new command with appropriate parameters
+    snapshot_create(
+        mode="maximal",
+        out=out,
+        include=None,
+        exclude=None,
+        git_tracked=False,
+        max_per_file=180_000,
+        total_max=2_500_000,
+        redact=False,
+        repo_map=True,
+    )
 
 
 def _posix_path(p: Path) -> str:
@@ -305,6 +258,32 @@ def _parse_flatpack_boundaries(text: str) -> List[Tuple[str, int, bool]]:
     return entries
 
 
+@app.command("txt", help="Flat text snapshot (legacy CLI shape).")
+def snapshot_txt(
+    preset: str = typer.Option("author-core", "--preset", help="Snapshot preset"),
+    out: str = typer.Option("~/repo_flat.txt", "--out", "-o"),
+    total_max: int = typer.Option(2_500_000, "--total-max"),
+    max_per_file: int = typer.Option(180_000, "--max-per-file"),
+    repo_map: bool = typer.Option(True, "--repo-map/--no-repo-map"),
+):
+    all_presets, default_excludes = load_snapshot_presets()
+    spec = all_presets.get(preset, {})
+    includes = spec.get("include", [])
+    outp = Path(out).expanduser()
+    flatten_txt(
+        out_path=outp,
+        include=includes,
+        exclude=default_excludes,
+        max_bytes_per_file=max_per_file,
+        total_max_bytes=total_max,
+        use_git_tracked=False,
+        include_untracked=False,
+        redact=True,
+        add_repo_map=repo_map,
+    )
+    typer.echo(str(outp))
+
+
 @app.command("verify")
 def snapshot_verify(
     snapshot_file: Optional[str] = typer.Option(
@@ -331,9 +310,7 @@ def snapshot_verify(
     total_max: int = typer.Option(
         4_000_000, "--total-max", help="Total budget (bytes, preflight only)"
     ),
-    disallow: List[str] = typer.Option(
-        PRESET_DEFAULT_EXCLUDE, "--disallow", help="Disallow these globs."
-    ),
+    disallow: List[str] = typer.Option([], "--disallow", help="Disallow these globs."),
     fail_on: List[str] = typer.Option(
         ["secrets", "oversize", "disallowed", "binary", "missing_required"],
         "--fail-on",
@@ -443,18 +420,14 @@ def snapshot_verify(
         _fail_if_needed(len(entries), total_bytes)
 
     # Preflight logic
-    if mode == "ultra-tight":
-        base_includes = PRESET_ULTRA_TIGHT_INCLUDE
-    elif mode == "author-core":
-        base_includes = PRESET_AUTHOR_CORE_INCLUDE
-    else:
-        base_includes = []
+    all_presets, default_excludes = load_snapshot_presets()
+
+    base_includes = all_presets[mode].get("include", []) if mode in all_presets else []
 
     final_includes = base_includes + (include or [])
-    final_excludes = PRESET_DEFAULT_EXCLUDE + (exclude or [])
+    final_excludes = default_excludes + (exclude or [])
 
-    # Collect files using a simplified glob-based approach
-    all_files = {p.resolve() for p in Path(".").rglob("*") if p.is_file()}
+    # Build candidates strictly from final_includes (expand globs), then filter with final_excludes
     included_files = set()
     for pat in final_includes:
         for p in Path(".").glob(pat):

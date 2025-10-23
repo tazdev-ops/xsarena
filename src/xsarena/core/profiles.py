@@ -15,7 +15,7 @@ def load_profiles():
         },
         "pop": {"overlays": ["pop"], "extra": "Accessible; rigor without padding."},
         "reference": {
-            "overlays": ["nobs"],
+            "overlays": ["no_bs"],
             "extra": "Terse, factual; definitions first.",
         },
     }

@@ -1,22 +1,32 @@
-# Bridge v2 (Local-first)
+# Bridge v2 (Local-first, Modular)
 
-Start
-- xsarena ops service start-bridge-v2
-- Open your LMArena page and add #bridge=5102 if your userscript expects it.
+Overview
+- FastAPI server with WebSocket to a userscript tab.
+- Per-request Cloudflare detection + refresh; per-peer rate limits; simple image markdown passthrough.
+- IDs captured via internal endpoints + CLI helpers; stored in .xsarena/config.yml.
 
-Health
-- GET $(base_url)/v1/health → {"status":"ok","ws_connected":true|false,...}
-  - base_url is normalized to end with /v1 in settings.
+Start + Health
+- Start bridge: xsarena ops service start-bridge-v2
+- Health: GET $(base)/v1/health → {"status":"ok","ws_connected":true|false,...}
+  - base_url normalized to end with /v1
 
 Capture IDs (recommended)
 - xsarena unified-settings capture-ids
   - Sends /internal/start_id_capture to the bridge
-  - Instructs you to click "Retry" in the browser
-  - Polls /internal/config and persists bridge.session_id/message_id to .xsarena/config.yml
+  - Instructs you to click "Retry" in your browser
+  - Polls /internal/config
+  - Persists bridge: {session_id, message_id} into .xsarena/config.yml
 
 Models
-- GET /v1/models returns current map; POST /internal/update_available_models updates via userscript page source.
+- GET /v1/models shows the current list
+- Update via POST /internal/update_available_models (userscript posts page source)
+- Per-model mapping (optional): model_endpoint_map.json supports session/message IDs and mode/battle_target
+
+Guards
+- Cloudflare: automatic refresh with a capped retry per request
+- Rate limits: per-peer "burst/window" read from CONFIG on each call
+- Idle restart: optional with reconnect message; disabled during active streams
 
 Notes
-- Cloudflare: bridge auto-refresh uses a guarded retry; let it finish.
-- Idle restart: enable in config if desired; streams are respected.
+- API key (optional): set CONFIG.api_key to enforce Authorization: Bearer
+- Image outputs: userscript stream is parsed; image URLs become markdown: ![Image](url)

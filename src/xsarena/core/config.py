@@ -27,7 +27,7 @@ class Config(BaseModel):
     redaction_enabled: bool = False
 
     @model_validator(mode="after")
-    def validate_config(self):
+    def validate_config(self) -> "Config":
         """Validate configuration values."""
         errors = []
 
@@ -40,7 +40,8 @@ class Config(BaseModel):
         # Validate model
         if self.backend == "openrouter" and not self.api_key:
             errors.append(
-                "OpenRouter backend requires api_key. Set OPENROUTER_API_KEY environment variable or configure in .xsarena/config.yml"
+                "OpenRouter backend requires api_key. Set OPENROUTER_API_KEY environment "
+                "variable or configure in .xsarena/config.yml"
             )
 
         # Validate base_url format
@@ -116,6 +117,9 @@ class Config(BaseModel):
         """Load config with layered precedence:
         defaults → .xsarena/config.yml → environment variables → CLI flags (applied by main).
         """
+        """Load config with layered precedence:
+        defaults → .xsarena/config.yml → environment variables → CLI flags (applied by main).
+        """
         # Start with defaults
         config_dict: Dict[str, Any] = {
             "backend": "bridge",  # Default to browser-based bridge; API backends are optional for advanced use
@@ -145,7 +149,8 @@ class Config(BaseModel):
                     )
                     if unknown_keys:
                         console.print(
-                            f"[yellow]Warning: Unknown config keys in {config_file_path}:[/yellow] {', '.join(sorted(unknown_keys))}"
+                            f"[yellow]Warning: Unknown config keys in {config_file_path}:[/yellow] "
+                            f"{', '.join(sorted(unknown_keys))}"
                         )
 
                     config_dict.update(file_config)
@@ -155,33 +160,44 @@ class Config(BaseModel):
                     )
 
         # Override with environment variables
-        env_overrides = {}
-        if os.getenv("XSARENA_BACKEND"):
-            env_overrides["backend"] = os.getenv("XSARENA_BACKEND")
-        if os.getenv("XSARENA_MODEL"):
-            env_overrides["model"] = os.getenv("XSARENA_MODEL")
-        if os.getenv("XSARENA_WINDOW_SIZE"):
-            env_overrides["window_size"] = int(os.getenv("XSARENA_WINDOW_SIZE"))
-        if os.getenv("XSARENA_ANCHOR_LENGTH"):
-            env_overrides["anchor_length"] = int(os.getenv("XSARENA_ANCHOR_LENGTH"))
-        if os.getenv("XSARENA_CONTINUATION_MODE"):
-            env_overrides["continuation_mode"] = os.getenv("XSARENA_CONTINUATION_MODE")
-        if os.getenv("XSARENA_REPETITION_THRESHOLD"):
-            env_overrides["repetition_threshold"] = float(
-                os.getenv("XSARENA_REPETITION_THRESHOLD")
+        env_overrides: Dict[str, Any] = {}
+        backend_env = os.getenv("XSARENA_BACKEND")
+        if backend_env is not None:
+            env_overrides["backend"] = backend_env
+        model_env = os.getenv("XSARENA_MODEL")
+        if model_env is not None:
+            env_overrides["model"] = model_env
+        window_size_env = os.getenv("XSARENA_WINDOW_SIZE")
+        if window_size_env is not None:
+            env_overrides["window_size"] = int(window_size_env)
+        anchor_length_env = os.getenv("XSARENA_ANCHOR_LENGTH")
+        if anchor_length_env is not None:
+            env_overrides["anchor_length"] = int(anchor_length_env)
+        continuation_mode_env = os.getenv("XSARENA_CONTINUATION_MODE")
+        if continuation_mode_env is not None:
+            env_overrides["continuation_mode"] = continuation_mode_env
+        repetition_threshold_env = os.getenv("XSARENA_REPETITION_THRESHOLD")
+        if repetition_threshold_env is not None:
+            env_overrides["repetition_threshold"] = float(repetition_threshold_env)
+        max_retries_env = os.getenv("XSARENA_MAX_RETRIES")
+        if max_retries_env is not None:
+            env_overrides["max_retries"] = int(max_retries_env)
+        api_key_env = os.getenv("OPENROUTER_API_KEY")
+        if api_key_env is not None:
+            env_overrides["api_key"] = api_key_env
+        base_url_env = os.getenv("XSARENA_BASE_URL")
+        if base_url_env is not None:
+            env_overrides["base_url"] = base_url_env
+        timeout_env = os.getenv("XSARENA_TIMEOUT")
+        if timeout_env is not None:
+            env_overrides["timeout"] = int(timeout_env)
+        redaction_enabled_env = os.getenv("XSARENA_REDACTION_ENABLED")
+        if redaction_enabled_env is not None:
+            env_overrides["redaction_enabled"] = redaction_enabled_env.lower() in (
+                "true",
+                "1",
+                "yes",
             )
-        if os.getenv("XSARENA_MAX_RETRIES"):
-            env_overrides["max_retries"] = int(os.getenv("XSARENA_MAX_RETRIES"))
-        if os.getenv("OPENROUTER_API_KEY"):
-            env_overrides["api_key"] = os.getenv("OPENROUTER_API_KEY")
-        if os.getenv("XSARENA_BASE_URL"):
-            env_overrides["base_url"] = os.getenv("XSARENA_BASE_URL")
-        if os.getenv("XSARENA_TIMEOUT"):
-            env_overrides["timeout"] = int(os.getenv("XSARENA_TIMEOUT"))
-        if os.getenv("XSARENA_REDACTION_ENABLED"):
-            env_overrides["redaction_enabled"] = os.getenv(
-                "XSARENA_REDACTION_ENABLED"
-            ).lower() in ("true", "1", "yes")
 
         config_dict.update(env_overrides)
 

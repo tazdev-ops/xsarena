@@ -1,4 +1,5 @@
 """Tests for resume handler."""
+
 from unittest.mock import Mock
 
 from xsarena.core.jobs.resume_handler import ResumeHandler

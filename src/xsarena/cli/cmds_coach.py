@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import asyncio
+import contextlib
 import pathlib
 import time
 
@@ -39,11 +40,10 @@ def _ask_q(eng: Engine, subject: str):
 def coach_start(subject: str, minutes: int = 10):
     # Import joy functions if available, otherwise use existing fallbacks
     global log_event, add_achievement
-    try:
+    with contextlib.suppress(ImportError):
         from ..core.joy import add_achievement, log_event
-    except ImportError:
+
         # Joy module is optional, keep using the fallbacks defined at module level
-        pass
 
     try:
         eng = Engine(create_backend("openrouter"), SessionState())
@@ -84,11 +84,10 @@ def coach_quiz(subject: str, n: int = 10):
     """A quick N-question MCQ quiz."""
     # Import joy functions if available, otherwise use existing fallbacks
     global log_event, add_achievement
-    try:
+    with contextlib.suppress(ImportError):
         from ..core.joy import add_achievement, log_event
-    except ImportError:
+
         # Joy module is optional, keep using the fallbacks defined at module level
-        pass
 
     try:
         eng = Engine(create_backend("openrouter"), SessionState())
@@ -122,11 +121,10 @@ def boss_start(subject: str, n: int = 20, minutes: int = 25):
     """Timed Boss mini-exam; auto-creates a repair prompt."""
     # Import joy functions if available, otherwise use existing fallbacks
     global log_event, add_achievement
-    try:
+    with contextlib.suppress(ImportError):
         from ..core.joy import add_achievement, log_event
-    except ImportError:
+
         # Joy module is optional, keep using the fallbacks defined at module level
-        pass
 
     try:
         eng = Engine(create_backend("openrouter"), SessionState())

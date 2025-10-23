@@ -33,6 +33,18 @@ def _internal_ok(request: Request) -> bool:
         return False
 
 
+def _local_internal_ok(request: Request) -> bool:
+    """Local internal guard that uses handlers.CONFIG first, falling back to global guard."""
+    expected = CONFIG.get("internal_api_token", "dev-token-change-me")
+    provided = request.headers.get("x-internal-token") or request.headers.get(
+        "authorization", ""
+    ).replace("Bearer ", "")
+    if provided == expected:
+        return True
+    # fallback to global guard (reads config_loaders.CONFIG)
+    return _internal_ok(request)
+
+
 def load_config():
     """Load configuration from .xsarena/config.yml."""
     global CONFIG
@@ -113,7 +125,6 @@ async def chat_completions_handler(
     browser_ws,
     response_channels,
     REFRESHING_BY_REQUEST,
-    cloudflare_verified,
 ):
     """Handle chat completions requests."""
     if not browser_ws:
@@ -238,233 +249,33 @@ async def chat_completions_handler(
             {"request_id": request_id, "payload": lmarena_payload}
         )
 
-        # Reset Cloudflare verification flag for this request
-        cloudflare_verified = False
+        from .streams import stream_generator as stream_utility
 
-        async def stream_generator():
-            global cloudflare_verified, REFRESHING_BY_REQUEST
-            try:
-                queue = response_channels[request_id]
-                timeout_seconds = CONFIG.get("stream_response_timeout_seconds", 360)
+        stream_gen = stream_utility(
+            request_id,
+            browser_ws,
+            response_channels,
+            REFRESHING_BY_REQUEST,
+            lmarena_payload,
+            model_name,
+        )
 
-                while True:
-                    try:
-                        # Use timeout for queue.get to handle timeouts gracefully
-                        data = await asyncio.wait_for(
-                            queue.get(), timeout=timeout_seconds
-                        )
-
-                        # Check for Cloudflare detection
-                        if isinstance(data, str):
-                            # Check if this looks like a Cloudflare page using configurable patterns
-                            cloudflare_patterns = CONFIG.get(
-                                "cloudflare_patterns",
-                                [
-                                    "Just a moment...",
-                                    "Enable JavaScript and cookies to continue",
-                                    "Checking your browser before accessing",
-                                ],
-                            )
-                            if any(pattern in data for pattern in cloudflare_patterns):
-                                max_refresh_attempts = CONFIG.get(
-                                    "max_refresh_attempts", 1
-                                )
-                                current_refresh_attempts = REFRESHING_BY_REQUEST.get(
-                                    request_id, 0
-                                )
-                                if current_refresh_attempts < max_refresh_attempts:
-                                    # First time seeing Cloudflare, trigger refresh
-                                    logger.info(
-                                        f"Detected Cloudflare challenge, sending refresh command (attempt {current_refresh_attempts + 1}/{max_refresh_attempts})"
-                                    )
-                                    REFRESHING_BY_REQUEST[request_id] = (
-                                        current_refresh_attempts + 1
-                                    )
-                                    await browser_ws.send_json({"command": "refresh"})
-                                    # Wait for a short backoff period before retrying
-                                    await asyncio.sleep(5.0)  # 5 second backoff
-                                    # Retry by sending the same request again
-                                    await browser_ws.send_json(
-                                        {
-                                            "request_id": request_id,
-                                            "payload": lmarena_payload,
-                                        }
-                                    )
-                                    continue  # Continue to wait for response again
-
-                                else:
-                                    # Already tried refreshing up to max attempts, return error
-                                    error_chunk = {
-                                        "error": {
-                                            "type": "cloudflare_challenge",
-                                            "message": f"Cloudflare security challenge still present after {max_refresh_attempts} refresh attempts. Please manually refresh the browser.",
-                                        }
-                                    }
-                                    yield f"data: {json.dumps(error_chunk)}\n\n"
-                                    yield "data: [DONE]\n\n"
-                                    break
-
-                        if isinstance(data, dict) and "error" in data:
-                            logger.error(f"Error from browser: {data['error']}")
-                            raise HTTPException(status_code=502, detail=data["error"])
-                        if data == "[DONE]":
-                            # Check if we need to add content filter explanation in the final chunk
-                            from .formatters import format_openai_finish_chunk
-
-                            yield format_openai_finish_chunk(
-                                model_name, request_id, reason="stop"
-                            )
-                            # Reset per-request refresh flag after successful completion
-                            REFRESHING_BY_REQUEST.pop(request_id, None)
-                            break
-
-                        # Handle image content for image models
-                        if isinstance(data, str) and data.startswith("![Image]"):
-                            # This is an image markdown, format as appropriate
-                            from .formatters import format_openai_chunk
-
-                            yield format_openai_chunk(data, model_name, request_id)
-                        else:
-                            yield format_openai_chunk(data, model_name, request_id)
-                    except asyncio.TimeoutError:
-                        logger.error(
-                            f"Timeout waiting for response for request_id: {request_id}"
-                        )
-                        error_chunk = {
-                            "error": {
-                                "type": "timeout",
-                                "message": f"Response timeout after {timeout_seconds} seconds",
-                            }
-                        }
-                        yield f"data: {json.dumps(error_chunk)}\n\n"
-                        yield "data: [DONE]\n\n"
-                        break
-            finally:
-                # Reset per-request refresh flag in all exit paths to prevent getting stuck
-                REFRESHING_BY_REQUEST.pop(request_id, None)
-                if request_id in response_channels:
-                    del response_channels[request_id]
+        from .streams import handle_non_stream_response as non_stream_handler
 
         if want_stream:
-            return StreamingResponse(stream_generator(), media_type="text/event-stream")
+            return StreamingResponse(stream_gen, media_type="text/event-stream")
         else:
-            # Aggregate into a single JSON response (OpenAI-style)
-            try:
-                queue = response_channels[request_id]
-                timeout_seconds = CONFIG.get("stream_response_timeout_seconds", 360)
-                content_parts = []
-
-                while True:
-                    try:
-                        data = await asyncio.wait_for(
-                            queue.get(), timeout=timeout_seconds
-                        )
-
-                        # Check for Cloudflare detection
-                        if isinstance(data, str):
-                            # Check if this looks like a Cloudflare page using configurable patterns
-                            cloudflare_patterns = CONFIG.get(
-                                "cloudflare_patterns",
-                                [
-                                    "Just a moment...",
-                                    "Enable JavaScript and cookies to continue",
-                                    "Checking your browser before accessing",
-                                ],
-                            )
-                            if any(pattern in data for pattern in cloudflare_patterns):
-                                max_refresh_attempts = CONFIG.get(
-                                    "max_refresh_attempts", 1
-                                )
-                                current_refresh_attempts = REFRESHING_BY_REQUEST.get(
-                                    request_id, 0
-                                )
-                                if current_refresh_attempts < max_refresh_attempts:
-                                    # First time seeing Cloudflare, trigger refresh
-                                    logger.info(
-                                        f"Detected Cloudflare challenge, sending refresh command (attempt {current_refresh_attempts + 1}/{max_refresh_attempts})"
-                                    )
-                                    REFRESHING_BY_REQUEST[request_id] = (
-                                        current_refresh_attempts + 1
-                                    )
-                                    await browser_ws.send_json({"command": "refresh"})
-                                    # Wait for a short backoff period before retrying
-                                    await asyncio.sleep(5.0)  # 5 second backoff
-                                    # Retry by sending the same request again
-                                    await browser_ws.send_json(
-                                        {
-                                            "request_id": request_id,
-                                            "payload": lmarena_payload,
-                                        }
-                                    )
-                                    # Clear the content parts and continue waiting for the new response
-                                    content_parts = []
-                                    continue  # Continue to wait for response again
-                                else:
-                                    # Already tried refreshing up to max attempts, return error
-                                    raise HTTPException(
-                                        status_code=503,
-                                        detail=f"Cloudflare security challenge still present after {max_refresh_attempts} refresh attempts. Please manually refresh the browser.",
-                                    )
-
-                        if isinstance(data, dict) and "error" in data:
-                            logger.error(f"Error from browser: {data['error']}")
-                            raise HTTPException(status_code=502, detail=data["error"])
-                        if data == "[DONE]":
-                            # Reset per-request refresh flag after successful completion
-                            REFRESHING_BY_REQUEST.pop(request_id, None)
-                            break
-                        content_parts.append(str(data))
-                    except asyncio.TimeoutError:
-                        logger.error(
-                            f"Timeout waiting for response for request_id: {request_id}"
-                        )
-                        raise HTTPException(
-                            status_code=408,
-                            detail=f"Response timeout after {timeout_seconds} seconds",
-                        )
-
-                content = "".join(content_parts)
-
-                # Check if this looks like a content filter response
-                finish_reason = "stop"
-                if any(
-                    phrase in content.lower()
-                    for phrase in [
-                        "content filter",
-                        "filtered",
-                        "inappropriate",
-                        "not allowed",
-                    ]
-                ):
-                    finish_reason = "content_filter"
-                    # Add explanation for content filter
-                    content += "\n\nResponse was truncated (filter/limit). Consider reducing length or simplifying."
-
-                # Create full OpenAI ChatCompletion response
-                response = {
-                    "id": request_id,
-                    "object": "chat.completion",
-                    "created": int(time.time()),
-                    "model": model_name,
-                    "choices": [
-                        {
-                            "index": 0,
-                            "message": {"role": "assistant", "content": content},
-                            "finish_reason": finish_reason,
-                        }
-                    ],
-                    "usage": {
-                        "prompt_tokens": 0,  # Not calculated in this implementation
-                        "completion_tokens": 0,  # Not calculated in this implementation
-                        "total_tokens": 0,  # Not calculated in this implementation
-                    },
-                }
-                return JSONResponse(response)
-            finally:
-                # Reset per-request refresh flag in all exit paths to prevent getting stuck
-                REFRESHING_BY_REQUEST.pop(request_id, None)
-                if request_id in response_channels:
-                    del response_channels[request_id]
+            # Use the centralized non-stream response handler
+            response = await non_stream_handler(
+                request_id,
+                browser_ws,
+                response_channels,
+                REFRESHING_BY_REQUEST,
+                lmarena_payload,
+                model_name,
+                want_stream,
+            )
+            return JSONResponse(response)
     except HTTPException:
         # Re-raise HTTP exceptions as-is
         raise
@@ -473,7 +284,7 @@ async def chat_completions_handler(
             del response_channels[request_id]
         REFRESHING_BY_REQUEST.pop(request_id, None)
         logger.error(f"Error processing chat completion: {e}", exc_info=True)
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 async def update_available_models_handler(request: Request):
@@ -583,7 +394,7 @@ async def update_available_models_handler(request: Request):
             )
     except Exception as e:
         logger.error(f"Error updating models: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 async def update_id_capture_handler(request: Request):
@@ -651,4 +462,4 @@ async def update_id_capture_handler(request: Request):
         )
     except Exception as e:
         logger.error(f"Error updating ID capture: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e

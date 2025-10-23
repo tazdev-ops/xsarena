@@ -5,6 +5,9 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import List
 
+# Precompiled regex patterns for performance
+HEADER_PATTERN = re.compile(r"^(\s*)(#{1,6})\s+(.+)$")
+
 
 @dataclass
 class CoverageItem:
@@ -26,9 +29,9 @@ def parse_outline(outline_path: str) -> List[CoverageItem]:
 
     for line in lines:
         # Match markdown headers: #, ##, ###, etc.
-        header_match = re.match(r"^(\s*)(#{1,6})\s+(.+)$", line)
+        header_match = HEADER_PATTERN.match(line)
         if header_match:
-            len(header_match.group(1))
+            # Removed stray no-op: len(header_match.group(1))
             level = len(header_match.group(2))
             title = header_match.group(3).strip()
 

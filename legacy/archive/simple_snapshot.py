@@ -70,14 +70,12 @@ def is_text_file(filepath):
         ".mli",
         ".f",
         ".f90",
-        ".jl",
         ".m",
         ".mm",
         ".proto",
         ".thrift",
         ".graphql",
         ".gql",
-        ".sql",
         ".log",
         ".conf",
         ".config",
@@ -245,7 +243,6 @@ def should_skip_path(path):
 
 def simple_snapshot(output_file="snapshot.txt"):
     """Generate a simple snapshot by walking the repo tree and concatenating text files."""
-    root = Path(".").resolve()
     output_path = Path(output_file)
 
     print(f"Generating snapshot to {output_path}...")

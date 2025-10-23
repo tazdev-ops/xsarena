@@ -135,8 +135,7 @@ def study_glossary(
     output_file: str = typer.Option(None, "--out", help="Output file for the glossary"),
 ):
     """Create a glossary from a content file with frequency filtering."""
-    cli: CLIContext = ctx.obj
-    study_mode = StudyMode(cli.engine)  # Fixed variable assignment
+    _cli: CLIContext = ctx.obj
     content = _read_content_file(content_file)
 
     # Get terms with frequency
@@ -178,8 +177,7 @@ def study_index(
     output_file: str = typer.Option(None, "--out", help="Output file for the index"),
 ):
     """Generate an index from a content file with depth control."""
-    cli: CLIContext = ctx.obj
-    study_mode = StudyMode(cli.engine)  # Fixed variable assignment
+    _cli: CLIContext = ctx.obj
     content = _read_content_file(content_file)
 
     # Extract headings up to the specified depth
@@ -215,7 +213,7 @@ def study_cloze(
     ),
 ):
     """Create cloze deletions from a content file."""
-    cli: CLIContext = ctx.obj
+    _cli: CLIContext = ctx.obj
     content = _read_content_file(content_file)
 
     # Extract terms using existing function

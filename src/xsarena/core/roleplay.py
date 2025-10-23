@@ -121,7 +121,7 @@ def load_session(session_id: str) -> RoleplaySession:
 
         return session
     except Exception as e:
-        raise ValueError(f"Failed to load session {session_id}: {e}")
+        raise ValueError(f"Failed to load session {session_id}: {e}") from e
 
 
 def save_session(session: RoleplaySession) -> None:
@@ -173,7 +173,7 @@ def export_markdown(session_id: str) -> Optional[str]:
 
         return str(output_path)
     except Exception:
-        return None
+        return None  # Intentionally suppress errors and return None
 
 
 def redact_boundary_violations(boundaries: Boundaries, text: str) -> str:

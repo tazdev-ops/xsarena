@@ -11,7 +11,6 @@ import yaml
 from ...utils.io import atomic_write
 from ..backends.transport import BackendTransport
 from ..project_config import get_project_settings
-from .model import JobManager
 
 
 class Scheduler:
@@ -65,11 +64,13 @@ class Scheduler:
                 if isinstance(cfg[day], (list, tuple))
                 else (cfg.get("start", 0), cfg.get("end", 0))
             )
-            if start_hour <= current_hour < end_hour:
+            in_range = (
+                start_hour <= current_hour < end_hour
+                if start_hour <= end_hour
+                else (current_hour >= start_hour or current_hour < end_hour)
+            )
+            if in_range:
                 return True
-            elif start_hour > end_hour:  # Overnight hours (e.g., 22 to 6)
-                if current_hour >= start_hour or current_hour < end_hour:
-                    return True
 
         return False
 
@@ -114,7 +115,9 @@ class Scheduler:
             raise ValueError("Transport not set for scheduler")
 
         # Create a job runner and run the job
-        runner = JobManager()
+        from .manager import JobManager as _JM
+
+        runner = _JM()
 
         # Create control queue and resume event for this job
         control_queue = asyncio.Queue()
@@ -179,7 +182,7 @@ class Scheduler:
             return True
         else:
             # Look for the job in the priority queue
-            for i, (priority, queued_job_id) in enumerate(self.job_queue):
+            for i, (_, queued_job_id) in enumerate(self.job_queue):
                 if queued_job_id == job_id:
                     self.job_queue.pop(i)
                     self._persist_queue()  # Persist the updated queue
@@ -189,7 +192,7 @@ class Scheduler:
     def _get_backend_for_job(self, job_id: str) -> str:
         """Get the backend type for a specific job."""
         try:
-            from .model import JobManager
+            from .manager import JobManager
 
             runner = JobManager()
             job = runner.load(job_id)
@@ -224,9 +227,7 @@ class Scheduler:
                     and len(raw_queue[0]) == 2
                 ):
                     # New format: [priority, job_id] pairs
-                    self.job_queue = [
-                        (priority, job_id) for priority, job_id in raw_queue
-                    ]
+                    self.job_queue = list(raw_queue)
                 else:
                     # Unexpected format, use default
                     self.job_queue = []
@@ -236,7 +237,7 @@ class Scheduler:
                 valid_jobs = []
                 for priority, job_id in self.job_queue:
                     try:
-                        from .model import JobManager
+                        from .manager import JobManager
 
                         runner = JobManager()
                         job = runner.load(job_id)

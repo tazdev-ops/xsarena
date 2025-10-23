@@ -24,15 +24,6 @@ def _load_personas():
 
 @app.command("list")
 def rp_list_personas():
-    try:
-        from ..core.roleplay import load_session, new_session, save_session
-    except ImportError:
-        typer.echo(
-            "Feature not included in this build. See documentation for installation instructions.",
-            err=True,
-        )
-        raise typer.Exit(1)
-
     personas = _load_personas()
     for key, val in personas.items():
         typer.echo(f"{key}: {val.get('title','')}")
@@ -48,14 +39,7 @@ def rp_start(
     safeword: str = typer.Option("PAUSE", "--safeword"),
 ):
     try:
-        from ..core.roleplay import (
-            append_turn,
-            export_markdown,
-            load_session,
-            new_session,
-            redact_boundary_violations,
-            save_session,
-        )
+        from ..core.roleplay import new_session
     except ImportError:
         typer.echo(
             "Feature not included in this build. See documentation for installation instructions.",
@@ -95,11 +79,8 @@ def rp_say(sess_id: str, text: str):
     try:
         from ..core.roleplay import (
             append_turn,
-            export_markdown,
             load_session,
-            new_session,
             redact_boundary_violations,
-            save_session,
         )
     except ImportError:
         typer.echo(
@@ -162,14 +143,7 @@ def rp_memory(
     show: bool = typer.Option(False, "--show"),
 ):
     try:
-        from ..core.roleplay import (
-            append_turn,
-            export_markdown,
-            load_session,
-            new_session,
-            redact_boundary_violations,
-            save_session,
-        )
+        from ..core.roleplay import load_session, save_session
     except ImportError:
         typer.echo(
             "Feature not included in this build. See documentation for installation instructions.",
@@ -194,14 +168,7 @@ def rp_model(
     model: Optional[str] = typer.Option(None, "--model"),
 ):
     try:
-        from ..core.roleplay import (
-            append_turn,
-            export_markdown,
-            load_session,
-            new_session,
-            redact_boundary_violations,
-            save_session,
-        )
+        from ..core.roleplay import load_session, save_session
     except ImportError:
         typer.echo(
             "Feature not included in this build. See documentation for installation instructions.",
@@ -225,14 +192,7 @@ def rp_bounds(
     safeword: Optional[str] = typer.Option(None, "--safeword"),
 ):
     try:
-        from ..core.roleplay import (
-            append_turn,
-            export_markdown,
-            load_session,
-            new_session,
-            redact_boundary_violations,
-            save_session,
-        )
+        from ..core.roleplay import load_session, save_session
     except ImportError:
         typer.echo(
             "Feature not included in this build. See documentation for installation instructions.",
@@ -254,14 +214,7 @@ def rp_bounds(
 @app.command("export")
 def rp_export(sess_id: str):
     try:
-        from ..core.roleplay import (
-            append_turn,
-            export_markdown,
-            load_session,
-            new_session,
-            redact_boundary_violations,
-            save_session,
-        )
+        from ..core.roleplay import export_markdown
     except ImportError:
         typer.echo(
             "Feature not included in this build. See documentation for installation instructions.",

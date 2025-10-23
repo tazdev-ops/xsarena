@@ -48,12 +48,12 @@ def _apply_suppress(report: dict) -> dict:
     new = []
     for item in report.get("summary", []):
         chk = item.split(":")[0].strip() if ":" in item else ""
-        if chk in sup:
-            pats = sup.get(chk) or []
-            if not pats:
-                continue
-            if any(pat.lower() in item.lower() for pat in pats):
-                continue
+        if chk in sup and not sup.get(chk):
+            continue
+        # Check for pattern-based suppression if needed
+        pats = sup.get("patterns", [])
+        if pats and any(pat.lower() in item.lower() for pat in pats):
+            continue
         new.append(item)
     report["summary"] = new
     return report

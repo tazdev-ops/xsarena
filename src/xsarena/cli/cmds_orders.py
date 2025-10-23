@@ -1,4 +1,5 @@
 # src/xsarena/cli/cmds_orders.py
+import contextlib
 import time
 from pathlib import Path
 
@@ -25,10 +26,8 @@ def new(title: str, body: str = typer.Option(None, "--body")):
     block = ["\n# ONE ORDER — " + title, f"Date (UTC): {_ts()}", content.strip(), "\n"]
     with log.open("a", encoding="utf-8") as f:
         f.write("\n".join(block))
-    try:
+    with contextlib.suppress(Exception):
         merge_rules.callback()  # invoke Typer command function
-    except Exception:
-        pass
     typer.echo(f"✓ logged → {log}")
 
 

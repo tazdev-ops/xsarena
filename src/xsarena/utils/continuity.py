@@ -6,6 +6,18 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import List
 
+# Precompiled regex patterns for performance
+HEADING_PATTERN = re.compile(r"^(#{1,2})\s+(.+)$")
+REINTRO_PATTERNS = [
+    re.compile(r"^(what|who|where|when|why|how)\s+is\s+\w+", re.IGNORECASE),
+    re.compile(r"^in\s+this\s+(section|chapter|part)", re.IGNORECASE),
+    re.compile(r"^to\s+begin", re.IGNORECASE),
+    re.compile(r"^first", re.IGNORECASE),
+    re.compile(r"^initially", re.IGNORECASE),
+    re.compile(r"^let\'?s\s+(begin|start|explore)", re.IGNORECASE),
+]
+SENTENCE_SPLIT_PATTERN = re.compile(r"[.!?]+")
+
 
 @dataclass
 class ContinuityIssue:
@@ -38,7 +50,7 @@ def analyze_continuity(book_path: str) -> List[ContinuityIssue]:
 
     for line in lines:
         # Check if this is a heading
-        heading_match = re.match(r"^(#{1,2})\s+(.+)$", line.strip())
+        heading_match = HEADING_PATTERN.match(line.strip())
         if heading_match:
             # Save previous section
             if current_section:
@@ -84,29 +96,22 @@ def analyze_continuity(book_path: str) -> List[ContinuityIssue]:
                 ContinuityIssue(
                     type="drift",
                     position=i,
-                    description=f"Moderate continuity issue between '{prev_section['title']}' and '{curr_section['title']}'",
+                    description=(
+                        f"Moderate continuity issue between "
+                        f"'{prev_section['title']}' and '{curr_section['title']}'"
+                    ),
                     severity="medium",
                     suggestion="Consider increasing anchor_length to 300-360",
                 )
             )
 
     # Look for re-introduction phrases at section beginnings
-    reintro_patterns = [
-        r"^(what|who|where|when|why|how)\s+is\s+\w+",
-        r"^in\s+this\s+(section|chapter|part)",
-        r"^to\s+begin",
-        r"^first",
-        r"^initially",
-        r"^let\'?s\s+(begin|start|explore)",
-    ]
-
     for i, section in enumerate(sections):
         # Get the first few lines of the section
         first_lines = section["content"][:200].lower()
-        first_lines.split(".")
 
-        for pattern in reintro_patterns:
-            if re.search(pattern, first_lines):
+        for pattern in REINTRO_PATTERNS:
+            if pattern.search(first_lines):
                 issues.append(
                     ContinuityIssue(
                         type="reintro",
@@ -119,7 +124,7 @@ def analyze_continuity(book_path: str) -> List[ContinuityIssue]:
 
     # Look for repetition within the text
     content = book_content.lower()
-    sentences = re.split(r"[.!?]+", content)
+    sentences = SENTENCE_SPLIT_PATTERN.split(content)
 
     # Check for repeated sentences
     sentence_counts = {}

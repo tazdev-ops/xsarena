@@ -1,4 +1,5 @@
 """Centralized job resume logic."""
+
 import sys
 from typing import Optional
 

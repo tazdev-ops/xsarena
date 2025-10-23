@@ -1,4 +1,5 @@
 """Test jobstore events parsing functionality."""
+
 import json
 import tempfile
 from pathlib import Path

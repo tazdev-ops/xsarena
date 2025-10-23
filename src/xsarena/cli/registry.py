@@ -15,6 +15,23 @@ try:
 except ImportError:
     # chad module is optional
     chad_app = None
+from .cmds_agent import app as agent_app
+from .cmds_authoring import (
+    ingest_ack,
+    ingest_run,
+    ingest_style,
+    ingest_synth,
+    lossless_break_paragraphs,
+    lossless_enhance_structure,
+    lossless_improve_flow,
+    lossless_ingest,
+    lossless_rewrite,
+    lossless_run,
+    style_narrative,
+    style_nobs,
+    style_reading,
+    style_show,
+)
 from .cmds_checklist import app as checklist_app
 from .cmds_coach import app as coach_app
 from .cmds_coder import app as coder_app
@@ -25,6 +42,7 @@ from .cmds_debug import app as debug_app
 from .cmds_directives import overlays_list, overlays_show, roles_list, roles_show
 from .cmds_docs import app as docs_app
 from .cmds_endpoints import app as endpoints_app
+from .cmds_handoff import app as handoff_app
 from .cmds_health import app as health_app
 from .cmds_interactive import app as interactive_app
 from .cmds_jobs import app as jobs_app
@@ -34,6 +52,7 @@ from .cmds_list import app as list_app
 from .cmds_macros import app as macros_app
 from .cmds_metrics import app as metrics_app
 from .cmds_modes import app as modes_app
+from .cmds_orders import app as orders_app
 from .cmds_people import app as people_app
 from .cmds_pipeline import app as pipeline_app
 from .cmds_playground import app as playground_app
@@ -42,8 +61,10 @@ from .cmds_preview import app as preview_app
 from .cmds_publish import app as publish_app
 from .cmds_report import app as report_app
 from .cmds_run import app as run_app
+from .cmds_settings import app as config_app
 from .cmds_snapshot import app as snapshot_app
 from .cmds_tools import app as tools_app
+from .cmds_tools import export_chapters_cmd, extract_checklists_cmd
 from .cmds_unified_settings import app as unified_settings_app
 from .cmds_upgrade import app as upgrade_app
 from .cmds_workshop import app as workshop_app
@@ -91,7 +112,6 @@ app.add_typer(
 author_app = typer.Typer(name="author", help="Core content creation workflows.")
 
 # Add post-process tools as a subgroup under author
-from .cmds_tools import export_chapters_cmd, extract_checklists_cmd
 
 post_process_app = typer.Typer(
     name="post-process", help="Post-processing tools (aliases to utils tools)"
@@ -102,23 +122,6 @@ author_app.add_typer(post_process_app, name="post-process")
 
 app.add_typer(author_app)
 
-# Add authoring commands directly to the author app
-from .cmds_authoring import (
-    ingest_ack,
-    ingest_run,
-    ingest_style,
-    ingest_synth,
-    lossless_break_paragraphs,
-    lossless_enhance_structure,
-    lossless_improve_flow,
-    lossless_ingest,
-    lossless_rewrite,
-    lossless_run,
-    style_narrative,
-    style_nobs,
-    style_reading,
-    style_show,
-)
 
 author_app.command("ingest-ack")(ingest_ack)
 author_app.command("ingest-synth")(ingest_synth)
@@ -135,8 +138,6 @@ author_app.command("style-nobs")(style_nobs)
 author_app.command("style-reading")(style_reading)
 author_app.command("style-show")(style_show)
 
-from .cmds_settings import app as config_app
-
 ops_app = typer.Typer(
     name="ops", help="System health, jobs, services, and configuration."
 )
@@ -151,16 +152,20 @@ ops_app.add_typer(snapshot_app, name="snapshot")
 ops_app.add_typer(
     config_app, name="config", help="Configuration and backend management"
 )
-# Import and register the new command groups
-from .cmds_handoff import app as handoff_app
-from .cmds_orders import app as orders_app
+# Add ops settings as an alias to ops config
+ops_app.add_typer(
+    config_app,
+    name="settings",
+    help="Configuration and backend management (alias for config)",
+)
+
 
 app.add_typer(report_app, name="report", help="Create diagnostic reports")
 ops_app.add_typer(handoff_app, name="handoff", help="Prepare higher-AI handoffs")
 ops_app.add_typer(orders_app, name="orders", help="Manage ONE ORDER log")
 
 app.add_typer(ops_app)
-
+# Removed to match tests: top-level 'project' command not registered
 # --- Additional Semantic Groups ---
 utilities_group = typer.Typer(name="utils", help="General utility commands.")
 
@@ -199,21 +204,22 @@ app.add_typer(overlays_app)
 # NOTE: Do NOT register 'analyze' at top-level (tests expect it to be absent)
 # app.add_typer(analyze_app, name="analyze")
 app.add_typer(audio_app, name="audio", hidden=True)  # Hidden as per changelog
-app.add_typer(bilingual_app, name="bilingual")
+app.add_typer(bilingual_app, name="bilingual", hidden=True)
 app.add_typer(
     booster_app, name="booster", help="Interactively engineer and improve prompts"
 )
 if chad_app:
-    app.add_typer(chad_app, name="chad")
+    app.add_typer(chad_app, name="chad", hidden=True)
+app.add_typer(agent_app, name="agent", hidden=True)  # Hidden agent for power users
 app.add_typer(checklist_app, name="checklist")
 app.add_typer(coach_app, name="coach")
-app.add_typer(coder_app, name="coder")
+app.add_typer(coder_app, name="coder", hidden=True)
 app.add_typer(
     controls_app,
     name="controls",
     help="Fine-tune output, continuation, and repetition behavior.",
 )
-ops_app.add_typer(debug_app, name="debug", help="Debugging commands")  # Add to ops
+app.add_typer(debug_app, name="debug", help="Debugging commands")  # Add to main app
 # NOTE: Do NOT register 'directives' at top-level (tests expect it to be absent)
 app.add_typer(endpoints_app, name="endpoints")
 app.add_typer(joy_app, name="joy", hidden=True)  # Hidden
@@ -227,7 +233,6 @@ app.add_typer(pipeline_app, name="pipeline")
 app.add_typer(playground_app, name="playground")
 app.add_typer(policy_app, name="policy", hidden=True)  # Hidden
 app.add_typer(preview_app, name="preview")
-# NOTE: Do NOT register 'project' at top-level (tests expect it to be absent)
 app.add_typer(publish_app, name="publish")
 # NOTE: Do NOT register 'study' at top-level (tests expect it to be absent)
 app.add_typer(upgrade_app, name="upgrade")

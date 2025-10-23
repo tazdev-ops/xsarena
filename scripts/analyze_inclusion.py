@@ -111,7 +111,7 @@ def analyze_project():
                 size = Path(file_path).stat().st_size
                 total_size += size
                 all_files.append((file_path, size))
-            except:
+            except Exception:
                 continue  # Skip files that can't be accessed
 
     print(f"Estimated total size: {total_size / 1024:.1f} KB")

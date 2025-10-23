@@ -1,0 +1,38 @@
+Total file count: 827
+Total size: 1662334 bytes (1.59 MB)
+
+Top 20 largest files:
+  41967 bytes: directives/manifest.yml
+  41848 bytes: docs/archive/PROJECT_MAP.md
+  37886 bytes: .xsarena/tmp/prompt_cache.json
+  30595 bytes: src/xsarena/bridge_v2/handlers.py
+  27386 bytes: src/xsarena.egg-info/SOURCES.txt
+  22917 bytes: src/xsarena/modes/book.py
+  19413 bytes: src/xsarena/cli/interactive_session.py
+  17464 bytes: directives/_rules/rules.merged.md
+  16985 bytes: src/xsarena/cli/cmds_snapshot.py
+  16437 bytes: src/xsarena/core/v2_orchestrator/orchestrator.py
+  15471 bytes: directives/_rules/sources/CLI_AGENT_RULES.md
+  15463 bytes: src/xsarena/cli/cmds_authoring.py
+  15257 bytes: src/xsarena/cli/cmds_settings.py
+  15198 bytes: src/xsarena/cli/cmds_jobs.py
+  14146 bytes: tests/debug_maximal.py
+  13432 bytes: src/xsarena/core/jobs/executor_core.py
+  12576 bytes: src/xsarena/cli/cmds_health.py
+  12324 bytes: docs/QUICK_GUIDE.md
+  12287 bytes: src/xsarena/core/prompt.py
+  12180 bytes: tests/test_bridge_v2_features.py
+
+File counts by extension:
+  .md: 495
+  .py: 199
+  .txt: 60
+  .yml: 31
+  .json: 15
+  .sh: 14
+  : 6
+  .toml: 2
+  .ini: 2
+  .yaml: 1
+  .ps1: 1
+  .html: 1

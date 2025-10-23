@@ -1,6 +1,7 @@
 """Chunk processing logic for XSArena v0.3."""
 
 import asyncio
+import contextlib
 import time
 import uuid
 from datetime import datetime
@@ -11,8 +12,10 @@ from ...utils.token_estimator import chars_to_tokens_approx, tokens_to_chars_app
 from ..anchor_service import create_anchor
 from ..backends.transport import BackendTransport, BaseEvent
 from ..prompt_runtime import build_chunk_prompt
+from ..state import SessionState
+from .errors import get_user_friendly_error_message, map_exception_to_error_code
 from .helpers import drain_next_hint, strip_next_lines
-from .model import JobV3, get_user_friendly_error_message, map_exception_to_error_code
+from .model import JobV3
 
 # Import from new modules
 from .processing.extension_handler import perform_micro_extension
@@ -204,7 +207,7 @@ class ChunkProcessor:
                 return "CANCELLED"
 
             # NEW: Lossless metrics + optional compress pass (gated by session_state)
-            try:
+            with contextlib.suppress(Exception):
                 extended_content = await apply_lossless_metrics_and_compression(
                     content=extended_content,
                     job=job,
@@ -213,9 +216,7 @@ class ChunkProcessor:
                     transport=transport,
                     session_state=session_state,
                 )
-            except Exception:
                 # Metrics must never break the run
-                pass
 
             return extended_content, next_hint
 
@@ -226,15 +227,19 @@ class ChunkProcessor:
 
             # Emit chunk failed event
             chunk_failed_event = {
-                "event_id": str(uuid.uuid4()),
-                "timestamp": time.time(),
                 "job_id": job.id,
                 "chunk_id": f"chunk_{chunk_idx}",
                 "error_message": str(e),
                 "error_code": error_code,
                 "user_message": user_message,
             }
-            await on_event(BaseEvent(**chunk_failed_event))
+            await on_event(
+                BaseEvent(
+                    event_id=str(uuid.uuid4()),
+                    timestamp=time.time(),
+                    metadata=chunk_failed_event,
+                )
+            )
 
             # Log detailed error context
             self.job_store._log_event(

@@ -67,3 +67,23 @@ When debugging JobSpec-related issues, ensure your snapshot includes:
 ## After cleanup:
 - `xsarena snapshot run` (quick)
 - `xsarena doctor env` (quick)
+
+## Modularization Decisions (RunSpecV2 Era)
+
+Why
+- Improve testability, reduce file sizes, and prevent cross-layer coupling.
+
+Decisions
+- Bridge handlers split into config_loaders/guards/streams; handlers are routes only.
+- Interactive cockpit split into controllers (prompt/jobs/config/checkpoint); interactive_session.py is a thin router.
+- Jobs error taxonomy isolated in jobs/errors.py; JobManager/JobV3 split for clarity.
+- Snapshot helpers deduped under utils/snapshot; flatpack_txt consumes shared helpers.
+
+Guardrails
+- Modules ≤ 500 LOC; functions ≤ 80 LOC.
+- No cross-layer imports (bridge_v2 → cli; cli → transports).
+- After CLI changes, run: xsarena docs gen-help and commit help files.
+
+Back-out Plan
+- Keep each refactor in a small PR; behavior unchanged by tests.
+- Revert a PR cleanly if regressions appear; add a test that would have caught it.

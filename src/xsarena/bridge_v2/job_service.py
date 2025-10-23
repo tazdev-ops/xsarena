@@ -4,7 +4,7 @@ import json
 from pathlib import Path
 from typing import Dict, List, Optional
 
-from ..core.jobs.model import JobManager
+from ..core.jobs.manager import JobManager
 
 
 class JobService:

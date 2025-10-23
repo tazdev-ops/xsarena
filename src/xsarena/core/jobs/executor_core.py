@@ -10,8 +10,10 @@ from pathlib import Path
 from typing import Awaitable, Callable, Dict, Optional
 
 from ..backends.transport import BackendTransport, BaseEvent
+from ..state import SessionState
 from .chunk_processor import ChunkProcessor
-from .model import JobV3, get_user_friendly_error_message, map_exception_to_error_code
+from .errors import get_user_friendly_error_message, map_exception_to_error_code
+from .model import JobV3
 from .store import JobStore
 
 
@@ -34,7 +36,7 @@ class JobExecutor:
         on_event: Callable[[BaseEvent], Awaitable[None]],
         control_queue: asyncio.Queue,
         resume_event: asyncio.Event,
-    ):
+    ) -> None:
         """Execute a job with the given transport and callbacks."""
         # Update job state to RUNNING
         job.state = "RUNNING"
@@ -43,12 +45,16 @@ class JobExecutor:
 
         # Emit job started event
         job_started_event = {
-            "event_id": str(uuid.uuid4()),
-            "timestamp": time.time(),
             "job_id": job.id,
             "spec": job.run_spec.model_dump(),
         }
-        await on_event(BaseEvent(**job_started_event))
+        await on_event(
+            BaseEvent(
+                event_id=str(uuid.uuid4()),
+                timestamp=time.time(),
+                metadata=job_started_event,
+            )
+        )
         self.job_store._log_event(job.id, {"type": "job_started"})
 
         # Prepare output path
@@ -74,7 +80,7 @@ class JobExecutor:
         watchdog_secs = getattr(job.run_spec, "timeout", 300)
         max_retries = 3  # TODO: Make configurable
 
-        async def on_chunk(idx: int, body: str, hint: Optional[str] = None):
+        async def on_chunk(idx: int, body: str, hint: Optional[str] = None) -> None:
             """Callback for when a chunk is completed."""
             with open(out_path, "a", encoding="utf-8") as f:
                 if f.tell() == 0 or idx == 1:
@@ -99,15 +105,19 @@ class JobExecutor:
 
             # Emit chunk done event
             chunk_done_event = {
-                "event_id": str(uuid.uuid4()),
-                "timestamp": time.time(),
                 "job_id": job.id,
                 "chunk_id": f"chunk_{idx}",
                 "result": body,
             }
-            await on_event(BaseEvent(**chunk_done_event))
+            await on_event(
+                BaseEvent(
+                    event_id=str(uuid.uuid4()),
+                    timestamp=time.time(),
+                    metadata=chunk_done_event,
+                )
+            )
 
-        async def _do_run():
+        async def _do_run() -> None:
             """Internal function to perform the actual run."""
 
             # Store the control queue and resume event for this job
@@ -128,20 +138,18 @@ class JobExecutor:
                 )
 
             # Determine starting chunk index (resume from last completed + 1, or start from 1)
-            start_chunk_idx = 1
-            if job.state == "PENDING":  # If resuming, check for completed chunks
-                last_completed = self.job_store._get_last_completed_chunk(job.id)
-                if last_completed > 0:
-                    start_chunk_idx = last_completed + 1
-                    # Log that we're resuming from a specific chunk
-                    self.job_store._log_event(
-                        job.id,
-                        {
-                            "type": "resume_from_chunk",
-                            "last_completed_chunk": last_completed,
-                            "starting_chunk": start_chunk_idx,
-                        },
-                    )
+            last_completed = self.job_store._get_last_completed_chunk(job.id)
+            start_chunk_idx = (last_completed + 1) if last_completed > 0 else 1
+            # Log that we're resuming from a specific chunk
+            if last_completed > 0:
+                self.job_store._log_event(
+                    job.id,
+                    {
+                        "type": "resume_from_chunk",
+                        "last_completed_chunk": last_completed,
+                        "starting_chunk": start_chunk_idx,
+                    },
+                )
 
             # This would integrate with the new autopilot FSM
             # For now, we'll simulate the process with anchored continuation and micro-extends
@@ -181,13 +189,17 @@ class JobExecutor:
 
                 # Emit job completed event
                 job_completed_event = {
-                    "event_id": str(uuid.uuid4()),
-                    "timestamp": time.time(),
                     "job_id": job.id,
                     "result_path": out_path,
                     "total_chunks": max_chunks,
                 }
-                await on_event(BaseEvent(**job_completed_event))
+                await on_event(
+                    BaseEvent(
+                        event_id=str(uuid.uuid4()),
+                        timestamp=time.time(),
+                        metadata=job_completed_event,
+                    )
+                )
 
                 self.job_store._log_event(
                     job.id,
@@ -237,14 +249,18 @@ class JobExecutor:
                 else:
                     job.state = "FAILED"
                     job_failed_event = {
-                        "event_id": str(uuid.uuid4()),
-                        "timestamp": time.time(),
                         "job_id": job.id,
                         "error_message": "watchdog timeout",
                         "error_code": error_code,
                         "user_message": user_message,
                     }
-                    await on_event(BaseEvent(**job_failed_event))
+                    await on_event(
+                        BaseEvent(
+                            event_id=str(uuid.uuid4()),
+                            timestamp=time.time(),
+                            metadata=job_failed_event,
+                        )
+                    )
 
                     self.job_store._log_event(
                         job.id,
@@ -294,14 +310,18 @@ class JobExecutor:
                 else:
                     job.state = "FAILED"
                     job_failed_event = {
-                        "event_id": str(uuid.uuid4()),
-                        "timestamp": time.time(),
                         "job_id": job.id,
                         "error_message": str(ex),
                         "error_code": error_code,
                         "user_message": user_message,
                     }
-                    await on_event(BaseEvent(**job_failed_event))
+                    await on_event(
+                        BaseEvent(
+                            event_id=str(uuid.uuid4()),
+                            timestamp=time.time(),
+                            metadata=job_failed_event,
+                        )
+                    )
 
                     self.job_store._log_event(
                         job.id,
@@ -325,10 +345,8 @@ class JobExecutor:
         if job.id in self.resume_events:
             del self.resume_events[job.id]
 
-    def _get_session_state(self, job: JobV3):
+    def _get_session_state(self, job: JobV3) -> Optional[SessionState]:
         """Helper to get session state from job metadata."""
         if "session_state" in job.meta and job.meta["session_state"]:
-            from ..state import SessionState
-
             return SessionState(**job.meta["session_state"])
         return None

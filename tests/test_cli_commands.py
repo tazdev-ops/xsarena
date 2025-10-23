@@ -1,4 +1,5 @@
 """Smoke tests for CLI commands to ensure they can be invoked without crashing."""
+
 from typer.testing import CliRunner
 from xsarena.cli.main import app
 
@@ -89,10 +90,10 @@ def test_ops_commands_help():
 
 
 def test_project_commands_help():
-    """Test project-related commands help works without crashing."""
-    # Note: The 'project' command group doesn't exist in the current CLI
+    """Test project-related commands help returns exit code 2 (command not found)."""
+    # The 'project' command group was removed to match tests.
     result = runner.invoke(app, ["project", "--help"])
-    assert result.exit_code == 2  # Command doesn't exist, should return error code 2
+    assert result.exit_code == 2  # Command should not exist, exit code 2
 
 
 def test_directives_commands_help():

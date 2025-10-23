@@ -33,7 +33,7 @@ This document explains how XSArena is put together and how the major parts relat
   - prompt.py
     - Composes system_text from base templates + overlays (+ reading overlay) + extra files
   - state.py
-    - SessionState "knobs": continuation mode, anchor length, repetition threshold, min chars, overlays, reading overlay, etc.
+    - SessionState \"knobs\": continuation mode, anchor length, repetition threshold, min chars, overlays, reading overlay, etc.
 
 - Jobs
   - jobs/model.py — JobManager: submit/resume/list, delegates to JobExecutor
@@ -65,7 +65,7 @@ This document explains how XSArena is put together and how the major parts relat
 - .xsarena/jobs/<job_id> — job.json + events.jsonl + outputs
 - directives/ — base templates, overlays, role guides
 
-## Typical flow: "run book"
+## Typical flow: \"run book\"
 1) CLI → registry.run_book → Orchestrator.run_spec
 2) Compose system_text (base + overlays + files)
 3) Submit job via JobManager
@@ -80,3 +80,35 @@ This document explains how XSArena is put together and how the major parts relat
 - Always await draining "next" hints; prefer hint over anchor
 - Don't idle-restart bridge while response channels are active
 - Only one Cloudflare refresh attempt per request_id
+
+## Appendix: Module Ownership & Boundaries (v0.2.x)
+
+Core flows
+- Orchestrator: src/xsarena/core/v2_orchestrator/orchestrator.py (RunSpecV2)
+- Jobs: JobManager (load/save/control) + JobExecutor (run loop) + ChunkProcessor (per chunk) + Scheduler (concurrency/quiet hours)
+- Backends: bridge_v2 (FastAPI + WebSocket) with circuit breaker wrapper
+- Snapshots: utils/snapshot/* (text/zip writers, collectors, config); flatpack_txt for chat-uploadable flat packs
+
+Bridge v2 (modularized)
+- api_server.py (wiring)
+- handlers.py (routes only)
+- config_loaders.py (read CONFIG/models/mappings)
+- guards.py (auth, rate-limit, busy)
+- streams.py (SSE/non-stream assembly; finish_reason parity; Cloudflare detection)
+
+CLI (selected)
+- run_*.py (book/continue/from-recipe linted to accepted keys)
+- ops/jobs, ops/snapshot, settings, report
+- interactive_session.py (thin) + interactive controllers:
+  - prompt_ctrl.py, jobs_ctrl.py, config_ctrl.py, checkpoint_ctrl.py
+
+Jobs & errors
+- jobs/model.py (JobV3)
+- jobs/manager.py (JobManager orchestration)
+- jobs/errors.py (exception→error_code mapping + user messages)
+- jobs/executor_core.py, jobs/chunk_processor.py (+ processing/extension_handler.py, metrics_tracker.py)
+
+Boundaries
+- bridge_v2/* must not import cli/*
+- cli/interactive controllers call Engine/Orchestrator; never import transports
+- Shared defaults (e.g., snapshot excludes) live under core/snapshot_config.py

@@ -1,4 +1,5 @@
 """Dispatcher module to reuse Typer app for /command in interactive mode."""
+
 import io
 import shlex
 import sys
@@ -35,7 +36,7 @@ def dispatch_command(app: Typer, command_line: str, cli_context: Any) -> int:
         # Run the Typer app programmatically with captured output
         with redirect_stdout(stdout_capture), redirect_stderr(stderr_capture):
             # Set the context object for the app
-            app(args, obj=cli_context, standalone_mode=False)
+            app(prog_name="xsarena", args=args, obj=cli_context, standalone_mode=False)
 
         # Get the captured output
         stdout_content = stdout_capture.getvalue()

@@ -1,4 +1,5 @@
 """Pytest configuration for XSArena tests."""
+
 import tempfile
 from pathlib import Path
 
@@ -29,3 +30,9 @@ def sample_config():
         timeout=300,
         redaction_enabled=False,
     )
+
+
+@pytest.fixture
+def patch_create_backend():
+    """Placeholder fixture to avoid fixture-not-found errors."""
+    pass

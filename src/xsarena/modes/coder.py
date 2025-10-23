@@ -1,4 +1,5 @@
 """Coder mode for code editing and review."""
+
 from typing import Optional, Protocol
 
 

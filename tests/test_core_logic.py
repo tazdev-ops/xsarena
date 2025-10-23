@@ -1,4 +1,5 @@
 """Tests for core utility functions like chunking.py and anchor_service.py."""
+
 from xsarena.core.anchor_service import (
     anchor_from_text,
     build_anchor_continue_prompt,

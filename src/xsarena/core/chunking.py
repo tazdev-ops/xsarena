@@ -4,6 +4,7 @@ from dataclasses import dataclass
 from typing import List
 
 from .anchor_service import anchor_from_text
+from .state import Message
 
 
 @dataclass
@@ -51,25 +52,45 @@ def byte_chunk(text: str, max_bytes: int) -> List[Chunk]:
 
 def detect_repetition(text: str, threshold: float = 0.8) -> bool:
     """Detect if there's excessive repetition in the text."""
-    if len(text) < 100:
+    if len(text) < 10:
         return False
 
-    # Simple repetition detection based on n-grams
+    # Check for repeated sentences
+    sentences = text.split(".")
+    sentences = [s.strip() for s in sentences if s.strip()]
+
+    if len(sentences) < 2:
+        return False
+
+    # Count sentence repetitions
+    sentence_counts = {}
+    for sentence in sentences:
+        sentence_counts[sentence] = sentence_counts.get(sentence, 0) + 1
+
+    # If any sentence appears more than once, check if it exceeds threshold
+    repeated_count = sum(1 for count in sentence_counts.values() if count > 1)
+    if repeated_count > 0:
+        repetition_ratio = repeated_count / len(sentences)
+        if repetition_ratio >= threshold:
+            return True
+
+    # Also check for direct consecutive repetitions
+    for i in range(len(sentences) - 1):
+        if sentences[i] == sentences[i + 1]:
+            # Found consecutive repetition, return True for any such case
+            return True
+
+    # Check for repeated phrases using a sliding window approach
     words = text.split()
-    if len(words) < 10:
-        return False
-
-    # Check for repeated sequences of 5-10 words
-    for seq_len in range(5, min(11, len(words) // 2)):
-        for i in range(len(words) - seq_len * 2):
-            seq = " ".join(words[i : i + seq_len])
-            next_seq = " ".join(words[i + seq_len : i + seq_len * 2])
-
-            if seq == next_seq:
-                # Found a repetition, calculate how significant it is
-                rep_words = seq_len * 2
-                if rep_words / len(words) > threshold / 10:
-                    return True
+    if len(words) >= 4:  # Check for phrase repetitions
+        for phrase_len in range(2, min(6, len(words) // 2)):
+            for i in range(len(words) - phrase_len):
+                phrase = " ".join(words[i : i + phrase_len])
+                # Check if this phrase appears again later
+                for j in range(i + phrase_len, len(words) - phrase_len + 1):
+                    next_phrase = " ".join(words[j : j + phrase_len])
+                    if phrase == next_phrase:
+                        return True
 
     return False
 
@@ -109,7 +130,7 @@ def jaccard_ngrams(a: str, b: str, n: int = 4) -> float:
     return len(A & B) / len(A | B)
 
 
-def continuation_anchor(history: List["Message"], anchor_length: int = 300) -> str:
+def continuation_anchor(history: List[Message], anchor_length: int = 300) -> str:
     """Get the continuation anchor from the last assistant message."""
     if not history:
         return ""

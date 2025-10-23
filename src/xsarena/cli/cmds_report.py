@@ -4,7 +4,7 @@ from pathlib import Path
 
 import typer
 
-from ..core.jobs.model import JobManager
+from ..core.jobs.manager import JobManager
 from ..utils.snapshot.writers import write_pro_snapshot
 
 app = typer.Typer(help="Diagnostic reports for quick handoff or later analysis.")
@@ -66,7 +66,7 @@ def job_cmd(job_id: str):
     jm = JobManager()
     j = jm.load(job_id)
     evp = Path(".xsarena") / "jobs" / job_id / "events.jsonl"
-    stats = dict(chunks=0, retries=0, watchdogs=0, failovers=0)
+    stats = {"chunks": 0, "retries": 0, "watchdogs": 0, "failovers": 0}
     if evp.exists():
         for ln in evp.read_text(encoding="utf-8").splitlines():
             stats["chunks"] += '"chunk_done"' in ln

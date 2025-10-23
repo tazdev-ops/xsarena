@@ -1,4 +1,7 @@
 """
+Deprecated for CLI; authoritative presets live in xsarena.core.snapshot_config.
+This module remains for legacy/debug paths.
+
 Configuration handling for XSArena snapshot utility.
 """
 
@@ -11,6 +14,35 @@ except ImportError:
     tomllib = None
 
 ROOT = Path.cwd()
+
+# Default excludes that should be applied to all snapshot modes
+DEFAULT_EXCLUDES = [
+    ".git/**",
+    ".svn/**",
+    ".hg/**",
+    ".idea/**",
+    ".vscode/**",
+    "venv/**",
+    ".venv/**",
+    "__pycache__/**",
+    ".pytest_cache/**",
+    ".mypy_cache/**",
+    ".ruff_cache/**",
+    ".cache/**",
+    "*.pyc",
+    "*.pyo",
+    "*.pyd",
+    "*.o",
+    "*.a",
+    "*.so",
+    "*.dll",
+    "*.dylib",
+    "*.log",
+    "logs/**",
+    ".xsarena/**",
+    "*.egg-info/**",
+    ".ipynb_checkpoints/**",
+]
 
 
 def read_snapshot_config() -> Dict:
@@ -132,6 +164,58 @@ def read_snapshot_config() -> Dict:
                     "pipelines/**",
                     "examples/**",
                     "review/**",
+                ],
+                "exclude": [
+                    ".git/**",
+                    "venv/**",
+                    ".venv/**",
+                    "__pycache__/**",
+                    ".pytest_cache/**",
+                    ".mypy_cache/**",
+                    ".ruff_cache/**",
+                    ".cache/**",
+                    "*.pyc",
+                    "*.pyo",
+                    "*.pyd",
+                    "*.o",
+                    "*.a",
+                    "*.so",
+                    "*.dll",
+                    "*.dylib",
+                    "*.log",
+                    "logs/**",
+                    "*.egg-info/**",
+                    ".ipynb_checkpoints/**",
+                ],
+            },
+            "maximal": {
+                "include": [
+                    "src/**",
+                    "docs/**",
+                    "directives/**",
+                    "data/**",
+                    "tests/**",
+                    "examples/**",
+                    "books/**",
+                    "review/**",
+                    "recipes/**",
+                    "tools/**",
+                    "scripts/**",
+                    "packaging/**",
+                    "pipelines/**",
+                    "*.md",
+                    "*.txt",
+                    "*.yml",
+                    "*.yaml",
+                    "*.json",
+                    "*.py",
+                    "pyproject.toml",
+                    "project_manifest.json",
+                    ".gitignore",
+                    ".pre-commit-config.yaml",
+                    "Makefile",
+                    "mypy.ini",
+                    "pytest.ini",
                 ],
                 "exclude": [
                     ".git/**",

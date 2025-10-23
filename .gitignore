@@ -37,6 +37,8 @@ review/
 review/**
 .ruff_cache/
 # Snapshot and report artifacts
+repo_flat.txt
+xsa_*snapshot*.txt
 snapshot_chunks/
 # Snapshot output files
 snapshot.txt

@@ -8,9 +8,9 @@ from typing import Dict, List, Optional
 async def strip_next_lines(content: str) -> tuple[str, Optional[str]]:
     """Strip terminal NEXT directive variants and return hint."""
     patterns = [
-        r"\s*NEXT\s*:\s*([^\]]+)\]\s*$",
-        r"\s*Next\s*:\s*([^\]]+)\]\s*$",
-        r"\s*next\s*:\s*([^\]]+)\]\s*$",
+        r"\s*NEXT\s*:\s*\[([^\]]+)\]\s*$",
+        r"\s*Next\s*:\s*\[([^\]]+)\]\s*$",
+        r"\s*next\s*:\s*\[([^\]]+)\]\s*$",
     ]
     hint = None
     for pat in patterns:
@@ -20,9 +20,9 @@ async def strip_next_lines(content: str) -> tuple[str, Optional[str]]:
                 hint = m.group(1).strip()
             content = re.sub(pat, "", content, count=1, flags=re.IGNORECASE)
             break
-    # Purge any mid-body NEXT hints safely
+    # Purge any mid-body NEXT hints safely (also require brackets)
     content = re.sub(
-        r"\n?\s*NEXT\s*:\s*[^\]]*\]\s*\n?", "\n", content, flags=re.IGNORECASE
+        r"\n?\s*NEXT\s*:\s*\[[^\]]*\]\s*\n?", "\n", content, flags=re.IGNORECASE
     )
     return content.strip(), hint
 

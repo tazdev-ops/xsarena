@@ -6,11 +6,9 @@ import os
 import typer
 
 from ..core.pipeline import run_pipeline
+from ..utils.helpers import load_yaml_or_json
 
 app = typer.Typer()
-
-
-from ..utils.helpers import load_yaml_or_json
 
 
 @app.command("run")

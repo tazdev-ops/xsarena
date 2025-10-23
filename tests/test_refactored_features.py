@@ -1,12 +1,14 @@
 """Tests for the refactored XSArena features."""
 
+import contextlib
+
 import pytest
 from xsarena.core.anchor_service import (
     anchor_from_text,
     build_anchor_continue_prompt,
 )
 from xsarena.core.chunking import jaccard_ngrams
-from xsarena.core.jobs.model import JobManager
+from xsarena.core.jobs.manager import JobManager
 from xsarena.core.prompt import compose_prompt
 from xsarena.core.v2_orchestrator.orchestrator import Orchestrator
 from xsarena.core.v2_orchestrator.specs import LengthPreset, RunSpecV2, SpanPreset
@@ -128,11 +130,9 @@ async def test_orchestrator_integration():
 
     # This should compose the prompt and prepare for submission
     # but not actually send to backend since we're mocking
-    try:
+    with contextlib.suppress(Exception):
         # This would fail without a real backend, but we're just testing
         # that the orchestrator can process the run_spec
-        pass
-    except Exception:
         # Expected to fail without real backend, but the composition should work
         pass
 

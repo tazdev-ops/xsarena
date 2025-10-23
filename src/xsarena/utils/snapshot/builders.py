@@ -78,8 +78,8 @@ def build_jobs_summary() -> str:
             job_data = json.loads(job_file.read_text("utf-8", errors="replace"))
             state = job_data.get("state", "UNKNOWN")
             name = job_data.get("name", job_dir.name)
-            created_at = job_data.get("created", "N/A")
-            updated_at = job_data.get("updated", "N/A")
+            created_at = job_data.get("created_at", "N/A")
+            updated_at = job_data.get("updated_at", "N/A")
 
             # Count different event types
             event_counts = {
@@ -99,7 +99,7 @@ def build_jobs_summary() -> str:
                         event_counts["retry"] += 1
                     elif '"type": "error"' in line:
                         event_counts["error"] += 1
-                    elif '"type": "watchdog"' in line:
+                    elif '"type": "watchdog_timeout"' in line:
                         event_counts["watchdog"] += 1
                     elif '"type": "failover"' in line:
                         event_counts["failover"] += 1

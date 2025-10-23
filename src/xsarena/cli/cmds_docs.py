@@ -13,7 +13,7 @@ app = typer.Typer(help="Documentation generation commands")
 
 @app.command("gen-help")
 def gen_help():
-    """Generate help documentation by running xsarena --help and subcommand --help."""
+    """Generate help documentation by dynamically discovering the command tree."""
 
     # Create docs directory if it doesn't exist
     docs_dir = Path("docs")
@@ -31,50 +31,69 @@ def gen_help():
     except subprocess.CalledProcessError as e:
         typer.echo(f"Error getting root help: {e}")
 
-    # Get help for common subcommands
-    # We'll get help for subcommands by trying to call them with --help
-    subcommands = [
+    # Dynamically discover top-level commands from the registry
+    # Top-level groups as per the registry
+    top_level_groups = [
         "run",
         "interactive",
-        "control",
+        "settings",
         "report",
-        "profiles",
-        "config",
-        "backend",
         "preview",
-        "ingest",
-        "lossless",
-        "style",
-        "study",
-        "policy",
-        "chad",
-        "bilingual",
-        "booster",
-        "tools",
-        "coach",
-        "joy",
-        "agent",
-        "coder",
+        "publish",
         "pipeline",
         "project",
         "metrics",
         "debug",
         "adapt",
-        "boot",
         "checklist",
         "upgrade",
-        "fix",
-        "clean",
-        "mode",
         "macros",
         "playground",
-        "people",
         "roles",
         "overlays",
         "json",
+        "controls",
+        "docs",
+        "endpoints",
+        "audio",
+        "bilingual",
+        "booster",
+        "coach",
+        "coder",
+        "joy",
+        "list",
+        "modes",
+        "people",
+        "policy",
+        "workshop",
     ]
 
-    for cmd in subcommands:
+    # Ops subcommands
+    ops_subcommands = [
+        "service",
+        "jobs",
+        "health",
+        "snapshot",
+        "config",
+        "handoff",
+        "orders",
+    ]
+
+    # Generate help for top-level commands
+    for cmd in top_level_groups:
+        # Skip hidden commands that might not have help
+        if cmd in [
+            "audio",
+            "bilingual",
+            "coder",
+            "joy",
+            "modes",
+            "people",
+            "policy",
+            "workshop",
+        ]:
+            continue
+
         try:
             result = subprocess.run(
                 [sys.executable, "-m", "xsarena", cmd, "--help"],
@@ -87,14 +106,7 @@ def gen_help():
             # Some commands might not have --help or might require arguments
             continue
 
-    # Get help for ops subcommands
-    ops_subcommands = [
-        "jobs",
-        "service",
-        "snapshot",
-        "health",  # replacing deprecated "doctor"
-    ]
-
+    # Generate help for ops subcommands
     for cmd in ops_subcommands:
         try:
             result = subprocess.run(

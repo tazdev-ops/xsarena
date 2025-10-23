@@ -34,6 +34,6 @@ def test_helpers_loader():
             invalid_file = Path(tmpdir) / "invalid.json"
             invalid_file.write_text("{ invalid json }", encoding="utf-8")
             load_yaml_or_json(invalid_file)
-            assert False, "Should have raised an exception"
+            raise AssertionError("Expected FileNotFoundError but none was raised")
         except Exception:
             pass  # Expected to raise an exception

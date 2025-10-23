@@ -4,6 +4,8 @@ import json
 from pathlib import Path
 from typing import Any, Tuple
 
+import requests  # <-- module-level import so tests can monkeypatch helpers.requests
+
 
 def is_binary_sample(data: bytes, sample_size: int = 8192) -> bool:
     """
@@ -119,10 +121,11 @@ def load_yaml_or_json(path: Path) -> Any:
     content = path.read_text(encoding="utf-8")
 
     # Determine format based on file extension
-    if path.suffix.lower() in [".yaml", ".yml"]:
-        data = yaml.safe_load(content)
-    else:
-        data = json.loads(content)
+    data = (
+        yaml.safe_load(content)
+        if path.suffix.lower() in [".yaml", ".yml"]
+        else json.loads(content)
+    )
 
     return data
 
@@ -142,20 +145,40 @@ def capture_bridge_ids(base_url: str) -> tuple[str, str]:
     Raises:
         Exception: If IDs cannot be captured within timeout
     """
+    import os
     import time
 
-    import requests
+    import yaml
 
     start_url = f"{base_url}/internal/start_id_capture"
     cfg_url = f"{base_url}/internal/config"
 
+    # Get internal token from environment, config file, or default
+    internal_token = os.getenv("XSA_INTERNAL_TOKEN")
+    if not internal_token:
+        # Try to load from config file
+        config_path = Path(".xsarena/config.yml")
+        if config_path.exists():
+            try:
+                with open(config_path, "r", encoding="utf-8") as f:
+                    config_data = yaml.safe_load(f) or {}
+                internal_token = config_data.get("bridge", {}).get("internal_api_token")
+            except Exception:
+                pass  # Continue if config file can't be read
+
+    if not internal_token:
+        internal_token = "dev-token-change-me"  # Default fallback
+
+    # Prepare headers with internal token
+    headers = {"x-internal-token": internal_token}
+
     # POST /internal/start_id_capture
     try:
-        response = requests.post(start_url)
+        response = requests.post(start_url, headers=headers)
         if response.status_code != 200:
             raise Exception(f"Failed to start ID capture: {response.status_code}")
-    except requests.exceptions.ConnectionError:
-        raise Exception(f"Could not connect to bridge server at {base_url}")
+    except requests.exceptions.ConnectionError as e:
+        raise Exception(f"Could not connect to bridge server at {base_url}") from e
 
     # Poll GET /internal/config until bridge.session_id/message_id appear (timeout ~90s)
     timeout = 90  # seconds
@@ -163,7 +186,7 @@ def capture_bridge_ids(base_url: str) -> tuple[str, str]:
 
     while time.time() - start_time < timeout:
         try:
-            response = requests.get(cfg_url)
+            response = requests.get(cfg_url, headers=headers)
             if response.status_code == 200:
                 config_data = response.json()
                 bridge_config = config_data.get("bridge", {})

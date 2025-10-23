@@ -1,4 +1,5 @@
 """Test config model functionality."""
+
 import tempfile
 from pathlib import Path
 

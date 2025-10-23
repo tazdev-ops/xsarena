@@ -1,6 +1,7 @@
 """
 Service commands for XSArena bridge.
 """
+
 import typer
 
 from ..bridge_v2.api_server import run_server

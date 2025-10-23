@@ -4,7 +4,7 @@ import tempfile
 from pathlib import Path
 
 import pytest
-from xsarena.core.jobs.model import JobManager
+from xsarena.core.jobs.manager import JobManager
 
 
 @pytest.mark.asyncio

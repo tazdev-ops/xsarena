@@ -15,14 +15,36 @@ def checklist_status():
 
     # Define checks to run
     checks = [
-        ("Health: xsarena fix run", lambda: run_command("xsarena fix run")),
-        ("Health: xsarena backend test", lambda: run_command("xsarena backend test")),
+        (
+            "Health: xsarena ops health fix-run",
+            lambda: run_command("xsarena ops health fix-run"),
+        ),
+        (
+            "Health: xsarena ops config backend-test",
+            lambda: run_command("xsarena ops config backend-test"),
+        ),
         ("Adapt: xsarena adapt inspect", lambda: run_adapt_inspect()),
-        ("Clean: xsarena clean sweep", lambda: run_command("xsarena clean sweep")),
-        ("Snapshot: xsarena snapshot write", lambda: run_snapshot_write()),
+        (
+            "Clean: xsarena ops health sweep",
+            lambda: run_command("xsarena ops health sweep"),
+        ),
+        ("Snapshot: xsarena ops snapshot create", lambda: run_snapshot_write()),
         ("Report: xsarena report quick", lambda: run_report_quick()),
-        ("Boot: xsarena boot read", lambda: run_command("xsarena boot read")),
-        ("Help: xsarena --help", lambda: run_command("xsarena --help")),
+        (
+            "Boot: xsarena ops health read",
+            lambda: run_command("xsarena ops health read"),
+        ),
+        ("Help: xsarena --help", lambda: check_file("docs/_help_root.txt")),
+        (
+            "Help: xsarena ops service --help",
+            lambda: check_file("docs/_help_serve.txt"),
+        ),
+        (
+            "Help: xsarena ops snapshot --help",
+            lambda: check_file("docs/_help_snapshot.txt"),
+        ),
+        ("Help: xsarena ops jobs --help", lambda: check_file("docs/_help_jobs.txt")),
+        ("Help: xsarena run --help", lambda: check_file("docs/_help_z2h.txt")),
         ("Main config file", lambda: check_file(".xsarena/config.yml")),
         ("Merged rules", lambda: check_file("directives/_rules/rules.merged.md")),
         (
@@ -161,13 +183,13 @@ def checklist_details():
     typer.echo("")
 
     details = [
-        ("xsarena fix run", "Check system health"),
-        ("xsarena backend test", "Check backend connectivity"),
+        ("xsarena ops health fix-run", "Check system health"),
+        ("xsarena ops config backend-test", "Check backend connectivity"),
         ("xsarena adapt inspect", "Generate adaptation plan"),
-        ("xsarena clean sweep", "List cleanup candidates"),
-        ("xsarena snapshot write", "Create snapshot in home dir"),
+        ("xsarena ops health sweep", "List cleanup candidates"),
+        ("xsarena ops snapshot create", "Create snapshot in home dir"),
         ("xsarena report quick", "Create report bundle"),
-        ("xsarena boot read", "Read startup plan"),
+        ("xsarena ops health read", "Read startup plan"),
         ("ls -la .xsarena/", "Check config directory"),
         ("ls -la directives/_rules/", "Check rules directory"),
         ("cat docs/IMPLEMENTATION_CHECKLIST.md", "View full checklist"),

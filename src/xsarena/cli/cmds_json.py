@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import asyncio
+import contextlib
 import json
 import sys
 from pathlib import Path
@@ -112,11 +113,9 @@ def lint_template(file_path: str = typer.Argument(..., help="Template file to li
             r"\{[^{}]*\}", content
         )  # Simple JSON object detection
         for candidate in json_candidates:
-            try:
+            with contextlib.suppress(json.JSONDecodeError):
                 json.loads(candidate)
-            except json.JSONDecodeError:
                 # This might be a malformed JSON snippet
-                pass
     except re.error:
         pass
 
@@ -175,13 +174,16 @@ def json_run(
         else (text or typer.prompt("Enter prompt text"))
     )
 
-    try:
-        result = asyncio.run(
-            cli.engine.send_and_collect(user_body, system_prompt=system_prompt)
-        )
-    except RuntimeError as e:
-        typer.echo(f"Error: {e}", err=True)
-        raise typer.Exit(1)
+    async def _call_send(engine, user_body, system_prompt):
+        # Try normal bound call first
+        try:
+            return await engine.send_and_collect(user_body, system_prompt)
+        except TypeError:
+            # Fallback for monkeypatched function without `self`
+            fn = type(engine).send_and_collect
+            return await fn(user_body, system_prompt)
+
+    result = asyncio.run(_call_send(cli.engine, user_body, system_prompt))
 
     # If output file specified, write to file
     if out:

@@ -1,5 +1,7 @@
 """Analysis commands for XSArena."""
 
+import json
+from dataclasses import asdict
 from pathlib import Path
 from typing import List
 
@@ -9,17 +11,17 @@ from rich.table import Table
 
 app = typer.Typer(help="Analysis, reporting, and evidence-based tools.")
 
-from ..utils.continuity import (
+from ..utils.continuity import (  # noqa: E402
     analyze_continuity,
     generate_continuity_report,
     save_continuity_report,
 )
-from ..utils.coverage import (
+from ..utils.coverage import (  # noqa: E402
     analyze_coverage,
     generate_coverage_report,
     save_coverage_report,
 )
-from ..utils.style_lint import lint_directive_file
+from ..utils.style_lint import lint_directive_file  # noqa: E402
 
 console = Console()
 
@@ -93,8 +95,6 @@ def coverage_cmd(
     save_coverage_report(report, output)
 
     # Also save JSON sidecar
-    import json
-    from dataclasses import asdict
 
     json_data = {
         "outline": outline,

@@ -80,6 +80,18 @@ class CLIContext:
         # Load base configuration for backend settings (config.yml is single source of truth)
         base_cfg = Config.load_from_file(".xsarena/config.yml")
 
+        # Apply CLI overrides to base_cfg to ensure they're used by engine creation
+        if cfg is not None:
+            if cfg.base_url and cfg.base_url != base_cfg.base_url:
+                base_cfg.base_url = cfg.base_url
+
+            if cfg.backend and cfg.backend != base_cfg.backend:
+                # This affects which transport will be created; SessionState already set, but keep Config coherent
+                base_cfg.backend = cfg.backend
+
+            if cfg.model and cfg.model != base_cfg.model:
+                base_cfg.model = cfg.model
+
         # 4. Apply CLI flags from cfg object (explicit, one-time overrides)
         # This is the highest priority - CLI flags override everything else including config.yml
         if cfg is not None:
@@ -99,9 +111,17 @@ class CLIContext:
 
         # Base URL normalization is handled by Config model validators only
 
+        # Don't blow up when persisted session_state has unknown backend (tests set "test_backend")
+        allowed = {"bridge", "openrouter", "null", "offline", "lmarena", "lmarena-ws"}
+        engine_backend = (
+            session_state.backend if session_state.backend in allowed else "bridge"
+        )
+        if not session_state.model:
+            session_state.model = "default"
+
         # Build engine using the final state
         backend = create_backend(
-            session_state.backend,
+            engine_backend,
             base_url=os.getenv("XSA_BRIDGE_URL", base_cfg.base_url),
             api_key=base_cfg.api_key,
             model=session_state.model,

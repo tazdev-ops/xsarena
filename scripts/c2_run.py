@@ -53,10 +53,11 @@ def run_cmd(args: List[str]) -> Dict:
 
 
 def write_report(name_hint: str, content: str, out_file: str | None) -> str:
-    if out_file:
-        p = ROOT / out_file
-    else:
-        p = REPORT_DIR / f"{name_hint}_{int(time.time())}.md"
+    p = (
+        ROOT / out_file
+        if out_file
+        else REPORT_DIR / f"{name_hint}_{int(time.time())}.md"
+    )
     p.parent.mkdir(parents=True, exist_ok=True)
     p.write_text(content, encoding="utf-8")
     return str(p.relative_to(ROOT))

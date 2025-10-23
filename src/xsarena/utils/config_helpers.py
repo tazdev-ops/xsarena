@@ -4,6 +4,7 @@ Consolidates configuration to 2 main files:
 - .xsarena/config.yml - project settings
 - .xsarena/session_state.json - user session state
 """
+
 import json
 from pathlib import Path
 from typing import Any, Dict

@@ -1,9 +1,10 @@
 """
 Monitor job progress and send hints.
 """
+
 import asyncio
 
-from xsarena.core.jobs.model import JobManager
+from xsarena.core.jobs.manager import JobManager
 
 
 async def main():

@@ -1,17 +1,17 @@
 disallow_globs:
-  - ".git/**"
-  - "venv/**"
+  - ".git/**"  # VCS
+  - "venv/**"  # env
   - ".venv/**"
   - "__pycache__/**"
-  - "*.pyc"
   - ".pytest_cache/**"
   - ".mypy_cache/**"
   - ".ruff_cache/**"
   - ".cache/**"
-  - ".xsarena/**"
-  - "books/**"
-  - "review/**"
-  - "tests/**"
+  - "*.pyc"
+  - ".xsarena/**"        # internal state/jobs (including config.yml)
+  - "books/**"           # generated content
+  - "review/**"          # artifacts
+  - "tests/**"           # reduce noise for shareable flat packs
   - "examples/**"
   - "tools/**"
   - "scripts/**"

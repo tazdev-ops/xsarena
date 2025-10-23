@@ -1,0 +1,13 @@
+    495 .md
+    206 .py
+     61 .txt
+     31 .yml
+     15 .json
+     14 .sh
+      2 .toml
+      2 .ini
+      1 .yaml
+      1 .ps1
+      1 .js
+      1 .html
+      1 .gitignore

@@ -1,4 +1,5 @@
 """Bilingual mode for text processing and translation."""
+
 from typing import Protocol
 
 

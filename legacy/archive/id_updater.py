@@ -91,7 +91,7 @@ async def _update_ids(request: Request):
             try:
                 with open(config_path, "r", encoding="utf-8") as f:
                     existing_config = yaml.safe_load(f) or {}
-            except:
+            except Exception:
                 pass  # If config file is invalid, start with empty dict
 
         # Update the bridge section with the new IDs

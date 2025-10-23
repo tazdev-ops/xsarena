@@ -49,10 +49,9 @@ def test_all_commands_show_help():
                             command
                             and command not in ["help", "Commands"]
                             and len(command) > 1
+                            and all(c.isalnum() or c in ["-", "_"] for c in command)
                         ):
-                            # Check if the command looks like a valid CLI command (alphanumeric + hyphens/underscores)
-                            if all(c.isalnum() or c in ["-", "_"] for c in command):
-                                commands.append(command)
+                            commands.append(command)
         # Stop when we reach the end of the commands table
         if in_commands_section and "╰" in line:
             break

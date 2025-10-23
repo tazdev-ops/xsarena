@@ -1,6 +1,7 @@
 """
 Unified settings commands for XSArena.
 """
+
 from pathlib import Path
 
 import typer

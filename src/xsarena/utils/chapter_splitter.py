@@ -71,10 +71,9 @@ def split_book_into_chapters(book_path: str, output_dir: str) -> List[Chapter]:
         # Clean up content - remove the heading from the content since it's the title
         lines = chapter_content.split("\n")
         # Remove the first line which is the heading
-        if lines and re.match(h1_pattern, lines[0].strip()):
-            content_lines = lines[1:]  # Skip the heading line
-        else:
-            content_lines = lines
+        content_lines = (
+            lines[1:] if lines and re.match(h1_pattern, lines[0].strip()) else lines
+        )
 
         # Join and clean up content
         clean_content = "\n".join(content_lines).strip()

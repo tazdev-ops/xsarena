@@ -1,6 +1,7 @@
 """
 Generate study aids for all books in a directory.
 """
+
 import subprocess
 from pathlib import Path
 
